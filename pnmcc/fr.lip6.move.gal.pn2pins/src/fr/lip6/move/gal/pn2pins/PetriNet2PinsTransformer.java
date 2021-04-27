@@ -13,11 +13,13 @@ import java.util.logging.Logger;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.Property;
+import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.AtomicPropManager;
 import fr.lip6.move.gal.structural.expr.CExpressionPrinter;
 import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class PetriNet2PinsTransformer {
@@ -451,10 +453,10 @@ public class PetriNet2PinsTransformer {
 		pw.println("}");
 
 		pw.println("int label_count() {");
-		pw.println("  return " + (net.getTransitionCount() + atoms.size()) + " ;");
+		pw.println("  return " + (net.getTransitionCount() + atoms.size() + invAtoms.size()) + " ;");
 		pw.println("}");
 
-		pw.println("char * labnames [" + (net.getTransitionCount() + atoms.size()) + "] = {");
+		pw.println("char * labnames [" + (net.getTransitionCount() + atoms.size() + invAtoms.size()) + "] = {");
 		boolean first = true;
 		for (int i = 0; i < net.getTransitionCount(); i++) {
 			if (!first) {
@@ -474,18 +476,32 @@ public class PetriNet2PinsTransformer {
 			pw.print("  \"LTLAP" + atom.getName() + "\"");
 			pw.println();
 		}
+		for (AtomicProp atom : invAtoms) {
+			if (!first) {
+				pw.print(",");
+			} else {
+				first = false;
+			}
+			pw.print("  \"" + atom.getName() + "\"");
+			pw.println();
+		}
 		pw.println("};");
 
-		List<int[]> lm = new ArrayList<>(atoms.size());
+		List<int[]> lm = new ArrayList<>(atoms.size()+invAtoms.size());
 		for (AtomicProp ap : atoms.getAtoms()) {
 			BitSet lr = new BitSet();
 			SparsePetriNet.addSupport(ap.getExpression(), lr);
 			lm.add(convertToLine(lr));
 		}
-		if (atoms.size() > 0)
+		for (AtomicProp ap : invAtoms) {
+			BitSet lr = new BitSet();
+			SparsePetriNet.addSupport(ap.getExpression(), lr);
+			lm.add(convertToLine(lr));
+		}
+		if (atoms.size() + invAtoms.size() > 0)
 			printMatrix(pw, "lm", lm);
 		pw.print("int* label_matrix(int row) {\n" + "  if (row < " + net.getTransitionCount() + ") return rm[row];\n");
-		if (atoms.size() > 0) {
+		if (atoms.size() + invAtoms.size() > 0) {
 			pw.print("  else return lm[row-" + net.getTransitionCount() + "];\n");
 		}
 		pw.print("}\n");
@@ -528,6 +544,11 @@ public class PetriNet2PinsTransformer {
 				IntMatrixCol enab = new IntMatrixCol(net.getTransitionCount(), 0);
 				IntMatrixCol disab = new IntMatrixCol(net.getTransitionCount(), 0);
 				for (AtomicProp ap : atoms.getAtoms()) {
+					SparseIntArray[] lines = nes.computeAblingsForPredicate(ap.getExpression());
+					disab.appendColumn(lines[0]);
+					enab.appendColumn(lines[1]);
+				}
+				for (AtomicProp ap : invAtoms) {
 					SparseIntArray[] lines = nes.computeAblingsForPredicate(ap.getExpression());
 					disab.appendColumn(lines[0]);
 					enab.appendColumn(lines[1]);
@@ -690,7 +711,7 @@ public class PetriNet2PinsTransformer {
 			pw.println("int state_label(void* model, int label, int* src) {");
 			// labels
 			List<AtomicProp> alist = new ArrayList<>(atoms.getAtoms());
-			
+			alist.addAll(invAtoms);
 			
 
 			pw.println("  switch (label) {");
@@ -700,7 +721,7 @@ public class PetriNet2PinsTransformer {
 				pw.println("     return " + buildGuard(net.getFlowPT().getColumn(tindex), "src") + ";");
 			}
 			// labels
-			for (int tindex = net.getTransitionCount(); tindex < net.getTransitionCount() + atoms.size(); tindex++) {
+			for (int tindex = net.getTransitionCount(); tindex < net.getTransitionCount() + alist.size(); tindex++) {
 				pw.println("      case " + tindex + " : ");
 				pw.append("        return ");
 				alist.get(tindex - net.getTransitionCount()).getExpression().accept(printer);
@@ -717,7 +738,7 @@ public class PetriNet2PinsTransformer {
 				pw.println("  label[" + tindex + "] = " + buildGuard(net.getFlowPT().getColumn(tindex), "src") + ";");
 			}
 			pw.println("  if (guards_only) return 0; ");
-			for (int tindex = net.getTransitionCount(); tindex < net.getTransitionCount() + atoms.size(); tindex++) {
+			for (int tindex = net.getTransitionCount(); tindex < net.getTransitionCount() + alist.size(); tindex++) {
 				pw.println("  label[" + tindex + "] = ");
 				alist.get(tindex - net.getTransitionCount()).getExpression().accept(printer);
 				pw.println(" ;");
@@ -747,7 +768,7 @@ public class PetriNet2PinsTransformer {
 				pw.append("        return ");
 				ap.next().getExpression().accept(printer);
 				pw.println(";");
-			}
+			}			
 			pw.println("    }");
 			pw.println("  }");
 			//int (*get_state_size)();
@@ -796,11 +817,10 @@ public class PetriNet2PinsTransformer {
 	}
 
 	private AtomicPropManager atoms = new AtomicPropManager();
-	private boolean isSafe;
 	private boolean forSpot;
-
-	public void transform(SparsePetriNet spec, String cwd, boolean withPorMatrix, boolean isSafe, boolean forSpot) {
-		this.isSafe = isSafe;
+	private List<AtomicProp> invAtoms = new ArrayList<>();
+	
+	public void transform(SparsePetriNet spn, String cwd, boolean withPorMatrix, boolean forSpot) {
 		this.forSpot = forSpot;
 		//		if ( spec.getMain() instanceof GALTypeDeclaration ) {
 		//			Logger.getLogger("fr.lip6.move.gal").fine("detecting pure GAL");
@@ -810,18 +830,38 @@ public class PetriNet2PinsTransformer {
 		//		}
 		long time = System.currentTimeMillis();
 
-		net = spec;
+		net = spn;
 
-		if (spec.getTransitionCount() > 1500 && withPorMatrix) {
+		if (spn.getTransitionCount() > 1500 && withPorMatrix) {
 			withPorMatrix = false;
 			Logger.getLogger("fr.lip6.move.gal").info("Too many transitions (" + net.getTransitionCount()
 			+ ") to apply POR reductions. Disabling POR matrices.");
 		}
-
-		Map<String, Expression> pmap = atoms.loadAtomicProps(spec.getProperties());
+		
+		boolean isLTL = true;
+		if (! spn.getProperties().isEmpty() && spn.getProperties().get(0).getType() == PropertyType.INVARIANT) {
+			isLTL = false;
+		}
+		
+		if (isLTL) {
+			atoms.loadAtomicProps(spn.getProperties());
+		} else {
+			for (Property prop : spn.getProperties()) {
+				if (prop.getType() == PropertyType.INVARIANT) {
+					if (prop.getBody().getOp() == Op.AG) {
+						invAtoms.add(new AtomicProp(prop.getName().replaceAll("-", ""), 
+								prop.getBody().childAt(0)));
+					} else if (prop.getBody().getOp() == Op.EF) {
+						// negate
+						invAtoms.add(new AtomicProp(prop.getName().replaceAll("-", ""),
+								Expression.not(prop.getBody().childAt(0))));
+					}					
+				}
+			}
+		}
 
 		hasPartialOrder = withPorMatrix;
-		nes = new NecessaryEnablingsolver(isSafe);
+		nes = new NecessaryEnablingsolver(spn.isSafe());
 		try {
 
 			buildBodyFile(cwd + "/model.c");
