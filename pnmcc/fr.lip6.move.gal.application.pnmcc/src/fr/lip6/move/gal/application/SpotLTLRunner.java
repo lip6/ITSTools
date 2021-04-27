@@ -63,7 +63,7 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 
 					} else {
 						p2p = new PetriNet2PinsTransformer();
-						p2p.transform(spn, workFolder, false, isSafe, true);
+						p2p.transform(spn, workFolder, false, true);
 						
 					}
 					try {
@@ -96,9 +96,9 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (InterruptedException e) {
-					System.out.println("WARNING : LTS min runner thread was asked to interrupt. Dying gracefully.");
+					System.out.println("WARNING : SpotMC runner thread was asked to interrupt. Dying gracefully.");
 				} catch (RuntimeException e) {
-					System.out.println("WARNING : LTS min runner thread failed on error :" + e);
+					System.out.println("WARNING : SpotMC runner thread failed on error :" + e);
 					e.printStackTrace();
 				}
 			}
