@@ -29,6 +29,7 @@ import fr.lip6.move.serialization.SerializationUtil;
 
 public class ITSRunner extends AbstractRunner {
 
+	private static final int DEBUG = 0;
 	private String examination;
 	private MccTranslator reader;
 	protected CommandLine cl;
@@ -324,18 +325,22 @@ public class ITSRunner extends AbstractRunner {
 	public String outputPropertyFile() throws IOException {
 		String proppath ; 
 		if (examination.contains("CTL")) {
-			proppath = Files.createTempFile(examination, ".ctl").getFileName().toFile().getCanonicalPath();
+			File file = Files.createTempFile(examination, ".ctl").toFile();
+			if (DEBUG == 0) file.deleteOnExit();
+			proppath = file.getCanonicalPath();	
 			SerializationUtil.serializePropertiesForITSCTLTools(getOutputPath(), spec.getProperties(), proppath);
 		} else if (examination.contains("LTL")) {
-			proppath = Files.createTempFile(examination, ".ltl").getFileName().toFile().getCanonicalPath();
+			File file = Files.createTempFile(examination, ".ltl").toFile();
+			if (DEBUG == 0) file.deleteOnExit();
+			proppath = file.getCanonicalPath();	
 			SerializationUtil.serializePropertiesForITSLTLTools(getOutputPath(), spec.getProperties(), proppath);
 		} else {
 			// Reachability
-			proppath = Files.createTempFile(examination, ".prop").getFileName().toFile().getCanonicalPath();
+			File file = Files.createTempFile(examination, ".prop").toFile();
+			if (DEBUG == 0) file.deleteOnExit();
+			proppath = file.getCanonicalPath();	
 			SerializationUtil.serializePropertiesForITSTools(getOutputPath(), spec.getProperties(), proppath);
 		}
-
-
 		return proppath;
 	}
 
@@ -383,7 +388,9 @@ public class ITSRunner extends AbstractRunner {
 	}
 
 	public String outputGalFile() throws IOException {
-		String outpath = Files.createTempFile(examination, ".gal").getFileName().toFile().getCanonicalPath();
+		File file = Files.createTempFile(examination, ".gal").toFile();
+		if (DEBUG == 0) file.deleteOnExit();		
+		String outpath = file.getCanonicalPath();
 		if (! spec.getProperties().isEmpty()) {
 			List<Property> props = new ArrayList<Property>(spec.getProperties());
 			spec.getProperties().clear();
