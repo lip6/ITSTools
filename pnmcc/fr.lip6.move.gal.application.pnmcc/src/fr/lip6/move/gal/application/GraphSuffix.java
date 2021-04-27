@@ -1,22 +1,97 @@
 package fr.lip6.move.gal.application;
 
-import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class GraphSuffix {
 
 	public static boolean[] computeNonStablePlaces(SparsePetriNet spn, DoneProperties doneProps) {
-		boolean[] nonstable = new boolean[spn.getPlaceCount()];
+
+		int reduced = 0;
 		long time = System.currentTimeMillis();
+
+		// Etape 1 : réduction scc triviales non marquées
+		reduced = reduceTrivialScc(spn, doneProps);
+
+		boolean[] nonstable = new boolean[spn.getPlaceCount()];
+
 		// extract simple transitions to a PxP matrix
+		IntMatrixCol graph = buildFreeTokenGraph(spn);
+
+		reduced += reduceMarkedSuffix(spn, graph, nonstable, doneProps);
+
+		// On cherche des places pas encore instable, et non marquées, sans
+		// prédecesseur.
+		reduced += reduceUnmarkedSuffix(spn, graph, nonstable, doneProps);
+		if (reduced > 0) {
+			System.out.println("Structural test allowed to assert that " + reduced + " places are NOT stable. Took "+(System.currentTimeMillis() - time)+" ms.");
+		}
+
+		return nonstable;
+	}
+
+	private static int reduceUnmarkedSuffix(SparsePetriNet spn, IntMatrixCol graph, boolean[] nonstable,
+			DoneProperties doneProps) {
+		int reduced = 0;
+		IntMatrixCol tgraph = graph.transpose();
+		Set<Integer> heads = new HashSet<>();
+		for (int pid = 0; pid < tgraph.getColumnCount(); pid++) {
+			if (tgraph.getColumn(pid).size() == 0 && spn.getMarks().get(pid) == 0 && !nonstable[pid])
+				heads.add(pid);
+		}
+
+		// 6. Calcul des suffixes des têtes
+		Set<Integer> unStableSuffix = new HashSet<>(heads);
+
+		StructuralReduction.collectPrefix(unStableSuffix, tgraph, false);
+
+		// 7-a Retirer au suffixe les places de têtes
+		unStableSuffix.removeAll(heads);
+
+		// 7-b
+		for (int i : unStableSuffix) {
+			nonstable[i] = true;
+			reduced++;
+		}
+		if (!unStableSuffix.isEmpty())
+			doneProps.put("unMarkedSuffixTest", false, "UNMARKED_SUFFIX_TEST");
+		return reduced;
+	}
+
+	private static int reduceMarkedSuffix(SparsePetriNet spn, IntMatrixCol graph, boolean[] nonstable,
+			DoneProperties doneProps) {
+		int reduced = 0;
+		Set<Integer> safeNodes = new HashSet<>();
+		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
+
+			// 2. initialement marquée && au moins un successeur
+			if (spn.getMarks().get(pid) > 0 && graph.getColumn(pid).size() > 0) {
+				safeNodes.add(pid);
+			}
+		}
+		// 3 & 4 invocation du calcul des suffixes des safeNodes, toutes les places de
+		// safeNodes sont sont instables
+		StructuralReduction.collectPrefix(safeNodes, graph, false);
+
+		// every node in safeNodes is unstable
+		for (int i : safeNodes) {
+			nonstable[i] = true;
+			reduced++;
+		}
+		if (!safeNodes.isEmpty())
+			doneProps.put("markedSuffixTest", false, "MARKED_SUFFIX_TEST");
+		return reduced;
+	}
+
+	private static IntMatrixCol buildFreeTokenGraph(SparsePetriNet spn) {
 		int nbP = spn.getPlaceCount();
 		IntMatrixCol graph = new IntMatrixCol(nbP, nbP);
 
@@ -29,106 +104,33 @@ public class GraphSuffix {
 			SparseIntArray hTP = flowTP.getColumn(tid); // flowPT(tid).keyAt(0)
 			if (hPT.size() == 1 && hPT.valueAt(0) == 1 && hTP.get(hPT.keyAt(0)) == 0) {
 				for (int pid = 0; pid < hTP.size(); pid++) {
-					// source - dest
-					graph.set(hPT.keyAt(0), hTP.keyAt(pid), 1);
+					// dest - source
+					graph.set(hTP.keyAt(pid), hPT.keyAt(0), 1);
 				}
 			}
 		}
-		Set<Integer> safeNodes = new HashSet<>();
+		return graph;
+	}
 
-		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
-
-			// 2. initialement marquée && au moins un successeur
-			if (spn.getMarks().get(pid) > 0 && graph.getColumn(pid).size() > 0) {
-				safeNodes.add(pid);
-			}
-		}
-		// 3 & 4 invocation du calcul des suffixes des safeNodes, toutes les places de safeNodes sont sont instables
-		collectPrefix(safeNodes, graph, false);
-
-		// 5. On cherche des places pas encore instable, et non marquées, sans prédecesseur.
-
-		IntMatrixCol tgraph = graph.transpose();
-		Set<Integer> unStable = new HashSet<>();
-
-		for (int pid = 0; pid < tgraph.getColumnCount(); pid++) {
-			if (tgraph.getColumn(pid).size() == 0 && spn.getMarks().get(pid) == 0 && !safeNodes.contains(pid))
-				unStable.add(pid);
-		}
-		
-		//6. Calcul des suffixes des têtes
-		
-		Set<Integer> unStableHead = new HashSet<>(unStable);
-		
-		collectPrefix(unStableHead, tgraph, false);
-		
-		
-		//7-a Retirer au suffixe les places de têtes
-		Set<Integer> result = unStableHead.stream().filter(pid->!(unStable.contains(pid))).collect(Collectors.toSet());
-		
-		//7-b 
-		unStable.addAll(result);
-
-		
-		
-		//******************************    what's next ? **************************************
-		
-		List<List<Integer>> sccs = Tarjan.searchForSCC(graph);
-		sccs.removeIf(s -> s.size() == 1);
+	private static int reduceTrivialScc(SparsePetriNet spn, DoneProperties doneProps) {
 
 		int reduced = 0;
-		// so we have SCC, any SCC with tokens initially in it => all places in the SCC
-		// are NON STABLE
-		for (List<Integer> scc : sccs) {
-			boolean isMarked = false;
-			for (int pid : scc) {
-				if (spn.getMarks().get(pid) > 0) {
-					isMarked = true;
-					break;
-				}
-			}
-			if (isMarked) {
-				for (int pid : scc) {
-					nonstable[pid] = true;
-					reduced++;
-				}
-			}
+		StructuralReduction sr = new StructuralReduction(spn);
+		BitSet bs = new BitSet();
+
+		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
+			if (spn.getMarks().get(pid) > 0)
+				bs.set(pid);
+		}
+		sr.setProtected(bs);
+
+		if (sr.findFreeSCC(ReductionType.SAFETY)) {
+			doneProps.put("unMarkedSccTest", false, "TRIVIAL_UNMARKED_SCC_TEST");
+			reduced += spn.getPlaceCount() - sr.getPlaceCount();
+			spn.readFrom(sr);
 		}
 
-		if (reduced > 0) {
-			System.out.println("SCC test allowed to assert that " + reduced + " places are NOT stable.");
-			doneProps.put("SccTest", false, "TRIVIAL_MARKED_SCC_TEST");
-		}
-		return nonstable;
+		return reduced;
 	}
 
-	// méthode calcul des suffixes des safeNodes
-	private static void collectPrefix(Set<Integer> safeNodes, IntMatrixCol graph, boolean transpose) {
-		if (safeNodes.size() == graph.getColumnCount()) {
-			return;
-		}
-		// work with predecessor relationship
-		IntMatrixCol tgraph = graph;
-
-		if (transpose)
-			tgraph = graph.transpose();
-
-		Set<Integer> seen = new HashSet<>();
-		List<Integer> todo = new ArrayList<>(safeNodes);
-		while (!todo.isEmpty()) {
-			List<Integer> next = new ArrayList<>();
-			seen.addAll(todo);
-			for (int n : todo) {
-				SparseIntArray pred = tgraph.getColumn(n);
-				for (int i = 0; i < pred.size(); i++) {
-					int pre = pred.keyAt(i);
-					if (seen.add(pre)) {
-						next.add(pre);
-					}
-				}
-			}
-			todo = next;
-		}
-		safeNodes.addAll(seen);
-	}
 }
