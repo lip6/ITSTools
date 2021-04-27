@@ -81,7 +81,9 @@ public class GlobalPropertySolver {
 		boolean[] todiscard = null;
 		if (spn instanceof SparsePetriNet) {
 			SparsePetriNet sspn = (SparsePetriNet) spn;
-			todiscard = computeNonStablePlaces(sspn, doneProps);
+			//todiscard = computeNonStablePlaces(sspn, doneProps);
+			todiscard = GraphSuffix.computeNonStablePlaces(sspn, doneProps);
+
 		}
 
 		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
