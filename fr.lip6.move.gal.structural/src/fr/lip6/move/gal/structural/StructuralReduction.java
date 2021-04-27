@@ -1081,7 +1081,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 							Set<Integer> safeNodes = computeSafeNodes(this, rt, graph, untouchable);
 							if (safeNodes.size() < pnames.size()) {
 								// modifies safeNodes to add any prefix of them in the graph
-								collectPrefix(safeNodes, graph);
+								collectPrefix(safeNodes, graph, true);
 							}
 							// Now, make sure all outputs of t are actually irrelevant now
 							boolean doit = true;
@@ -2402,7 +2402,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			// System.out.println("A total of "+ (nbP - covered) + " / " + nbP + " places could possibly be suffix of SCC.");
 			
 			// modifies safeNodes to add any prefix of them in the graph
-			collectPrefix(safeNodes, graph);
+			collectPrefix(safeNodes, graph, true);
 			
 			if (DEBUG >= 3) {
 				FlowPrinter.drawNet(pn, "Safe nodes + prefix", safeNodes, Collections.emptySet());
@@ -2524,33 +2524,37 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return safeNodes;
 	}
 	
-	private static void collectPrefix(Set<Integer> safeNodes, IntMatrixCol graph) {
+	public static void collectPrefix(Set<Integer> safeNodes, IntMatrixCol graph, boolean transpose) {
 		if (safeNodes.size() == graph.getColumnCount()) {
 			return;
 		}
 		// work with predecessor relationship
-		IntMatrixCol tgraph = graph.transpose();
-		
+		IntMatrixCol tgraph;
+		if (transpose)
+			tgraph = graph.transpose();
+		else
+			tgraph = graph;
+
 		Set<Integer> seen = new HashSet<>();
 		List<Integer> todo = new ArrayList<>(safeNodes);
-		while (! todo.isEmpty()) {
+		while (!todo.isEmpty()) {
 			List<Integer> next = new ArrayList<>();
 			seen.addAll(todo);
 			for (int n : todo) {
 				SparseIntArray pred = tgraph.getColumn(n);
-				for (int i=0; i < pred.size() ; i++) {
+				for (int i = 0; i < pred.size(); i++) {
 					int pre = pred.keyAt(i);
 					if (seen.add(pre)) {
 						next.add(pre);
 					}
 				}
 			}
-			todo = next;			
+			todo = next;
 		}
 		safeNodes.addAll(seen);
 	}
 
-	private boolean findFreeSCC (ReductionType rt) {
+	public boolean findFreeSCC (ReductionType rt) {
 		if (rt == ReductionType.LTL) {
 			return false;
 		}
