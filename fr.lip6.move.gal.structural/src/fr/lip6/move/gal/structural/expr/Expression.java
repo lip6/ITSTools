@@ -144,11 +144,11 @@ public interface Expression {
 			}
 			break;
 		}
-		case AG : case EF : case F : case G : case X : case AF :  {
+		case AG : case AF : case EF : case EG : case F : case G : case X :   {
 			if (l.getOp() == Op.BOOLCONST) {
 				return l;
 			}
-		}
+		}		
 		default :
 			break;
 		}		
