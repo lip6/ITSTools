@@ -349,34 +349,18 @@ public class Application implements IApplication, Ender {
 		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
 
 			if (examination.startsWith("CTL")) {
-				if (reader.getHLPN() != null) {
-					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
-					
-					SparsePetriNet skel = reader.getHLPN().skeleton();
-					skel.getProperties().removeIf(p -> ! fr.lip6.move.gal.structural.expr.Simplifier.allEnablingsAreNegated(p.getBody()));
-					
-					reader.setSpn(skel, true);
-					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-					new AtomicReducerSR().strongReductions(solverPath, reader, doneProps);
-					reader.getSPN().simplifyLogic();
-					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-					reader.rebuildSpecification(doneProps);
-					GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
-					reader.flattenSpec(false);
-					GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
-					
+				LTLPropertySolver logicSolver = new LTLPropertySolver(spotPath, solverPath, pwd, false);
+				int solved = logicSolver.preSolveForLogic(reader, doneProps, false);
+				if (solved > 0) {
+					if (reader.getSPN().getProperties().isEmpty()) {
+						return null;
+					}
 				}
-				reader.createSPN();
-				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-				new AtomicReducerSR().strongReductions(solverPath, reader, doneProps);
-				reader.getSPN().simplifyLogic();
-				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				reader.rebuildSpecification(doneProps);
 				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 				reader.flattenSpec(false);
 				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
-//				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
-//				Simplifier.simplify(reader.getSpec());
+				
 
 				// due to + being OR in the CTL syntax, we don't support this type of props
 				// TODO: make CTL syntax match the normal predicate syntax in ITS tools
