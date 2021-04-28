@@ -529,6 +529,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 							if (DEBUG>=1) System.out.println("Added transition "+tname +" pre:" + resPT  +" post:" + resTP);
 							done++;
 						}
+						tflowTP = null;
+						tflowPT = null;
 					} else {
 						continue;
 					}
