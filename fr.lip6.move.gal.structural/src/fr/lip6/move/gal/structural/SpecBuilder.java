@@ -52,15 +52,20 @@ public class SpecBuilder {
 				Variable place = gal.getVariables().get(inputs.keyAt(i));
 				int val = inputs.valueAt(i);
 				guard = GF2.and(guard, GF2.createComparison(GF2.createVariableRef(place), ComparisonOperators.GE, GF2.constant(val)));
-			}
-			trans.setGuard(guard);
+			}						
 			SparseIntArray outputs = flowTP.getColumn(ti);
 			SparseIntArray flow = SparseIntArray.sumProd(-1, inputs, 1, outputs);
 			for (int i=0 ; i < flow.size() ; i++) {
 				Variable v = gal.getVariables().get(flow.keyAt(i));
 				Statement ass = GF2.createIncrement(v, flow.valueAt(i));
 				trans.getActions().add(ass);
-			}
+//				if (isReversible && flow.valueAt(i) > 0) {
+//					// for reversible transitions e.g. in CTL this is preferable.
+//					guard = GF2.and(guard, GF2.createComparison(GF2.createVariableRef(v), ComparisonOperators.GE, GF2.constant(0)));
+//				}
+			}			
+
+			trans.setGuard(guard);			
 			gal.getTransitions().add(trans);
 			ti++;
 		}
