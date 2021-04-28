@@ -52,15 +52,30 @@ public class LTLPropertySolver {
 
 	public int runStructuralLTLCheck(MccTranslator reader, DoneProperties doneProps)
 			throws IOException, TimeoutException, LTLException {
-		int solved =0;
+		int solved = preSolveForLogic(reader, doneProps, true);
+		if (reader.getSPN().getProperties().isEmpty()) {
+			return solved;
+		}
+		
+		runStutteringLTLTest(reader, doneProps);
+
+		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+		return solved;
+	}
+
+	public int preSolveForLogic(MccTranslator reader, DoneProperties doneProps, boolean isLTL)
+			throws IOException, TimeoutException {
+		int solved = 0;
 		if (reader.getHLPN() != null) {
-			if (exportLTL) {					
+			if (isLTL && exportLTL) {					
 				SpotRunner.exportLTLProperties(reader.getHLPN(),"col",workDir);
 			}
 			solved += ReachabilitySolver.checkInInitial(reader.getHLPN(),doneProps);
-			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
-			sr.runLTLSimplifications(reader.getHLPN());
-			if (exportLTL) {					
+			if (isLTL) {
+				SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
+				sr.runLTLSimplifications(reader.getHLPN());
+			}
+			if (isLTL && exportLTL) {					
 				SpotRunner.exportLTLProperties(reader.getHLPN(),"colred",workDir);
 			}
 			SparsePetriNet skel = reader.getHLPN().skeleton();
@@ -78,11 +93,11 @@ public class LTLPropertySolver {
 		}
 		reader.createSPN();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
-		if (exportLTL) {
+		if (isLTL && exportLTL) {
 			SpotRunner.exportLTLProperties(reader.getSPN(),"raw",workDir);
 		}
 
-		if (spotPath != null) {
+		if (spotPath != null && isLTL) {
 			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
 			sr.runLTLSimplifications(reader.getSPN());
 		}
@@ -118,15 +133,12 @@ public class LTLPropertySolver {
 		
 		
 		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-		if (spotPath != null) {
+		
+		if (isLTL && spotPath != null) {
 			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
 			sr.runLTLSimplifications(reader.getSPN());
 		}
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
-		
-		runStutteringLTLTest(reader, doneProps);
-
-		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 		return solved;
 	}
 
