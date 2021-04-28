@@ -368,7 +368,16 @@ public class Application implements IApplication, Ender {
 						StructuralReduction sr = new StructuralReduction (spnProp);
 						sr.reduce(ReductionType.SI_LTL);
 						spnProp.readFrom(sr);
-						
+						spnProp.simplifyLogic();
+						ReachabilitySolver.checkInInitial(spnProp, doneProps);
+						if (spnProp.getProperties().isEmpty()) {
+							continue;
+						}
+						GALSolver.runGALReductions(reader2, doneProps);
+						GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
+						if (reader.getSpec().getProperties().isEmpty()) {
+							continue;
+						}
 						GlobalPropertySolver.verifyWithSDD(reader2, doneProps, examination, solverPath, 30);
 					}										
 				}
