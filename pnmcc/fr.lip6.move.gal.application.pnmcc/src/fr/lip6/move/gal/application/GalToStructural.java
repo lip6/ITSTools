@@ -20,6 +20,7 @@ import fr.lip6.move.gal.EF;
 import fr.lip6.move.gal.EG;
 import fr.lip6.move.gal.EU;
 import fr.lip6.move.gal.EX;
+import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.LTLFuture;
@@ -31,6 +32,7 @@ import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.Reference;
+import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.structural.Property;
@@ -90,6 +92,16 @@ public class GalToStructural extends GalSwitch<Expression> {
 		} else {
 			return Expression.op(op, doSwitch(bin.getLeft()), doSwitch(bin.getRight()));
 		}
+	}
+	
+	@Override
+	public Expression caseTrue(True object) {
+		return Expression.constant(true);
+	}
+
+	@Override
+	public Expression caseFalse(False object) {
+		return Expression.constant(false);
 	}
 	
 	private void findOperandsAdd(List<Expression> operands, IntExpression e) {
