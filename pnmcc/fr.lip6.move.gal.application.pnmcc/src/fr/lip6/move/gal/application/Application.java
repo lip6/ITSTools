@@ -358,7 +358,6 @@ public class Application implements IApplication, Ender {
 				}
 				
 				
-				
 				for (fr.lip6.move.gal.structural.Property prop : reader.getSPN().getProperties()) {
 					// try some property specific reductions
 					if (fr.lip6.move.gal.structural.expr.Simplifier.isSyntacticallyStuttering(prop)) {
@@ -378,7 +377,12 @@ public class Application implements IApplication, Ender {
 				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 				reader.flattenSpec(false);
 				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
+				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				
+				
+				if (reader.getSPN().getProperties().isEmpty()) {
+					return null;
+				}
 				// due to + being OR in the CTL syntax, we don't support this type of props
 				// TODO: make CTL syntax match the normal predicate syntax in ITS tools
 				// reader.removeAdditionProperties();
