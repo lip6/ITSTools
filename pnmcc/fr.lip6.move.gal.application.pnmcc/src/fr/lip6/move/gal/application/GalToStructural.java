@@ -186,7 +186,7 @@ public class GalToStructural extends GalSwitch<Expression> {
 	}
 	@Override
 	public Expression caseEU(EU o) {
-		return Expression.op(Op.AU, doSwitch(o.getLeft()), doSwitch(o.getRight()));
+		return Expression.op(Op.EU, doSwitch(o.getLeft()), doSwitch(o.getRight()));
 	}
 	
 	
