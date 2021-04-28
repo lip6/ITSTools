@@ -356,12 +356,29 @@ public class Application implements IApplication, Ender {
 						return null;
 					}
 				}
+				
+				
+				
+				for (fr.lip6.move.gal.structural.Property prop : reader.getSPN().getProperties()) {
+					// try some property specific reductions
+					if (fr.lip6.move.gal.structural.expr.Simplifier.isSyntacticallyStuttering(prop)) {
+						MccTranslator reader2 = reader.copy();
+						SparsePetriNet spnProp = reader2.getSPN();
+						spnProp.getProperties().clear();
+						spnProp.getProperties().add(prop.copy());
+						StructuralReduction sr = new StructuralReduction (spnProp);
+						sr.reduce(ReductionType.SI_LTL);
+						spnProp.readFrom(sr);
+						
+						GlobalPropertySolver.verifyWithSDD(reader2, doneProps, examination, solverPath, 30);
+					}										
+				}
+				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				reader.rebuildSpecification(doneProps);
 				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 				reader.flattenSpec(false);
 				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 				
-
 				// due to + being OR in the CTL syntax, we don't support this type of props
 				// TODO: make CTL syntax match the normal predicate syntax in ITS tools
 				// reader.removeAdditionProperties();

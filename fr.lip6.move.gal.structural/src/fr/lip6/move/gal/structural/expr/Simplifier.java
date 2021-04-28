@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import fr.lip6.move.gal.structural.Property;
+
 public class Simplifier {
 
 	
@@ -506,6 +508,31 @@ public class Simplifier {
 			}
 		}
 		return true;
+	}
+
+	public static boolean isSyntacticallyStuttering(Property prop) {
+		switch (prop.getType()) {
+		case CTL:
+		case LTL:
+			return isSyntacticallyStuttering(prop.getBody());
+		default:
+			return true;			
+		}	
+	}
+
+	private static boolean isSyntacticallyStuttering(Expression body) {
+		if (body == null) {
+			return true;
+		} else if (body.getOp() == Op.AX || body.getOp() == Op.EX || body.getOp() == Op.X) {
+			return false;			
+		} else {
+			for (int cid=0, cide=body.nbChildren() ; cid < cide ; cid++) {
+				if (! isSyntacticallyStuttering(body.childAt(cid))) {
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 
 }
