@@ -26,6 +26,10 @@ jobs:
          restore-keys: ${{ runner.os }}-m2
     - name: destroy cache
       run: rm -rf ~/.m2
+    - name: Wait to make sure GH pages artefacts are deployed on ITSTools
+      uses: jakejarvis/wait-action@master
+      with:
+        time: '30s'    
     - name: Build with Maven
       run: cd fr.lip6.move.gal.itscl.parent && mvn clean generate-sources install && cd ..
     - name: Copy scripts
