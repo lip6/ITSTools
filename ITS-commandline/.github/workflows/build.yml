@@ -24,8 +24,6 @@ jobs:
          path: ~/.m2
          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
          restore-keys: ${{ runner.os }}-m2
-    - name: clear Maven
-      run: rm -rf ~/.m2
     - name: Build with Maven
       run: cd fr.lip6.move.gal.itscl.parent && mvn clean generate-sources install && cd ..
     - name: Copy scripts
