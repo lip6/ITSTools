@@ -454,19 +454,36 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	
 	public int rulePartialPostAgglo(ReductionType rt) {
 		IntMatrixCol tflowTP = null;
-		IntMatrixCol tflowPT = null;
+		IntMatrixCol tflowPT = flowPT.transpose();
 		int done = 0;
 		Set<Integer> toreduce = new HashSet<>();
-		for (int tid = 0, te = tnames.size() ; tid < te ; tid ++) {
-			SparseIntArray pt = flowPT.getColumn(tid);
-			if (pt.size() == 1) {
-				// stuttering transition with one single input from p
-				int pid = pt.keyAt(0);
-				if (pt.valueAt(0)==1 && marks.get(pid) == 0 && !untouchable.get(pid) && !touches(tid)) {
-					toreduce.add(pid);
+		for (int pid = 0, pide = getPlaceCount(); pid < pide; pid++) {
+			if (marks.get(pid) != 0 || untouchable.get(pid))
+				continue;
+			SparseIntArray tpt = tflowPT.getColumn(pid);
+			boolean canReduce = true;
+			boolean hasStutter = false;
+			boolean hasNonStutter = false;
+			for (int i = 0, ie = tpt.size(); i < ie; i++) {
+				int tid = tpt.keyAt(i);
+				SparseIntArray pt = flowPT.getColumn(tid);
+				if (pt.size() == 1 && pt.valueAt(0) == 1) {
+					// stuttering transition with one single input from p
+					if (touches(tid)) {
+						hasNonStutter = true;
+					} else {
+						hasStutter = true;
+					}
+				} else {
+					canReduce = false;
+					break;
 				}
 			}
+			if (canReduce && hasNonStutter && hasStutter) {
+				toreduce.add(pid);
+			}
 		}
+		
 		List<Integer> todropt = new ArrayList<>();
 		if (! toreduce.isEmpty()) {
 			for (int pid : toreduce) {
@@ -502,7 +519,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					if (touches(tid)) {
 						continue;
 					}
-					if (DEBUG>=1) System.out.println("Net is Partial-Post-aglomerable in transition id "+tid+ " "+tnames.get(tid) + " place " + pid + " pre "+ tflowTP.getColumn(pid) + " post " + tflowPT.getColumn(pid) );
+					if (DEBUG>=1) System.out.println("Net is Partial-Post-aglomerable in transition id "+tid+ " "+tnames.get(tid) + " place " + pid + " pre "+ tpt + " post " + ttp );
 					
 					int curt = tnames.size();
 					if (flowPT.getColumn(tid).size()==1 && flowPT.getColumn(tid).valueAt(0)==1) {
