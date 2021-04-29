@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import fr.lip6.move.gal.structural.Property;
+import fr.lip6.move.gal.structural.PropertyType;
 
 public class Simplifier {
 
@@ -533,6 +534,18 @@ public class Simplifier {
 			}
 			return true;
 		}
+	}
+
+	public static boolean isAnInvariant(Property property) {
+		if (property.getType() == PropertyType.INVARIANT)
+			return true;
+		else if (property.getType() == PropertyType.CTL) {
+			Op firstOp = property.getBody().getOp() ;
+			if (firstOp == Op.AG || firstOp == Op.EF) {
+				return AtomicPropManager.isPureBool(property.getBody().childAt(0)) ;
+			}
+		}
+		return false;
 	}
 
 }

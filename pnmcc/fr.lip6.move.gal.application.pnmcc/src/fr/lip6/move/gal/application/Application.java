@@ -49,6 +49,7 @@ import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.InvariantCalculator;
+import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -374,9 +375,21 @@ public class Application implements IApplication, Ender {
 							continue;
 						}
 						GALSolver.runGALReductions(reader2, doneProps);
-						GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
-						if (reader.getSpec().getProperties().isEmpty()) {
+						GALSolver.checkInInitial(reader2.getSpec(), doneProps, reader2.getSPN().isSafe());
+						if (reader2.getSpec().getProperties().isEmpty()) {
 							continue;
+						}
+						fr.lip6.move.gal.structural.Property propRed = spnProp.getProperties().get(0);
+						if (fr.lip6.move.gal.structural.expr.Simplifier.isAnInvariant(propRed)) {
+							// requalify
+							propRed.setType(PropertyType.INVARIANT);
+							// solve with reachability
+							ReachabilitySolver.applyReductions(reader2, doneProps, solverPath);														
+							
+							if (reader2.getSPN().getProperties().isEmpty()) {
+								continue;
+							}
+							propRed.setType(PropertyType.CTL);
 						}
 						GlobalPropertySolver.verifyWithSDD(reader2, doneProps, examination, solverPath, 30);
 					}										
