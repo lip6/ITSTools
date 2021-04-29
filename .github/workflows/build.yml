@@ -22,8 +22,8 @@ jobs:
       uses: actions/cache@v2
       with:
          path: ~/.m2
-         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-         restore-keys: ${{ runner.os }}-m2
+         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}v2
+         restore-keys: ${{ runner.os }}-m2v2
     - name: Build with Maven
       run: cd fr.lip6.move.gal.parent && mvn -T 4 -e generate-sources install && cd -
     - name: Deploy to GitHub Pages
