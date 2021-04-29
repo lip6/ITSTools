@@ -206,7 +206,12 @@ public class PropHandler extends DefaultHandler {
 	}
 
 	private int findPlace(String name) {
-		return spec.getPlaceIndex(normalizeName(name));
+		int index = spec.getPlaceIndex(normalizeName(name));
+		if (index < 0) {
+			System.out.println("Unknown place :\""+name+"\" in property !");
+			throw new IllegalArgumentException("Unknown place :\""+name+"\" in property !");
+		}
+		return index;
 	}
 
 	public void popNary(Op op) {
@@ -240,10 +245,16 @@ public class PropHandler extends DefaultHandler {
 				}
 			}			
 		}
+		int index;
 		if (tcache == null)
-			return spec.getTransitionIndex(normalizeName(name));
+			index = spec.getTransitionIndex(normalizeName(name));
 		else
-			return tcache.get(normalizeName(name));
+			index = tcache.get(normalizeName(name));
+		if (index < 0) {
+			System.out.println("Unknown transition named :\""+name+"\""+" in property.");
+			throw new IllegalArgumentException("Unknown transition named :\""+name+"\""+" in property.");
+		}
+		return index;
 	}
 
 	public static String normalizeName(String text) {
