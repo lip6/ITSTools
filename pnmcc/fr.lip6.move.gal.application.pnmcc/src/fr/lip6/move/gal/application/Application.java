@@ -50,6 +50,7 @@ import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.PropertyType;
+import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -103,7 +104,9 @@ public class Application implements IApplication, Ender {
 	private static final String REBUILDPNML = "-rebuildPNML";
 	private static final String EXPORT_LTL = "-exportLTL";
 	private static final String UNFOLD = "--unfold";
-
+	private static final String SKELETON = "--skeleton";
+	private static final String NOSIMPLIFICATION = "--nosimplification";
+	
 	private List<IRunner> runners = new ArrayList<>();
 
 	private static Logger logger = Logger.getLogger("fr.lip6.move.gal");
@@ -176,6 +179,8 @@ public class Application implements IApplication, Ender {
 		boolean rebuildPNML = false;
 		boolean exportLTL = false;
 		boolean unfold =false;
+		boolean skeleton =false;
+		boolean nosimplifications = false;
 		
 		long timeout = 3600;
 
@@ -224,6 +229,11 @@ public class Application implements IApplication, Ender {
 				useManyOrder = true;
 			} else if (UNFOLD.equals(args[i])) {
 				unfold = true;
+			} else if (SKELETON.equals(args[i])) {
+				unfold = true;
+				skeleton = true;
+			} else if (NOSIMPLIFICATION.equals(args[i])) {
+				nosimplifications = true;
 			} else if (EXPORT_LTL.equals(args[i])) {
 				exportLTL = true;
 			}
@@ -351,8 +361,34 @@ public class Application implements IApplication, Ender {
 		reader.loadProperties();
 
 		if (unfold) {
-			reader.createSPN();
-			tryRebuildPNML(pwd, examination, true, reader, doneProps);			
+			SparsePetriNet spn;
+			if (nosimplifications) {
+				if (reader.getHLPN() != null) {
+					SparseHLPetriNet hlpn = reader.getHLPN();
+					hlpn.simplifyLogic();
+					spn = hlpn.unfold();
+					if (skeleton) {
+						spn = hlpn.skeleton();
+					}
+				} else {
+					spn = reader.getSPN();
+				}
+			} else {
+				reader.createSPN();
+				spn = reader.getSPN();
+			}
+			String outform = pwd + "/" + examination + ".sr.xml";
+			boolean usesConstants = PropertiesToPNML.transform(reader.getSPN(), outform, doneProps);
+			if (usesConstants) {
+				// we exported constants to a place with index = current place count
+				// to be consistent now add a trivially constant place with initial marking 1
+				// token
+				System.out.println("Added a place called one to the net.");
+				spn.addPlace("one", 1);
+			}
+			String outsr = pwd + "/model.sr.pnml";
+			StructuralToPNML.transform(spn, outsr);
+			
 			return null;
 		}
 		

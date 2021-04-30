@@ -389,6 +389,34 @@ class PrintVisitor implements ExprVisitor<Void> {
 			}
 			break;
 		}
+		case ENABLED:
+		{
+			pw.append("              <is-fireable>\n"); 
+			for (Expression child : naryOp.getChildren()) {
+				if (child.getOp() == Op.TRANSREF) {
+					pw.append("                <transition>t"+ child.getValue()+"</transition>\n");
+				} else {
+					throw new IllegalArgumentException("Unexpected child of enabled should be a transition.");
+				}
+			}
+			pw.append("              </is-fireable>\n"); 
+			break;
+		}
+		case CARD:
+		{
+			pw.append("              <tokens-count>\n"); 
+			for (Expression child : naryOp.getChildren()) {
+				if (child.getOp() == Op.PLACEREF) {
+					pw.append("                <place>p"+ child.getValue()+"</place>\n");
+				} else if (child.getOp() == Op.CONST) {
+					for (int i=0; i < child.getValue(); i++) {
+						pw.append("                <place>p"+placeCount+"</place>\n");
+					}
+					usesConstant = true;
+				}
+			}
+			pw.append("              </tokens-count>\n"); 
+		}
 		default :
 		{
 			PropertiesToPNML.log.warning("Unexpected operator in formula :" + naryOp);
