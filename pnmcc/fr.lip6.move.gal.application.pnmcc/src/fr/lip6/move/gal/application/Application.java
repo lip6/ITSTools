@@ -366,15 +366,17 @@ public class Application implements IApplication, Ender {
 				if (reader.getHLPN() != null) {
 					SparseHLPetriNet hlpn = reader.getHLPN();
 					hlpn.simplifyLogic();
-					spn = hlpn.unfold();
 					if (skeleton) {
 						spn = hlpn.skeleton();
+					} else {
+						spn = hlpn.unfold();
 					}
 				} else {
 					spn = reader.getSPN();
 				}
 			} else {
 				reader.createSPN();
+				// includes syntactic simplifications
 				spn = reader.getSPN();
 			}
 			String outform = pwd + "/" + examination + ".sr.xml";
