@@ -336,7 +336,7 @@ public class MccTranslator {
 		if (hlpn != null) {
 			hlpn.simplifyLogic();
 			spn = hlpn.unfold();
-			FlowPrinter.drawNet(new StructuralReduction(spn), "Unfolded");
+			if (DEBUG >= 1) FlowPrinter.drawNet(new StructuralReduction(spn), "Unfolded");
 		} 
 		if (DEBUG >= 1) System.out.println("initial properties :" + spn.getProperties());
 		
