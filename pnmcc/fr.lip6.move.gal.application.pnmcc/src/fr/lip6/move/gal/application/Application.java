@@ -102,6 +102,7 @@ public class Application implements IApplication, Ender {
 	private static final String TIMEOUT = "-timeout";
 	private static final String REBUILDPNML = "-rebuildPNML";
 	private static final String EXPORT_LTL = "-exportLTL";
+	private static final String UNFOLD = "--unfold";
 
 	private List<IRunner> runners = new ArrayList<>();
 
@@ -174,7 +175,8 @@ public class Application implements IApplication, Ender {
 		boolean useManyOrder = false;
 		boolean rebuildPNML = false;
 		boolean exportLTL = false;
-
+		boolean unfold =false;
+		
 		long timeout = 3600;
 
 		for (int i = 0; i < args.length; i++) {
@@ -220,6 +222,8 @@ public class Application implements IApplication, Ender {
 				doHierarchy = false;
 			} else if (MANYORDER.equals(args[i])) {
 				useManyOrder = true;
+			} else if (UNFOLD.equals(args[i])) {
+				unfold = true;
 			} else if (EXPORT_LTL.equals(args[i])) {
 				exportLTL = true;
 			}
@@ -346,6 +350,12 @@ public class Application implements IApplication, Ender {
 		// uses a SAX parser to load to Logic MM, then an M2M to GAL properties.
 		reader.loadProperties();
 
+		if (unfold) {
+			reader.createSPN();
+			tryRebuildPNML(pwd, examination, true, reader, doneProps);			
+			return null;
+		}
+		
 		// are we going for CTL ? only ITSRunner answers this.
 		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
 
