@@ -156,12 +156,20 @@ public class SparseHLPetriNet extends PetriNet {
 		spn.setName(getName() +"_unf");
 		
 		// generate places with appropriate indexes
-		for (HLPlace p : places) {
-			for (int i=0,ie=p.getInitial().length ; i < ie ; i++) {
-				spn.addPlace(p.getName()+"_"+i, p.getInitial()[i]);
+		{
+			StringBuilder sb = new StringBuilder();
+			for (HLPlace p : places) {
+				String hlname = p.getName();
+				sb.append(hlname);
+				sb.append('_');
+				for (int i=0,ie=p.getInitial().length ; i < ie ; i++) {
+					sb.setLength(hlname.length()+1);
+					sb.append(i);
+					spn.addPlace(sb.toString(), p.getInitial()[i]);
+				}
+				sb.setLength(0);
 			}
 		}
-		
 		// generate transitions + a predicate for enabling of a colored transition
 		
 		for (HLTrans t : transitions) {
