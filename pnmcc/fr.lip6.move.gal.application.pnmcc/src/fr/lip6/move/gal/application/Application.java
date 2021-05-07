@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.application;
 
+import static fr.lip6.move.gal.structural.smt.SMTUtils.computeReducedFlow;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -106,6 +108,7 @@ public class Application implements IApplication, Ender {
 	private static final String UNFOLD = "--unfold";
 	private static final String SKELETON = "--skeleton";
 	private static final String NOSIMPLIFICATION = "--nosimplification";
+	private static final String INVARIANT = "--invariant";
 	
 	private List<IRunner> runners = new ArrayList<>();
 
@@ -181,6 +184,8 @@ public class Application implements IApplication, Ender {
 		boolean unfold =false;
 		boolean skeleton =false;
 		boolean nosimplifications = false;
+		boolean invariants = false;
+		
 		
 		long timeout = 3600;
 
@@ -229,6 +234,8 @@ public class Application implements IApplication, Ender {
 				useManyOrder = true;
 			} else if (UNFOLD.equals(args[i])) {
 				unfold = true;
+			} else if (INVARIANT.equals(args[i])) {
+				invariants = true;
 			} else if (SKELETON.equals(args[i])) {
 				unfold = true;
 				skeleton = true;
@@ -280,6 +287,23 @@ public class Application implements IApplication, Ender {
 			return null;
 		}
 
+		if (invariants) {
+			reader.createSPN();
+			List<Integer> tnames = new ArrayList<>();
+			List<Integer> repr = new ArrayList<>();
+			IntMatrixCol sumMatrix = computeReducedFlow(reader.getSPN(), tnames, repr);
+			SparsePetriNet spn = reader.getSPN();
+			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, reader.getSPN().getPnames());		
+			InvariantCalculator.printInvariant(invar, spn.getPnames(), reader.getSPN().getMarks());
+			
+			Set<SparseIntArray> invarT = DeadlockTester.computeTinvariants(reader.getSPN(), sumMatrix, tnames);
+			List<Integer> empty = new ArrayList<>(tnames.size());
+			for (int i=0 ; i < tnames.size(); i++) empty.add(0);
+			List<String> strtnames = repr.stream().map(id -> spn.getTnames().get(id)).collect(Collectors.toList());
+			InvariantCalculator.printInvariant(invarT, strtnames, empty );
+			return null;
+		}
+		
 		// for debug and control COL files are small, otherwise 1MB PNML limit (i.e.
 		// roughly 200kB GAL max).
 		if (pwd.contains("COL") || new File(pwd + "/model.pnml").length() < 1000000) {
@@ -298,6 +322,7 @@ public class Application implements IApplication, Ender {
 
 		}
 
+		
 
 		// initialize a shared container to detect help detect termination in portfolio
 		// case
