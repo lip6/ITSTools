@@ -61,7 +61,7 @@ public class DeadlockTester {
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-		Set<SparseIntArray> invarT = computeTinvariants(sr, sumMatrix, tnames);
+		Set<SparseIntArray> invarT = null; //computeTinvariants(sr, sumMatrix, tnames);
 		
 		try {
 			boolean solveWithReals = true;
@@ -180,9 +180,6 @@ public class DeadlockTester {
 	public static Set<SparseIntArray> computeTinvariants(ISparsePetriNet sr, IntMatrixCol sumMatrix,
 			List<Integer> tnames) {
 		
-		if (true) {
-			return null;
-		}
 		List<String> strtnames = tnames.stream().map(id -> sr.getTnames().get(id)).collect(Collectors.toList());
 		Set<SparseIntArray> invarT = InvariantCalculator.computePInvariants(sumMatrix.transpose(), strtnames, true);
 		
@@ -229,7 +226,7 @@ public class DeadlockTester {
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-		Set<SparseIntArray> invarT = computeTinvariants(sr, sumMatrix, tnames);
+		Set<SparseIntArray> invarT = null ; // computeTinvariants(sr, sumMatrix, tnames);
 		
 		ReadFeedCache rfc = new ReadFeedCache();
 		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
@@ -288,7 +285,7 @@ public class DeadlockTester {
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-		Set<SparseIntArray> invarT = computeTinvariants(sr, sumMatrix, tnames);
+		Set<SparseIntArray> invarT = null ; //computeTinvariants(sr, sumMatrix, tnames);
 		timeout *= 5;
 		boolean [] done = new boolean [tocheck.size()];
 		List<Script> properties = new ArrayList<>(tocheck.size());
@@ -2222,7 +2219,7 @@ public class DeadlockTester {
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-		Set<SparseIntArray> invarT = computeTinvariants(sr, sumMatrix, tnames);
+		Set<SparseIntArray> invarT = null; //computeTinvariants(sr, sumMatrix, tnames);
 		
 		ReadFeedCache rfc = new ReadFeedCache();
 		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
