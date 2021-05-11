@@ -125,8 +125,8 @@
 		<junit-version>4.8.1</junit-version>
 		<eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
 		<!-- EDIT THIS ORBIT SITE FOR NEXT RELEASE : this is 2020-06 -->
-		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository/</orbit-site>
-		<platform-version-name>2020-06</platform-version-name>
+		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository/</orbit-site>
+		<platform-version-name>2021-03</platform-version-name>
 		<tycho-version>2.0.0</tycho-version>
 		<sonar.exclusions>**/Messages.java</sonar.exclusions>
 		<xtextVersion>2.23.0</xtextVersion>
@@ -180,7 +180,7 @@
 				<configuration>
 					<resolver>p2</resolver>
 					<pomDependencies>consider</pomDependencies>
-					<executionEnvironment>JavaSE-1.8</executionEnvironment>
+					<executionEnvironment>JavaSE-11</executionEnvironment>
 					<!-- <target> <artifact> <groupId>org.eclipselabs.spray</groupId> <artifactId>org.eclipselabs.spray.targetplatform</artifactId> 
 						<version>0.4.0-SNAPSHOT</version> <classifier>spray</classifier> </artifact> 
 						</target> -->
