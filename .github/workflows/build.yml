@@ -32,11 +32,10 @@ jobs:
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.3
       with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: fr.lip6.move.gal.updatesite/target/repository # The folder the action should deploy.
-          CLEAN: true # Automatically remove deleted files from the deploy branch
-          SINGLE_COMMIT: true 
+          branch: gh-pages # The branch the action should deploy to.
+          folder: fr.lip6.move.gal.updatesite/target/repository # The folder the action should deploy.
+          clean: true # Automatically remove deleted files from the deploy branch
+          single-commit: true 
     - name: Trigger ITS commandline
       uses: mvasigh/dispatch-action@main
       with:
