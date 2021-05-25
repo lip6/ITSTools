@@ -405,7 +405,7 @@ public class Application implements IApplication, Ender {
 				spn = reader.getSPN();
 			}
 			String outform = pwd + "/" + examination + ".sr.xml";
-			boolean usesConstants = PropertiesToPNML.transform(reader.getSPN(), outform, doneProps);
+			boolean usesConstants = PropertiesToPNML.transform(spn, outform, doneProps);
 			if (usesConstants) {
 				// we exported constants to a place with index = current place count
 				// to be consistent now add a trivially constant place with initial marking 1
