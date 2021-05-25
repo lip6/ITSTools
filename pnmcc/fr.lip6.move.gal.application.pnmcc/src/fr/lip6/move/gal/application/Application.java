@@ -539,8 +539,13 @@ public class Application implements IApplication, Ender {
 				|| examination.equals("GlobalProperties")) {
 
 			if (examination.startsWith("LTL")) {
-				LTLPropertySolver ltlsolve = new LTLPropertySolver(spotPath, solverPath, pwd, exportLTL);
-				ltlsolve.runStructuralLTLCheck(reader, doneProps);
+				
+				if (spotPath == null) {
+					System.out.println("Warning : spot flags not provided. Please use flag : -spotpath $BINDIR/ltlfilt ");
+				} else {
+					LTLPropertySolver ltlsolve = new LTLPropertySolver(spotPath, solverPath, pwd, exportLTL);
+					ltlsolve.runStructuralLTLCheck(reader, doneProps);
+				}
 
 				if (reader.getSPN().getProperties().isEmpty()) {
 					System.out.println("All properties solved without resorting to model-checking.");
