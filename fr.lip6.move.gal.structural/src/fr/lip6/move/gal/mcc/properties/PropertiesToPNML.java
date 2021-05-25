@@ -83,6 +83,12 @@ public class PropertiesToPNML {
 		} else if (type == PropertyType.DEADLOCK) {
 			pw.append("      <exists-path><finally><deadlock/></finally></exists-path>\n");
 			return false;
+		} else if (type == PropertyType.LTL) {
+			pw.append("<all-paths>");
+			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount());
+			body.accept(v);
+			pw.append("</all-paths>");
+			return v.getUsesConstant();
 		} else {
 			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount());
 			body.accept(v);
