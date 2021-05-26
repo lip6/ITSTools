@@ -109,6 +109,7 @@ public class Application implements IApplication, Ender {
 	private static final String SKELETON = "--skeleton";
 	private static final String NOSIMPLIFICATION = "--nosimplification";
 	private static final String INVARIANT = "--invariant";
+	private static final String APPLYSR = "--applySR";
 	
 	private List<IRunner> runners = new ArrayList<>();
 
@@ -185,7 +186,7 @@ public class Application implements IApplication, Ender {
 		boolean skeleton =false;
 		boolean nosimplifications = false;
 		boolean invariants = false;
-		
+		boolean applySR = false;
 		
 		long timeout = 3600;
 
@@ -241,6 +242,8 @@ public class Application implements IApplication, Ender {
 				skeleton = true;
 			} else if (NOSIMPLIFICATION.equals(args[i])) {
 				nosimplifications = true;
+			} else if (APPLYSR.equals(args[i])) {
+				applySR = true;
 			} else if (EXPORT_LTL.equals(args[i])) {
 				exportLTL = true;
 			}
@@ -404,18 +407,54 @@ public class Application implements IApplication, Ender {
 				// includes syntactic simplifications
 				spn = reader.getSPN();
 			}
-			String outform = pwd + "/" + examination + ".sr.xml";
-			boolean usesConstants = PropertiesToPNML.transform(spn, outform, doneProps);
-			if (usesConstants) {
-				// we exported constants to a place with index = current place count
-				// to be consistent now add a trivially constant place with initial marking 1
-				// token
-				System.out.println("Added a place called one to the net.");
-				spn.addPlace("one", 1);
+			if (! applySR) {
+				String outform = pwd + "/" + examination + ".sr.xml";
+				boolean usesConstants = PropertiesToPNML.transform(spn, outform, doneProps);
+				if (usesConstants) {
+					// we exported constants to a place with index = current place count
+					// to be consistent now add a trivially constant place with initial marking 1
+					// token
+					System.out.println("Added a place called one to the net.");
+					spn.addPlace("one", 1);
+				}
+				String outsr = pwd + "/model.sr.pnml";
+				StructuralToPNML.transform(spn, outsr);
+			} else {
+				
+				for (int propid = 0; propid < spn.getProperties().size() ; propid++) {
+					MccTranslator copy = reader.copy();
+					fr.lip6.move.gal.structural.Property prop = copy.getSPN().getProperties().get(propid);
+					copy.getSPN().getProperties().clear();
+					copy.getSPN().getProperties().add(prop);
+					
+					StructuralReduction sr = new StructuralReduction(copy.getSPN());
+					sr.setProtected(copy.getSPN().computeSupport());
+					if (examination.startsWith("CTL") || examination.startsWith("LTL")) {
+						if (fr.lip6.move.gal.structural.expr.Simplifier.isSyntacticallyStuttering(prop)) {
+							ReachabilitySolver.applyReductions(sr, ReductionType.SI_LTL, solverPath, true, true);
+						} else {
+							ReachabilitySolver.applyReductions(sr, ReductionType.LTL, solverPath, true, true);
+						}
+					} else {
+						ReachabilitySolver.applyReductions(sr, ReductionType.SAFETY, solverPath, true, true);
+					}
+					copy.getSPN().readFrom(sr);
+					
+					String outform = pwd + "/" + examination + "." + propid + ".sr.xml";
+					boolean usesConstants = PropertiesToPNML.transform(copy.getSPN(), outform, doneProps);
+					if (usesConstants) {
+						// we exported constants to a place with index = current place count
+						// to be consistent now add a trivially constant place with initial marking 1
+						// token
+						System.out.println("Added a place called one to the net.");
+						spn.addPlace("one", 1);
+					}
+					String outsr = pwd + "/model."+ propid +".sr.pnml";
+					StructuralToPNML.transform(copy.getSPN(), outsr);					
+				}
+				
+				
 			}
-			String outsr = pwd + "/model.sr.pnml";
-			StructuralToPNML.transform(spn, outsr);
-			
 			return null;
 		}
 		
