@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.structural.expr;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.function.Function;
@@ -197,6 +198,10 @@ public interface Expression {
 	}
 	static Expression nop(Op op) {
 		return nop(op, new ArrayList<>());
+	}
+	
+	static Expression nop(Op op, Expression ...children) {
+		return nop(op,Arrays.asList(children));
 	}
 	
 	static Expression nop(Op op, List<Expression> children) {
