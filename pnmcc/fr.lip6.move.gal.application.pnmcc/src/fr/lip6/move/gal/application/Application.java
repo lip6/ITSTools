@@ -57,6 +57,7 @@ import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.gal.structural.StructuralToGreatSPN;
@@ -110,6 +111,8 @@ public class Application implements IApplication, Ender {
 	private static final String NOSIMPLIFICATION = "--nosimplification";
 	private static final String INVARIANT = "--invariant";
 	private static final String APPLYSR = "--applySR";
+	private static final String GENDEADTR = "--gen-dead-transition";
+	private static final String GENDEADPL= "--gen-dead-place";
 	
 	private List<IRunner> runners = new ArrayList<>();
 
@@ -188,6 +191,10 @@ public class Application implements IApplication, Ender {
 		boolean invariants = false;
 		boolean applySR = false;
 		
+		boolean genDeadTransitions = false;
+		boolean genDeadPlaces = false;
+		
+		
 		long timeout = 3600;
 
 		for (int i = 0; i < args.length; i++) {
@@ -244,6 +251,12 @@ public class Application implements IApplication, Ender {
 				nosimplifications = true;
 			} else if (APPLYSR.equals(args[i])) {
 				applySR = true;
+			} else if (GENDEADPL.equals(args[i])) {
+				genDeadPlaces = true;
+				examination = "DeadPlace";
+			} else if (GENDEADTR.equals(args[i])) {
+				genDeadTransitions = true;
+				examination = "DeadTransition";
 			} else if (EXPORT_LTL.equals(args[i])) {
 				exportLTL = true;
 			}
@@ -384,10 +397,41 @@ public class Application implements IApplication, Ender {
 			ToGalTransformer.setWithAbstractColors(false);
 		}
 
+		if (genDeadPlaces || genDeadTransitions) {
+			reader.createSPN(false,false);
+			SparsePetriNet spn = reader.getSPN();
+
+			if (genDeadPlaces) {
+				for (int pid=0, pide=spn.getPlaceCount(); pid < pide; ++pid) {
+					spn.getProperties().add(new fr.lip6.move.gal.structural.Property(Expression.op(Op.EF, Expression.op(Op.LEQ, Expression.constant(1), Expression.var(pid)), null),PropertyType.INVARIANT,"p"+pid));
+				}
+				examination = "ReachabilityCardinality";
+			} else if (genDeadTransitions) {
+				for (int tid=0, tide=spn.getTransitionCount(); tid < tide; ++tid) {
+					spn.getProperties().add(new fr.lip6.move.gal.structural.Property(Expression.op(Op.EF, Expression.nop(Op.ENABLED, Expression.trans(tid)), null),PropertyType.INVARIANT,"t"+tid));				
+				}
+				examination = "ReachabilityFireability";
+			}
+			
+			String outform = pwd + "/" + examination + ".sr.xml";
+			boolean usesConstants = PropertiesToPNML.transform(spn, outform, doneProps);
+			if (usesConstants) {
+				// we exported constants to a place with index = current place count
+				// to be consistent now add a trivially constant place with initial marking 1
+				// token
+				System.out.println("Added a place called one to the net.");
+				spn.addPlace("one", 1);
+			}
+			String outsr = pwd + "/model.sr.pnml";
+			StructuralToPNML.transform(spn, outsr);
+			return null;			
+		}
+		
 		// Now translate and load properties into GAL
 		// uses a SAX parser to load to Logic MM, then an M2M to GAL properties.
 		reader.loadProperties();
-
+		
+		
 		if (unfold) {
 			SparsePetriNet spn;
 			if (nosimplifications) {
