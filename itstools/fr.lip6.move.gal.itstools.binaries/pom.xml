@@ -28,17 +28,16 @@
                             <target>
                                 <echo message="Get ITS tools binaries"/>
                                 <get src="https://github.com/lip6/libITS/raw/osx/its-reach" dest="bin/its-reach-Darwin"/>
-<!--                                 <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-reach" dest="bin/its-reach-linux32"/> -->
                                 <get src="https://lip6.github.io/libITS/its-reach" dest="bin/its-reach-linux64"/>
-                                <get src="https://ci.appveyor.com/api/projects/yanntm/libITS/artifacts/bin/its-reach.exe" dest="bin/its-reach-win64"/>
+                                <get src="https://github.com/lip6/libITS/raw/Windows/its-reach.exe" dest="bin/its-reach-win64"/>
+
                                 <get src="https://github.com/lip6/ITS-CTL/raw/osx/its-ctl" dest="bin/its-ctl-Darwin"/>
-<!--                                 <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-ctl" dest="bin/its-ctl-linux32"/> -->
                                 <get src="https://lip6.github.io/ITS-CTL/its-ctl" dest="bin/its-ctl-linux64"/>
-                                <get src="https://ci.appveyor.com/api/projects/yanntm/ITS-CTL/artifacts/bin/its-ctl.exe" dest="bin/its-ctl-win64"/>
+                                <get src="https://github.com/lip6/ITS-LTL/raw/Windows/its-ctl.exe" dest="bin/its-ctl-win64"/>
+
                                 <get src="https://github.com/lip6/ITS-LTL/raw/osx/its-ltl" dest="bin/its-ltl-Darwin"/>
-<!--                                 <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-ltl" dest="bin/its-ltl-linux32"/> -->
                                 <get src="https://lip6.github.io/ITS-LTL/its-ltl" dest="bin/its-ltl-linux64"/>
-                                <get src="https://ci.appveyor.com/api/projects/yanntm/ITS-LTL/artifacts/src/its-ltl.exe" dest="bin/its-ltl-win64"/>
+                                <get src="https://github.com/lip6/ITS-LTL/raw/Windows/its-ltl.exe" dest="bin/its-ltl-win64"/>
                                 <chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
                            </target>
                         </configuration>
