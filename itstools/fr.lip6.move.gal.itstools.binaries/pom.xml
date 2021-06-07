@@ -37,7 +37,9 @@
 
                                 <get src="https://github.com/lip6/ITS-LTL/raw/osx/its-ltl" dest="bin/its-ltl-Darwin"/>
                                 <get src="https://lip6.github.io/ITS-LTL/its-ltl" dest="bin/its-ltl-linux64"/>
-                                <get src="https://github.com/lip6/ITS-LTL/raw/Windows/its-ltl.exe" dest="bin/its-ltl-win64"/>
+                                <!-- <get src="https://github.com/lip6/ITS-LTL/raw/Windows/its-ltl.exe" dest="bin/its-ltl-win64"/> -->
+                                <get src="https://ci.appveyor.com/api/projects/yanntm/ITS-LTL/artifacts/src/its-ltl.exe" dest="bin/its-ltl-win64"/>
+                                
                                 <chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
                            </target>
                         </configuration>
