@@ -755,6 +755,8 @@ public class HLSRTransformer {
 						if (nsort.getSortdef() instanceof ProductSort) {
 							ProductSort prod = (ProductSort) nsort.getSortdef();
 							elemSort = prod.getElementSort().get(i);
+						} else {
+							elemSort = nsort.getSortdef();
 						}
 					}
 				}
