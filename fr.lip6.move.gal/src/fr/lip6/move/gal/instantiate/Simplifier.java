@@ -847,7 +847,11 @@ public abstract class Simplifier {
 					int index = ((Constant) va.getIndex()).getValue();
 					Set<Integer> cstIndexes = constantArrs.get(va.getRef());
 					if (cstIndexes != null && cstIndexes.contains(index) ) {
-						EcoreUtil.replace(obj, EcoreUtil.copy(((ArrayPrefix) va.getRef()).getValues().get(index)));						
+						if (((ArrayPrefix) va.getRef()).getValues().size() > index) {
+							EcoreUtil.replace(obj, EcoreUtil.copy(((ArrayPrefix) va.getRef()).getValues().get(index)));						
+						} else {
+							EcoreUtil.replace(obj, GF2.constant(0));
+						}
 						totalexpr++;
 					}
 					it.prune();
