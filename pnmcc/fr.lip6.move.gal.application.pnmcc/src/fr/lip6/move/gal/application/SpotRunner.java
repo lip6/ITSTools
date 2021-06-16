@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
@@ -47,6 +48,7 @@ public class SpotRunner {
 	private String workFolder;
 	private long timeout;
 	private String pathToautstates;
+	private String pathToSenseCLSL;
 
 	public SpotRunner(String pathToExe, String workFolder, long timeout) {
 		super();
@@ -54,6 +56,7 @@ public class SpotRunner {
 		this.pathToltl2tgba = pathToExe.replace("ltlfilt", "ltl2tgba");
 		this.pathToautfilt = pathToExe.replace("ltlfilt", "autfilt");
 		this.pathToautstates = pathToExe.replace("ltlfilt", "autstates.py");
+		this.pathToSenseCLSL = pathToExe.replace("ltlfilt", "senseclsl.py");
 		this.workFolder = workFolder;
 		this.timeout = timeout;
 	}
@@ -633,5 +636,71 @@ public class SpotRunner {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	public void analyzeCLSL(TGBA tgba) {
+		long time = System.currentTimeMillis();
+		CommandLine cl = new CommandLine();
+		cl.setWorkingDir(new File(workFolder));
+		cl.addArg(pathToSenseCLSL);
+		File curAut = Files.createTempFile("curaut", ".hoa").toFile();
+		if (DEBUG == 0) curAut.deleteOnExit();
+		PrintWriter pw = new PrintWriter(curAut);
+		tgba.exportAsHOA(pw);
+		pw.close();
+		cl.addArg(curAut.getCanonicalPath());
+
+		if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
+		File outPath = Files.createTempFile("outclsl", ".txt").toFile();
+		if (DEBUG == 0) outPath.deleteOnExit();
+		int status = 1;
+		try {
+			status = Runner.runTool(timeout, cl, outPath, true);
+		} catch (IOException | TimeoutException | InterruptedException e) {
+			throw new IOException(e);
+		}
+		if (status == 0) {
+			if (DEBUG >= 1) System.out.println("Successful run of Spot took " + (System.currentTimeMillis() - time) + " ms captured in "
+					+ outPath.getCanonicalPath());
+			BufferedReader br = new BufferedReader(new FileReader(outPath));
+			// skip comment line
+			// #is_stutter,is_sl_ins,is_cl_ins
+			String line = br.readLine();
+			line = br.readLine();			
+			br.close();
+			
+			boolean [] stutter = new boolean [3];
+			
+			for (int i=0, cur=0; i < line.length() ; i++) {
+				char c = line.charAt(i);
+				if (c == '1') {
+					stutter[cur++] = true;
+				} else if (c == '0') {
+					stutter[cur++] = false;
+				}
+			}
+			
+			if (stutter[0] && ! tgba.getProperties().contains("stutter-invariant")) {
+				tgba.getProperties().add("stutter-invariant");
+			}
+			if (stutter[1]) {
+				tgba.getProperties().add("sl-invariant");
+			}
+			if (stutter[2]) {
+				tgba.getProperties().add("cl-invariant");
+			}
+
+			tgba.getProperties().add(line);
+			
+			if (DEBUG >= 2)
+				System.out.println("Resulting TGBA : " + tgbaout.toString());
+		} else {
+			System.out.println("Spot run failed in " + (System.currentTimeMillis() - time) + " ms. Status :" + status);
+			try (Stream<String> stream = Files.lines(Paths.get(outPath.getCanonicalPath()))) {
+				stream.forEach(System.out::println);
+			}
+			throw new IOException();
+		}	
+		
 	}
 }
