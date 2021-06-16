@@ -141,6 +141,79 @@ public class LTLPropertySolver {
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 		return solved;
 	}
+	
+	public void runSLCLLTLTest(MccTranslator reader, DoneProperties doneProps)
+			throws TimeoutException, LTLException {
+		SpotRunner spot = new SpotRunner(spotPath, workDir, 10);
+
+
+
+		for (fr.lip6.move.gal.structural.Property propPN : reader.getSPN().getProperties()) {
+			if (doneProps.containsKey(propPN.getName())) 
+				continue;
+			long time = System.currentTimeMillis();
+			if (DEBUG >= 1) System.out.println("Starting run for "+propPN.getName()+" :" + SpotRunner.printLTLProperty(propPN.getBody()));
+			TGBA tgba = spot.transformToTGBA(propPN);
+			spot.analyzeCLSL(tgba);
+			
+			if (! tgba.isStutterInvariant() && (tgba.isCLInvariant() || tgba.isSLInvariant())) {
+				// semi decision approach
+				
+				System.out.println("Found a SL/CL insensitive property : " + propPN.getName() + ":" + propPN.getBody());
+				
+				// annotate it with Infinite Stutter Accepted Formulas
+				spot.computeInfStutter(tgba);
+			
+				// build a new copy of the model, with only this property				
+				List<AtomicProp> aps = tgba.getAPs();
+					
+				SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
+				
+				spn.getProperties().clear();
+				
+				StructuralReduction sr = new StructuralReduction(spn);
+				
+				BitSet support = new BitSet();
+				for (AtomicProp ap : aps) {
+					SparsePetriNet.addSupport(ap.getExpression(),support);
+				}
+				
+				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
+				BitSet supportForProp = spn.computeSupport();
+				if (! supportForProp.equals(support)) {
+					System.out.println("Property had overlarge support with respect to TGBA, discarding it for now.");
+					spn.getProperties().clear();
+				}
+				sr.setProtected(support);
+
+				try {
+					ReductionType rt = ReductionType.SI_LTL ; 
+					ReachabilitySolver.applyReductions(sr, rt, solverPath, true, true);			
+				} catch (GlobalPropertySolvedException gse) {
+					System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
+					gse.printStackTrace();
+				}
+				
+				// rebuild and reinterpret the reduced net
+				// index of places may have changed, formula might be syntactically simpler 
+				// recompute fresh tgba with correctly indexed AP					
+				List<Expression> atoms = aps.stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
+				List<Expression> atoms2 = spn.readFrom(sr,atoms);
+				for (int i =0,ie=atoms.size(); i<ie; i++) {
+					aps.get(i).setExpression(atoms2.get(i));
+				}
+				// we can maybe simplify some predicates now : apply some basic tests
+				spn.testInInitial();
+				spn.removeConstantPlaces();
+				spn.simplifyLogic();
+				
+				checkLTLProperty(propPN, tgba, spn, reader, doneProps, spot, time);				
+			}
+
+			
+		}
+	}
+	
 
 	public void runStutteringLTLTest(MccTranslator reader, DoneProperties doneProps)
 			throws TimeoutException, LTLException {
@@ -162,118 +235,129 @@ public class LTLPropertySolver {
 			spot.computeInfStutter(tgba);
 
 			
-			try {
-				System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
-				if (DEBUG >= 2) FlowPrinter.drawNet(spnForProp,"For product with " + propPN.getName());
-				// walk the product a bit
-				RandomProductWalker pw = new RandomProductWalker(spnForProp,tgba);
-				pw.runProduct(NBSTEPS, 10, false);
-				pw.runProduct(NBSTEPS, 10, true);
-				
-				// so we couldn't find a counter example, let's reflect upon this fact.
-				TGBA tgbak = applyKnowledgeBasedReductions(spnForProp,tgba, spot, propPN);				
-				
-				SparsePetriNet spnForPropWithK;
-				if (tgbak != tgba) {
-					spnForPropWithK = reduceForProperty(spnForProp, tgbak,
-							spnForProp.getProperties().isEmpty() ? null : spnForProp.getProperties().get(0));
-				} else {
-					spnForPropWithK = spnForProp;
-				}
+			checkLTLProperty(propPN, tgba, spnForProp, reader, doneProps, spot, time);
+		}
+	}
 
-				if (DEBUG >= 2) FlowPrinter.drawNet(spnForPropWithK,"For product with " + propPN.getName());
-				// index of places may have changed, formula might be syntactically simpler 
-				// annotate it with Infinite Stutter Acceped Formulas
-				spot.computeInfStutter(tgbak);
-				pw = new RandomProductWalker(spnForPropWithK,tgbak);
-				pw.runProduct(NBSTEPS, 10, false);
-				pw.runProduct(NBSTEPS, 10, true);
-				
-				if (! tgbak.isStutterInvariant()) {
-					// go for PPOR
-					try {
-						TGBA tgbappor = spot.computeForwardClosedSI(tgbak);
-
-						boolean canWork = false;
-						boolean[] stm = tgbappor.getStutterMarkers();
-						// check that there are stutter invariant states
-						for (int q=0; q < tgbappor.nbStates() ; q++) {
-							if (stm[q] && ! isFullAccept(tgbappor.getEdges().get(q),tgbappor.getNbAcceptance())) {
-								canWork = true;
-								break;
-							}
-						}
-						
-						if (canWork) {
-							System.out.println("Applying partial POR strategy " + Arrays.toString(stm));
-							spot.computeInfStutter(tgbappor);
-							// build the reduced system and TGBA
-							SparsePetriNet spnredSI = new SparsePetriNet(spnForPropWithK);
-							spnredSI.getProperties().clear();
-
-							{
-								StructuralReduction sr = buildReduced(spnredSI, true, tgbappor.getAPs(),true);
-								
-								// rebuild and reinterpret the reduced net
-								// index of places may have changed, formula might be syntactically simpler 
-								// recompute fresh tgba with correctly indexed AP					
-								List<Expression> atoms = tgbappor.getAPs().stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
-								List<Expression> atomsred = spnredSI.readFrom(sr,atoms);
-								
-								if (DEBUG >= 2) {
-									Set<Integer> hl = new HashSet<>();
-									BitSet bs = sr.getTokeepImages();
-									
-									for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
-										hl.add(i);
-									}
-									FlowPrinter.drawNet(sr, solverPath, hl, new HashSet<>());
-								}
-								
-								pw = new RandomProductWalker(spnForPropWithK, sr, tgbappor, atomsred);
-								
-								pw.runProduct(NBSTEPS, 10, false);
-								pw.runProduct(NBSTEPS, 10, true);
-							}
-							
-						}
-					
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				
-				
-				// Last step, try exhaustive methods
-				
-				MccTranslator reader2 = reader.copy();
-				if (spnForPropWithK.getProperties().isEmpty()) {
-					// we killed it due to alphabet differences
-					StructuralReduction sr = new StructuralReduction(spnForProp);
-					
-					BitSet support = spnForProp.computeSupport();					
-					sr.setProtected(support);
-					try {
-						ReductionType rt = tgba.isStutterInvariant() ? ReductionType.SI_LTL : ReductionType.LTL; 
-						ReachabilitySolver.applyReductions(sr, rt, solverPath, true, true);			
-					} catch (GlobalPropertySolvedException gse) {
-						System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
-						gse.printStackTrace();
-					}
-					spnForProp.readFrom(sr);				
-					
-				} else {
-					reader2.setSpn(spnForPropWithK, true);
-				}
-				// 15 seconds timeout, just treat the fast ones.
-				GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", solverPath, 15);
-				
-			} catch (AcceptedRunFoundException a) {
-				doneProps.put(propPN.getName(), false, "STUTTER_TEST");
-			} catch (EmptyProductException e2) {
-				doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
+	private void checkLTLProperty(fr.lip6.move.gal.structural.Property propPN, TGBA tgba, SparsePetriNet spnForProp,
+			MccTranslator reader, DoneProperties doneProps, SpotRunner spot, long time)
+			throws LTLException, TimeoutException {
+		try {
+			System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
+			if (DEBUG >= 2) FlowPrinter.drawNet(spnForProp,"For product with " + propPN.getName());
+			// walk the product a bit
+			RandomProductWalker pw = new RandomProductWalker(spnForProp,tgba);
+			pw.runProduct(NBSTEPS, 10, false);
+			pw.runProduct(NBSTEPS, 10, true);
+			
+			// so we couldn't find a counter example, let's reflect upon this fact.
+			TGBA tgbak = applyKnowledgeBasedReductions(spnForProp,tgba, spot, propPN);				
+			
+			SparsePetriNet spnForPropWithK;
+			if (tgbak != tgba) {
+				spnForPropWithK = reduceForProperty(spnForProp, tgbak,
+						spnForProp.getProperties().isEmpty() ? null : spnForProp.getProperties().get(0));
+			} else {
+				spnForPropWithK = spnForProp;
 			}
-			System.out.println("Treatment of property "+propPN.getName()+" finished in "+(System.currentTimeMillis()-time)+" ms.");
+
+			if (DEBUG >= 2) FlowPrinter.drawNet(spnForPropWithK,"For product with " + propPN.getName());
+			// index of places may have changed, formula might be syntactically simpler 
+			// annotate it with Infinite Stutter Acceped Formulas
+			spot.computeInfStutter(tgbak);
+			pw = new RandomProductWalker(spnForPropWithK,tgbak);
+			pw.runProduct(NBSTEPS, 10, false);
+			pw.runProduct(NBSTEPS, 10, true);
+			
+			if (! tgbak.isStutterInvariant()) {
+				treatPartialPOR(tgbak, spnForPropWithK, spot);
+			}
+			
+			
+			// Last step, try exhaustive methods
+			
+			MccTranslator reader2 = reader.copy();
+			if (spnForPropWithK.getProperties().isEmpty()) {
+				// we killed it due to alphabet differences
+				StructuralReduction sr = new StructuralReduction(spnForProp);
+				
+				BitSet support = spnForProp.computeSupport();					
+				sr.setProtected(support);
+				try {
+					ReductionType rt = tgba.isStutterInvariant() ? ReductionType.SI_LTL : ReductionType.LTL; 
+					ReachabilitySolver.applyReductions(sr, rt, solverPath, true, true);			
+				} catch (GlobalPropertySolvedException gse) {
+					System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
+					gse.printStackTrace();
+				}
+				spnForProp.readFrom(sr);				
+				
+			} else {
+				reader2.setSpn(spnForPropWithK, true);
+			}
+			// 15 seconds timeout, just treat the fast ones.
+			GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", solverPath, 15);
+			
+		} catch (AcceptedRunFoundException a) {
+			doneProps.put(propPN.getName(), false, "STUTTER_TEST");
+		} catch (EmptyProductException e2) {
+			doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
+		}
+		System.out.println("Treatment of property "+propPN.getName()+" finished in "+(System.currentTimeMillis()-time)+" ms.");
+	}
+
+	private void treatPartialPOR(TGBA tgbak, SparsePetriNet spnForPropWithK, SpotRunner spot) throws LTLException {
+		RandomProductWalker pw;
+		// go for PPOR
+		try {
+			TGBA tgbappor = spot.computeForwardClosedSI(tgbak);
+
+			boolean canWork = false;
+			boolean[] stm = tgbappor.getStutterMarkers();
+			// check that there are stutter invariant states
+			for (int q=0; q < tgbappor.nbStates() ; q++) {
+				if (stm[q] && ! isFullAccept(tgbappor.getEdges().get(q),tgbappor.getNbAcceptance())) {
+					canWork = true;
+					break;
+				}
+			}
+			
+			if (canWork) {
+				System.out.println("Applying partial POR strategy " + Arrays.toString(stm));
+				spot.computeInfStutter(tgbappor);
+				// build the reduced system and TGBA
+				SparsePetriNet spnredSI = new SparsePetriNet(spnForPropWithK);
+				spnredSI.getProperties().clear();
+
+				{
+					StructuralReduction sr = buildReduced(spnredSI, true, tgbappor.getAPs(),true);
+					
+					// rebuild and reinterpret the reduced net
+					// index of places may have changed, formula might be syntactically simpler 
+					// recompute fresh tgba with correctly indexed AP					
+					List<Expression> atoms = tgbappor.getAPs().stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
+					List<Expression> atomsred = spnredSI.readFrom(sr,atoms);
+					
+					if (DEBUG >= 2) {
+						Set<Integer> hl = new HashSet<>();
+						BitSet bs = sr.getTokeepImages();
+						
+						for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
+							hl.add(i);
+						}
+						FlowPrinter.drawNet(sr, solverPath, hl, new HashSet<>());
+					}
+					
+					pw = new RandomProductWalker(spnForPropWithK, sr, tgbappor, atomsred);
+					
+					pw.runProduct(NBSTEPS, 10, false);
+					pw.runProduct(NBSTEPS, 10, true);
+				}
+				
+			}
+		
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
