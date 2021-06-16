@@ -154,12 +154,16 @@ public class LTLPropertySolver {
 			long time = System.currentTimeMillis();
 			if (DEBUG >= 1) System.out.println("Starting run for "+propPN.getName()+" :" + SpotRunner.printLTLProperty(propPN.getBody()));
 			TGBA tgba = spot.transformToTGBA(propPN);
-			spot.analyzeCLSL(tgba);
+			try {
+				spot.analyzeCLSL(tgba);
+			} catch (IOException e) {
+				System.out.println("Warning : SL/CL computation failed.");
+			}
 			
 			if (! tgba.isStutterInvariant() && (tgba.isCLInvariant() || tgba.isSLInvariant())) {
 				// semi decision approach
 				
-				System.out.println("Found a SL/CL insensitive property : " + propPN.getName() + ":" + propPN.getBody());
+				System.out.println("Found a " + (tgba.isSLInvariant() ? "SL":"CL") + " insensitive property : " + propPN.getName() + ":" + propPN.getBody());
 				
 				// annotate it with Infinite Stutter Accepted Formulas
 				spot.computeInfStutter(tgba);
