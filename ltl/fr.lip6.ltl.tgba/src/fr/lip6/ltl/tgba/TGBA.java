@@ -313,6 +313,12 @@ public class TGBA {
 	public boolean isStutterInvariant() {
 		return getProperties().contains("stutter-invariant");
 	}
+	public boolean isSLInvariant() {
+		return getProperties().contains("sl-invariant");
+	}
+	public boolean isCLInvariant() {
+		return getProperties().contains("cl-invariant");
+	}
 
 	public void setStutterMarkers(boolean[] stutter) {
 		this.stutter = stutter;
