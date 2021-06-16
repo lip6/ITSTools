@@ -638,7 +638,7 @@ public class SpotRunner {
 		return false;
 	}
 
-	public void analyzeCLSL(TGBA tgba) {
+	public void analyzeCLSL(TGBA tgba) throws IOException {
 		long time = System.currentTimeMillis();
 		CommandLine cl = new CommandLine();
 		cl.setWorkingDir(new File(workFolder));
@@ -692,8 +692,6 @@ public class SpotRunner {
 
 			tgba.getProperties().add(line);
 			
-			if (DEBUG >= 2)
-				System.out.println("Resulting TGBA : " + tgbaout.toString());
 		} else {
 			System.out.println("Spot run failed in " + (System.currentTimeMillis() - time) + " ms. Status :" + status);
 			try (Stream<String> stream = Files.lines(Paths.get(outPath.getCanonicalPath()))) {
