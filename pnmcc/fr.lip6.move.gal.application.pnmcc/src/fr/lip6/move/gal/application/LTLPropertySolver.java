@@ -19,6 +19,7 @@ import fr.lip6.ltl.tgba.LTLException;
 import fr.lip6.ltl.tgba.RandomProductWalker;
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.ltl.tgba.TGBAEdge;
+import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
@@ -211,7 +212,21 @@ public class LTLPropertySolver {
 				spn.removeConstantPlaces();
 				spn.simplifyLogic();
 				
-				checkLTLProperty(propPN, tgba, spn, reader, doneProps, spot, time);				
+				
+				DoneProperties tmpDoneProps = new ConcurrentHashDoneProperties();
+				checkLTLProperty(propPN, tgba, spn, reader, tmpDoneProps , spot, time);
+				if (tmpDoneProps.containsKey(propPN.getName())) {
+					boolean verdict = tmpDoneProps.getValue(propPN.getName());
+					if (verdict && tgba.isCLInvariant()) {
+						// true formula + CL = real proof
+						doneProps.put(propPN.getName(), verdict, "CL_INSENSITIVE");
+					} else if (!verdict && tgba.isSLInvariant()) {
+						// false formula + SL = real proof
+						doneProps.put(propPN.getName(), verdict, "SL_INSENSITIVE");
+					} else {
+						System.out.println("CL/SL decision was in the wrong direction : "+ (tgba.isSLInvariant() ? "SL":"CL") + " + " + verdict);					
+					}
+				}
 			}
 
 			
@@ -221,6 +236,9 @@ public class LTLPropertySolver {
 
 	public void runStutteringLTLTest(MccTranslator reader, DoneProperties doneProps)
 			throws TimeoutException, LTLException {
+
+		runSLCLLTLTest(reader, doneProps);
+		
 		SpotRunner spot = new SpotRunner(spotPath, workDir, 10);
 
 
