@@ -690,8 +690,6 @@ public class SpotRunner {
 				tgba.getProperties().add("cl-invariant");
 			}
 
-			tgba.getProperties().add(line);
-			
 		} else {
 			System.out.println("Spot run failed in " + (System.currentTimeMillis() - time) + " ms. Status :" + status);
 			try (Stream<String> stream = Files.lines(Paths.get(outPath.getCanonicalPath()))) {
