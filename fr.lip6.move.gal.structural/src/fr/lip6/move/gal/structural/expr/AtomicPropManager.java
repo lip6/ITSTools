@@ -150,6 +150,10 @@ public class AtomicPropManager {
 			}
 		}
 		
+		if (expr.getOp() == Op.APREF) {
+			return collectAndRewriteUsingAtoms(((AtomicPropRef) expr).getAp().getExpression(), uniqueMap);
+		}
+		
 		// recursive case
 		List<Expression> resc = new ArrayList<>(expr.nbChildren());
 		boolean changed = false;
