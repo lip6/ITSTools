@@ -80,6 +80,7 @@ import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.NaryOp;
@@ -875,6 +876,8 @@ public class MccTranslator {
 			} else {
 				return GalFactory.eINSTANCE.createFalse();
 			}
+		} else if (expr.getOp() == Op.APREF) {
+			return toGal(((AtomicPropRef)expr).getAp().getExpression(), variables);
 		}
 		throw new UnsupportedOperationException();
 	}
