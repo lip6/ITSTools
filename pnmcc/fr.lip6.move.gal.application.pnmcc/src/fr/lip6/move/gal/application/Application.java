@@ -113,6 +113,7 @@ public class Application implements IApplication, Ender {
 	private static final String APPLYSR = "--applySR";
 	private static final String GENDEADTR = "--gen-dead-transition";
 	private static final String GENDEADPL= "--gen-dead-place";
+	private static final String ANALYZE_SENSITIVITY="--analyze-sensitivity";
 	
 	private List<IRunner> runners = new ArrayList<>();
 
@@ -194,6 +195,7 @@ public class Application implements IApplication, Ender {
 		boolean genDeadTransitions = false;
 		boolean genDeadPlaces = false;
 		
+		boolean analyzeSensitivity = false;
 		
 		long timeout = 3600;
 
@@ -257,6 +259,8 @@ public class Application implements IApplication, Ender {
 			} else if (GENDEADTR.equals(args[i])) {
 				genDeadTransitions = true;
 				examination = "DeadTransition";
+			} else if (ANALYZE_SENSITIVITY.equals(args[i])) {
+				analyzeSensitivity = true;
 			} else if (EXPORT_LTL.equals(args[i])) {
 				exportLTL = true;
 			}
@@ -303,6 +307,12 @@ public class Application implements IApplication, Ender {
 			return null;
 		}
 
+		if (analyzeSensitivity) {
+			SpotRunner spot = new SpotRunner(spotPath, pwd, 10);
+			LTLAnalyzer.doSensitivityAnalysis(reader,spot,pwd,examination,solverPath);
+			return IApplication.EXIT_OK;			
+		}
+		
 		if (invariants) {
 			reader.createSPN();
 			List<Integer> tnames = new ArrayList<>();
@@ -499,7 +509,7 @@ public class Application implements IApplication, Ender {
 				
 				
 			}
-			return null;
+			return IApplication.EXIT_OK;
 		}
 		
 		// are we going for CTL ? only ITSRunner answers this.
