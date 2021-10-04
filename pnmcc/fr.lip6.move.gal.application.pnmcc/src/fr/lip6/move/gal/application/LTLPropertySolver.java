@@ -192,7 +192,7 @@ public class LTLPropertySolver {
 				sr.setProtected(support);
 
 				try {
-					ReductionType rt = ReductionType.SI_LTL ; 
+					ReductionType rt = ReductionType.SLCL_LTL ; 
 					ReachabilitySolver.applyReductions(sr, rt, solverPath, true, true);			
 				} catch (GlobalPropertySolvedException gse) {
 					System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());

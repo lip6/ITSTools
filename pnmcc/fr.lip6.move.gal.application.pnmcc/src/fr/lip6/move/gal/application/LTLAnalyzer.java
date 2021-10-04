@@ -95,7 +95,7 @@ public class LTLAnalyzer {
 					long time = System.currentTimeMillis();
 					StructuralReduction sr = new StructuralReduction (spnProp);
 					try {
-						ReachabilitySolver.applyReductions(sr, ReductionType.SI_LTL, solverPath, true, false);
+						ReachabilitySolver.applyReductions(sr, ReductionType.SLCL_LTL, solverPath, true, false);
 						// sr.reduce(ReductionType.SI_LTL);
 					} catch (Exception e) {
 						e.printStackTrace();
