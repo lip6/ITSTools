@@ -19,6 +19,9 @@ public class LTLAnalyzer {
 		long redTime;
 		long analysisTime;
 		boolean isSI,isSh,isLen;
+		boolean reducedLTL=false;
+		boolean reducedSLCL=false;
+		
 		try {
 			reader.loadProperties();
 
@@ -28,7 +31,7 @@ public class LTLAnalyzer {
 			nbT=spn.getTransitionCount();
 
 			PrintWriter out = new PrintWriter(pwd+"/"+examination+"stats.csv");
-			out.println("model,examination,property id,init places,init trans,out places,out trans,red places,red trans,time to red(ms),Stutter Ins,Short Ins,Leng Ins,analysis time(ms)");
+			out.println("model,examination,property id,init places,init trans,reduced LTL,out places,out trans,reduced short long,red places,red trans,time to red(ms),Stutter Ins,Short Ins,Leng Ins,analysis time(ms)");
 			for (int propid = 0; propid < spn.getProperties().size() ; propid++) {
 				MccTranslator copy = reader.copy();
 				fr.lip6.move.gal.structural.Property prop = copy.getSPN().getProperties().get(propid);
@@ -58,7 +61,7 @@ public class LTLAnalyzer {
 					spnProp.getProperties().add(prop.copy());
 					StructuralReduction sr = new StructuralReduction (spnProp);
 					try {
-						ReachabilitySolver.applyReductions(sr, ReductionType.LTL, solverPath, true, true);
+						reducedLTL = ReachabilitySolver.applyReductions(sr, ReductionType.LTL, solverPath, true, true);
 						//sr.reduce(ReductionType.LTL);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -86,7 +89,8 @@ public class LTLAnalyzer {
 						e.printStackTrace();
 					}
 				}
-				reader2 = reader.copy();
+				// chain reductions
+				// reader2 = reader.copy();
 				{
 					SparsePetriNet spnProp = reader2.getSPN();
 					spnProp.getProperties().clear();
@@ -95,7 +99,7 @@ public class LTLAnalyzer {
 					long time = System.currentTimeMillis();
 					StructuralReduction sr = new StructuralReduction (spnProp);
 					try {
-						ReachabilitySolver.applyReductions(sr, ReductionType.SLCL_LTL, solverPath, true, false);
+						reducedSLCL = ReachabilitySolver.applyReductions(sr, ReductionType.SLCL_LTL, solverPath, true, false);
 						// sr.reduce(ReductionType.SI_LTL);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -126,7 +130,7 @@ public class LTLAnalyzer {
 				}
 
 				String name = pwd.replaceAll(".*/", "");
-				out.println(name+","+examination+","+propid+","+nbP+","+nbT+","+nbP2+","+nbT2+","+nbP3+","+nbT3+","+redTime+","+(isSI?"1":"0")+","+(isSh?"1":"0")+","+(isLen?"1":"0")+","+analysisTime);
+				out.println(name+","+examination+","+propid+","+nbP+","+nbT+","+reducedLTL+","+nbP2+","+nbT2+","+reducedSLCL+","+nbP3+","+nbT3+","+redTime+","+(isSI?"1":"0")+","+(isSh?"1":"0")+","+(isLen?"1":"0")+","+analysisTime);
 				
 			}
 			out.close();
