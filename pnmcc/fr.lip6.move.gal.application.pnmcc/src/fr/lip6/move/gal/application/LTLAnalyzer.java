@@ -93,9 +93,7 @@ public class LTLAnalyzer {
 				// reader2 = reader.copy();
 				{
 					SparsePetriNet spnProp = reader2.getSPN();
-					spnProp.getProperties().clear();
-					spnProp.getProperties().add(prop.copy());
-
+					
 					long time = System.currentTimeMillis();
 					StructuralReduction sr = new StructuralReduction (spnProp);
 					try {
