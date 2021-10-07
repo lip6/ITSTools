@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.application;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -30,8 +31,10 @@ public class LTLAnalyzer {
 			nbP=spn.getPlaceCount();
 			nbT=spn.getTransitionCount();
 
-			PrintWriter out = new PrintWriter(pwd+"/"+examination+"stats.csv");
+			// with auto flush
+			PrintWriter out = new PrintWriter(new FileOutputStream(pwd+"/"+examination+"stats.csv"),true);
 			out.println("model,examination,property id,init places,init trans,reduced LTL,out places,out trans,reduced short long,red places,red trans,time to red(ms),Stutter Ins,Short Ins,Leng Ins,analysis time(ms)");
+			
 			for (int propid = 0; propid < spn.getProperties().size() ; propid++) {
 				MccTranslator copy = reader.copy();
 				fr.lip6.move.gal.structural.Property prop = copy.getSPN().getProperties().get(propid);
