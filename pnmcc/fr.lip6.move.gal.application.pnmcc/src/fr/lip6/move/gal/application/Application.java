@@ -114,6 +114,7 @@ public class Application implements IApplication, Ender {
 	private static final String GENDEADTR = "--gen-dead-transition";
 	private static final String GENDEADPL= "--gen-dead-place";
 	private static final String ANALYZE_SENSITIVITY="--analyze-sensitivity";
+	private static final String NOSLCLTEST="--no-slcl";
 	
 	private List<IRunner> runners = new ArrayList<>();
 
@@ -196,7 +197,6 @@ public class Application implements IApplication, Ender {
 		boolean genDeadPlaces = false;
 		
 		boolean analyzeSensitivity = false;
-		
 		long timeout = 3600;
 
 		for (int i = 0; i < args.length; i++) {
@@ -263,6 +263,8 @@ public class Application implements IApplication, Ender {
 				analyzeSensitivity = true;
 			} else if (EXPORT_LTL.equals(args[i])) {
 				exportLTL = true;
+			} else if (NOSLCLTEST.equals(args[i])) {
+				LTLPropertySolver.noSLCLtest = true;
 			}
 		}
 
