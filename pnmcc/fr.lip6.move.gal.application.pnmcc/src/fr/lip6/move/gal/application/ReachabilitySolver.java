@@ -425,7 +425,7 @@ public class ReachabilitySolver {
 			System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
 		}
 
-		if (rt != ReductionType.LIVENESS && rt != ReductionType.LTL &&(reduced == 0 || iteration==0)) {
+		if (rt != ReductionType.LIVENESS && rt != ReductionType.LTL && rt != ReductionType.SLCL_LTL &&(reduced == 0 || iteration==0)) {
 			List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
 			if (! tokill.isEmpty()) {
 				System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
