@@ -548,4 +548,39 @@ public class Simplifier {
 		return false;
 	}
 
+	
+	public static Expression evalWithAPValue (AtomicProp ap, boolean value, Expression expr) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof AtomicPropRef) {
+			AtomicPropRef apref = (AtomicPropRef) expr;
+			if (apref.getAp().equals(ap)) {
+				return Expression.constant(value);
+			}			
+		} 							
+		if (expr.nbChildren() == 0) {
+			return expr;
+		}
+		
+		List<Expression> resc = new ArrayList<>(expr.nbChildren());
+		boolean changed = false;
+		for (int cid = 0, cide = expr.nbChildren() ; cid < cide ; cid++) {
+			Expression child = expr.childAt(cid);
+			Expression e = evalWithAPValue(ap,value,child);
+			resc.add(e);
+			if (e != child) {
+				changed = true;
+			}
+		}
+		if (! changed) {
+			return expr;
+		} else {
+			return Expression.nop(expr.getOp(), resc);
+		}	
+	}
+	
+	public static Expression existentialQuantification (AtomicProp ap, Expression expr) {				
+		return simplifyBoolean(Expression.op(Op.OR, evalWithAPValue(ap, false, expr), evalWithAPValue(ap, true, expr)));
+	}
+	
 }
