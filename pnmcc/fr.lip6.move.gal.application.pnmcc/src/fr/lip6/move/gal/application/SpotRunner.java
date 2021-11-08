@@ -477,7 +477,7 @@ public class SpotRunner {
 
 	}
 
-	private TGBA simplify(TGBA tgba, File autPath) throws IOException, TimeoutException, InterruptedException {
+	public TGBA simplify(TGBA tgba, File autPath) throws IOException, TimeoutException, InterruptedException {
 
 		long time = System.currentTimeMillis();
 		CommandLine cl = new CommandLine();
@@ -698,5 +698,13 @@ public class SpotRunner {
 			throw new IOException();
 		}	
 		
+	}
+
+	public TGBA buildTGBA(String ltl, AtomicPropManager apm) throws IOException, TimeoutException, InterruptedException {
+		File f2 = Files.createTempFile("autLTL", ".hoa").toFile();
+		if (DEBUG == 0) f2.deleteOnExit();
+		buildAutomaton(ltl, f2);		
+		
+		return TGBAparserHOAF.parseFrom(f2.getCanonicalPath(), apm);
 	}
 }
