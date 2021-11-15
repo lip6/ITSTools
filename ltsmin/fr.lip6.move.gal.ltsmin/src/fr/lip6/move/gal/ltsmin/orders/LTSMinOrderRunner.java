@@ -15,7 +15,7 @@ import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.application.Ender;
+import fr.lip6.move.gal.application.runner.Ender;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;

@@ -23,4 +23,5 @@ Require-Bundle: org.eclipse.core.runtime,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: LIP6
-Export-Package: fr.lip6.move.gal.application
+Export-Package: fr.lip6.move.gal.application,
+ fr.lip6.move.gal.application.runner
