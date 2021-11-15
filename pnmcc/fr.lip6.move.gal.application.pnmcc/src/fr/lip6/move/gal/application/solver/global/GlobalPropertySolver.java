@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.application;
+package fr.lip6.move.gal.application.solver.global;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,6 +13,11 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.application.GraphSuffix;
+import fr.lip6.move.gal.application.ITSRunner;
+import fr.lip6.move.gal.application.MccTranslator;
+import fr.lip6.move.gal.application.ReachabilitySolver;
+import fr.lip6.move.gal.application.UpperBoundsSolver;
 import fr.lip6.move.gal.application.runner.Ender;
 import fr.lip6.move.gal.application.runner.IRunner;
 import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;

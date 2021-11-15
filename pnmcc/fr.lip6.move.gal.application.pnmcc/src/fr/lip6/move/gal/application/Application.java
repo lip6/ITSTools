@@ -44,6 +44,8 @@ import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;
 import fr.lip6.move.gal.application.runner.smt.SMTRunner;
 import fr.lip6.move.gal.application.runner.spot.SpotLTLRunner;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
+import fr.lip6.move.gal.application.solver.global.DeadlockSolver;
+import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.Instantiator;

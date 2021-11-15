@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.application;
+package fr.lip6.move.gal.application.solver.global;
 
 import java.util.HashSet;
 import java.util.Set;

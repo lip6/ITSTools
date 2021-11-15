@@ -20,6 +20,7 @@ import fr.lip6.ltl.tgba.RandomProductWalker;
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.ltl.tgba.TGBAEdge;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
+import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.logic.AtomicReducerSR;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
