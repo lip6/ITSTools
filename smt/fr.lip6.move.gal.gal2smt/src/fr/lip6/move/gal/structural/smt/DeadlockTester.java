@@ -182,6 +182,7 @@ public class DeadlockTester {
 		
 		List<String> strtnames = tnames.stream().map(id -> sr.getTnames().get(id)).collect(Collectors.toList());
 		Set<SparseIntArray> invarT = InvariantCalculator.computePInvariants(sumMatrix.transpose(), strtnames, true);
+	//	Set<SparseIntArray> invarT = InvariantCalculator.computePInvariants(sumMatrix.transpose(), strtnames, false, 120);
 		
 		if (DEBUG >=1 && invarT != null) {
 			List<Integer> empty = new ArrayList<>(tnames.size());
