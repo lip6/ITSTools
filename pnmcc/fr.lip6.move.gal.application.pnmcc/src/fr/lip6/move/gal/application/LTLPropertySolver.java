@@ -44,6 +44,7 @@ public class LTLPropertySolver {
 	private String workDir;
 	private boolean exportLTL;
 	public static boolean noSLCLtest=false;
+	public static boolean noKnowledgetest=false;
 
 	public LTLPropertySolver(String spotPath, String solverPath, String workDir, boolean exportLTL) {
 		this.spotPath = spotPath;
@@ -452,6 +453,10 @@ public class LTLPropertySolver {
 
 	private TGBA applyKnowledgeBasedReductions(SparsePetriNet spn, TGBA tgba, SpotRunner spot, Property propPN) throws LTLException, TimeoutException {
 
+		if (noKnowledgetest) {
+			return tgba;
+		}
+		
 		// cheap knowledge 
 		List<Expression> knowledge = new ArrayList<>(); 
 

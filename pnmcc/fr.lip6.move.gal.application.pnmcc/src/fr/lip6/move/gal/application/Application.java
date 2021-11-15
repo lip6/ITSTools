@@ -115,6 +115,8 @@ public class Application implements IApplication, Ender {
 	private static final String GENDEADPL= "--gen-dead-place";
 	private static final String ANALYZE_SENSITIVITY="--analyze-sensitivity";
 	private static final String NOSLCLTEST="--no-slcl";
+	private static final String NOKNOWLEDGE="--no-knowledge";
+	
 	
 	private List<IRunner> runners = new ArrayList<>();
 
@@ -265,6 +267,8 @@ public class Application implements IApplication, Ender {
 				exportLTL = true;
 			} else if (NOSLCLTEST.equals(args[i])) {
 				LTLPropertySolver.noSLCLtest = true;
+			} else if (NOKNOWLEDGE.equals(args[i])) {
+				LTLPropertySolver.noKnowledgetest = true;
 			}
 		}
 
