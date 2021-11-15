@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.application;
+package fr.lip6.move.gal.application.runner;
 
 /** 
  * Something you tell when it's time to end it.

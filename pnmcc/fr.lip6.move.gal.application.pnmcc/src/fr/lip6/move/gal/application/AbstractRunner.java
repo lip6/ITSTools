@@ -3,6 +3,7 @@ package fr.lip6.move.gal.application;
 import java.io.IOException;
 
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.application.runner.IRunner;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 
 public abstract class AbstractRunner implements IRunner  {
