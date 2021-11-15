@@ -24,7 +24,7 @@ import fr.lip6.move.gal.application.runner.spot.SpotRunner;
 import fr.lip6.move.gal.application.solver.GALSolver;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
-import fr.lip6.move.gal.logic.AtomicReducerSR;
+import fr.lip6.move.gal.application.solver.logic.AtomicReducerSR;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;

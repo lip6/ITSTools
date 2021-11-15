@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.logic;
+package fr.lip6.move.gal.application.solver.logic;
 
 import java.util.ArrayList;
 import java.util.HashSet;
