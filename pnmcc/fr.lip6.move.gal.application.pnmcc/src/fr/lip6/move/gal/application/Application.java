@@ -37,6 +37,7 @@ import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.application.runner.CegarRunner;
 import fr.lip6.move.gal.application.runner.Ender;
 import fr.lip6.move.gal.application.runner.IRunner;
 import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;

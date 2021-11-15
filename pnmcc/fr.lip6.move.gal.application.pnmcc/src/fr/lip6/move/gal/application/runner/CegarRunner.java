@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.application;
+package fr.lip6.move.gal.application.runner;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,8 +7,6 @@ import java.util.logging.Logger;
 
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.application.runner.Ender;
-import fr.lip6.move.gal.application.runner.IRunner;
 import fr.lip6.move.gal.cegar.frontend.CegarFrontEnd;
 import fr.lip6.move.gal.cegar.interfaces.IResult;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;

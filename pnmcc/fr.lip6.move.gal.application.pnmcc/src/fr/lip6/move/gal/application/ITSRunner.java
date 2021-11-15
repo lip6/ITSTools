@@ -20,6 +20,7 @@ import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.application.runner.AbstractRunner;
 import fr.lip6.move.gal.application.runner.Ender;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
