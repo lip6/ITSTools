@@ -43,6 +43,7 @@ public class LTLPropertySolver {
 	private String solverPath;
 	private String workDir;
 	private boolean exportLTL;
+	public static boolean noSLCLtest=false;
 
 	public LTLPropertySolver(String spotPath, String solverPath, String workDir, boolean exportLTL) {
 		this.spotPath = spotPath;
@@ -145,6 +146,9 @@ public class LTLPropertySolver {
 	
 	public void runSLCLLTLTest(MccTranslator reader, DoneProperties doneProps)
 			throws TimeoutException, LTLException {
+		if (noSLCLtest) {
+			return;
+		}
 		SpotRunner spot = new SpotRunner(spotPath, workDir, 10);
 
 
