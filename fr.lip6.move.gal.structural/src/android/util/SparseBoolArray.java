@@ -317,5 +317,60 @@ public class SparseBoolArray implements Cloneable {
 			removeAt(k);
 		}
 	}
+	public static SparseBoolArray or(SparseBoolArray a, SparseBoolArray b) {
+		int inter = 0;
+		// step 1 evaluate size	
+		int i=0;
+		int j=0;
+		for (int ie=a.size(), je=b.size() ; i < ie && j < je ; ) {
+			if (a.mKeys[i] > b.mKeys[j]) {
+				j++;
+			} else if (a.mKeys[i] < b.mKeys[j]) {
+				i++;
+			} else {
+				i++;
+				j++;
+				inter++;
+			}
+		}
+		int resSize = a.size() + b.size() - inter;
+		SparseBoolArray res = new SparseBoolArray(resSize);
+		// step 2 assign
+		int cur=0;
+		i=0;
+		j=0;
+		for (int ie=a.size(), je=b.size() ; i < ie && j < je ; ) {
+			if (a.mKeys[i] > b.mKeys[j]) {
+				res.mKeys[cur++]=b.mKeys[j];
+				j++;
+			} else if (a.mKeys[i] < b.mKeys[j]) {
+				res.mKeys[cur++]=a.mKeys[i];
+				i++;
+			} else {
+				res.mKeys[cur++]=b.mKeys[j];
+				i++;
+				j++;
+			}
+		}
+		// add remaining elements if any
+		for (int ie=a.size(); i < ie ; i++) {
+			res.mKeys[cur++]=a.mKeys[i];
+		}
+		for (int je=b.size(); j < je ; j++) {
+			res.mKeys[cur++]=b.mKeys[j];
+		}
+		res.mSize = cur;
+		return res;
+	}
+	
+	public static void main(String[] args) {
+		SparseBoolArray a = new SparseBoolArray();
+		a.set(1);a.set(3);a.set(5);
+		SparseBoolArray b = new SparseBoolArray();
+		b.set(2);b.set(3);b.set(4);
+		
+		System.out.println("a="+a+"\nb="+b+"\na||b="+or(a,b));
+		System.out.println("\na="+a+"\nb="+b+"\nb||a="+or(b,a));
+	}
 	
 }
