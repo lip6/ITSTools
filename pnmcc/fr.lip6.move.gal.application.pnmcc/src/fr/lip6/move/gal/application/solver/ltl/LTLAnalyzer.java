@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import fr.lip6.ltl.tgba.TGBA;
-import fr.lip6.move.gal.application.MccTranslator;
+import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;

@@ -9,7 +9,7 @@ import java.util.Set;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.Application;
-import fr.lip6.move.gal.application.MccTranslator;
+import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;

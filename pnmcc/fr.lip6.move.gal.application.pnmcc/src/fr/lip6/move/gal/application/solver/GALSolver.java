@@ -24,7 +24,7 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
-import fr.lip6.move.gal.application.MccTranslator;
+import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 

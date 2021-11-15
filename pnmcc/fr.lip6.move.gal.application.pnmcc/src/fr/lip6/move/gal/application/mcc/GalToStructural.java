@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.application;
+package fr.lip6.move.gal.application.mcc;
 
 import java.util.ArrayList;
 import java.util.List;

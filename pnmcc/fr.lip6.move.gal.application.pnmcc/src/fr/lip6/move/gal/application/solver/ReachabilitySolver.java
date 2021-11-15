@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.Application;
-import fr.lip6.move.gal.application.MccTranslator;
+import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.logic.AtomicReducerSR;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;

@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.application;
+package fr.lip6.move.gal.graph;
 
 import java.util.BitSet;
 import java.util.HashSet;

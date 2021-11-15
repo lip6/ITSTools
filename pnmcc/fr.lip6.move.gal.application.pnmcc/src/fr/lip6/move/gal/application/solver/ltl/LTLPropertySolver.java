@@ -19,7 +19,7 @@ import fr.lip6.ltl.tgba.LTLException;
 import fr.lip6.ltl.tgba.RandomProductWalker;
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.ltl.tgba.TGBAEdge;
-import fr.lip6.move.gal.application.MccTranslator;
+import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
 import fr.lip6.move.gal.application.solver.GALSolver;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;

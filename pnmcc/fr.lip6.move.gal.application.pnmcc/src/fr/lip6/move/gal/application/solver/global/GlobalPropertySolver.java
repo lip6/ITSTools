@@ -13,15 +13,15 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.application.GraphSuffix;
-import fr.lip6.move.gal.application.ITSRunner;
-import fr.lip6.move.gal.application.MccTranslator;
+import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.application.runner.Ender;
 import fr.lip6.move.gal.application.runner.IRunner;
+import fr.lip6.move.gal.application.runner.ITSRunner;
 import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.application.solver.UpperBoundsSolver;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.graph.GraphSuffix;
 import fr.lip6.move.gal.graph.Tarjan;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;

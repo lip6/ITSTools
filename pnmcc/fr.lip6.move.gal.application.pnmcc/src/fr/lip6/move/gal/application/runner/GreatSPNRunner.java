@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.application;
+package fr.lip6.move.gal.application.runner;
 
 import java.io.BufferedReader;
 import java.io.File;
