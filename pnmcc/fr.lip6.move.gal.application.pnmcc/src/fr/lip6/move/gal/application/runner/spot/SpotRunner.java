@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.ltl.tgba.TGBAEdge;
 import fr.lip6.ltl.tgba.io.TGBAparserHOAF;
-import fr.lip6.move.gal.application.ExpressionToLogicNG;
+import fr.lip6.move.gal.application.logicng.ExpressionToLogicNG;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.gal.structural.PetriNet;

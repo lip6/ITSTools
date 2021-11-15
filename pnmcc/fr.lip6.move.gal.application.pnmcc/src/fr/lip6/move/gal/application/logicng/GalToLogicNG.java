@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.application;
+package fr.lip6.move.gal.application.logicng;
 
 import java.util.HashMap;
 import java.util.List;
