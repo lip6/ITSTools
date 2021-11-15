@@ -16,7 +16,7 @@ import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.application.runner.Ender;
 import fr.lip6.move.gal.application.runner.IRunner;
-import fr.lip6.move.gal.application.runner.ITSRunner;
+import fr.lip6.move.gal.application.runner.its.ITSRunner;
 import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.application.solver.UpperBoundsSolver;
