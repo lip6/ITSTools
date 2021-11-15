@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -38,7 +39,6 @@ import fr.lip6.move.gal.application.runner.CegarRunner;
 import fr.lip6.move.gal.application.runner.Ender;
 import fr.lip6.move.gal.application.runner.IRunner;
 import fr.lip6.move.gal.application.runner.MccDonePropertyPrinter;
-import fr.lip6.move.gal.application.runner.its.ITSRunner;
 import fr.lip6.move.gal.application.runner.its.MultiOrderRunner;
 import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;
 import fr.lip6.move.gal.application.runner.smt.SMTRunner;
@@ -136,12 +136,12 @@ public class Application implements IApplication, Ender {
 
 	private static Logger logger = Logger.getLogger("fr.lip6.move.gal");
 
-	private boolean wasKilled = false;
+	private AtomicBoolean wasKilled = new AtomicBoolean(false);
 	private long startTime;
 
 	@Override
 	public synchronized void killAll() {
-		wasKilled = true;
+		wasKilled.set(true);
 		for (IRunner runner : runners) {
 			if (runner != null) {
 				runner.interrupt();
@@ -407,8 +407,8 @@ public class Application implements IApplication, Ender {
 					+ reader.getSPN().getTransitionCount() + " transitions.");
 			reader.rebuildSpecification(doneProps);
 			// ITS is the only method we will run.
-			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-					reader, doneProps, useLouvain, timeout);
+			reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+					reader, doneProps, useLouvain, timeout, wasKilled, startTime, runners, this);
 
 			return 0;
 		}
@@ -641,8 +641,8 @@ public class Application implements IApplication, Ender {
 
 			tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
 
-			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-					reader, doneProps, useLouvain, timeout);
+			reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+					reader, doneProps, useLouvain, timeout, wasKilled, startTime, runners, this);
 			return 0;
 		}
 
@@ -703,8 +703,8 @@ public class Application implements IApplication, Ender {
 			}
 
 			if (doITS || onlyGal) {
-				reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-						reader, doneProps, useLouvain, timeout);
+				reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+						reader, doneProps, useLouvain, timeout, wasKilled, startTime, runners, this);
 			}
 
 			for (IRunner r : runners) {
@@ -863,8 +863,8 @@ public class Application implements IApplication, Ender {
 				}
 			}
 
-			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-					reader, doneProps, useLouvain, timeout);
+			reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+					reader, doneProps, useLouvain, timeout, wasKilled, startTime, runners, this);
 
 		}
 
@@ -953,95 +953,6 @@ public class Application implements IApplication, Ender {
 			}
 		}
 		return tocheck;
-	}
-
-	private MccTranslator runMultiITS(String pwd, String examination, String gspnpath, String orderHeur, boolean doITS,
-			boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, DoneProperties doneProps,
-			boolean useLouvain, long timeout) throws IOException, InterruptedException {
-		MccTranslator reader2 = null;
-		long elapsed = (startTime - System.currentTimeMillis()) / 1000;
-		timeout -= elapsed;
-		if (useManyOrder) {
-			reader2 = reader.copy();
-			timeout /= 3;
-		} else {
-			reader2 = reader;
-		}
-
-		if (!wasKilled && (useLouvain || useManyOrder)) {
-//			if (useManyOrder)
-//				reader = reader2.copy();
-			reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-			reader.setLouvain(true);
-			reader.setOrder(null);
-			reader.flattenSpec(true);
-
-			if (doITS || onlyGal) {
-				// decompose + simplify as needed
-				IRunner itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(), timeout,
-						null);
-				itsRunner.configure(reader.getSpec(), doneProps);
-				runners.add(itsRunner);
-				if (doITS) {
-					itsRunner.solve(this);
-					itsRunner.join();
-				}
-				runners.remove(itsRunner);
-			}
-
-		}
-
-		if (!wasKilled && (doITS || onlyGal) && (!useLouvain || useManyOrder)) {
-			if (useManyOrder)
-				reader = reader2.copy();
-			reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-			if (reader.getHLPN() != null) {
-				reader.setOrder(reader.getHLPN().computeOrder());
-			}
-			reader.flattenSpec(true);
-
-			if (doITS || onlyGal) {
-				// decompose + simplify as needed
-				IRunner itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(), timeout,
-						null);
-				itsRunner.configure(reader.getSpec(), doneProps);
-				runners.add(itsRunner);
-				if (doITS) {
-					itsRunner.solve(this);
-					itsRunner.join();
-				}
-				runners.remove(itsRunner);
-			}
-
-		}
-
-		if (!wasKilled && orderHeur != null && gspnpath != null) {
-			if (useManyOrder)
-				reader = reader2.copy();
-
-			reader.flattenSpec(false);
-			reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-			String myOrderff = null;
-			if (orderHeur != null) {
-				myOrderff = MultiOrderRunner.computeOrderWithGreatSPN(pwd, gspnpath, orderHeur, reader, myOrderff);
-			}
-
-			if (doITS || onlyGal) {
-				// decompose + simplify as needed
-				IRunner itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(), timeout,
-						myOrderff);
-				itsRunner.configure(reader.getSpec(), doneProps);
-				runners.add(itsRunner);
-				if (doITS) {
-					itsRunner.solve(this);
-					itsRunner.join();
-				}
-				runners.remove(itsRunner);
-			}
-
-		}
-
-		return reader;
 	}
 
 	/*

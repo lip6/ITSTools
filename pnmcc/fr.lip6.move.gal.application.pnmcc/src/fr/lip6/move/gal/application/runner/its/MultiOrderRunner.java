@@ -2,12 +2,18 @@ package fr.lip6.move.gal.application.runner.its;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
+import fr.lip6.move.gal.application.runner.Ender;
+import fr.lip6.move.gal.application.runner.IRunner;
 import fr.lip6.move.gal.instantiate.Instantiator;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.StructuralReduction;
@@ -66,5 +72,94 @@ public class MultiOrderRunner {
 		}
 		return orderff;
 	}
+
+	public static  MccTranslator runMultiITS(String pwd, String examination, String gspnpath, String orderHeur, boolean doITS,
+				boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, DoneProperties doneProps,
+				boolean useLouvain, long timeout, AtomicBoolean wasKilled, long startTime, List<IRunner> runners, Ender e) throws IOException, InterruptedException {
+			MccTranslator reader2 = null;
+			long elapsed = (startTime - System.currentTimeMillis()) / 1000;
+			timeout -= elapsed;
+			if (useManyOrder) {
+				reader2 = reader.copy();
+				timeout /= 3;
+			} else {
+				reader2 = reader;
+			}
+	
+			if (!wasKilled.get() && (useLouvain || useManyOrder)) {
+	//			if (useManyOrder)
+	//				reader = reader2.copy();
+				reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+				reader.setLouvain(true);
+				reader.setOrder(null);
+				reader.flattenSpec(true);
+	
+				if (doITS || onlyGal) {
+					// decompose + simplify as needed
+					IRunner itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(), timeout,
+							null);
+					itsRunner.configure(reader.getSpec(), doneProps);
+					runners.add(itsRunner);
+					if (doITS) {
+						itsRunner.solve(e);
+						itsRunner.join();
+					}
+					runners.remove(itsRunner);
+				}
+	
+			}
+	
+			if (!wasKilled.get() && (doITS || onlyGal) && (!useLouvain || useManyOrder)) {
+				if (useManyOrder)
+					reader = reader2.copy();
+				reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+				if (reader.getHLPN() != null) {
+					reader.setOrder(reader.getHLPN().computeOrder());
+				}
+				reader.flattenSpec(true);
+	
+				if (doITS || onlyGal) {
+					// decompose + simplify as needed
+					IRunner itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(), timeout,
+							null);
+					itsRunner.configure(reader.getSpec(), doneProps);
+					runners.add(itsRunner);
+					if (doITS) {
+						itsRunner.solve(e);
+						itsRunner.join();
+					}
+					runners.remove(itsRunner);
+				}
+	
+			}
+	
+			if (!wasKilled.get() && orderHeur != null && gspnpath != null) {
+				if (useManyOrder)
+					reader = reader2.copy();
+	
+				reader.flattenSpec(false);
+				reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+				String myOrderff = null;
+				if (orderHeur != null) {
+					myOrderff = computeOrderWithGreatSPN(pwd, gspnpath, orderHeur, reader, myOrderff);
+				}
+	
+				if (doITS || onlyGal) {
+					// decompose + simplify as needed
+					IRunner itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(), timeout,
+							myOrderff);
+					itsRunner.configure(reader.getSpec(), doneProps);
+					runners.add(itsRunner);
+					if (doITS) {
+						itsRunner.solve(e);
+						itsRunner.join();
+					}
+					runners.remove(itsRunner);
+				}
+	
+			}
+	
+			return reader;
+		}
 
 }
