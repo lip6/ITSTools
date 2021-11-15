@@ -1,10 +1,12 @@
-package fr.lip6.move.gal.application;
+package fr.lip6.move.gal.application.solver.ltl;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
 import fr.lip6.ltl.tgba.TGBA;
+import fr.lip6.move.gal.application.MccTranslator;
+import fr.lip6.move.gal.application.ReachabilitySolver;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;

@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.application;
+package fr.lip6.move.gal.application.solver.ltl;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +19,10 @@ import fr.lip6.ltl.tgba.LTLException;
 import fr.lip6.ltl.tgba.RandomProductWalker;
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.ltl.tgba.TGBAEdge;
+import fr.lip6.ltl.tgba.TGBAProductBuilder;
+import fr.lip6.move.gal.application.GALSolver;
+import fr.lip6.move.gal.application.MccTranslator;
+import fr.lip6.move.gal.application.ReachabilitySolver;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
 import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.logic.AtomicReducerSR;
@@ -38,7 +42,7 @@ import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.Simplifier;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
-public class LTLPropertySolver {
+public class LTLPropertySolver2 {
 
 	private static final int NBSTEPS = 100000;
 	private static final int DEBUG = 0;
@@ -46,10 +50,8 @@ public class LTLPropertySolver {
 	private String solverPath;
 	private String workDir;
 	private boolean exportLTL;
-	public static boolean noSLCLtest=false;
-	public static boolean noKnowledgetest=false;
 
-	public LTLPropertySolver(String spotPath, String solverPath, String workDir, boolean exportLTL) {
+	public LTLPropertySolver2(String spotPath, String solverPath, String workDir, boolean exportLTL) {
 		this.spotPath = spotPath;
 		this.solverPath = solverPath;
 		this.workDir = workDir;
@@ -150,9 +152,6 @@ public class LTLPropertySolver {
 	
 	public void runSLCLLTLTest(MccTranslator reader, DoneProperties doneProps)
 			throws TimeoutException, LTLException {
-		if (noSLCLtest) {
-			return;
-		}
 		SpotRunner spot = new SpotRunner(spotPath, workDir, 10);
 
 
@@ -456,10 +455,6 @@ public class LTLPropertySolver {
 
 	private TGBA applyKnowledgeBasedReductions(SparsePetriNet spn, TGBA tgba, SpotRunner spot, Property propPN) throws LTLException, TimeoutException {
 
-		if (noKnowledgetest) {
-			return tgba;
-		}
-		
 		// cheap knowledge 
 		List<Expression> knowledge = new ArrayList<>(); 
 
@@ -504,30 +499,50 @@ public class LTLPropertySolver {
 					throw new AcceptedRunFoundException();
 					//return TGBA.makeTrue();
 				}
-			} catch (IOException e) {
+
+
+				TGBA prod = sr.computeProduct(tgba, ltl);
+				if (prod.getEdges().get(prod.getInitial()).size() == 0) {
+					// this is just false !
+					System.out.println("Property proved to be true thanks to knowledge :" + factoid);
+					throw new EmptyProductException();
+					//				return TGBA.makeFalse();
+				} 
+				//			else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
+				//				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
+				//				tgba = prod;
+				//				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
+				//				needRebuild = true;
+				//				wasAdopted = true;
+				//			} else if (prod.getAPs().size() < tgba.getAPs().size()) {
+				//				System.out.println("Adopting property with smaller alphabet thanks to knowledge :" + factoid);
+				//				tgba = prod;
+				//				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
+				//				needRebuild = true;
+				//				wasAdopted = true;
+				//			}
+				TGBA fact = sr.buildTGBA(ltl,tgba.getApm());			
+				TGBA quotient = TGBAProductBuilder.makeQuotient(tgba, fact);
+				
+				
+				
+				File autPath = Files.createTempFile("aut", ".hoa").toFile();
+				if (DEBUG == 0) autPath.deleteOnExit();
+				TGBA tgbaSimp = sr.simplify(quotient,autPath);
+				
+				tgba = tgbaSimp;
+				
+				int edgeCount = tgba.getEdges().stream().mapToInt(List::size).sum();
+				System.out.println("Knowledge taken : " + ltl);
+				System.out.println("TGBA size =" + tgba.nbStates() + " acc=" + tgba.getNbAcceptance() + " edges="+edgeCount);
+				needRebuild = true;
+				wasAdopted = true;
+				
+			} catch (IOException|InterruptedException e) {
 				// skip
 				System.out.println("IOexception raised when running Spot : " + e);
 			}
-
-			TGBA prod = sr.computeProduct(tgba, ltl);
-			if (prod.getEdges().get(prod.getInitial()).size() == 0) {
-				// this is just false !
-				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-				throw new EmptyProductException();
-//				return TGBA.makeFalse();
-			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
-				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
-				tgba = prod;
-				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
-				needRebuild = true;
-				wasAdopted = true;
-			} else if (prod.getAPs().size() < tgba.getAPs().size()) {
-				System.out.println("Adopting property with smaller alphabet thanks to knowledge :" + factoid);
-				tgba = prod;
-				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
-				needRebuild = true;
-				wasAdopted = true;
-			}			
+			
 		}						
 
 		if (wasAdopted) {
