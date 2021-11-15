@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.graph.Tarjan;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
