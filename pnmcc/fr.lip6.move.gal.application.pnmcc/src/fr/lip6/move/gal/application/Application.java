@@ -40,6 +40,7 @@ import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.application.runner.Ender;
 import fr.lip6.move.gal.application.runner.IRunner;
 import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;
+import fr.lip6.move.gal.application.runner.smt.SMTRunner;
 import fr.lip6.move.gal.application.runner.spot.SpotLTLRunner;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
 import fr.lip6.move.gal.gal2smt.Solver;
