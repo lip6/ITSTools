@@ -44,6 +44,9 @@ import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;
 import fr.lip6.move.gal.application.runner.smt.SMTRunner;
 import fr.lip6.move.gal.application.runner.spot.SpotLTLRunner;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
+import fr.lip6.move.gal.application.solver.GALSolver;
+import fr.lip6.move.gal.application.solver.ReachabilitySolver;
+import fr.lip6.move.gal.application.solver.UpperBoundsSolver;
 import fr.lip6.move.gal.application.solver.global.DeadlockSolver;
 import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.application.solver.ltl.LTLAnalyzer;
@@ -92,7 +95,7 @@ public class Application implements IApplication, Ender {
 		});
 	}
 
-	static final int DEBUG = 0;
+	public static final int DEBUG = 0;
 	private static final String APPARGS = "application.args";
 
 	private static final String PNFOLDER = "-pnfolder";

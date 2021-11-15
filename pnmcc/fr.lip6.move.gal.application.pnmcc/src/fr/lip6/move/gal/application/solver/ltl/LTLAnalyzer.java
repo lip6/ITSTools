@@ -6,8 +6,8 @@ import java.io.PrintWriter;
 
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.application.MccTranslator;
-import fr.lip6.move.gal.application.ReachabilitySolver;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
+import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.structural.SparsePetriNet;

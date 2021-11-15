@@ -11,8 +11,8 @@ import java.util.concurrent.TimeoutException;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.MccTranslator;
-import fr.lip6.move.gal.application.ReachabilitySolver;
 import fr.lip6.move.gal.application.runner.BlissRunner;
+import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.structural.DeadlockFound;
