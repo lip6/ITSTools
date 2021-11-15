@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.logic.AtomicReducerSR;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;

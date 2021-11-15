@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.application;
+package fr.lip6.move.gal.logic;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,6 +28,8 @@ import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
+import fr.lip6.move.gal.application.GalToLogicNG;
+import fr.lip6.move.gal.application.MccTranslator;
 import fr.lip6.move.gal.instantiate.PropertySimplifier;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
