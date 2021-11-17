@@ -185,6 +185,7 @@ public class LTLPropertySolver {
 					
 				SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
 				
+				// get rid of these, go for tgba
 				spn.getProperties().clear();
 				
 				StructuralReduction sr = new StructuralReduction(spn);
@@ -195,11 +196,7 @@ public class LTLPropertySolver {
 				}
 				
 				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
-				BitSet supportForProp = spn.computeSupport();
-				if (! supportForProp.equals(support)) {
-					System.out.println("Property had overlarge support with respect to TGBA, discarding it for now.");
-					spn.getProperties().clear();
-				}
+
 				sr.setProtected(support);
 
 				try {
@@ -215,13 +212,12 @@ public class LTLPropertySolver {
 				// recompute fresh tgba with correctly indexed AP					
 				List<Expression> atoms = aps.stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
 				List<Expression> atoms2 = spn.readFrom(sr,atoms);
+				// we can maybe simplify some predicates now : apply some basic tests
+				spn.removeConstantPlaces(atoms2);
+				
 				for (int i =0,ie=atoms.size(); i<ie; i++) {
 					aps.get(i).setExpression(atoms2.get(i));
 				}
-				// we can maybe simplify some predicates now : apply some basic tests
-				spn.testInInitial();
-				spn.removeConstantPlaces();
-				spn.simplifyLogic();
 				
 				
 				DoneProperties tmpDoneProps = new ConcurrentHashDoneProperties();
@@ -289,7 +285,7 @@ public class LTLPropertySolver {
 			SparsePetriNet spnForPropWithK;
 			if (tgbak != tgba) {
 				spnForPropWithK = reduceForProperty(spnForProp, tgbak,
-						spnForProp.getProperties().isEmpty() ? null : spnForProp.getProperties().get(0));
+						spnForProp.getProperties().isEmpty() ? propPN : spnForProp.getProperties().get(0));
 			} else {
 				spnForPropWithK = spnForProp;
 			}
@@ -311,6 +307,7 @@ public class LTLPropertySolver {
 			
 			MccTranslator reader2 = reader.copy();
 			if (spnForPropWithK.getProperties().isEmpty()) {
+				spnForProp.getProperties().add(propPN);
 				// we killed it due to alphabet differences
 				StructuralReduction sr = new StructuralReduction(spnForProp);
 				
@@ -324,7 +321,7 @@ public class LTLPropertySolver {
 					gse.printStackTrace();
 				}
 				spnForProp.readFrom(sr);				
-				
+				reader2.setSpn(spnForProp, true);
 			} else {
 				reader2.setSpn(spnForPropWithK, true);
 			}
@@ -435,16 +432,23 @@ public class LTLPropertySolver {
 	private StructuralReduction buildReduced(SparsePetriNet spn, boolean isStutterInv, List<AtomicProp> aps, boolean keepImage) {
 		// ok let's reduce the system for this property 
 		StructuralReduction sr = new StructuralReduction(spn);
+		// whether we want to build and store the image function, for dynamic product approaches
 		sr.setKeepImage(keepImage);
+		
+		// compute the support deriving from the AP
 		BitSet support = new BitSet();
 		for (AtomicProp ap : aps) {
 			SparsePetriNet.addSupport(ap.getExpression(),support);
 		}
 		System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
-		BitSet supportForProp = spn.computeSupport();
-		if (! supportForProp.equals(support)) {
-			System.out.println("Property had overlarge support with respect to TGBA, discarding it for now.");
-			spn.getProperties().clear();
+		
+		if (! spn.getProperties().isEmpty()) {
+			// check whether the LTL property support agrees with the AP support of the TGBA
+			BitSet supportForProp = spn.computeSupport();
+			if (! supportForProp.equals(support)) {
+				System.out.println("Property had overlarge support with respect to TGBA, discarding it for now.");
+				spn.getProperties().clear();
+			}			
 		}
 		sr.setProtected(support);
 		try {
