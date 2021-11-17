@@ -1681,6 +1681,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 				emptyPlaceWithTransition(pid, fid);
 				// System.out.println("Pushed tokens out of "+pnames.get(pid));
+			} else if (isMarked) {
+				continue;
 			}
 
 			red += agglomerateAround(pid, Hids, Fids,"Post",tflowPT,tflowTP);
