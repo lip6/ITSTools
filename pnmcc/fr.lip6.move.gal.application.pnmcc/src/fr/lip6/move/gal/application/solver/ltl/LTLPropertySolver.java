@@ -51,6 +51,7 @@ public class LTLPropertySolver {
 	private boolean exportLTL;
 	public static boolean noSLCLtest=false;
 	public static boolean noKnowledgetest=false;
+	public static boolean noStutterTest=false;
 
 	public LTLPropertySolver(String spotPath, String solverPath, String workDir, boolean exportLTL) {
 		this.spotPath = spotPath;
@@ -275,10 +276,12 @@ public class LTLPropertySolver {
 			System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
 			if (DEBUG >= 2) FlowPrinter.drawNet(spnForProp,"For product with " + propPN.getName());
 			// walk the product a bit
-			RandomProductWalker pw = new RandomProductWalker(spnForProp,tgba);
-			pw.runProduct(NBSTEPS, 10, false);
-			pw.runProduct(NBSTEPS, 10, true);
 			
+			if (! noStutterTest) {
+				RandomProductWalker pw = new RandomProductWalker(spnForProp,tgba);
+				pw.runProduct(NBSTEPS, 10, false);			
+				pw.runProduct(NBSTEPS, 10, true);
+			}
 			// so we couldn't find a counter example, let's reflect upon this fact.
 			TGBA tgbak = applyKnowledgeBasedReductions(spnForProp,tgba, spot, propPN);				
 			
@@ -294,9 +297,11 @@ public class LTLPropertySolver {
 			// index of places may have changed, formula might be syntactically simpler 
 			// annotate it with Infinite Stutter Acceped Formulas
 			spot.computeInfStutter(tgbak);
-			pw = new RandomProductWalker(spnForPropWithK,tgbak);
-			pw.runProduct(NBSTEPS, 10, false);
-			pw.runProduct(NBSTEPS, 10, true);
+			if (!noStutterTest) {
+				RandomProductWalker pw = new RandomProductWalker(spnForPropWithK,tgbak);
+				pw.runProduct(NBSTEPS, 10, false);
+				pw.runProduct(NBSTEPS, 10, true);
+			}
 			
 			if (! tgbak.isStutterInvariant()) {
 				treatPartialPOR(tgbak, spnForPropWithK, spot);

@@ -130,6 +130,7 @@ public class Application implements IApplication, Ender {
 	private static final String ANALYZE_SENSITIVITY="--analyze-sensitivity";
 	private static final String NOSLCLTEST="--no-slcl";
 	private static final String NOKNOWLEDGE="--no-knowledge";
+	private static final String NOSTUTTERLTL="--no-stutterltl";
 	
 	
 	private List<IRunner> runners = new ArrayList<>();
@@ -283,6 +284,8 @@ public class Application implements IApplication, Ender {
 				LTLPropertySolver.noSLCLtest = true;
 			} else if (NOKNOWLEDGE.equals(args[i])) {
 				LTLPropertySolver.noKnowledgetest = true;
+			} else if (NOSTUTTERLTL.equals(args[i])) {
+				LTLPropertySolver.noStutterTest = true;
 			}
 		}
 
