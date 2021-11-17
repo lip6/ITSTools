@@ -2,6 +2,7 @@ package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -316,11 +317,16 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		}
 	}
 	
+	
+	
 	/**
 	 * Returns the total tokens that lived in the constant places removed.
 	 * @return
 	 */
 	public int removeConstantPlaces() {
+		return removeConstantPlaces(Collections.emptyList());
+	}
+	public int removeConstantPlaces(List<Expression> atomicProps) {
 		int totalp = 0;
 		// find constant marking places
 		IntMatrixCol tflowPT = flowPT.transpose();
@@ -362,6 +368,9 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		if (totalp > 0) {
 			for (Property prop : getProperties()) {
 				prop.setBody(simplifyConstants(prop.getBody(),perm));
+			}
+			for (int i=0; i < atomicProps.size() ; i++) {
+				atomicProps.set(i, simplifyConstants(atomicProps.get(i), perm));
 			}
 			for (int pid = perm.length-1; pid >= 0 ; pid--) {
 				if (perm[pid]==-1) {
