@@ -1675,7 +1675,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 			if (DEBUG>=1) System.out.println("Net is Post-agglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 			
-			if (isMarked) {
+			if (isMarked && ! keepImage) {
 				// fire the single F continuation until the place is empty
 				int fid = fcand.keyAt(0);
 
