@@ -365,4 +365,29 @@ public interface Expression {
 		return new AtomicPropRef(ap);
 	}
 
+	static Expression resolveAP(Expression e) {
+		if (e == null) {
+			return null;
+		} else if (e instanceof AtomicPropRef) {
+			AtomicPropRef apref = (AtomicPropRef) e;
+			return apref.getAp().getExpression();			
+		} else {
+			List<Expression> resc = new ArrayList<>(e.nbChildren());
+			boolean changed = false;
+			for (int i=0; i < e.nbChildren() ; i++) {
+				Expression child = e.childAt(i);
+				Expression e2 = resolveAP(child);
+				resc.add(e2);
+				if (e2 != child) {
+					changed = true;
+				}
+			}
+			if (! changed) {
+				return e;
+			} else {
+				return Expression.nop(e.getOp(), resc);
+			}
+		}
+	}
+
 }
