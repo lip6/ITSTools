@@ -265,7 +265,7 @@ public class LTLPropertySolver {
 			spot.computeInfStutter(tgba);
 
 			
-			checkLTLProperty(propPN, tgba, spnForProp, reader, doneProps, spot, time);
+			checkLTLProperty(spnForProp.getProperties().get(0), tgba, spnForProp, reader, doneProps, spot, time);
 		}
 	}
 
@@ -273,11 +273,11 @@ public class LTLPropertySolver {
 			MccTranslator reader, DoneProperties doneProps, SpotRunner spot, long time)
 			throws LTLException, TimeoutException {
 		try {
-			System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
 			if (DEBUG >= 2) FlowPrinter.drawNet(spnForProp,"For product with " + propPN.getName());
 			// walk the product a bit
 			
 			if (! noStutterTest) {
+				System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
 				RandomProductWalker pw = new RandomProductWalker(spnForProp,tgba);
 				pw.runProduct(NBSTEPS, 10, false);			
 				pw.runProduct(NBSTEPS, 10, true);
@@ -530,13 +530,13 @@ public class LTLPropertySolver {
 			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
 				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
 				tgba = prod;
-				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
+				propPN.setBody(Expression.op(Op.OR, propPN.getBody(), Expression.not(Expression.resolveAP(factoid))));
 				needRebuild = true;
 				wasAdopted = true;
 			} else if (prod.getAPs().size() < tgba.getAPs().size()) {
 				System.out.println("Adopting property with smaller alphabet thanks to knowledge :" + factoid);
 				tgba = prod;
-				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
+				propPN.setBody(Expression.op(Op.OR, propPN.getBody(), Expression.not(Expression.resolveAP(factoid))));
 				needRebuild = true;
 				wasAdopted = true;
 			}			
