@@ -3,6 +3,7 @@ package fr.lip6.move.gal.application.runner.ltsmin;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.ltsmin.BinaryToolsPlugin;
 import fr.lip6.move.gal.ltsmin.BinaryToolsPlugin.Tool;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.pn2pins.PetriNet2PinsTransformer;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
@@ -98,11 +100,11 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 								.collect(Collectors.toList());
 					}
 					todo.removeAll(doneProps.keySet());
-					checkProperties(g2p, p2p, timeout);
+					checkProperties(g2p, p2p, timeout,doneProps);
 					todo.removeAll(doneProps.keySet());
 					if (! todo.isEmpty()) {
 						System.out.println("Retrying LTSmin with larger timeout "+(8*timeout)+ " s");
-						checkProperties(g2p, p2p, 8 * timeout);
+						checkProperties(g2p, p2p, 8 * timeout, doneProps);
 					}
 					todo.removeAll(doneProps.keySet());
 					if ( todo.isEmpty()) {
@@ -118,7 +120,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 				}
 			}
 
-			public void checkProperties(Gal2PinsTransformerNext g2p, PetriNet2PinsTransformer p2p, long time)
+			public void checkProperties(Gal2PinsTransformerNext g2p, PetriNet2PinsTransformer p2p, long time, DoneProperties doneProps)
 					throws IOException, InterruptedException {
 				boolean negateResult;
 				if (spn == null) {
@@ -143,7 +145,10 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 					}
 
 				} else {							
-					for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
+					for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(spn.getProperties())) {
+						if (doneProps.containsKey(prop.getName())) {
+							continue;
+						}
 						String pbody = null;
 						if (prop.getType() == PropertyType.LTL)
 							pbody = p2p.printLTLProperty(prop);
