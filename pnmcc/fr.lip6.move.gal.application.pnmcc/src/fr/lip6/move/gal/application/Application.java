@@ -684,10 +684,7 @@ public class Application implements IApplication, Ender {
 					} catch (Exception e) {
 						Logger.getLogger("fr.lip6.move.gal").warning("Invariant computation timed out after "+timeout+" seconds.");
 					}
-					
-					ltlsolve.runSLCLLTLTest(reader2, doneProps);
-					
-					ltlsolve.runStructuralLTLCheck(reader, doneProps);					
+												
 				}
 
 				if (reader.getSPN().getProperties().isEmpty()) {
