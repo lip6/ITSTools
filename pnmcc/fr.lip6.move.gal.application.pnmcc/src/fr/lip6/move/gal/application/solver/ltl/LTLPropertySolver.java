@@ -152,14 +152,14 @@ public class LTLPropertySolver {
 		return solved;
 	}
 	
-	public void runSLCLLTLTest(MccTranslator reader, DoneProperties doneProps)
+	public int runSLCLLTLTest(MccTranslator reader, DoneProperties doneProps)
 			throws TimeoutException, LTLException {
 		if (noSLCLtest) {
-			return;
+			return 0;
 		}
 		SpotRunner spot = new SpotRunner(spotPath, workDir, 10);
 
-
+		int solved =0;
 
 		for (fr.lip6.move.gal.structural.Property propPN : reader.getSPN().getProperties()) {
 			if (doneProps.containsKey(propPN.getName())) 
@@ -188,6 +188,7 @@ public class LTLPropertySolver {
 				
 				// get rid of these, go for tgba
 				spn.getProperties().clear();
+				spn.getProperties().add(propPN);
 				
 				StructuralReduction sr = new StructuralReduction(spn);
 				
@@ -220,6 +221,8 @@ public class LTLPropertySolver {
 					aps.get(i).setExpression(atoms2.get(i));
 				}
 				
+				if (doneProps.containsKey(propPN.getName())) 
+					continue;
 				
 				DoneProperties tmpDoneProps = new ConcurrentHashDoneProperties();
 				checkLTLProperty(propPN, tgba, spn, reader, tmpDoneProps , spot, time);
@@ -228,9 +231,11 @@ public class LTLPropertySolver {
 					if (verdict && tgba.isCLInvariant()) {
 						// true formula + CL = real proof
 						doneProps.put(propPN.getName(), verdict, "CL_INSENSITIVE");
+						solved++;
 					} else if (!verdict && tgba.isSLInvariant()) {
 						// false formula + SL = real proof
 						doneProps.put(propPN.getName(), verdict, "SL_INSENSITIVE");
+						solved++;
 					} else {
 						System.out.println("CL/SL decision was in the wrong direction : "+ (tgba.isSLInvariant() ? "SL":"CL") + " + " + verdict);					
 					}
@@ -239,13 +244,13 @@ public class LTLPropertySolver {
 
 			
 		}
+		return solved;
 	}
 	
 
 	public void runStutteringLTLTest(MccTranslator reader, DoneProperties doneProps)
 			throws TimeoutException, LTLException {
-
-		runSLCLLTLTest(reader, doneProps);
+		
 		
 		SpotRunner spot = new SpotRunner(spotPath, workDir, 10);
 
@@ -275,12 +280,20 @@ public class LTLPropertySolver {
 		try {
 			if (DEBUG >= 2) FlowPrinter.drawNet(spnForProp,"For product with " + propPN.getName());
 			// walk the product a bit
+			if (doneProps.containsKey(propPN.getName())) 
+				return;
 			
 			if (! noStutterTest) {
 				System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
 				RandomProductWalker pw = new RandomProductWalker(spnForProp,tgba);
-				pw.runProduct(NBSTEPS, 10, false);			
+				pw.runProduct(NBSTEPS, 10, false);
+				if (doneProps.containsKey(propPN.getName())) 
+					return;
+				
 				pw.runProduct(NBSTEPS, 10, true);
+				if (doneProps.containsKey(propPN.getName())) 
+					return;
+				
 			}
 			// so we couldn't find a counter example, let's reflect upon this fact.
 			TGBA tgbak = applyKnowledgeBasedReductions(spnForProp,tgba, spot, propPN);				
@@ -292,6 +305,10 @@ public class LTLPropertySolver {
 			} else {
 				spnForPropWithK = spnForProp;
 			}
+			
+			if (doneProps.containsKey(propPN.getName())) 
+				return;
+			
 
 			if (DEBUG >= 2) FlowPrinter.drawNet(spnForPropWithK,"For product with " + propPN.getName());
 			// index of places may have changed, formula might be syntactically simpler 
@@ -307,6 +324,9 @@ public class LTLPropertySolver {
 				treatPartialPOR(tgbak, spnForPropWithK, spot);
 			}
 			
+			
+			if (doneProps.containsKey(propPN.getName())) 
+				return;
 			
 			// Last step, try exhaustive methods
 			
