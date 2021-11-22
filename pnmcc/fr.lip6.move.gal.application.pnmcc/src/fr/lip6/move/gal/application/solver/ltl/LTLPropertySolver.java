@@ -188,7 +188,7 @@ public class LTLPropertySolver {
 				
 				// get rid of these, go for tgba
 				spn.getProperties().clear();
-				spn.getProperties().add(propPN);
+				spn.getProperties().add(propPN.copy());
 				
 				StructuralReduction sr = new StructuralReduction(spn);
 				
@@ -225,7 +225,7 @@ public class LTLPropertySolver {
 					continue;
 				
 				DoneProperties tmpDoneProps = new ConcurrentHashDoneProperties();
-				checkLTLProperty(propPN, tgba, spn, reader, tmpDoneProps , spot, time);
+				checkLTLProperty(spn.getProperties().get(0), tgba, spn, reader, tmpDoneProps , spot, time);
 				if (tmpDoneProps.containsKey(propPN.getName())) {
 					boolean verdict = tmpDoneProps.getValue(propPN.getName());
 					if (verdict && tgba.isCLInvariant()) {
