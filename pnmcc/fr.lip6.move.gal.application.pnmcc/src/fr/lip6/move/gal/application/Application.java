@@ -13,11 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
@@ -665,26 +660,11 @@ public class Application implements IApplication, Ender {
 					System.out.println("Warning : spot flags not provided. Please use flag : -spotpath $BINDIR/ltlfilt ");
 				} else {
 					LTLPropertySolver ltlsolve = new LTLPropertySolver(spotPath, solverPath, pwd, exportLTL);
-					MccTranslator reader2 = reader.copy();
-					MccTranslator reader3 = reader; //final
-					ExecutorService pool = Executors.newCachedThreadPool();
-					CompletionService<Integer> completionService = 
-						       new ExecutorCompletionService<Integer>(pool);
-
 					
-					// System.out.println("Before : "+ SerializationUtil.getText(be, true));
-					completionService.submit(()->ltlsolve.runStructuralLTLCheck(reader3, doneProps));
-					completionService.submit(()->ltlsolve.runSLCLLTLTest(reader2, doneProps));
+					ltlsolve.runStructuralLTLCheck(reader, doneProps);
+					ltlsolve.runSLCLLTLTest(reader, doneProps);
 					
-					try {
-						Future<Integer> res = completionService.take();
-						Integer done = res.get();
-						res =  completionService.take();
-						done += res.get();
-					} catch (Exception e) {
-						Logger.getLogger("fr.lip6.move.gal").warning("Invariant computation timed out after "+timeout+" seconds.");
-					}
-												
+					reader.rebuildSpecification(doneProps);
 				}
 
 				if (reader.getSPN().getProperties().isEmpty()) {
