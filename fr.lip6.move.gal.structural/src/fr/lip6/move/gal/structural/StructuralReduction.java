@@ -2469,16 +2469,14 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			}
 			SparseIntArray hPT = pn.getFlowPT().getColumn(tid);
 			SparseIntArray hTP = pn.getFlowTP().getColumn(tid);
-			// TODO : for LTL, we need to know if we have a free stutter available or not.
-			for (int j =0; j < hTP.size() ; j++) {
-				// additional condition : the transition must update the target				
-				if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL || rt==ReductionType.DEADLOCKS || hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
-					for (int i=0; i < hPT.size() ; i++) {
-						// suppress self edges
-						if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL || rt==ReductionType.DEADLOCKS ||  hTP.keyAt(j) != hPT.keyAt(i)) {
-							// this is the transposed graph					
-							graph.set(hTP.keyAt(j), hPT.keyAt(i), 1);
-						}
+			
+			for (int j = 0; j < hTP.size(); j++) {				
+				int pdest = hTP.keyAt(j);
+				// additional condition : the transition must update the target of the token flow graph
+				if (hTP.valueAt(j) != hPT.get(pdest)) {
+					for (int i = 0; i < hPT.size(); i++) {
+						// this is the transposed graph
+						graph.set(pdest, hPT.keyAt(i), 1);
 					}
 				}
 			}			
@@ -2524,7 +2522,13 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				if (i == Integer.MAX_VALUE) {
 			         break; // or (i+1) would overflow
 			    }
-			 }			
+			 }	
+			BitSet targets = new BitSet();
+			if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL) {
+				for (Integer node: safeNodes) {
+					targets.set(node);
+				}
+			}
 			// add all preconditions of transitions touching p				
 			for (int tid=0, e=pn.getTransitionCount() ; tid < e ; tid++) {
 				if (rt == ReductionType.SAFETY && touches(tid, pn, untouchable)) {
@@ -2532,17 +2536,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 						safeNodes.add(pn.getFlowPT().getColumn(tid).keyAt(i));
 					}
 				} else if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL) {
-					// stronger condition
-					boolean touches = false;
-					SparseIntArray pt = pn.getFlowPT().getColumn(tid);
-					for (int i=0,ie=pt.size() ; i < ie ; i++) {
-						if (safeNodes.contains(pt.keyAt(i))) {
-							touches = true;
-							break;
+					if (touches(tid, pn, targets)) {
+						for (int i=0, ee=pn.getFlowPT().getColumn(tid).size(); i < ee ; i++) {
+							safeNodes.add(pn.getFlowPT().getColumn(tid).keyAt(i));
 						}
-					}
-					for (int i=0, ee=pn.getFlowPT().getColumn(tid).size(); i < ee ; i++) {
-						safeNodes.add(pn.getFlowPT().getColumn(tid).keyAt(i));
 					}
 				}
 			}
