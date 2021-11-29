@@ -30,7 +30,7 @@ jobs:
     - name: Build with Maven
       run: cd fr.lip6.move.gal.parent && mvn -T 4 -e generate-sources install && cd -
     - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@4.1.5
+      uses: JamesIves/github-pages-deploy-action@4.1.7
       with:
           branch: gh-pages # The branch the action should deploy to.
           folder: fr.lip6.move.gal.updatesite/target/repository # The folder the action should deploy.
