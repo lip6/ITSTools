@@ -44,7 +44,8 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		this.doPOR = doPOR;
 		this.onlyGal = onlyGal;
 		try {
-			this.workFolder = Files.createTempDirectory("ltsmin").toFile();			
+			this.workFolder = Files.createTempDirectory("ltsmin").toFile();
+			workFolder.deleteOnExit();
 		} catch (IOException e) {
 			System.out.println("Unable to create temporary folder.");
 		}
@@ -210,6 +211,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		
 		try {
 			File outputff = Files.createTempFile("ltsrun", ".out").toFile();
+			outputff.deleteOnExit();
 			long time = System.currentTimeMillis();
 			System.out.println("Running LTSmin : " + ltsmin);
 			int status = Runner.runTool(timeout, ltsmin, outputff, true);
@@ -286,6 +288,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 
 		System.out.println("Running compilation step : " + clgcc);
 		File outputff = Files.createTempFile("gccrun", ".out").toFile();
+		outputff.deleteOnExit();
 		int status = Runner.runTool(timeout, clgcc, outputff, true);
 		if (status != 0) {
 			Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
@@ -308,6 +311,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		clgcc.addArg("model.o");
 		System.out.println("Running link step : " + clgcc);
 		File outputff = Files.createTempFile("linkrun", ".out").toFile();
+		outputff.deleteOnExit();
 		int status = Runner.runTool(timeout, clgcc, outputff, true);
 		if (status != 0) {
 			Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
