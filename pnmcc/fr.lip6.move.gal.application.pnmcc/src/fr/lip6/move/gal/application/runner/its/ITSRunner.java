@@ -184,7 +184,12 @@ public class ITSRunner extends AbstractRunner {
 
 			try {
 				for (String line = ""; line != null ; line=in.readLine() ) {
-					System.out.println(line);
+					// don't trace overlong lines e.g. formulas from COL to avoid swamping logs
+					if (line.length() > 155) {
+						System.out.println(line.substring(0, 155)+"..."+line.length());
+					} else {
+						System.out.println(line);
+					}
 					//stdOutput.toString().split("\\r?\\n")) ;
 					if ( line.matches("Max variable value.*")) {
 						if (examination.equals("StateSpace")) {

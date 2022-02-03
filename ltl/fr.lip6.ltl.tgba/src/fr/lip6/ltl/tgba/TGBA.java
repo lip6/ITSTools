@@ -106,7 +106,11 @@ public class TGBA {
 	
 	@Override
 	public String toString() {
-		return "TGBA [mat=" + mat + ", initial=" + initial + ", aps=" + atoms + ", nbAcceptance=" + nbAcceptance
+		String atomsred = atoms.toString() ;
+		if (atomsred.length() > 155) {
+			atomsred= atomsred.substring(0,155) + "...]"; // some APS are too long to print, 160 char is about two lines of it, that is enough
+		}
+		return "TGBA [mat=" + mat + ", initial=" + initial + ", aps=" + atomsred  + ", nbAcceptance=" + nbAcceptance
 				+ ", properties=" + properties + ", stateDesc=" + stateDesc + Arrays.toString(stutter) +"]";
 	}
 	
