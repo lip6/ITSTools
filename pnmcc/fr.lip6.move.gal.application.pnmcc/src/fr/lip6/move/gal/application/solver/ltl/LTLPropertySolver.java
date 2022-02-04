@@ -472,7 +472,9 @@ public class LTLPropertySolver {
 			BitSet supportForProp = spn.computeSupport();
 			if (! supportForProp.equals(support)) {
 				System.out.println("Property had overlarge support with respect to TGBA, discarding it for now.");
-				spn.getProperties().clear();
+				//spn.getProperties().clear();
+				// TODO : patch this once we have TGBA support in tools
+				support = supportForProp;
 			}			
 		}
 		sr.setProtected(support);
