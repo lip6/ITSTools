@@ -35,6 +35,7 @@ import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
+import fr.lip6.move.gal.structural.WalkUtils;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
@@ -501,6 +502,8 @@ public class LTLPropertySolver {
 
 		addInitialStateKnowledge(knowledge, spn, tgba);
 
+		addNextStateKnowledge(knowledge, spn, tgba);
+		
 		System.out.println("Knowledge obtained : " + knowledge);
 
 		// try to reduce the tgba using this knowledge
@@ -571,6 +574,64 @@ public class LTLPropertySolver {
 
 		return tgba;
 
+	}
+
+	private void addNextStateKnowledge(List<Expression> knowledge, SparsePetriNet spn, TGBA tgba) {
+		Set<Expression> condX = new HashSet<>();
+		// check if there are true arc from initial state
+		for (TGBAEdge edge : tgba.getEdges().get(tgba.getInitial())) {
+			// edge is labeled by true
+			if (edge.getCondition().getOp()==Op.BOOLCONST && edge.getCondition().getValue()==1) {
+				// not a self loop, that is F as front operator
+				if (edge.getDest() != tgba.getInitial()) {
+					int dest = edge.getDest();
+					for (TGBAEdge edgeX : tgba.getEdges().get(dest)) {
+						if (edgeX.getCondition().getOp() != Op.BOOLCONST) {
+							// grab formulas labeling edges out of this node
+							condX.add(edgeX.getCondition());
+						}
+					}
+				}
+			}
+		}
+		if (condX.isEmpty())
+			return;
+		List<Expression> condXlist=new ArrayList<>(condX);
+		boolean [] alltrue = new boolean[condXlist.size()];
+		boolean [] allfalse = new boolean[condXlist.size()];
+		Arrays.fill(alltrue,true);
+		Arrays.fill(allfalse,true);
+		
+		// run a 1 step test
+		WalkUtils wu = new WalkUtils(spn);
+		SparseIntArray init = wu.getInitial();
+		int[] enabled = wu.computeEnabled(init);
+		for (int i=0 ; i < enabled[0] ; i++) {
+			int ti = enabled[i+1];
+			SparseIntArray dest = wu.fire(ti, init);
+			for (int ei = 0; ei < condXlist.size() ; ei++) {
+				if (!allfalse[ei] && !alltrue[ei]) {
+					continue;
+				}
+				Expression cond=condXlist.get(ei);
+				int res = cond.eval(dest);
+				if (res==0) {
+					alltrue[ei]=false;
+				} else {
+					allfalse[ei]=false;
+				}
+			}
+		}
+		
+		// interpret results as LTL assertions (knowledge)
+		for (int ei = 0; ei < condXlist.size() ; ei++) {
+			if (alltrue[ei]) {
+				knowledge.add(Expression.nop(Op.X,condXlist.get(ei)));
+			} else if (allfalse[ei]) {
+				knowledge.add(Expression.nop(Op.X,Expression.not(condXlist.get(ei))));				
+			}
+		}
+		
 	}
 
 	private void addInitialStateKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
