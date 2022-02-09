@@ -284,10 +284,9 @@ Property : 'property' (name=ID | name=STRING) body=LogicProp ';' ;
 
 LogicProp : BoundsProp | BoolProp ;
 
-BoolProp : SafetyProp | CTLProp | LTLProp ;
+BoolProp : SafetyProp | CTLProp | LTLProp | AtomicProp ;
 	
-SafetyProp :	ReachableProp | InvariantProp | NeverProp
-;
+SafetyProp :	ReachableProp | InvariantProp | NeverProp ;
 
 BoundsProp : '[' 'bounds' ']' ':' target=BoundsPredicate ;
 
@@ -296,6 +295,8 @@ ReachableProp : '[' 'reachable' ']'  ':' predicate=POr;
 InvariantProp : '[' 'invariant' ']'  ':' predicate=POr;
 
 NeverProp : '[' 'never' ']'  ':' predicate=POr;
+
+AtomicProp : '[' 'atom' ']'  ':' predicate=POr;
 
 CTLProp : '[' 'ctl' ']'  ':' predicate=CTLUntil;
 
@@ -652,7 +653,7 @@ BPPrimary returns IntExpression:
 
 /* =====   Boolean expressions ===== */
 enum ComparisonOperators:
-	GT='>' | // Greater Thean
+	GT='>' | // Greater Than
 	LT='<' | // Lower Than
 	GE='>=' | // Greater or Equal
 	LE='<=' | // Lower or Equal
