@@ -507,8 +507,15 @@ public class LTLPropertySolver {
 		System.out.println("Knowledge obtained : " + knowledge);
 
 		// try to reduce the tgba using this knowledge
-		SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
 
+		tgba = manuallyIntegrateKnowledge(spn, tgba, knowledge, propPN, spot);
+
+		return tgba;
+
+	}
+
+	public TGBA manuallyIntegrateKnowledge(SparsePetriNet spn, TGBA tgba, List<Expression> knowledge, Property propPN,
+			SpotRunner spot) throws AcceptedRunFoundException, EmptyProductException, TimeoutException {
 		boolean needRebuild = true;
 		boolean wasAdopted = false;
 		for (Expression factoid : knowledge) {
@@ -519,7 +526,7 @@ public class LTLPropertySolver {
 
 				File comp = Files.createTempFile("comp", ".hoa").toFile();
 				if (needRebuild) {
-					if (! sr.buildComplement(tgba, comp)) {
+					if (! spot.buildComplement(tgba, comp)) {
 						// failure of Spot ?
 						continue;
 					}				
@@ -536,7 +543,7 @@ public class LTLPropertySolver {
 				// test disjoint : A * K is empty
 				// therefore, A does not cover K => does not cover S
 				// we have empty product with !A.
-				if (sr.isProductEmpty(comp,ltl)) {
+				if (spot.isProductEmpty(comp,ltl)) {
 					System.out.println("Property (complement) proved to be false thanks to knowledge :" + factoid);
 					throw new AcceptedRunFoundException();
 					//return TGBA.makeTrue();
@@ -546,7 +553,7 @@ public class LTLPropertySolver {
 				System.out.println("IOexception raised when running Spot : " + e);
 			}
 
-			TGBA prod = sr.computeProduct(tgba, ltl);
+			TGBA prod = spot.computeProduct(tgba, ltl);
 			if (prod.getEdges().get(prod.getInitial()).size() == 0) {
 				// this is just false !
 				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
@@ -569,11 +576,9 @@ public class LTLPropertySolver {
 
 		if (wasAdopted) {
 			spot.computeInfStutter(tgba);
-			sr.runLTLSimplifications(spn);
+			spot.runLTLSimplifications(spn);
 		}
-
 		return tgba;
-
 	}
 
 	private void addNextStateKnowledge(List<Expression> knowledge, SparsePetriNet spn, TGBA tgba) {
