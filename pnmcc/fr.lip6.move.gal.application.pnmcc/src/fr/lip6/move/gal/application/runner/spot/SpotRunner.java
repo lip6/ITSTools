@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
@@ -42,6 +41,15 @@ import fr.lip6.move.gal.structural.expr.Simplifier;
 public class SpotRunner {
 
 
+	public static enum GivenStrategy {
+		/**restrict edge labels to their useful subset*/
+		CONSTRAIN,
+		/**relax labels using impossible assignments if that reduce their support */
+		RELAX,
+		/** do both [the default] */
+		ALL
+	}
+	
 	private static final int DEBUG = 0;
 	private String pathToltlfilt;
 	private String pathToltl2tgba;
@@ -707,5 +715,46 @@ public class SpotRunner {
 		buildAutomaton(ltl, f2);		
 		
 		return TGBAparserHOAF.parseFrom(f2.getCanonicalPath(), apm);
+	}
+
+	public TGBA givenThat(TGBA tgba, Expression factoid, GivenStrategy constrain) {
+		TGBA tgbaout = tgba;
+
+		try {
+			long time = System.currentTimeMillis();
+			CommandLine cl = new CommandLine();
+			cl.setWorkingDir(new File(workFolder));
+			cl.addArg(pathToautfilt);
+			cl.addArg("--hoaf=tv"); // prefix notation for output
+			cl.addArg("--small");
+			cl.addArg("--given-formula="+printLTLProperty(factoid));
+
+			File curAut = Files.createTempFile("b4k", ".hoa").toFile();
+			if (DEBUG == 0) curAut.deleteOnExit();
+			PrintWriter pw = new PrintWriter(curAut);
+			tgba.exportAsHOA(pw);
+			pw.close();
+			cl.addArg("-F");
+			cl.addArg(curAut.getCanonicalPath());		
+
+			if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
+			File stdOutput = Files.createTempFile("prod", ".hoa").toFile();
+			if (DEBUG == 0) stdOutput.deleteOnExit();
+			int status = Runner.runTool(timeout, cl, stdOutput, true);
+			if (status == 0 || status == 1) {
+				if (DEBUG >= 1) System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());
+				tgbaout = TGBAparserHOAF.parseFrom(stdOutput.getCanonicalPath(), tgba.getApm());
+
+
+			} else {
+				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+				try (Stream<String> stream = Files.lines(Paths.get(stdOutput.getCanonicalPath()))) {
+					stream.forEach(System.out::println);
+				}
+			}
+		} catch (IOException | TimeoutException | InterruptedException e) {
+			e.printStackTrace();
+		}
+		return tgbaout;
 	}
 }
