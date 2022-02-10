@@ -507,11 +507,55 @@ public class LTLPropertySolver {
 		System.out.println("Knowledge obtained : " + knowledge);
 
 		// try to reduce the tgba using this knowledge
-
-		tgba = manuallyIntegrateKnowledge(spn, tgba, knowledge, propPN, spot);
-
+		if (false)
+			tgba = manuallyIntegrateKnowledge(spn, tgba, knowledge, propPN, spot);
+		else
+			tgba = spotIntegrateKnowledge(spn, tgba, knowledge, propPN, spot);
+			
 		return tgba;
 
+	}
+
+	private TGBA spotIntegrateKnowledge(SparsePetriNet spn, TGBA tgba, List<Expression> knowledge, Property propPN,
+			SpotRunner spot) throws TimeoutException, EmptyProductException {
+		
+		long time = System.currentTimeMillis();
+		int oriAlphabetSize = tgba.getAPs().size();
+		int oriNbStates = tgba.getEdges().size();
+		int oriNbEdge = tgba.getEdges().stream().mapToInt(List::size).sum();
+		TGBA tgbaOri = tgba;
+		
+		for (Expression factoid : knowledge) {
+			tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.CONSTRAIN);
+			if (tgba.getEdges().size() == 1 && tgba.getEdges().get(0).isEmpty()) {
+				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
+				break;
+			}
+		}
+
+		if (!(tgba.getEdges().size() == 1 && tgba.getEdges().get(0).isEmpty())) {
+			for (Expression factoid : knowledge) {
+				tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RELAX);
+				if (tgba.getEdges().size() == 1 && tgba.getEdges().get(0).isEmpty()) {
+					System.out.println("Property proved to be true thanks to knowledge :" + factoid);
+					break;
+				}
+			}
+		}
+		
+		System.out.println("Knowledge based reduction with " + knowledge.size() + " factoid took "
+				+ (System.currentTimeMillis() - time) + " ms. Reduced automaton from " + oriNbStates + " states, "
+				+ oriNbEdge + " edges and " + oriAlphabetSize + " AP to " + tgba.getEdges().size() + " states, "
+				+ tgba.getEdges().stream().mapToInt(List::size).sum() + " edges and " + tgba.getAPs().size() + " AP.");		
+
+		if (tgba.getEdges().size() == 1 && tgba.getEdges().get(0).isEmpty()) {
+			throw new EmptyProductException();
+		}
+		
+		spot.computeInfStutter(tgba);
+		spot.runLTLSimplifications(spn);
+		
+		return tgba;
 	}
 
 	public TGBA manuallyIntegrateKnowledge(SparsePetriNet spn, TGBA tgba, List<Expression> knowledge, Property propPN,
