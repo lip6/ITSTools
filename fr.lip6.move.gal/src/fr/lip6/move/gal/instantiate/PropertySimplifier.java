@@ -6,6 +6,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.AtomicProp;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BoolProp;
 import fr.lip6.move.gal.BooleanExpression;
@@ -85,6 +86,8 @@ public class PropertySimplifier {
 //					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL");
 					p.setPredicate(GalFactory.eINSTANCE.createFalse());;					
 				}
+			} else if (prop.getBody() instanceof AtomicProp) {
+				continue;
 			} else if (prop.getBody() instanceof BoolProp) {
 				BoolProp bprop = (BoolProp) prop.getBody();
 				replaceWithInitial(bprop.getPredicate());
