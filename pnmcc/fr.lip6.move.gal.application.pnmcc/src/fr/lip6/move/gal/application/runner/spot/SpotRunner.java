@@ -43,7 +43,7 @@ public class SpotRunner {
 
 	public static enum GivenStrategy {
 		/**restrict edge labels to their useful subset*/
-		CONSTRAIN,
+		RESTRICT,
 		/**relax labels using impossible assignments if that reduce their support */
 		RELAX,
 		/** do both [the default] */
@@ -726,7 +726,9 @@ public class SpotRunner {
 			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 			cl.addArg("--hoaf=tv"); // prefix notation for output
-			cl.addArg("--small");
+		
+			// TODO : currently bugged
+			// cl.addArg("--small");
 			cl.addArg("--given-formula="+printLTLProperty(factoid));
 
 			File curAut = Files.createTempFile("b4k", ".hoa").toFile();
@@ -735,7 +737,9 @@ public class SpotRunner {
 			tgba.exportAsHOA(pw);
 			pw.close();
 			cl.addArg("-F");
-			cl.addArg(curAut.getCanonicalPath());		
+			cl.addArg(curAut.getCanonicalPath());	
+			
+			cl.addArg("--given-strategy="+constrain.toString().toLowerCase());
 
 			if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
 			File stdOutput = Files.createTempFile("prod", ".hoa").toFile();
