@@ -526,7 +526,7 @@ public class LTLPropertySolver {
 		TGBA tgbaOri = tgba;
 		
 		for (Expression factoid : knowledge) {
-			tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.CONSTRAIN);
+			tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RESTRICT);
 			if (tgba.getEdges().size() == 1 && tgba.getEdges().get(0).isEmpty()) {
 				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
 				break;
@@ -630,7 +630,7 @@ public class LTLPropertySolver {
 		// check if there are true arc from initial state
 		for (TGBAEdge edge : tgba.getEdges().get(tgba.getInitial())) {
 			// edge is labeled by true
-			if (edge.getCondition().getOp()==Op.BOOLCONST && edge.getCondition().getValue()==1) {
+			// if (edge.getCondition().getOp()==Op.BOOLCONST && edge.getCondition().getValue()==1) {
 				// not a self loop, that is F as front operator
 				if (edge.getDest() != tgba.getInitial()) {
 					int dest = edge.getDest();
@@ -641,7 +641,7 @@ public class LTLPropertySolver {
 						}
 					}
 				}
-			}
+			// }
 		}
 		if (condX.isEmpty())
 			return;
