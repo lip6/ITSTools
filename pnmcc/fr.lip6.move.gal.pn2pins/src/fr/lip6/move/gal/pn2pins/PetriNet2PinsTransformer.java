@@ -558,7 +558,7 @@ public class PetriNet2PinsTransformer {
 					disab.appendColumn(lines[0]);
 					enab.appendColumn(lines[1]);
 				}
-				printMatrix(pw, "mayDisableAtom", enab);
+				printMatrix(pw, "mayDisableAtom", disab);
 				printMatrix(pw, "mayEnableAtom", enab);
 			}
 
