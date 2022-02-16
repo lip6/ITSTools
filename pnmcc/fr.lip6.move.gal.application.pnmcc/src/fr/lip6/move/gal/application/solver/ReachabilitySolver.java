@@ -428,7 +428,9 @@ public class ReachabilitySolver {
 			}							
 			System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
 		}
-
+		// ok we got some implicit places, let the normal rules have another try.
+		if (hasReduced)
+			return hasReduced;
 		if (rt != ReductionType.LIVENESS && rt != ReductionType.LTL && rt != ReductionType.SLCL_LTL &&(reduced == 0 || iteration==0)) {
 			List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
 			if (! tokill.isEmpty()) {
