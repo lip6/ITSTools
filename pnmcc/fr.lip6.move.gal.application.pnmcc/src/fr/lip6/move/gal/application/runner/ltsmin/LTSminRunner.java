@@ -289,6 +289,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		System.out.println("Running compilation step : " + clgcc);
 		File outputff = Files.createTempFile("gccrun", ".out").toFile();
 		outputff.deleteOnExit();
+		new File(workFolder+"/model.o").deleteOnExit();
 		int status = Runner.runTool(timeout, clgcc, outputff, true);
 		if (status != 0) {
 			Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
@@ -312,6 +313,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		System.out.println("Running link step : " + clgcc);
 		File outputff = Files.createTempFile("linkrun", ".out").toFile();
 		outputff.deleteOnExit();
+		new File(workFolder+"/gal.so").deleteOnExit();
 		int status = Runner.runTool(timeout, clgcc, outputff, true);
 		if (status != 0) {
 			Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
