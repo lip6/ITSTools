@@ -216,7 +216,7 @@ public class DeadlockTester {
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr,
 			String solverPath, boolean isSafe, List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> orders) {
 		System.out.println("Running SMT prover for "+tocheck.size()+" properties.");
-		if (tocheck.size() >= 20 || sr.getPlaceCount() + sr.getTransitionCount() >= 8000) {
+		if (true || tocheck.size() >= 20 || sr.getPlaceCount() + sr.getTransitionCount() >= 8000) {
 			return testUnreachableWithSMTIncremental(tocheck, sr, solverPath, isSafe, representative, timeout, withWitness, orders);
 		}
 		
@@ -312,7 +312,7 @@ public class DeadlockTester {
 		try {				
 			// Step 1 : go for solveWithReals = true;				
 			List<String> replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, true, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
-			Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in real domain returned"
+			Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in real domain returned "
 					+"unsat :" + replies.stream().filter(s->"unsat".equals(s)).count()
 					+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count()
 					+ " real:" + replies.stream().filter(s->"real".equals(s)).count()
