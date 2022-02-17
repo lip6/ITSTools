@@ -722,7 +722,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			// p has a (single) input t, that has a single output p, arc value is 1
 			if ( toP.size()==1 && toP.valueAt(0)==1) {
 				int tfeed = toP.keyAt(0);
-						
+				
+				if (touches(tfeed)) {
+					continue;
+				}
+				
 				if (tflowPT == null) {
 					tflowPT = flowPT.transpose();
 				}
