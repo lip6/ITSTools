@@ -274,6 +274,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				totaliter += ruleReducePlaces(rt,false,true);
 			}
 			
+
+			if (totaliter ==0 && rt == ReductionType.SAFETY) {
+				totaliter += ruleCausalAgglo(rt);
+			}
+			
 			total += totaliter;
 			if (totaliter > 0) {
 				System.out.println("Iterating global reduction "+ (iter) + " with "+ totaliter+ " rules applied. Total rules applied " + total + " place count " + pnames.size() + " transition count " + tnames.size());				
@@ -687,7 +692,82 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return done;
 	}
 
-
+	/**
+	 * Agglomerate a place p :
+	 * * p initially unmarked
+	 * * p has a single input/feeder
+	 * * p has a single consumer
+	 * * arc weights are 1 around p
+	 * * the single feeder only feeds us
+	 * * the causal prefix of p has empty intersection with other inputs of the consumer
+	 */
+	public int ruleCausalAgglo(ReductionType rt) {
+		int red = 0;
+		IntMatrixCol tflowTP = null;
+		IntMatrixCol tflowPT = null;
+		IntMatrixCol graph = null;
+		
+		for (int pid=0 ; pid < pnames.size() ; pid++) {
+			// p unobserved
+			if (untouchable.get(pid)) {
+				continue;
+			}
+			// p unmarked
+			if (marks.get(pid) >0)
+				continue;
+			if (tflowTP == null) {
+				tflowTP = flowTP.transpose();
+			}
+			SparseIntArray toP = tflowTP.getColumn(pid);
+			// p has a (single) input t, that has a single output p, arc value is 1
+			if ( toP.size()==1 && toP.valueAt(0)==1) {
+				int tfeed = toP.keyAt(0);
+						
+				if (tflowPT == null) {
+					tflowPT = flowPT.transpose();
+				}
+				SparseIntArray fromP = tflowPT.getColumn(pid);
+				// p has a single output t, arc value is 1				
+				if (fromP.size()==1 && fromP.valueAt(0)==1) {
+					int tcons = fromP.keyAt(0);
+					
+					// compute the causal prefix for p
+					if (graph==null) {
+						graph = buildGraph(this, rt, -1);
+					}
+					
+					// the set of nodes that are "safe"
+					Set<Integer> safeNodes = new HashSet<>();
+					safeNodes.add(pid);
+					// modifies safeNodes to add any prefix of them in the graph
+					collectPrefix(safeNodes, graph, true);
+										
+					// no other input of t can belong to this prefix
+					boolean ok = true;
+					SparseIntArray predT = flowPT.getColumn(tcons);
+					for (int i=0, ie=predT.size() ; i < ie ; i++ ) {
+						int pp = predT.keyAt(i);
+						if (pp!=pid && safeNodes.contains(pp)) {
+							ok = false;
+							break;
+						}
+					}
+					
+					if (ok) {
+						if (DEBUG>=1) System.out.println("Net is Causal-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + tfeed + " -> " + tcons);
+						agglomerateAround(pid, Collections.singletonList(tfeed), Collections.singletonList(tcons),"Causal",tflowPT,tflowTP);
+						red ++;
+					}
+				}
+			}
+		}
+		if (red >0) {
+			System.out.println("Causal-agglomeration rule applied "+red+" times.");
+		}
+		
+		return red;
+	}
+	
 	public int ruleFreeAgglo(boolean doComplex) {
 		IntMatrixCol tflowTP = null;
 		int done = 0;
