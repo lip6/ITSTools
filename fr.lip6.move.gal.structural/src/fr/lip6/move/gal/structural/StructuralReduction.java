@@ -723,7 +723,13 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			if ( toP.size()==1 && toP.valueAt(0)==1) {
 				int tfeed = toP.keyAt(0);
 				
+				// tfeed stutters
 				if (touches(tfeed)) {
+					continue;
+				}
+				
+				// tfeed has p as single output
+				if (flowTP.getColumn(tfeed).size() > 1) {
 					continue;
 				}
 				
@@ -734,6 +740,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				// p has a single output t, arc value is 1				
 				if (fromP.size()==1 && fromP.valueAt(0)==1) {
 					int tcons = fromP.keyAt(0);
+					
+					// tcons has other predecessors
+					if (flowPT.getColumn(tcons).size() <= 1) {
+						continue;
+					}
 					
 					// compute the causal prefix for p
 					if (graph==null) {
