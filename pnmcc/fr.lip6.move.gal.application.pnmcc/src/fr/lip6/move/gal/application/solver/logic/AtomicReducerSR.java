@@ -16,6 +16,7 @@ import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.Property;
+import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
@@ -30,13 +31,13 @@ import fr.lip6.move.gal.structural.smt.DeadlockTester;
 public class AtomicReducerSR {
 	private static final int DEBUG = 0;
 
-	public int strongReductions(String solverPath, MccTranslator reader, DoneProperties doneProps) {
-		if (reader.getExamination().contains("LTL") || reader.getExamination().contains("CTL")) {
-			return checkAtomicPropositionsLogic(reader.getSPN(), doneProps, solverPath);
+	public int strongReductions(String solverPath, SparsePetriNet spn, DoneProperties doneProps) {
+		if (spn.getProperties().stream().anyMatch(p -> p.getType() == PropertyType.LTL || p.getType() == PropertyType.CTL)) {
+			return checkAtomicPropositionsLogic(spn, doneProps, solverPath);
 		} else {
-			int solved = checkAtomicPropositions(reader.getSPN(), doneProps, solverPath, true);
-			solved += checkAtomicPropositions(reader.getSPN(), doneProps, solverPath, false);
-			reader.getSPN().simplifyLogic();
+			int solved = checkAtomicPropositions(spn, doneProps, solverPath, true);
+			solved += checkAtomicPropositions(spn, doneProps, solverPath, false);
+			spn.simplifyLogic();
 			return solved;
 		}
 	}
