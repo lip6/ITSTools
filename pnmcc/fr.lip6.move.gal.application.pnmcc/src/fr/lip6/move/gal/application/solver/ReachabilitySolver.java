@@ -196,7 +196,7 @@ public class ReachabilitySolver {
 				
 				if (iter == 0 && !doneAtoms) {
 	//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
-					if (new AtomicReducerSR().strongReductions(solverPath, reader, doneProps) > 0) {
+					if (new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps) > 0) {
 						checkInInitial(reader.getSPN(), doneProps);
 						iter++;
 					}
