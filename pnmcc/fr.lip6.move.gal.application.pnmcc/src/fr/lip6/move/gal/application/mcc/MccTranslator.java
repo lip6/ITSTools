@@ -93,7 +93,6 @@ public class MccTranslator {
 	private Specification spec;
 	private IOrder order;
 	private String folder;
-	private String examination;
 	private Support simplifiedVars = new Support();
 	private boolean isSafeNet = false;
 	private boolean useLouvain;
@@ -104,9 +103,8 @@ public class MccTranslator {
 	private static boolean withSeparation = false;
 	private static final int DEBUG = 0;
 	
-	public MccTranslator(String pwd, String examination, boolean useLouvain) {
+	public MccTranslator(String pwd, boolean useLouvain) {
 		this.folder = pwd;
-		this.examination = examination;
 		this.useLouvain = useLouvain;
 	}
 
@@ -129,9 +127,6 @@ public class MccTranslator {
 		return spn;
 	}
 	
-	public String getExamination() {
-		return examination;
-	}
 	/**
 	 * Sets the spec and order attributes, spec is set to result of PNML tranlsation and order is set to null if no nupn/computed order is available.
 	 * @param folder input folder absolute path, containing a model.pnml file
@@ -315,7 +310,7 @@ public class MccTranslator {
 	/** Job : parse the property files into the Specification.
 	 * The examination determines what happens in here. 
 	 * @throws IOException */
-	public void loadProperties() throws IOException {
+	public void loadProperties(String examination) throws IOException {
 		if (examination.equals("StateSpace")) {
 			return ;
 		} else {
@@ -323,10 +318,10 @@ public class MccTranslator {
 			String propff = folder +"/" +  examination + ".xml";
 			int parsed = 0;
 			if (hlpn != null) {
-				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , hlpn, getPropertyType());				 
+				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , hlpn, getPropertyType(examination));				 
 				hlpn.simplifyLogic();
 			} else {
-				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , spn, getPropertyType());
+				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , spn, getPropertyType(examination));
 			}
 			System.out.println("Parsed " +parsed +" properties from file "+propff+" in "+ (System.currentTimeMillis() - time) + " ms.");			
 		}
@@ -365,7 +360,7 @@ public class MccTranslator {
 		createSPN(true,true);
 	}
 
-	private PropertyType getPropertyType() {
+	private PropertyType getPropertyType(String examination) {
 		if ("ReachabilityFireability".equals(examination) || "ReachabilityCardinality".equals(examination)) {
 			return PropertyType.INVARIANT;
 		} else if (examination.contains("Deadlock") || "GlobalProperties".equals(examination)) {
@@ -492,7 +487,7 @@ public class MccTranslator {
 
 
 	public MccTranslator copy() {		
-		MccTranslator copy = new MccTranslator(folder, examination, useLouvain);
+		MccTranslator copy = new MccTranslator(folder, useLouvain);
 		copy.order = this.order;
 		copy.isSafeNet = this.isSafeNet;
 		copy.simplifiedVars = new Support(simplifiedVars);
