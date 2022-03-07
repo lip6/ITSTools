@@ -301,7 +301,7 @@ public class Application implements IApplication, Ender {
 		SerializationUtil.setStandalone(true);
 
 		// setup a "reader" that parses input property files correctly and efficiently
-		MccTranslator reader = new MccTranslator(pwd, examination, useLouvain);
+		MccTranslator reader = new MccTranslator(pwd, useLouvain);
 
 		try {
 			if (readGAL == null) {
@@ -462,7 +462,7 @@ public class Application implements IApplication, Ender {
 		
 		// Now translate and load properties into GAL
 		// uses a SAX parser to load to Logic MM, then an M2M to GAL properties.
-		reader.loadProperties();
+		reader.loadProperties(examination);
 		
 		
 		if (unfold) {
@@ -664,7 +664,9 @@ public class Application implements IApplication, Ender {
 					ltlsolve.runStructuralLTLCheck(reader, doneProps);
 					ltlsolve.runSLCLLTLTest(reader, doneProps);
 					
-					reader.rebuildSpecification(doneProps);
+					if (! reader.getSPN().getProperties().isEmpty()) {
+						reader.rebuildSpecification(doneProps);
+					}
 				}
 
 				if (reader.getSPN().getProperties().isEmpty()) {
@@ -734,7 +736,7 @@ public class Application implements IApplication, Ender {
 					
 					reader.setSpn(skel,true);
 					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-					new AtomicReducerSR().strongReductions(solverPath, reader, doneProps);
+					new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps);
 					reader.getSPN().simplifyLogic();
 					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 					reader.rebuildSpecification(doneProps);
