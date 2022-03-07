@@ -27,7 +27,7 @@ public class LTLAnalyzer {
 		boolean reducedSLCL=false;
 		
 		try {
-			reader.loadProperties();
+			reader.loadProperties(examination);
 
 			reader.createSPN();
 			SparsePetriNet spn = reader.getSPN();
