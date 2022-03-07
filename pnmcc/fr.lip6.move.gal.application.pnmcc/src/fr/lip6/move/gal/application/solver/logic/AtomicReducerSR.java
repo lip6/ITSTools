@@ -1,5 +1,8 @@
 package fr.lip6.move.gal.application.solver.logic;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -13,7 +16,10 @@ import java.util.Map.Entry;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
+import fr.lip6.move.gal.application.solver.ReachabilitySolver;
+import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
+import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
@@ -60,75 +66,70 @@ public class AtomicReducerSR {
 		AtomicPropManager apm = new AtomicPropManager();
 		Map<String, Expression> pmap = apm.loadAtomicProps(spn.getProperties());
 
+		// a copy to work on reductions with
+		SparsePetriNet spnred = new SparsePetriNet(spn);
+		spnred.getProperties().clear();
+		
 		// build a list of invariants to test with SMT/random
 		// for each of them test value in initial state
-		List<Expression> tocheck = new ArrayList<>();
-
 		SparseIntArray istate = new SparseIntArray(spn.getMarks());
 		for (AtomicProp ent: apm.getAtoms()) {
 			Expression cmp = ent.getExpression();
+			String pname = ent.getName();
 			int val = cmp.eval(istate);
 			if (val == 1) {
 				// UNSAT => it never becomes false
-				tocheck.add(Expression.not(cmp));
+				
+				Property p = new Property(Expression.nop(Op.EF, Expression.not(cmp)), PropertyType.INVARIANT, pname);
+				spnred.getProperties().add(p);
+				
 			} else {
 				// UNSAT => it never becomes true
-				tocheck.add(cmp);
+				Property p = new Property(Expression.nop(Op.EF,cmp), PropertyType.INVARIANT, pname);
+				spnred.getProperties().add(p);				
 			}			
 		}
-
-		List<Integer> tocheckIndexes = new ArrayList<>();
-		for (int j=0; j < tocheck.size(); j++) { tocheckIndexes.add(j);}
-
-		RandomExplorer re = new RandomExplorer(spn);
-		int steps = 100000; // 100k steps
-		int timeout = 30; // 30 secs
-		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,timeout,-1);
-		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
-			if (verdicts[v] != 0) {
-				// well, this is not an invariant, too bad
-				tocheck.remove(v);
-				tocheckIndexes.remove(v);
-			}
+		
+		String wd = "/tmp";
+		try {
+			File workFolder = Files.createTempDirectory("redAtoms").toFile();
+			workFolder.deleteOnExit();
+			wd = workFolder.getCanonicalPath();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-
-		if (tocheck.isEmpty()) {
-			return 0;
-		}		
-
+		
+		MccTranslator reader = new MccTranslator(wd, false);
+		reader.setSpn(spnred, true);
+		
+		DoneProperties todoProps = new ConcurrentHashDoneProperties();
+		try {
+			ReachabilitySolver.applyReductions(reader, todoProps , solverPath);
+		} catch (GlobalPropertySolvedException e) {
+			e.printStackTrace();
+		}
 
 		int nsolved = 0;
 		int nsimpl = 0;
-		List<Integer> repr = new ArrayList<>();
-		List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, spn, solverPath, repr,20,false);
+		for (Entry<String, Boolean> ent : todoProps.entrySet()) {
+			Boolean res = ent.getValue();
+			
+			if (! res) {
+				// cool we've proven an invariant, we can substitute
+				String pname = ent.getKey();
+				AtomicProp atom = apm.findAP(pname);
+				Expression c = atom.getExpression();
+				boolean val = c.eval(istate) == 1;
+			
+				if (DEBUG >= 1) System.out.println("SMT proved atom is invariant; concluding " + pname + " is always " + val);						
 
-		Iterator<AtomicProp> it = apm.getAtoms().iterator();
-		int vi=0;
-		int cur=0;
-		while (it.hasNext()) {
-			AtomicProp ent = it.next();
-			int vind = tocheckIndexes.get(cur);
-			if (vi == vind) {
-				SparseIntArray parikh = paths.get(cur);
-				if (parikh == null) {
-					// cool we've proven an invariant, we can substitute
-					Expression c = ent.getExpression();
-					boolean val = c.eval(istate) == 1;
-					if (DEBUG >= 1) System.out.println("SMT proved "+tocheck.get(cur) + " is unreachable; concluding " + c + " is always " + val);						
+				if (val)
+					atom.setExpression(Expression.constant(true));
+				else
+					atom.setExpression(Expression.constant(false));
 
-					if (val)
-						ent.setExpression(Expression.constant(true));
-					else
-						ent.setExpression(Expression.constant(false));
-
-					nsolved ++;
-				}
-				cur++;
-				if (cur >= tocheckIndexes.size()) {
-					break;
-				}
-			}				
-			vi++;
+				nsolved ++;
+			}
 		}
 
 		if (nsolved > 0) {
