@@ -129,6 +129,7 @@ public class LTLPropertySolver {
 			try {
 				ReachabilitySolver.applyReductions(sr, ReductionType.LTL, solverPath, true, true);				
 				reader.getSPN().readFrom(sr);
+				reader.getSPN().removeConstantPlaces();
 			} catch (GlobalPropertySolvedException gse) {
 				System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
 				gse.printStackTrace();
