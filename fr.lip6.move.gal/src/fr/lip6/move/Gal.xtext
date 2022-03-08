@@ -653,12 +653,12 @@ BPPrimary returns IntExpression:
 
 /* =====   Boolean expressions ===== */
 enum ComparisonOperators:
-	GT='>' | // Greater Than
-	LT='<' | // Lower Than
-	GE='>=' | // Greater or Equal
-	LE='<=' | // Lower or Equal
-	EQ='==' | // Equal
-	NE='!='; // Not Equal
+	GT='>' | 
+	LT='<' | 
+	GE='>=' | 
+	LE='<=' | 
+	EQ='==' | 
+	NE='!='; 
 	
 Or returns BooleanExpression:
 	(And ({Or.left=current} ->'||' right=And)*);
