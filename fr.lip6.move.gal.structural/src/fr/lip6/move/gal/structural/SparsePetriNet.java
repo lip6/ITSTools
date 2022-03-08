@@ -393,8 +393,10 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 				trem.add(tnames.remove(tid));				
 			}
 		}
-		if (totalp>0 || !todelTrans.isEmpty())
+		if (totalp>0 || !todelTrans.isEmpty()) {
 			System.out.println("Reduce places removed "+totalp + " places and " + todelTrans.size() + " transitions. " + (DEBUG>=1 ? ("Places : " + prem + " Transitions:" + trem):""));
+			simplifyLogic();
+		}
 
 		return totaltok;
 	}
