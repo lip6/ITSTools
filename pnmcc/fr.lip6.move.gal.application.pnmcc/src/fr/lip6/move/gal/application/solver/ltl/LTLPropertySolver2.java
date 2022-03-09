@@ -90,7 +90,7 @@ public class LTLPropertySolver2 {
 			skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p.getBody()));
 			reader.setSpn(skel,true);
 			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-			new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps);
+			new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps,new SpotRunner(spotPath, workDir, 10));
 			reader.getSPN().simplifyLogic();
 			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 			reader.rebuildSpecification(doneProps);
@@ -134,7 +134,7 @@ public class LTLPropertySolver2 {
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 		solved += GALSolver.runGALReductions(reader, doneProps);
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);					
-		solved += new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps);
+		solved += new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(spotPath, workDir, 10));
 		reader.getSPN().simplifyLogic();
 		solved += reader.getSPN().testInInitial();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
