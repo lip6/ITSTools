@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
+import fr.lip6.move.gal.application.runner.spot.SpotRunner;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
@@ -28,6 +29,7 @@ import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.AtomicPropManager;
+import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
@@ -37,9 +39,9 @@ import fr.lip6.move.gal.structural.smt.DeadlockTester;
 public class AtomicReducerSR {
 	private static final int DEBUG = 0;
 
-	public int strongReductions(String solverPath, SparsePetriNet spn, DoneProperties doneProps) {
+	public int strongReductions(String solverPath, SparsePetriNet spn, DoneProperties doneProps, SpotRunner spot) {
 		if (spn.getProperties().stream().anyMatch(p -> p.getType() == PropertyType.LTL || p.getType() == PropertyType.CTL)) {
-			return checkAtomicPropositionsLogic(spn, doneProps, solverPath);
+			return checkAtomicPropositionsLogic(spn, doneProps, solverPath, spot);
 		} else {
 			int solved = checkAtomicPropositions(spn, doneProps, solverPath, true);
 			solved += checkAtomicPropositions(spn, doneProps, solverPath, false);
@@ -54,9 +56,10 @@ public class AtomicReducerSR {
 	 * @param doneProps
 	 * @param isSafe
 	 * @param solverPath 
+	 * @param spot 
 	 * @param comparisonAtoms if true look only at comparisons only as atoms (single predicate), otherwise sub boolean formulas are considered atoms (CTL, LTL) 
 	 */
-	private int checkAtomicPropositionsLogic (SparsePetriNet spn, DoneProperties doneProps, String solverPath) {
+	private int checkAtomicPropositionsLogic (SparsePetriNet spn, DoneProperties doneProps, String solverPath, SpotRunner spot) {
 
 		if (solverPath == null) {
 			return 0;
@@ -113,10 +116,10 @@ public class AtomicReducerSR {
 		int nsimpl = 0;
 		for (Entry<String, Boolean> ent : todoProps.entrySet()) {
 			Boolean res = ent.getValue();
+			String pname = ent.getKey();
 			
 			if (! res) {
-				// cool we've proven an invariant, we can substitute
-				String pname = ent.getKey();
+				// cool we've proven an invariant, we can substitute			
 				AtomicProp atom = apm.findAP(pname);
 				Expression c = atom.getExpression();
 				boolean val = c.eval(istate) == 1;
@@ -129,6 +132,34 @@ public class AtomicReducerSR {
 					atom.setExpression(Expression.constant(false));
 
 				nsolved ++;
+			} else {
+				if (spot != null) {
+					// so we have proved that EF !p if p is initially true
+					AtomicProp atom = apm.findAP(pname);
+					Expression c = atom.getExpression();
+					boolean val = c.eval(istate) == 1;
+
+					Expression FnotP = null;
+					if (val) {
+						FnotP = Expression.nop(Op.F, Expression.not(Expression.apRef(atom)));						
+					} else {
+						FnotP = Expression.nop(Op.F, Expression.apRef(atom));
+					}
+					
+					for (int pi=spn.getProperties().size()-1 ; pi >=0 ; pi--) {
+						Property prop = spn.getProperties().get(pi);
+						if (prop.getType() == PropertyType.LTL) {
+							Expression pAP = pmap.get(prop.getName());
+							if (containsAP(pAP,pname)) {
+								if (spot.isImpliedBy(Expression.not(pAP),FnotP)) {
+									doneProps.put(prop.getName(), false, "REACHABILITY");
+									spn.getProperties().remove(pi);
+								}
+							}
+						}					
+					}
+				}
+				
 			}
 		}
 
@@ -152,6 +183,20 @@ public class AtomicReducerSR {
 		return nsolved;
 	}
 
+
+	private static boolean containsAP(Expression pAP, String pname) {
+		if (pAP instanceof AtomicPropRef) {
+			AtomicPropRef apref = (AtomicPropRef) pAP;
+			return apref.getAp().getName().equals(pname);
+		} else {
+			for (int i=0,ie=pAP.nbChildren() ; i < ie ; i++) {
+				if (containsAP(pAP.childAt(i), pname)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Extract Atomic Propositions, unify them, for each of them test initial state, then try to assert it will not vary => simplifiable.
