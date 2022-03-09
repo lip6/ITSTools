@@ -104,7 +104,7 @@ public class AtomicReducerSR {
 		
 		DoneProperties todoProps = new ConcurrentHashDoneProperties();
 		try {
-			ReachabilitySolver.applyReductions(reader, todoProps , solverPath);
+			ReachabilitySolver.applyReductions(reader, todoProps , solverPath, 100);
 		} catch (GlobalPropertySolvedException e) {
 			e.printStackTrace();
 		}

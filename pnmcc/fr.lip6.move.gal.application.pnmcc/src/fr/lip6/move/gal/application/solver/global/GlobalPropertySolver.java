@@ -655,7 +655,7 @@ public class GlobalPropertySolver {
 		if (!reader.getSPN().getProperties().isEmpty()) {
 			try {
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-				ReachabilitySolver.applyReductions(reader, doneProps, solverPath);
+				ReachabilitySolver.applyReductions(reader, doneProps, solverPath, -1);
 			} catch (GlobalPropertySolvedException e) {
 				e.printStackTrace();
 			}

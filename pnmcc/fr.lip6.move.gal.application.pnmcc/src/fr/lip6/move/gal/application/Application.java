@@ -573,7 +573,7 @@ public class Application implements IApplication, Ender {
 							// requalify
 							propRed.setType(PropertyType.INVARIANT);
 							// solve with reachability
-							ReachabilitySolver.applyReductions(reader2, doneProps, solverPath);														
+							ReachabilitySolver.applyReductions(reader2, doneProps, solverPath, -1);														
 							
 							if (reader2.getSPN().getProperties().isEmpty()) {
 								continue;
@@ -747,7 +747,7 @@ public class Application implements IApplication, Ender {
 				reader.createSPN();
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				if (!reader.getSPN().getProperties().isEmpty())
-					ReachabilitySolver.applyReductions(reader, doneProps, solverPath);
+					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, -1);
 
 			} else {
 
@@ -794,7 +794,7 @@ public class Application implements IApplication, Ender {
 				}
 
 				if (!reader.getSpec().getProperties().isEmpty())
-					ReachabilitySolver.applyReductions(reader, doneProps, solverPath);
+					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, -1);
 
 				// Per property approach = WIP
 //				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
@@ -936,7 +936,7 @@ public class Application implements IApplication, Ender {
 				} else {
 					MccTranslator copy = reader.copy();
 					copy.getSpec().getProperties().removeIf(p -> !p.getName().equals(prop.getName()));
-					ReachabilitySolver.applyReductions(copy, doneProps, solverPath);
+					ReachabilitySolver.applyReductions(copy, doneProps, solverPath, -1);
 					System.out.println("For property " + prop.getName() + " final size "
 							+ ((GALTypeDeclaration) copy.getSpec().getTypes().get(0)).getVariables().size());
 				}

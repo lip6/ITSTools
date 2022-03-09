@@ -43,10 +43,11 @@ public class ReachabilitySolver {
 		return done;
 	}
 
-	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, String solverPath)
+	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, String solverPath, int timeout)
 				throws GlobalPropertySolvedException {
 			int iter;
 			int iterations =0;
+			long initial=System.currentTimeMillis();
 			boolean doneAtoms = false;
 			boolean doneSums = false;
 			do {
@@ -61,7 +62,7 @@ public class ReachabilitySolver {
 				computeToCheck(spn, tocheckIndexes, tocheck);
 				RandomExplorer re = new RandomExplorer(sr);
 				int steps = 1000000; // 1 million
-				if (iterations == 0 && iter==0) {
+				if ((iterations == 0 && iter==0) || timeout != -1) {
 					steps = 10000; // be more moderate on first run : 100k
 				}
 				if (randomCheckReachability(re, tocheck, spn, doneProps,steps) >0)
@@ -73,7 +74,11 @@ public class ReachabilitySolver {
 				if (solverPath != null) {
 					List<Integer> repr = new ArrayList<>();
 					List<SparseIntArray> orders = new ArrayList<>();
-					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, sr.isSafe(),repr, iterations==0 ? 5:45,true,orders);
+					int smttime = iterations==0 ? 5:45;
+					if (timeout != -1) {
+						smttime = 5;
+					}
+					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, sr.isSafe(),repr, smttime,true,orders);
 					
 					iter += treatSMTVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths);
 					long time = System.currentTimeMillis();
@@ -88,7 +93,7 @@ public class ReachabilitySolver {
 			        	System.out.println("Fused "+paths.size()+" Parikh solutions to " + indexMap.size() +" different solutions.");
 			        }
 					int maxTime = 100;
-					if (indexMap.size() >= 20) {
+					if (indexMap.size() >= 20 || timeout != -1) {
 						maxTime = 30;
 					}
 			        for (Entry<SparseIntArray, List<Integer>> ent:indexMap.entrySet()) {
@@ -138,7 +143,7 @@ public class ReachabilitySolver {
 								if (tocheck.size() >= 200) {
 									maxt = 1;
 									maxsteps = sz;
-								} else if (tocheck.size() >= 100) {
+								} else if (tocheck.size() >= 100 || timeout != -1) {
 									maxt = 2;
 									maxsteps = 2*sz;
 								} else if (tocheck.size() >= 16) {
@@ -194,7 +199,10 @@ public class ReachabilitySolver {
 				}
 	*/
 				
-				if (iter == 0 && !doneAtoms) {
+				if (System.currentTimeMillis() - initial >= timeout *1000)
+					return;
+				
+				if (iter == 0 && !doneAtoms && timeout == -1) {
 	//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
 					if (new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps) > 0) {
 						checkInInitial(reader.getSPN(), doneProps);
@@ -207,11 +215,15 @@ public class ReachabilitySolver {
 				if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
 	
-				GlobalPropertySolver.verifyWithSDD(reader, doneProps, "ReachabilityCardinality", solverPath, Math.max(5*(iterations+1),15));			
+				int timeSDD = Math.max(5*(iterations+1),15);
+				GlobalPropertySolver.verifyWithSDD(reader, doneProps, "ReachabilityCardinality", solverPath, timeSDD);			
 				
 				if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
 				iterations++;
+				
+				if (System.currentTimeMillis() - initial >= timeout *1000)
+					return;
 			} while ( (iterations<=1 || iter > 0) && ! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished());
 			
 			if (! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished()) {
