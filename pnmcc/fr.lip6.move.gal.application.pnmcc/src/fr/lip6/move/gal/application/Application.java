@@ -736,7 +736,7 @@ public class Application implements IApplication, Ender {
 					
 					reader.setSpn(skel,true);
 					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-					new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps);
+					new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, null);
 					reader.getSPN().simplifyLogic();
 					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 					reader.rebuildSpecification(doneProps);
