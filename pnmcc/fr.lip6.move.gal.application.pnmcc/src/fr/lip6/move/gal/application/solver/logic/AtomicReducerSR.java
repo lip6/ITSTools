@@ -39,9 +39,9 @@ import fr.lip6.move.gal.structural.smt.DeadlockTester;
 public class AtomicReducerSR {
 	private static final int DEBUG = 0;
 
-	public int strongReductions(String solverPath, SparsePetriNet spn, DoneProperties doneProps, SpotRunner spot) {
+	public int strongReductions(String solverPath, SparsePetriNet spn, DoneProperties doneProps, SpotRunner spot, boolean isOverApprox) {
 		if (spn.getProperties().stream().anyMatch(p -> p.getType() == PropertyType.LTL || p.getType() == PropertyType.CTL)) {
-			return checkAtomicPropositionsLogic(spn, doneProps, solverPath, spot);
+			return checkAtomicPropositionsLogic(spn, doneProps, solverPath, spot, isOverApprox);
 		} else {
 			int solved = checkAtomicPropositions(spn, doneProps, solverPath, true);
 			solved += checkAtomicPropositions(spn, doneProps, solverPath, false);
@@ -57,9 +57,10 @@ public class AtomicReducerSR {
 	 * @param isSafe
 	 * @param solverPath 
 	 * @param spot 
+	 * @param isOverApprox 
 	 * @param comparisonAtoms if true look only at comparisons only as atoms (single predicate), otherwise sub boolean formulas are considered atoms (CTL, LTL) 
 	 */
-	private int checkAtomicPropositionsLogic (SparsePetriNet spn, DoneProperties doneProps, String solverPath, SpotRunner spot) {
+	private int checkAtomicPropositionsLogic (SparsePetriNet spn, DoneProperties doneProps, String solverPath, SpotRunner spot, boolean isOverApprox) {
 
 		if (solverPath == null) {
 			return 0;
@@ -133,7 +134,7 @@ public class AtomicReducerSR {
 
 				nsolved ++;
 			} else {
-				if (spot != null) {
+				if (!isOverApprox && spot != null) {
 					// so we have proved that EF !p if p is initially true
 					AtomicProp atom = apm.findAP(pname);
 					Expression c = atom.getExpression();
@@ -152,7 +153,7 @@ public class AtomicReducerSR {
 							Expression pAP = pmap.get(prop.getName());
 							if (containsAP(pAP,pname)) {
 								if (spot.isImpliedBy(Expression.not(pAP),FnotP)) {
-									doneProps.put(prop.getName(), false, "REACHABILITY");
+									doneProps.put(prop.getName(), false, "REACHABILITY_KNOWLEDGE");
 									spn.getProperties().remove(pi);
 								}
 							}
