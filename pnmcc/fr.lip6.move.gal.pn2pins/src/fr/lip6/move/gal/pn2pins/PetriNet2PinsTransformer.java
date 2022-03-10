@@ -287,12 +287,27 @@ public class PetriNet2PinsTransformer {
 		pw.println("  // add a bool type for state labels");
 		pw.println("  int bool_type = lts_type_put_type (ltstype, \"boolean\", LTStypeBool, NULL);");
 
-		pw.println("  lts_type_set_state_label_count (ltstype, label_count());");
-		pw.println("  for (int i =0; i < label_count() ; i++) {");
-		pw.println("    lts_type_set_state_label_typeno (ltstype, i, bool_type);");
-		pw.println("    lts_type_set_state_label_name (ltstype, i, labnames[i]);");
-		pw.println("  }");
-
+		pw.println("  lts_type_set_state_label_count (ltstype, "+labelCount()+");");
+		
+		{			
+			for (int ii=0, ie=labelCount() ; ii < ie ; ii++) {
+				pw.println("    lts_type_set_state_label_typeno (ltstype, "+ii+", bool_type);");
+			}
+			
+			int labindex = 0;			
+			for (labindex=0 ; labindex < net.getTransitionCount() ; labindex++) {
+				pw.println("    lts_type_set_state_label_name (ltstype, "+i+ ", \"enabled" + labindex + "\");");				
+			}
+			for (AtomicProp atom : atoms.getAtoms()) {
+				pw.println("    lts_type_set_state_label_name (ltstype, "+i+ ", \"LTLAP" + atom.getName() + "\");");
+				labindex++;
+			}
+			for (AtomicProp atom : invAtoms) {
+				pw.println("    lts_type_set_state_label_name (ltstype, "+i+ ", \"" + atom.getName() + "\");");
+				labindex++;
+			}		
+		}
+		
 		// done with ltstype
 		pw.println("  lts_type_validate(ltstype);");
 
@@ -458,39 +473,8 @@ public class PetriNet2PinsTransformer {
 		pw.println("}");
 
 		pw.println("int label_count() {");
-		pw.println("  return " + (net.getTransitionCount() + atoms.size() + invAtoms.size()) + " ;");
+		pw.println("  return " + labelCount() + " ;");
 		pw.println("}");
-
-		pw.println("char * labnames [" + (net.getTransitionCount() + atoms.size() + invAtoms.size()) + "] = {");
-		boolean first = true;
-		for (int i = 0; i < net.getTransitionCount(); i++) {
-			if (!first) {
-				pw.print(",");
-			} else {
-				first = false;
-			}
-			pw.print("  \"" + "enabled" + i + "\"");
-			pw.println();
-		}
-		for (AtomicProp atom : atoms.getAtoms()) {
-			if (!first) {
-				pw.print(",");
-			} else {
-				first = false;
-			}
-			pw.print("  \"LTLAP" + atom.getName() + "\"");
-			pw.println();
-		}
-		for (AtomicProp atom : invAtoms) {
-			if (!first) {
-				pw.print(",");
-			} else {
-				first = false;
-			}
-			pw.print("  \"" + atom.getName() + "\"");
-			pw.println();
-		}
-		pw.println("};");
 
 		List<int[]> lm = new ArrayList<>(atoms.size()+invAtoms.size());
 		for (AtomicProp ap : atoms.getAtoms()) {
@@ -602,6 +586,10 @@ public class PetriNet2PinsTransformer {
 
 	}
 
+	private int labelCount() {
+		return (net.getTransitionCount() + atoms.size() + invAtoms.size());
+	}
+
 	public void printMatrix(PrintWriter pw, String matrixName, IntMatrixCol matrix) {
 		pw.println("int *" + matrixName + "[" + matrix.getColumnCount() + "] = {");
 		for (int i = 0; i < matrix.getColumnCount(); i++) {
@@ -663,25 +651,7 @@ public class PetriNet2PinsTransformer {
 		pw.append("  int state [" + net.getPlaceCount() + "];\n");
 		pw.append("} state_t ;\n");
 
-		for (int ti = 0, tie = net.getTransitionCount(); ti < tie; ti++) {
-			SparseIntArray pt = net.getFlowPT().getColumn(ti);
-			SparseIntArray tp = net.getFlowTP().getColumn(ti);
 
-			pw.append("static inline int transition" + ti + " (state_t * current) {\n");
-
-			if (pt.size() > 0) {
-				pw.append("  if (" + buildGuard(pt, "current->state") + ") { ");
-			} else {
-				pw.append("  if (true) { ");
-			}
-			SparseIntArray eff = SparseIntArray.sumProd(-1, pt, 1, tp);
-			for (int i = 0, ie = eff.size(); i < ie; i++) {
-				pw.append("   current->state[" + eff.keyAt(i) + "] += " + eff.valueAt(i) + ";");
-			}
-			pw.append("   return true;\n");
-			pw.append("  } else { return false; }\n");
-			pw.append("}\n");
-		}
 		if (!forSpot) {
 			pw.println("int next_state(void* model, int group, int *src, TransitionCB callback, void *arg) {");
 
@@ -698,7 +668,18 @@ public class PetriNet2PinsTransformer {
 			pw.println("  switch (group) {");
 			for (int tindex = 0; tindex < net.getTransitionCount(); tindex++) {
 				pw.println("  case " + tindex + " : ");
-				pw.println("     if (transition" + tindex + "(&cur)) {");
+				
+				SparseIntArray pt = net.getFlowPT().getColumn(tindex);
+				SparseIntArray tp = net.getFlowTP().getColumn(tindex);
+				if (pt.size() > 0) {
+					pw.append("  if (" + buildGuard(pt, "cur.state") + ") { ");
+				} else {
+					pw.append("  if (true) { ");
+				}
+				SparseIntArray eff = SparseIntArray.sumProd(-1, pt, 1, tp);
+				for (int i = 0, ie = eff.size(); i < ie; i++) {
+					pw.append("   cur.state[" + eff.keyAt(i) + "] += " + eff.valueAt(i) + ";");
+				}
 				pw.println("       nbsucc++; ");
 				pw.println("       callback(arg, &transition_info, cur.state, wm[group]);");
 				// pw.println(" memcpy(& cur->state, src, sizeof(int)*
