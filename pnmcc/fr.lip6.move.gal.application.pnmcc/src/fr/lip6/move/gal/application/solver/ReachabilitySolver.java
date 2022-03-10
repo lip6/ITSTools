@@ -450,7 +450,7 @@ public class ReachabilitySolver {
 			}
 			sr.dropTransitions(tokill,"Redundant Transitions using SMT "+ (useStateEq?"with State Equation":"only with invariants") );
 			if (!tokill.isEmpty()) {
-				System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
+				System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions." /*+ tokill*/);								
 				hasReduced = true;
 			}
 		}
@@ -464,7 +464,7 @@ public class ReachabilitySolver {
 			}
 			sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
 			if (!tokill.isEmpty()) {
-				System.out.println("Dead transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
+				System.out.println("Dead transitions reduction (with SMT) removed "+tokill.size()+" transitions" /*+ tokill*/);								
 				hasReduced = true;
 			}
 		}
@@ -490,7 +490,7 @@ public class ReachabilitySolver {
 			}
 			sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
 			if (!tokill.isEmpty()) {
-				System.out.println("Dead transitions reduction (with SMT) triggered by suspicious arc values removed "+tokill.size()+" transitions :"+ tokill);								
+				System.out.println("Dead transitions reduction (with SMT) triggered by suspicious arc values removed "+tokill.size()+" transitions." /*+ tokill*/);								
 				if (rt == ReductionType.LIVENESS) {
 					throw new DeadlockFound();
 				}
