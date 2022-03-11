@@ -85,6 +85,9 @@ public class MultiOrderRunner {
 			} else {
 				reader2 = reader;
 			}
+			if (reader.getSpec() == null) {
+				reader.rebuildSpecification(doneProps);
+			}
 	
 			if (!wasKilled.get() && (useLouvain || useManyOrder)) {
 	//			if (useManyOrder)
