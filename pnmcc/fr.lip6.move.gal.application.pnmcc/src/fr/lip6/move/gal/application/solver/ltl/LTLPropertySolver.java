@@ -498,12 +498,12 @@ public class LTLPropertySolver {
 		
 		// cheap knowledge 
 		List<Expression> knowledge = new ArrayList<>(); 
-
-		addConvergenceKnowledge(knowledge, spn, tgba, spn.isSafe());
-
+		
 		addInitialStateKnowledge(knowledge, spn, tgba);
 
 		addNextStateKnowledge(knowledge, spn, tgba);
+		
+		addConvergenceKnowledge(knowledge, spn, tgba, spn.isSafe());
 		
 		System.out.println("Knowledge obtained : " + knowledge);
 
@@ -534,6 +534,14 @@ public class LTLPropertySolver {
 			}
 		}
 
+		if (!tgba.isStutterInvariant()) {
+			Expression allFacts = Expression.nop(Op.AND, knowledge);
+			tgba = spot.givenThat(tgba, allFacts, SpotRunner.GivenStrategy.STUTTER);
+			if (tgba.isStutterInvariant()) {
+				System.out.println("Knowledge sufficient to adopt a stutter insensitive property.");
+			}
+		}
+		
 		if (!(tgba.getEdges().size() == 1 && tgba.getEdges().get(0).isEmpty())) {
 			for (Expression factoid : knowledge) {
 				tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RELAX);
@@ -543,6 +551,7 @@ public class LTLPropertySolver {
 				}
 			}
 		}
+		
 		
 		System.out.println("Knowledge based reduction with " + knowledge.size() + " factoid took "
 				+ (System.currentTimeMillis() - time) + " ms. Reduced automaton from " + oriNbStates + " states, "
