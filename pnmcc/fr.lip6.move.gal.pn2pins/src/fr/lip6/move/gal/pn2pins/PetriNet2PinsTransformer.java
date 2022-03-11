@@ -296,14 +296,14 @@ public class PetriNet2PinsTransformer {
 			
 			int labindex = 0;			
 			for (labindex=0 ; labindex < net.getTransitionCount() ; labindex++) {
-				pw.println("    lts_type_set_state_label_name (ltstype, "+i+ ", \"enabled" + labindex + "\");");				
+				pw.println("    lts_type_set_state_label_name (ltstype, "+labindex+ ", \"enabled" + labindex + "\");");				
 			}
 			for (AtomicProp atom : atoms.getAtoms()) {
-				pw.println("    lts_type_set_state_label_name (ltstype, "+i+ ", \"LTLAP" + atom.getName() + "\");");
+				pw.println("    lts_type_set_state_label_name (ltstype, "+labindex+ ", \"LTLAP" + atom.getName() + "\");");
 				labindex++;
 			}
 			for (AtomicProp atom : invAtoms) {
-				pw.println("    lts_type_set_state_label_name (ltstype, "+i+ ", \"" + atom.getName() + "\");");
+				pw.println("    lts_type_set_state_label_name (ltstype, "+labindex+ ", \"" + atom.getName() + "\");");
 				labindex++;
 			}		
 		}
