@@ -732,8 +732,7 @@ public class SpotRunner {
 			cl.addArg("--check=stutter");
 			cl.addArg("--hoaf=tv"); // prefix notation for output
 		
-			// TODO : currently bugged
-			// cl.addArg("--small");
+			cl.addArg("--small");
 			cl.addArg("--given-formula="+printLTLProperty(factoid));
 
 			File curAut = Files.createTempFile("b4k", ".hoa").toFile();
