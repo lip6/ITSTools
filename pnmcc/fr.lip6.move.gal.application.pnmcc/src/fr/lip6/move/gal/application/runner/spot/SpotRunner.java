@@ -46,6 +46,8 @@ public class SpotRunner {
 		RESTRICT,
 		/**relax labels using impossible assignments if that reduce their support */
 		RELAX,
+		/** A variant of relax designed to make the language SI */
+		STUTTER,
 		/** do both [the default] */
 		ALL
 	}
@@ -113,6 +115,8 @@ public class SpotRunner {
 		CommandLine cl = new CommandLine();
 		cl.setWorkingDir(new File(workFolder));
 		cl.addArg(pathToltl2tgba);
+		
+		cl.addArg("--check=stutter");
 		cl.addArg("--hoaf=tv"); // prefix notation for output
 		if (prop.getType() == PropertyType.LTL) {
 			cl.addArg("-f"); // formula in next argument
@@ -725,6 +729,7 @@ public class SpotRunner {
 			CommandLine cl = new CommandLine();
 			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
+			cl.addArg("--check=stutter");
 			cl.addArg("--hoaf=tv"); // prefix notation for output
 		
 			// TODO : currently bugged
