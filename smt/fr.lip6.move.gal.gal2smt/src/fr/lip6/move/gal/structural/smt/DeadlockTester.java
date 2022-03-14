@@ -216,6 +216,7 @@ public class DeadlockTester {
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr,
 			String solverPath, boolean isSafe, List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> orders) {
 		System.out.println("Running SMT prover for "+tocheck.size()+" properties.");
+		if (tocheck.isEmpty()) { return new ArrayList<>(); }
 		if (true || tocheck.size() >= 20 || sr.getPlaceCount() + sr.getTransitionCount() >= 8000) {
 			return testUnreachableWithSMTIncremental(tocheck, sr, solverPath, isSafe, representative, timeout, withWitness, orders);
 		}
