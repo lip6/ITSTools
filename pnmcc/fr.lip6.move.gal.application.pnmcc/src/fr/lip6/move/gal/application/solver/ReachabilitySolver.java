@@ -162,7 +162,7 @@ public class ReachabilitySolver {
 						iter++;
 					
 				}
-				
+				ReachabilitySolver.checkInInitial(spn, doneProps);
 				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
 				if (spn.getProperties().isEmpty())
