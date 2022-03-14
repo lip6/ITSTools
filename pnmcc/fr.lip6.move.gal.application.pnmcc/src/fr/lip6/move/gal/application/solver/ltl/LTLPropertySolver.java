@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
@@ -32,11 +34,13 @@ import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.Property;
+import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.WalkUtils;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
+import fr.lip6.move.gal.structural.expr.AtomicPropManager;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.Simplifier;
@@ -498,15 +502,19 @@ public class LTLPropertySolver {
 		
 		// cheap knowledge 
 		List<Expression> knowledge = new ArrayList<>(); 
+		List<Expression> falseKnowledge = new ArrayList<>(); 
 		
 		addInitialStateKnowledge(knowledge, spn, tgba);
 
-		addNextStateKnowledge(knowledge, spn, tgba);
+		addNextStateKnowledge(knowledge, falseKnowledge, spn, tgba);
 		
 		addConvergenceKnowledge(knowledge, spn, tgba, spn.isSafe());
 		
+		addInvarianceKnowledge(knowledge, falseKnowledge, spn, tgba);
+		
 		System.out.println("Knowledge obtained : " + knowledge);
-
+		System.out.println("False Knowledge obtained : " + falseKnowledge);
+		
 		// try to reduce the tgba using this knowledge
 		if (false)
 			tgba = manuallyIntegrateKnowledge(spn, tgba, knowledge, propPN, spot);
@@ -515,6 +523,108 @@ public class LTLPropertySolver {
 			
 		return tgba;
 
+	}
+
+	private void addInvarianceKnowledge(List<Expression> knowledge, List<Expression> falseKnowledge, SparsePetriNet spn, TGBA tgba) {
+		
+		SparsePetriNet spnred = new SparsePetriNet(spn);
+		spnred.getProperties().clear();
+		
+		List<Expression> apForm = new ArrayList<>();
+		for (int s=0,se=tgba.nbStates() ; s < se ; s++) {
+			for (TGBAEdge e : tgba.getEdges().get(s)) {
+				apForm.add(e.getCondition());
+			}
+		}
+		// unify
+		apForm = new ArrayList<>(new LinkedHashSet<>(apForm));
+		
+		// build a list of invariants to test with SMT/random
+		// for each of them test value in initial state
+		SparseIntArray istate = new SparseIntArray(spn.getMarks());
+		
+		{
+			Set<Expression> seen = new HashSet<>();
+			int index = 0;
+			for (Expression cmp: apForm) {
+				
+				if (seen.add(cmp) && seen.add(Expression.not(cmp))) {
+
+					int val = cmp.eval(istate);
+					String pname = "apf" + index++;
+					if (val == 1) {
+						// UNSAT => it never becomes false
+						Property p = new Property(Expression.nop(Op.EF, Expression.not(cmp)), PropertyType.INVARIANT, pname);
+						spnred.getProperties().add(p);
+
+					} else {
+						// UNSAT => it never becomes true
+						Property p = new Property(Expression.nop(Op.EF,cmp), PropertyType.INVARIANT, pname);
+						spnred.getProperties().add(p);				
+					}
+				}
+			}
+			for (Property prop : spnred.getProperties()) {
+				Expression nbody = AtomicPropManager.rewriteWithoutAP(prop.getBody());
+				if (prop.getBody() != nbody) {
+					prop.setBody(nbody);
+				}				
+			}
+		}
+		
+		String wd = "/tmp";
+		try {
+			File workFolder = Files.createTempDirectory("redAtoms").toFile();
+			workFolder.deleteOnExit();
+			wd = workFolder.getCanonicalPath();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		MccTranslator reader = new MccTranslator(wd, false);
+		reader.setSpn(spnred, true);
+		
+		DoneProperties todoProps = new ConcurrentHashDoneProperties();
+		try {
+			ReachabilitySolver.applyReductions(reader, todoProps , solverPath, 100);
+		} catch (GlobalPropertySolvedException e) {
+			e.printStackTrace();
+		}
+		
+		int nsolved = 0;
+		for (Entry<String, Boolean> ent : todoProps.entrySet()) {
+			Boolean res = ent.getValue();
+			String pname = ent.getKey();
+			int pindex = Integer.parseInt(pname.replace("apf", ""));
+			Expression c = apForm.get(pindex);
+			boolean val = c.eval(istate) == 1;
+			if (! res) {
+				// cool we've proven an invariant, we can substitute							
+				if (DEBUG >= 1) System.out.println("SMT proved AP formula is invariant; concluding " + c + " is always " + val);						
+
+				if (val) {
+					knowledge.add(Expression.nop(Op.G, c));
+				} else {
+					knowledge.add(Expression.nop(Op.G, Expression.not(c)));
+				}
+				nsolved ++;
+			} else {
+				// so we have proved that EF !p if p is initially true
+				
+				Expression FnotP = null;
+				if (val) {
+					FnotP = Expression.nop(Op.F, Expression.not(c));						
+				} else {
+					FnotP = Expression.nop(Op.F, c);
+				}
+				
+				falseKnowledge.add(FnotP);
+			}
+		}
+		if (nsolved > 0) {
+			System.out.println("Found "+nsolved+" invariant AP formulas.");
+		}		
+		
 	}
 
 	private TGBA spotIntegrateKnowledge(SparsePetriNet spn, TGBA tgba, List<Expression> knowledge, Property propPN,
@@ -635,23 +745,25 @@ public class LTLPropertySolver {
 		return tgba;
 	}
 
-	private void addNextStateKnowledge(List<Expression> knowledge, SparsePetriNet spn, TGBA tgba) {
+	private void addNextStateKnowledge(List<Expression> knowledge, List<Expression> falseKnowledge, SparsePetriNet spn, TGBA tgba) {
 		Set<Expression> condX = new HashSet<>();
-		// check if there are true arc from initial state
-		for (TGBAEdge edge : tgba.getEdges().get(tgba.getInitial())) {
-			// edge is labeled by true
-			// if (edge.getCondition().getOp()==Op.BOOLCONST && edge.getCondition().getValue()==1) {
+		{
+			Set<Expression> seen = new HashSet<>();
+			// check if there are true arc from initial state
+			for (TGBAEdge edge : tgba.getEdges().get(tgba.getInitial())) {
 				// not a self loop, that is F as front operator
 				if (edge.getDest() != tgba.getInitial()) {
 					int dest = edge.getDest();
 					for (TGBAEdge edgeX : tgba.getEdges().get(dest)) {
 						if (edgeX.getCondition().getOp() != Op.BOOLCONST) {
-							// grab formulas labeling edges out of this node
-							condX.add(edgeX.getCondition());
+							if (seen.add(edgeX.getCondition()) && seen.add(Expression.not(edgeX.getCondition()))) {
+								// grab formulas labeling edges out of this node
+								condX.add(edgeX.getCondition());
+							}
 						}
 					}
 				}
-			// }
+			}
 		}
 		if (condX.isEmpty())
 			return;
@@ -688,6 +800,9 @@ public class LTLPropertySolver {
 				knowledge.add(Expression.nop(Op.X,condXlist.get(ei)));
 			} else if (allfalse[ei]) {
 				knowledge.add(Expression.nop(Op.X,Expression.not(condXlist.get(ei))));				
+			} else {
+				falseKnowledge.add(Expression.nop(Op.X,condXlist.get(ei)));
+				falseKnowledge.add(Expression.nop(Op.X,Expression.not(condXlist.get(ei))));
 			}
 		}
 		
