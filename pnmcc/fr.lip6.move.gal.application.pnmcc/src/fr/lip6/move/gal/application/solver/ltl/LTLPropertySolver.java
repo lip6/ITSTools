@@ -533,7 +533,8 @@ public class LTLPropertySolver {
 		List<Expression> apForm = new ArrayList<>();
 		for (int s=0,se=tgba.nbStates() ; s < se ; s++) {
 			for (TGBAEdge e : tgba.getEdges().get(s)) {
-				apForm.add(e.getCondition());
+				if (e.getCondition().getOp() != Op.BOOLCONST)
+					apForm.add(e.getCondition());
 			}
 		}
 		// unify
@@ -541,7 +542,7 @@ public class LTLPropertySolver {
 		
 		// build a list of invariants to test with SMT/random
 		// for each of them test value in initial state
-		SparseIntArray istate = new SparseIntArray(spn.getMarks());
+		SparseIntArray istate = new SparseIntArray(spnred.getMarks());
 		
 		{
 			Set<Expression> seen = new HashSet<>();
