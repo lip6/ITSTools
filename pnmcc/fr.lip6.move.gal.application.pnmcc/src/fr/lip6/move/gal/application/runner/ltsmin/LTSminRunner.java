@@ -79,8 +79,8 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 						
 					}
 					try {
-						compilePINS(Math.max(1, timeout/10));
-						linkPINS(Math.max(1, timeout/10));
+						compilePINS(Math.max(1, timeout/5));
+						linkPINS(Math.max(1, timeout/5));
 					} catch (TimeoutException to) {
 						throw new RuntimeException("Compilation or link of executable timed out." + to);
 					}
@@ -283,7 +283,9 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		clgcc.addArg("-I.");
 		clgcc.addArg("-std=c99");
 		clgcc.addArg("-fPIC");
-		clgcc.addArg("-O2");
+		// try no opt to limit timeout
+		clgcc.addArg("-O0");
+		// clgcc.addArg("-O2");
 		clgcc.addArg("model.c");
 
 		System.out.println("Running compilation step : " + clgcc);
