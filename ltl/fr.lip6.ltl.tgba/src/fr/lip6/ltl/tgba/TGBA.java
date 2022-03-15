@@ -324,6 +324,21 @@ public class TGBA {
 		return getProperties().contains("cl-invariant");
 	}
 
+	public boolean isEmptyLanguage() {
+		return nbStates() == 1 && getEdges().get(0).isEmpty();
+	}
+
+	public boolean isUniversalLanguage() {
+		if (nbStates() == 1 && getEdges().get(0).size() == 1) { 
+			TGBAEdge e = getEdges().get(0).get(0);
+			if (e.getSrc() == e.getDest() && e.getAcceptance().size() == getNbAcceptance() && e.getCondition().getOp() == Op.BOOLCONST && e.getCondition().getValue()==1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	
 	public void setStutterMarkers(boolean[] stutter) {
 		this.stutter = stutter;
 	}
