@@ -308,6 +308,9 @@ public class LTLPropertySolver {
 			if (tgbak != tgba) {
 				spnForPropWithK = reduceForProperty(spnForProp, tgbak,
 						spnForProp.getProperties().isEmpty() ? propPN : spnForProp.getProperties().get(0));
+				
+				// try again on this reduced system
+				tgbak = applyKnowledgeBasedReductions(spnForPropWithK, tgbak, spot, propPN);
 			} else {
 				spnForPropWithK = spnForProp;
 			}
@@ -360,9 +363,9 @@ public class LTLPropertySolver {
 			GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", solverPath, 15);
 			
 		} catch (AcceptedRunFoundException a) {
-			doneProps.put(propPN.getName(), false, "STUTTER_TEST");
+			doneProps.put(propPN.getName(), false, a.getTechniques());
 		} catch (EmptyProductException e2) {
-			doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
+			doneProps.put(propPN.getName(), true, e2.getTechniques());
 		}
 		System.out.println("Treatment of property "+propPN.getName()+" finished in "+(System.currentTimeMillis()-time)+" ms.");
 	}
@@ -629,7 +632,7 @@ public class LTLPropertySolver {
 	}
 
 	private TGBA spotIntegrateKnowledge(SparsePetriNet spn, TGBA tgba, List<Expression> knowledge, Property propPN,
-			SpotRunner spot) throws TimeoutException, EmptyProductException {
+			SpotRunner spot) throws TimeoutException, EmptyProductException, AcceptedRunFoundException {
 		
 		long time = System.currentTimeMillis();
 		int oriAlphabetSize = tgba.getAPs().size();
@@ -637,11 +640,31 @@ public class LTLPropertySolver {
 		int oriNbEdge = tgba.getEdges().stream().mapToInt(List::size).sum();
 		TGBA tgbaOri = tgba;
 		
+		tgba = knowledgeLoop(tgba, knowledge, spot);
+				
+		System.out.println("Knowledge based reduction with " + knowledge.size() + " factoid took "
+				+ (System.currentTimeMillis() - time) + " ms. Reduced automaton from " + oriNbStates + " states, "
+				+ oriNbEdge + " edges and " + oriAlphabetSize + " AP to " + tgba.getEdges().size() + " states, "
+				+ tgba.getEdges().stream().mapToInt(List::size).sum() + " edges and " + tgba.getAPs().size() + " AP.");		
+
+		if (tgba.isEmptyLanguage()) {
+			throw new EmptyProductException("KNOWLEDGE");
+		} else if (tgba.isUniversalLanguage()) {
+			throw new AcceptedRunFoundException("KNOWLEDGE");
+		}
+				
+		spot.computeInfStutter(tgba);
+		spot.runLTLSimplifications(spn);
+		
+		return tgba;
+	}
+
+	public TGBA knowledgeLoop(TGBA tgba, List<Expression> knowledge, SpotRunner spot) {
 		for (Expression factoid : knowledge) {
 			tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RESTRICT);
-			if (tgba.getEdges().size() == 1 && tgba.getEdges().get(0).isEmpty()) {
+			if (tgba.isEmptyLanguage()) {
 				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-				break;
+				return tgba;
 			}
 		}
 
@@ -653,29 +676,16 @@ public class LTLPropertySolver {
 			}
 		}
 		
-		if (!(tgba.getEdges().size() == 1 && tgba.getEdges().get(0).isEmpty())) {
-			for (Expression factoid : knowledge) {
-				tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RELAX);
-				if (tgba.getEdges().size() == 1 && tgba.getEdges().get(0).isEmpty()) {
-					System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-					break;
-				}
+		for (Expression factoid : knowledge) {
+			tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RELAX);
+			if (tgba.isEmptyLanguage()) {
+				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
+				return tgba;
+			} else if (tgba.isUniversalLanguage()) {
+				System.out.println("Property proved to be false thanks to knowledge :" + factoid);
+				return tgba;
 			}
 		}
-		
-		
-		System.out.println("Knowledge based reduction with " + knowledge.size() + " factoid took "
-				+ (System.currentTimeMillis() - time) + " ms. Reduced automaton from " + oriNbStates + " states, "
-				+ oriNbEdge + " edges and " + oriAlphabetSize + " AP to " + tgba.getEdges().size() + " states, "
-				+ tgba.getEdges().stream().mapToInt(List::size).sum() + " edges and " + tgba.getAPs().size() + " AP.");		
-
-		if (tgba.getEdges().size() == 1 && tgba.getEdges().get(0).isEmpty()) {
-			throw new EmptyProductException();
-		}
-		
-		spot.computeInfStutter(tgba);
-		spot.runLTLSimplifications(spn);
-		
 		return tgba;
 	}
 
@@ -710,7 +720,7 @@ public class LTLPropertySolver {
 				// we have empty product with !A.
 				if (spot.isProductEmpty(comp,ltl)) {
 					System.out.println("Property (complement) proved to be false thanks to knowledge :" + factoid);
-					throw new AcceptedRunFoundException();
+					throw new AcceptedRunFoundException("KNOWLEDGE");
 					//return TGBA.makeTrue();
 				}
 			} catch (IOException e) {
@@ -722,7 +732,7 @@ public class LTLPropertySolver {
 			if (prod.getEdges().get(prod.getInitial()).size() == 0) {
 				// this is just false !
 				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-				throw new EmptyProductException();
+				throw new EmptyProductException("KNOWLEDGE");
 //				return TGBA.makeFalse();
 			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
 				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
@@ -753,7 +763,7 @@ public class LTLPropertySolver {
 			// check if there are true arc from initial state
 			for (TGBAEdge edge : tgba.getEdges().get(tgba.getInitial())) {
 				// not a self loop, that is F as front operator
-				if (edge.getDest() != tgba.getInitial()) {
+				if (edge.getDest() != tgba.getInitial() || edge.getCondition().getOp() != Op.BOOLCONST) {
 					int dest = edge.getDest();
 					for (TGBAEdge edgeX : tgba.getEdges().get(dest)) {
 						if (edgeX.getCondition().getOp() != Op.BOOLCONST) {
