@@ -496,7 +496,7 @@ public class LTLPropertySolver2 {
 				// we have empty product with !A.
 				if (sr.isProductEmpty(comp,ltl)) {
 					System.out.println("Property (complement) proved to be false thanks to knowledge :" + factoid);
-					throw new AcceptedRunFoundException();
+					throw new AcceptedRunFoundException("KNOWLEDGE");
 					//return TGBA.makeTrue();
 				}
 
@@ -505,7 +505,7 @@ public class LTLPropertySolver2 {
 				if (prod.getEdges().get(prod.getInitial()).size() == 0) {
 					// this is just false !
 					System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-					throw new EmptyProductException();
+					throw new EmptyProductException("KNOWLEDGE");
 					//				return TGBA.makeFalse();
 				} 
 				//			else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
