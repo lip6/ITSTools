@@ -36,11 +36,3 @@ jobs:
           folder: fr.lip6.move.gal.updatesite/target/repository # The folder the action should deploy.
           clean: true # Automatically remove deleted files from the deploy branch
           single-commit: true 
-    - name: Trigger ITS commandline
-      uses: mvasigh/dispatch-action@main
-      with:
-          # You should create a personal access token and store it in your repository
-          token: ${{ secrets.NOTIF_PAT }}
-          repo: ITS-commandline
-          owner: yanntm
-          event_type: rebuild
