@@ -533,11 +533,19 @@ public class LTLPropertySolver {
 		SparsePetriNet spnred = new SparsePetriNet(spn);
 		spnred.getProperties().clear();
 		
+		
 		List<Expression> apForm = new ArrayList<>();
-		for (int s=0,se=tgba.nbStates() ; s < se ; s++) {
-			for (TGBAEdge e : tgba.getEdges().get(s)) {
-				if (e.getCondition().getOp() != Op.BOOLCONST)
-					apForm.add(e.getCondition());
+		{
+			Set<Expression> seen = new HashSet<>();
+			for (int s=0,se=tgba.nbStates() ; s < se ; s++) {
+				for (TGBAEdge e : tgba.getEdges().get(s)) {
+					if (e.getCondition().getOp() != Op.BOOLCONST) {
+						Expression cmp = e.getCondition();
+						if (seen.add(cmp) && seen.add(Expression.not(cmp))) {
+							apForm.add(e.getCondition());
+						}
+					}
+				}
 			}
 		}
 		// unify
@@ -548,12 +556,9 @@ public class LTLPropertySolver {
 		SparseIntArray istate = new SparseIntArray(spnred.getMarks());
 		
 		{
-			Set<Expression> seen = new HashSet<>();
+			
 			int index = 0;
 			for (Expression cmp: apForm) {
-				
-				if (seen.add(cmp) && seen.add(Expression.not(cmp))) {
-
 					int val = cmp.eval(istate);
 					String pname = "apf" + index++;
 					if (val == 1) {
@@ -566,7 +571,6 @@ public class LTLPropertySolver {
 						Property p = new Property(Expression.nop(Op.EF,cmp), PropertyType.INVARIANT, pname);
 						spnred.getProperties().add(p);				
 					}
-				}
 			}
 			for (Property prop : spnred.getProperties()) {
 				Expression nbody = AtomicPropManager.rewriteWithoutAP(prop.getBody());
