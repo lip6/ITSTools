@@ -94,7 +94,7 @@ public class RandomProductWalker {
 				if (cur.getPNState().equals(getWU(initialTGBA).getInitial()) && tgbaState == initialTGBA ) {
 					System.out.println("Initial state of product has no viable successors after "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
 					
-					throw new EmptyProductException();					
+					throw new EmptyProductException("STUTTER_TEST");					
 				} else {
 					reset ++;
 					cur = initial;
@@ -107,13 +107,13 @@ public class RandomProductWalker {
 			} else if (tgbaArcs.stream().anyMatch(arcid -> acceptAll[tgba.getEdges().get(tgbaState).get(arcid).getDest()])) {
 				System.out.println("Entered a terminal (fully accepting) state of product in "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
 
-				throw new AcceptedRunFoundException();
+				throw new AcceptedRunFoundException("STUTTER_TEST");
 			} else {
 				
 				if (enabled[0]==0 || getWU(tgbaState).canStutter(enabled)) {
 					if (tgba.getInfStutter().get(tgbaState).eval(cur.getPNState())==1) {
 						System.out.println("Stuttering criterion allowed to conclude after "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
-						throw new AcceptedRunFoundException();
+						throw new AcceptedRunFoundException("STUTTER_TEST");
 					}
 					if (enabled[0]==0) {
 						// deadlock in KS
@@ -179,7 +179,7 @@ public class RandomProductWalker {
 							System.out.println("Stack based approach found an accepted trace after " + i
 									+ " steps with " + reset + " reset with depth " + stackdepth + " and stack size "
 									+ stack.size() + " in " + (System.currentTimeMillis() - time) + " ms.");
-							throw new AcceptedRunFoundException();
+							throw new AcceptedRunFoundException("STACK_TEST");
 						}
 					}
 				}
