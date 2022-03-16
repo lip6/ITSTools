@@ -215,8 +215,8 @@ public class DeadlockTester {
 	
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr,
 			String solverPath, boolean isSafe, List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> orders) {
-		System.out.println("Running SMT prover for "+tocheck.size()+" properties.");
 		if (tocheck.isEmpty()) { return new ArrayList<>(); }
+		System.out.println("Running SMT prover for "+tocheck.size()+" properties.");
 		if (true || tocheck.size() >= 20 || sr.getPlaceCount() + sr.getTransitionCount() >= 8000) {
 			return testUnreachableWithSMTIncremental(tocheck, sr, solverPath, isSafe, representative, timeout, withWitness, orders);
 		}
@@ -409,6 +409,13 @@ public class DeadlockTester {
 			}
 		}
 		
+		
+		// are we finished ?
+		if (refineResultsWithTraps(sr, tnames, smt, solverPath, properties, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
+				solver.exit();
+				return verdicts;
+		}	
+		
 //				
 //		String rep = refineWithTraps(sr, tnames, solver, smt, solverPath);
 //		if (! "none".equals(rep)) {
@@ -447,6 +454,85 @@ public class DeadlockTester {
 	}
 
 
+
+
+	private static boolean refineResultsWithTraps(ISparsePetriNet sr, List<Integer> tnames, SMT smt,
+			String solverPath, List<Script> properties, boolean[] done, List<SparseIntArray> parikhs,
+			List<SparseIntArray> pors, List<String> verdicts, ISolver solver, boolean withWitness,
+			List<Integer> representative) {
+		
+		int nbdone = 0;
+		
+		for (int pid = 0, pide = properties.size() ; pid < pide ; pid++) {
+			if (done[pid]) {
+				nbdone++;
+				continue;
+			} else {
+				
+				IResponse res = solver.push(1);
+				if (res.isError()) {
+					break;
+				}
+				Script traps = new Script();
+				
+				Script tocheck = properties.get(pid);				
+				execAndCheckResult(tocheck, solver);
+				String textReply = checkSat(solver);
+
+				// are we finished ?
+				if (textReply.equals("unsat")||textReply.equals("unknown")) {
+					done[pid] = true;
+					nbdone++;
+					verdicts.set(pid, textReply);
+					if (textReply.equals("unsat"))
+						parikhs.set(pid, null);
+				}
+
+				if (textReply.equals("sat")) {
+					
+					textReply = refineWithTraps(sr, tnames, solver, smt, solverPath, traps);
+					if (textReply.equals("unsat")||textReply.equals("unknown")) {
+						done[pid] = true;
+						nbdone++;
+						verdicts.set(pid, textReply);
+						if (textReply.equals("unsat"))
+							parikhs.set(pid, null);
+					} else {
+					
+						SparseIntArray state = new SparseIntArray();
+						SparseIntArray parikh = new SparseIntArray();
+						SparseIntArray por = new SparseIntArray();
+						boolean hasreals = queryVariables(state, parikh, por, representative, solver);
+						if (hasreals)
+						{
+							// Logger.getLogger("fr.lip6.move.gal").info("Solution in real domain found non-integer solution.");
+							textReply = "real";
+							done[pid] = true;
+							nbdone++;
+							verdicts.set(pid, textReply);
+						} else {
+							parikhs.set(pid, parikh);
+							pors.set(pid, por);
+						}
+					}
+				}
+
+				res = solver.pop(1);
+				if (res.isError()) {
+					break;
+				}
+				
+				if (! traps.commands().isEmpty()) {
+					execAndCheckResult(traps, solver);
+					traps = new Script();
+				}
+				
+			}
+		}
+
+		// true if no more props to check
+		return nbdone == properties.size();
+	}
 
 
 	private static boolean checkResults(List<Script> properties, boolean[] done, List<SparseIntArray> parikhs,
@@ -584,7 +670,7 @@ public class DeadlockTester {
 		}
 		
 		if (textReply.equals("sat")) {
-			String rep = refineWithTraps(sr, tnames, solver, smt, solverPath);
+			String rep = refineWithTraps(sr, tnames, solver, smt, solverPath, null);
 			if (! "none".equals(rep)) {
 				textReply = rep;				
 				textReply = realityCheck(tnames, solveWithReals, solver, textReply);
@@ -845,7 +931,7 @@ public class DeadlockTester {
 					}
 				}
 				if (effective == 0) {
-					String rep = refineWithTraps(sr, tnames, solver, smt, solverPath);
+					String rep = refineWithTraps(sr, tnames, solver, smt, solverPath, null);
 					if (! "none".equals(rep)) {
 						continue;
 					} else {
@@ -880,7 +966,7 @@ public class DeadlockTester {
 	}
 
 	private static String refineWithTraps(ISparsePetriNet sr, List<Integer> tnames, ISolver solver,
-			org.smtlib.SMT smt, String solverPath) {
+			org.smtlib.SMT smt, String solverPath, Script traps) {
 		long time = System.currentTimeMillis();		
 		List<Integer> trap ;
 		String textReply = "none";
@@ -901,12 +987,18 @@ public class DeadlockTester {
 				List<IExpr> vars = trap.stream().map(n -> ef.symbol("s"+n)).collect(Collectors.toList());
 				IExpr sum = buildSum(ef, vars);
 				Script s = new Script();
-				s.add(new C_assert(ef.fcn(ef.symbol(">"), sum , ef.numeral(0))));
+				ICommand constraint = new C_assert(ef.fcn(ef.symbol(">"), sum , ef.numeral(0)));
+				s.add(constraint);
+				if (traps != null) {
+					traps.add(constraint);
+				}
 				execAndCheckResult(s, solver);
 				textReply = checkSat(solver,  false);
 				if (textReply.equals("unsat")) {
 					Logger.getLogger("fr.lip6.move.gal").info("Trap strengthening procedure managed to obtain unsat after adding "+added+ " trap constraints in " + (System.currentTimeMillis() -time) + " ms");
 					return textReply;
+				} else if (textReply.equals("unknown")) {
+					break;
 				}
 			}				
 		} while (!trap.isEmpty());
