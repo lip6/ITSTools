@@ -766,6 +766,58 @@ public class SpotRunner {
 		return tgbaout;
 	}
 	
+	
+	public boolean isIncludedIn(Expression falseFact, TGBA tgba) {
+		try {
+			long time = System.currentTimeMillis();
+			CommandLine cl = new CommandLine();
+			cl.setWorkingDir(new File(workFolder));
+			cl.addArg(pathToautfilt);
+			
+			// build automaton for tgba
+			// pass TGBA in HOAF
+			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
+			if (DEBUG == 0) curAut.deleteOnExit();
+			PrintWriter pw = new PrintWriter(curAut);
+			tgba.exportAsHOA(pw);
+			pw.close();
+			cl.addArg("--included-in="+curAut.getCanonicalPath());
+			
+			// build and pass aut for false factoid
+			File falseAut = Files.createTempFile("ffact", ".hoa").toFile();
+			if (DEBUG == 0) falseAut.deleteOnExit();
+			String ltlFalseFact = printLTLProperty(falseFact);
+			if (! buildAutomaton(ltlFalseFact,falseAut)) {
+				return false;
+			}
+			
+			cl.addArg(falseAut.getCanonicalPath());
+
+			if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
+			File stdOutput = Files.createTempFile("isImply", ".out").toFile();
+			if (DEBUG == 0) stdOutput.deleteOnExit();
+			int status = Runner.runTool(timeout, cl, stdOutput, true);
+			if (status == 0 || status == 1) {
+				if (DEBUG >= 1) System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());
+				
+				if (stdOutput.length() > 0) {
+					return true;
+				} else {
+					return false;
+				}
+				
+			} else {
+				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+				try (Stream<String> stream = Files.lines(Paths.get(stdOutput.getCanonicalPath()))) {
+					stream.forEach(System.out::println);
+				}
+			}
+		} catch (IOException | TimeoutException | InterruptedException e) {
+			e.printStackTrace();
+		}				
+		return false;
+	}
+
 
 	public boolean isImpliedBy(Expression main, Expression implicant) {
 		try {
