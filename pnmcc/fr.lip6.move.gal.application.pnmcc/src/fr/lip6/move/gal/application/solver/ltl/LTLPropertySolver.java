@@ -513,8 +513,6 @@ public class LTLPropertySolver {
 		
 		addConvergenceKnowledge(knowledge, spn, tgba, spn.isSafe());
 		
-		addInvarianceKnowledge(knowledge, falseKnowledge, spn, tgba);
-		
 		System.out.println("Knowledge obtained : " + knowledge);
 		System.out.println("False Knowledge obtained : " + falseKnowledge);
 		
@@ -522,10 +520,19 @@ public class LTLPropertySolver {
 		if (false)
 			tgba = manuallyIntegrateKnowledge(spn, tgba, knowledge, propPN, spot);
 		else
-			tgba = spotIntegrateKnowledge(spn, tgba, knowledge, propPN, spot);
-			
-		return tgba;
+			tgba = spotIntegrateKnowledge(spn, tgba, knowledge, falseKnowledge, propPN, spot);
 
+		if (tgba.isEmptyLanguage() || tgba.isUniversalLanguage()) {
+			return tgba;
+		} else {
+			addInvarianceKnowledge(knowledge, falseKnowledge, spn, tgba);
+
+			System.out.println("Knowledge obtained : " + knowledge);
+			System.out.println("False Knowledge obtained : " + falseKnowledge);
+
+			tgba = spotIntegrateKnowledge(spn, tgba, knowledge, falseKnowledge, propPN, spot);
+		}
+		return tgba;
 	}
 
 	private void addInvarianceKnowledge(List<Expression> knowledge, List<Expression> falseKnowledge, SparsePetriNet spn, TGBA tgba) {
@@ -635,7 +642,7 @@ public class LTLPropertySolver {
 		
 	}
 
-	private TGBA spotIntegrateKnowledge(SparsePetriNet spn, TGBA tgba, List<Expression> knowledge, Property propPN,
+	private TGBA spotIntegrateKnowledge(SparsePetriNet spn, TGBA tgba, List<Expression> knowledge, List<Expression> falseKnowledge, Property propPN,
 			SpotRunner spot) throws TimeoutException, EmptyProductException, AcceptedRunFoundException {
 		
 		long time = System.currentTimeMillis();
@@ -644,7 +651,7 @@ public class LTLPropertySolver {
 		int oriNbEdge = tgba.getEdges().stream().mapToInt(List::size).sum();
 		TGBA tgbaOri = tgba;
 		
-		tgba = knowledgeLoop(tgba, knowledge, spot);
+		tgba = knowledgeLoop(tgba, knowledge, falseKnowledge, spot);
 				
 		System.out.println("Knowledge based reduction with " + knowledge.size() + " factoid took "
 				+ (System.currentTimeMillis() - time) + " ms. Reduced automaton from " + oriNbStates + " states, "
@@ -663,7 +670,32 @@ public class LTLPropertySolver {
 		return tgba;
 	}
 
-	public TGBA knowledgeLoop(TGBA tgba, List<Expression> knowledge, SpotRunner spot) {
+	public TGBA knowledgeLoop(TGBA tgba, List<Expression> knowledge, List<Expression> falseKnowledge, SpotRunner spot) {
+		
+		// counter-examples ?
+		{
+			TGBA tgbarelax = tgba;
+			for (Expression factoid : knowledge) {
+				tgbarelax = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RELAX);
+				if (tgba.isEmptyLanguage()) {
+					System.out.println("Property proved to be true thanks to knowledge :" + factoid);
+					return tgbarelax;
+				} else if (tgba.isUniversalLanguage()) {
+					System.out.println("Property proved to be false thanks to knowledge :" + factoid);
+					return tgbarelax;
+				}
+			}
+			// test inclusion
+			// autfilt --included-in=AnotPhi.hoa Kmoins.hoa
+			for (Expression factoid : falseKnowledge) {
+				if (spot.isIncludedIn(factoid,tgbarelax)) {
+					System.out.println("Property proved to be false thanks to negative knowledge :" + factoid);
+					return TGBA.makeTrue();				
+				}
+			}
+		}
+		
+		
 		for (Expression factoid : knowledge) {
 			tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RESTRICT);
 			if (tgba.isEmptyLanguage()) {
