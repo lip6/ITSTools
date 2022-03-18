@@ -2,12 +2,14 @@ package fr.lip6.move.gal.application.runner.ltsmin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.LTLProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
@@ -29,6 +31,7 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class LTSminRunner extends AbstractRunner implements IRunner {
 
+	private static final int DEBUG = 0;
 	private String solverPath;
 	private boolean doPOR;
 	private boolean onlyGal;
@@ -37,6 +40,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 	private long timeout;
 	private boolean isSafe;
 	private SparsePetriNet spn;
+	private TGBA tgba;
 
 	public LTSminRunner(String solverPath, Solver solver, boolean doPOR, boolean onlyGal, long timeout, boolean isSafe) {
 		this.solverPath = solverPath;
@@ -75,7 +79,11 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 
 					} else {
 						p2p = new PetriNet2PinsTransformer();
-						p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false);
+						if (tgba != null) {
+							p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false, tgba.getApm());
+						} else {
+							p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false, null);
+						}
 						
 					}
 					try {
@@ -101,7 +109,19 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 								.collect(Collectors.toList());
 					}
 					todo.removeAll(doneProps.keySet());
-					checkProperties(g2p, p2p, timeout,doneProps);
+					
+					if (tgba == null) {
+						checkProperties(g2p, p2p, timeout,doneProps);
+					} else {
+						File curAut = Files.createTempFile("curaut", ".hoa").toFile();
+						if (DEBUG == 0) curAut.deleteOnExit();
+						PrintWriter pw = new PrintWriter(curAut);
+						tgba.exportAsHOA(pw);
+						pw.close();
+						
+						checkProperty(tgba.getName(), curAut.getCanonicalPath(), timeout, false, PropertyType.LTL);
+						
+					}
 					todo.removeAll(doneProps.keySet());
 					if (! todo.isEmpty()) {
 						System.out.println("Retrying LTSmin with larger timeout "+(8*timeout)+ " s");
@@ -269,7 +289,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 	}
 	
 	private boolean isStutterInvariant(String pbody) {		
-		return pbody ==null || ! pbody.contains("X");
+		return pbody==null || pbody.contains(".hoa") || ! pbody.contains("X");
 	}
 
 	private void compilePINS(long timeout) throws IOException, TimeoutException, InterruptedException {
@@ -327,5 +347,10 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 
 	public void setNet(SparsePetriNet spn) {
 		this.spn = spn;
+	}
+
+
+	public void setTGBA(TGBA negProp) {
+		this.tgba = negProp;
 	}
 }
