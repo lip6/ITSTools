@@ -66,7 +66,7 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 
 					} else {
 						p2p = new PetriNet2PinsTransformer();
-						p2p.transform(spn, workFolder, false, true);
+						p2p.transform(spn, workFolder, false, true, null);
 						
 					}
 					try {
