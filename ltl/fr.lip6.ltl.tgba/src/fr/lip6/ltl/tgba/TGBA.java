@@ -25,6 +25,7 @@ public class TGBA {
 	private List<Expression> infStutter = null;
 	private List<AtomicProp> atoms = new ArrayList<>();
 	private boolean[] stutter;
+	private String name;
 	
 	public TGBA(int numberOfStates,AtomicPropManager apm) {
 		mat = new ArrayList<>();		
@@ -34,6 +35,7 @@ public class TGBA {
 		}
 		stutter = new boolean[numberOfStates];
 		this.apm = apm;
+		this.name = "Formula";
 	}
 
 	public void setInitial(int state) {
@@ -104,13 +106,21 @@ public class TGBA {
 		return mat.size();
 	}
 	
+	public String getName() {
+		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 	@Override
 	public String toString() {
 		String atomsred = atoms.toString() ;
 		if (atomsred.length() > 155) {
 			atomsred= atomsred.substring(0,155) + "...]"; // some APS are too long to print, 160 char is about two lines of it, that is enough
 		}
-		return "TGBA [mat=" + mat + ", initial=" + initial + ", aps=" + atomsred  + ", nbAcceptance=" + nbAcceptance
+		return "TGBA "+name+"[mat=" + mat + ", initial=" + initial + ", aps=" + atomsred  + ", nbAcceptance=" + nbAcceptance
 				+ ", properties=" + properties + ", stateDesc=" + stateDesc + Arrays.toString(stutter) +"]";
 	}
 	
@@ -128,7 +138,7 @@ public class TGBA {
 //		properties: trans-labels explicit-labels trans-acc stutter-invariant
 		
 		pw.println("HOA: v1");
-		pw.println("name: \"Formula\"");
+		pw.println("name: \""+name+"\"");
 		pw.println("States: "+mat.size());
 		pw.println("Start: "+initial);
 		
@@ -295,6 +305,7 @@ public class TGBA {
 
 	public static TGBA makeTrue() {
 		TGBA tt = new TGBA(1,new AtomicPropManager());
+		tt.setName("UniversalLanguage");
 		tt.setInitial(0);
 		tt.setAcceptSize(0);
 		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(true)));
@@ -306,6 +317,7 @@ public class TGBA {
 
 	public static TGBA makeFalse() {
 		TGBA tt = new TGBA(1,new AtomicPropManager());
+		tt.setName("EmptyLanguage");
 		tt.setInitial(0);
 		tt.setAcceptSize(0);
 		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(false)));

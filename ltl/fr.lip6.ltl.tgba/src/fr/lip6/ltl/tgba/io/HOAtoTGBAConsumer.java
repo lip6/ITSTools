@@ -96,7 +96,7 @@ public class HOAtoTGBAConsumer implements HOAConsumer {
 
 	@Override
 	public void setName(String name) throws HOAConsumerException {
-		// meh, more cosmetics, just forget it.
+		tgba.setName(name);
 	}
 
 	@Override
