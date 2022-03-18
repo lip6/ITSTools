@@ -22,11 +22,14 @@ import fr.lip6.ltl.tgba.RandomProductWalker;
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.ltl.tgba.TGBAEdge;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
+import fr.lip6.move.gal.application.runner.Ender;
+import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
 import fr.lip6.move.gal.application.solver.GALSolver;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.application.solver.logic.AtomicReducerSR;
+import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
@@ -337,6 +340,14 @@ public class LTLPropertySolver {
 			if (doneProps.containsKey(propPN.getName())) 
 				return;
 			
+			if (false) {
+				// using HOA
+				tgbak.setName(propPN.getName());
+				verifyWithLTSmin(spnForPropWithK, tgbak, doneProps, 15);
+				SparsePetriNet spnHOA = reduceForProperty(spnForProp, tgbak, null);
+				verifyWithLTSmin(spnHOA, tgbak, doneProps, 15);
+			}
+			
 			// Last step, try exhaustive methods
 			
 			MccTranslator reader2 = reader.copy();
@@ -368,6 +379,31 @@ public class LTLPropertySolver {
 			doneProps.put(propPN.getName(), true, e2.getTechniques());
 		}
 		System.out.println("Treatment of property "+propPN.getName()+" finished in "+(System.currentTimeMillis()-time)+" ms.");
+	}
+	
+	private void verifyWithLTSmin (SparsePetriNet spn, TGBA negProp, DoneProperties doneProps, int timeout) {
+		LTSminRunner ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, negProp.isStutterInvariant(), false, timeout, spn.isSafe());
+		
+		try {
+			ltsminRunner.configure(null, doneProps);
+			ltsminRunner.setNet(spn);
+			ltsminRunner.setTGBA(negProp);
+
+			ltsminRunner.solve(new Ender() {
+				public void killAll() {
+					ltsminRunner.interrupt();
+				}
+			});
+
+			ltsminRunner.join(timeout*1000);
+			ltsminRunner.interrupt();
+			ltsminRunner.join();
+		} catch (IOException | InterruptedException e) {
+			System.out.println("LTSmin runner failed with exception " + e.getMessage());
+			e.printStackTrace();
+		}
+
+		spn.getProperties().removeIf(p->doneProps.containsKey(p.getName()));
 	}
 
 	private void treatPartialPOR(TGBA tgbak, SparsePetriNet spnForPropWithK, SpotRunner spot) throws LTLException {
