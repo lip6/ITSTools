@@ -806,7 +806,7 @@ public class PetriNet2PinsTransformer {
 	private boolean forSpot;
 	private List<AtomicProp> invAtoms = new ArrayList<>();
 	
-	public void transform(SparsePetriNet spn, String cwd, boolean withPorMatrix, boolean forSpot) {
+	public void transform(SparsePetriNet spn, String cwd, boolean withPorMatrix, boolean forSpot, AtomicPropManager providedAPM) {
 		this.forSpot = forSpot;
 		//		if ( spec.getMain() instanceof GALTypeDeclaration ) {
 		//			Logger.getLogger("fr.lip6.move.gal").fine("detecting pure GAL");
@@ -824,24 +824,28 @@ public class PetriNet2PinsTransformer {
 			+ ") to apply POR reductions. Disabling POR matrices.");
 		}
 		
-		boolean isLTL = true;
-		if (! spn.getProperties().isEmpty() && spn.getProperties().get(0).getType() == PropertyType.INVARIANT) {
-			isLTL = false;
-		}
-		
-		if (isLTL) {
-			atoms.loadAtomicProps(spn.getProperties());
+		if (providedAPM != null) {
+			this.atoms = providedAPM;
 		} else {
-			for (Property prop : spn.getProperties()) {
-				if (prop.getType() == PropertyType.INVARIANT) {
-					if (prop.getBody().getOp() == Op.AG) {
-						invAtoms.add(new AtomicProp(prop.getName().replaceAll("-", ""), 
-								prop.getBody().childAt(0)));
-					} else if (prop.getBody().getOp() == Op.EF) {
-						// negate
-						invAtoms.add(new AtomicProp(prop.getName().replaceAll("-", ""),
-								Expression.not(prop.getBody().childAt(0))));
-					}					
+			boolean isLTL = true;
+			if (! spn.getProperties().isEmpty() && spn.getProperties().get(0).getType() == PropertyType.INVARIANT) {
+				isLTL = false;
+			}
+
+			if (isLTL) {
+				atoms.loadAtomicProps(spn.getProperties());
+			} else {
+				for (Property prop : spn.getProperties()) {
+					if (prop.getType() == PropertyType.INVARIANT) {
+						if (prop.getBody().getOp() == Op.AG) {
+							invAtoms.add(new AtomicProp(prop.getName().replaceAll("-", ""), 
+									prop.getBody().childAt(0)));
+						} else if (prop.getBody().getOp() == Op.EF) {
+							// negate
+							invAtoms.add(new AtomicProp(prop.getName().replaceAll("-", ""),
+									Expression.not(prop.getBody().childAt(0))));
+						}					
+					}
 				}
 			}
 		}
