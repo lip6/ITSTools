@@ -116,7 +116,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 						File curAut = Files.createTempFile("curaut", ".hoa").toFile();
 						if (DEBUG == 0) curAut.deleteOnExit();
 						PrintWriter pw = new PrintWriter(curAut);
-						tgba.exportAsHOA(pw);
+						tgba.exportAsHOA(pw, true);
 						pw.close();
 						
 						checkProperty(tgba.getName(), curAut.getCanonicalPath(), timeout, false, PropertyType.LTL);
