@@ -291,7 +291,7 @@ public class SpotRunner {
 			File f1 = Files.createTempFile("autA", ".hoa").toFile();
 			if (DEBUG == 0) f1.deleteOnExit();
 			PrintWriter pw = new PrintWriter(f1);
-			tgba.exportAsHOA(pw);
+			tgba.exportAsHOA(pw, false);
 			pw.close();
 			
 			File f2 = Files.createTempFile("autB", ".hoa").toFile();
@@ -315,7 +315,7 @@ public class SpotRunner {
 		File curAut = Files.createTempFile("curaut", ".hoa").toFile();
 		if (DEBUG == 0) curAut.deleteOnExit();
 		PrintWriter pw = new PrintWriter(curAut);
-		tgba.exportAsHOA(pw);
+		tgba.exportAsHOA(pw, false);
 		pw.close();
 		cl.addArg(curAut.getCanonicalPath());
 
@@ -501,7 +501,7 @@ public class SpotRunner {
 		File curAut = Files.createTempFile("curaut", ".hoa").toFile();
 		if (DEBUG == 0) curAut.deleteOnExit();
 		PrintWriter pw = new PrintWriter(curAut);
-		tgba.exportAsHOA(pw);
+		tgba.exportAsHOA(pw, false);
 		pw.close();
 		cl.addArg("-F");
 		cl.addArg(curAut.getCanonicalPath());
@@ -537,7 +537,7 @@ public class SpotRunner {
 			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
 			if (DEBUG == 0) curAut.deleteOnExit();
 			PrintWriter pw = new PrintWriter(curAut);
-			tgba.exportAsHOA(pw);
+			tgba.exportAsHOA(pw, false);
 			pw.close();
 			cl.addArg("-F");
 			cl.addArg(curAut.getCanonicalPath());
@@ -659,7 +659,7 @@ public class SpotRunner {
 		File curAut = Files.createTempFile("curaut", ".hoa").toFile();
 		if (DEBUG == 0) curAut.deleteOnExit();
 		PrintWriter pw = new PrintWriter(curAut);
-		tgba.exportAsHOA(pw);
+		tgba.exportAsHOA(pw, false);
 		pw.close();
 		cl.addArg(curAut.getCanonicalPath());
 
@@ -738,7 +738,7 @@ public class SpotRunner {
 			File curAut = Files.createTempFile("b4k", ".hoa").toFile();
 			if (DEBUG == 0) curAut.deleteOnExit();
 			PrintWriter pw = new PrintWriter(curAut);
-			tgba.exportAsHOA(pw);
+			tgba.exportAsHOA(pw, false);
 			pw.close();
 			cl.addArg("-F");
 			cl.addArg(curAut.getCanonicalPath());	
@@ -779,7 +779,7 @@ public class SpotRunner {
 			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
 			if (DEBUG == 0) curAut.deleteOnExit();
 			PrintWriter pw = new PrintWriter(curAut);
-			tgba.exportAsHOA(pw);
+			tgba.exportAsHOA(pw, false);
 			pw.close();
 			cl.addArg("--included-in="+curAut.getCanonicalPath());
 			
