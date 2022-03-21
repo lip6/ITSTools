@@ -125,7 +125,7 @@ public class TGBA {
 	}
 	
 	
-	public void exportAsHOA (PrintWriter pw) {
+	public void exportAsHOA (PrintWriter pw, boolean forLTSmin) {
 
 		//example target
 //		HOA: v1
@@ -148,8 +148,14 @@ public class TGBA {
 		
 		
 		pw.print("AP: "+atoms.size());
-		for (AtomicProp ap : atoms) {
-			pw.print(" \"" + ap.getName() + "\"");
+		if (forLTSmin) {
+			for (AtomicProp ap : atoms) {
+				pw.print(" \"LTLAP" + ap.getName() + "==true\"");
+			}
+		} else {
+			for (AtomicProp ap : atoms) {
+				pw.print(" \"" + ap.getName() + "\"");
+			}
 		}
 		
 		pw.println();
