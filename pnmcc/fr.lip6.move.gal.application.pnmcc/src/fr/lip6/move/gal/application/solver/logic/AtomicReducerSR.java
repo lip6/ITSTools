@@ -79,7 +79,7 @@ public class AtomicReducerSR {
 		SparseIntArray istate = new SparseIntArray(spn.getMarks());
 		for (AtomicProp ent: apm.getAtoms()) {
 			Expression cmp = ent.getExpression();
-			String pname = ent.getName();
+			String pname = "AtomicProp"+ent.getName();
 			int val = cmp.eval(istate);
 			if (val == 1) {
 				// UNSAT => it never becomes false
@@ -117,7 +117,7 @@ public class AtomicReducerSR {
 		int nsimpl = 0;
 		for (Entry<String, Boolean> ent : todoProps.entrySet()) {
 			Boolean res = ent.getValue();
-			String pname = ent.getKey();
+			String pname = ent.getKey().replace("AtomicProp", "") ;
 			
 			if (! res) {
 				// cool we've proven an invariant, we can substitute			
