@@ -27,7 +27,12 @@ public class CommandLine {
 
 	@Override
 	public String toString() {
-		return "CommandLine [args=" + args + ", workingDir=" + workingDir + "]";
+		StringBuilder sb = new StringBuilder();
+		if (workingDir != null) sb.append("cd ").append(workingDir).append(";");
+		for (String arg : args) {
+			sb.append("'").append(arg).append("'").append(" ");
+		}
+		return sb.toString();
 	}
  
 	
