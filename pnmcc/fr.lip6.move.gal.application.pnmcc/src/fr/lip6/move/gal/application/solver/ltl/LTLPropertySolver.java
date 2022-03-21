@@ -340,7 +340,7 @@ public class LTLPropertySolver {
 			if (doneProps.containsKey(propPN.getName())) 
 				return;
 			
-			if (false) {
+			if (true) {
 				// using HOA
 				tgbak.setName(propPN.getName());
 				verifyWithLTSmin(spnForPropWithK, tgbak, doneProps, 15);
