@@ -5,22 +5,12 @@ Bundle-SymbolicName: org.logicng
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: LogicNG + LIP6
 Automatic-Module-Name: org.logicng
-Bundle-ClassPath: lib/antlr4-runtime.jar,
- lib/logicng.jar
 Export-Package: org.logicng.backbones,
- org.logicng.bdds,
- org.logicng.bdds.datastructures,
- org.logicng.bdds.io,
- org.logicng.bdds.jbuddy,
- org.logicng.bdds.orderings,
  org.logicng.cardinalityconstraints,
  org.logicng.collections,
  org.logicng.configurations,
  org.logicng.datastructures,
  org.logicng.datastructures.ubtrees,
- org.logicng.explanations.unsatcores,
- org.logicng.explanations.unsatcores.algorithms,
- org.logicng.explanations.unsatcores.drup,
  org.logicng.formulas,
  org.logicng.formulas.cache,
  org.logicng.formulas.printer,
@@ -38,6 +28,7 @@ Export-Package: org.logicng.backbones,
  org.logicng.propositions,
  org.logicng.pseudobooleans,
  org.logicng.solvers,
+ org.logicng.solvers.sat,
  org.logicng.solvers.datastructures,
  org.logicng.solvers.maxsat.algorithms,
  org.logicng.solvers.maxsat.encodings,
@@ -49,3 +40,4 @@ Export-Package: org.logicng.backbones,
  org.logicng.transformations.qmc,
  org.logicng.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ClassPath: lib/logicng.jar
