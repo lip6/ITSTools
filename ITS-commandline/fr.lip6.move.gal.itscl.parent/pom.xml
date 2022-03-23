@@ -42,10 +42,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<junit-version>4.8.1</junit-version>
 		<eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
-		<!-- EDIT THIS ORBIT SITE FOR NEXT RELEASE : this is 2019-09 -->
-		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository/</orbit-site>
-		<platform-version-name>2021-03</platform-version-name>
-		<tycho-version>1.7.0</tycho-version>
+		<!-- EDIT THIS ORBIT SITE FOR NEXT RELEASE : this is 2021-09 -->
+		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20220302172233/repository/</orbit-site>
+		<platform-version-name>2022-03</platform-version-name>
+		<tycho-version>2.7.0</tycho-version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
@@ -96,7 +96,7 @@
 				<configuration>
 					<resolver>p2</resolver>
 					<pomDependencies>consider</pomDependencies>
-					<executionEnvironmentDefault>JavaSE-1.8</executionEnvironmentDefault>
+					<executionEnvironmentDefault>JavaSE-11</executionEnvironmentDefault>
 					<!-- <target> <artifact> <groupId>org.eclipselabs.spray</groupId> <artifactId>org.eclipselabs.spray.targetplatform</artifactId> 
 						<version>0.4.0-SNAPSHOT</version> <classifier>spray</classifier> </artifact> 
 						</target> -->
