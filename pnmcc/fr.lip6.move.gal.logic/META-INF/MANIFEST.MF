@@ -10,7 +10,7 @@ Require-Bundle: fr.lip6.move.gal;visibility:=reexport,
  org.antlr.runtime,
  org.eclipse.xtext.util,
  org.logicng
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: org.apache.log4j
 Export-Package: fr.lip6.move.gal,
  fr.lip6.move.gal.logic,

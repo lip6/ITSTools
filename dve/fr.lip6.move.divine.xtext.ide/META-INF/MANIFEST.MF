@@ -9,8 +9,7 @@ Require-Bundle: org.eclipse.xtext.ide,
  org.antlr.runtime,
  org.eclipse.xtext.xbase.lib,
  fr.lip6.move.divine.xtext;bundle-version="1.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: fr.lip6.move.divine.ide,
  fr.lip6.move.divine.ide.contentassist.antlr,
  fr.lip6.move.divine.ide.contentassist.antlr.internal
-

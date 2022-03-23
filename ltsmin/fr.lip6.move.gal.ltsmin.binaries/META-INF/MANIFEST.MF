@@ -7,7 +7,7 @@ Bundle-Activator: fr.lip6.move.gal.ltsmin.BinaryToolsPlugin
 Eclipse-BundleShape: dir
 Require-Bundle: org.eclipse.core.runtime
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ClassPath: .
 Bundle-Vendor: LIP6
 Export-Package: fr.lip6.move.gal.ltsmin
