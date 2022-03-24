@@ -41,3 +41,4 @@ Export-Package: org.logicng.backbones,
  org.logicng.util
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ClassPath: lib/logicng.jar
+Require-Bundle: org.antlr.runtime;bundle-version="4.7.2"
