@@ -185,7 +185,7 @@ public class LTLPropertySolver {
 			if (! tgba.isStutterInvariant() && (tgba.isCLInvariant() || tgba.isSLInvariant())) {
 				// semi decision approach
 				
-				System.out.println("Found a " + (tgba.isSLInvariant() ? "SL":"CL") + " insensitive property : " + propPN.getName() + ":" + propPN.getBody());
+				System.out.println("Found a " + (tgba.isSLInvariant() ? "SL":"CL") + " insensitive property : " + propPN.getName());
 				
 				// annotate it with Infinite Stutter Accepted Formulas
 				spot.computeInfStutter(tgba);
