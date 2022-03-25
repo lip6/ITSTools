@@ -215,7 +215,11 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			ltsmin.addArg("-d");
 			isdeadlock = true;
 		} else if (propertyType == PropertyType.LTL) {
-			ltsmin.addArg("--ltl");
+			if (pbody.endsWith(".hoa")) {
+				ltsmin.addArg("--hoa");
+			} else {
+				ltsmin.addArg("--ltl");
+			}
 			ltsmin.addArg(pbody);
 			// ltsmin.addArg("--strategy=renault");
 			ltsmin.addArg("--buchi-type=spotba");
