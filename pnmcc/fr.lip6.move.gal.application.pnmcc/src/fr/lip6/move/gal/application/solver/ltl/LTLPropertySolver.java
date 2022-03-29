@@ -150,6 +150,7 @@ public class LTLPropertySolver {
 		solved += reader.getSPN().testInInitial();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 		
+		//verifyWithLTSmin (reader.getSPN(),doneProps,15);
 		
 		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 		
@@ -343,9 +344,13 @@ public class LTLPropertySolver {
 			if (true) {
 				// using HOA
 				tgbak.setName(propPN.getName());
-				verifyWithLTSmin(spnForPropWithK, tgbak, doneProps, 15);
+				verifyWithLTSmin(spnForPropWithK, tgbak, doneProps, 15, spot);
+				if (doneProps.containsKey(propPN.getName())) 
+					return;
 				SparsePetriNet spnHOA = reduceForProperty(spnForProp, tgbak, null);
-				verifyWithLTSmin(spnHOA, tgbak, doneProps, 15);
+				verifyWithLTSmin(spnHOA, tgbak, doneProps, 15, spot);
+				if (doneProps.containsKey(propPN.getName())) 
+					return;
 			}
 			
 			// Last step, try exhaustive methods
@@ -377,17 +382,46 @@ public class LTLPropertySolver {
 			doneProps.put(propPN.getName(), false, a.getTechniques());
 		} catch (EmptyProductException e2) {
 			doneProps.put(propPN.getName(), true, e2.getTechniques());
+		} finally {
+			System.out.println("Treatment of property "+propPN.getName()+" finished in "+(System.currentTimeMillis()-time)+" ms.");
 		}
-		System.out.println("Treatment of property "+propPN.getName()+" finished in "+(System.currentTimeMillis()-time)+" ms.");
 	}
 	
-	private void verifyWithLTSmin (SparsePetriNet spn, TGBA negProp, DoneProperties doneProps, int timeout) {
+	private void verifyWithLTSmin (SparsePetriNet spn, DoneProperties doneProps, int timeout) {
+		LTSminRunner ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, false, false, timeout, spn.isSafe());
+		
+		try {
+			ltsminRunner.configure(null, doneProps);
+			ltsminRunner.setNet(spn);
+
+			ltsminRunner.solve(new Ender() {
+				public void killAll() {
+					ltsminRunner.interrupt();
+				}
+			});
+
+			ltsminRunner.join(timeout*1000);
+			ltsminRunner.interrupt();
+			ltsminRunner.join();
+		} catch (IOException | InterruptedException e) {
+			System.out.println("LTSmin runner failed with exception " + e.getMessage());
+			e.printStackTrace();
+		}
+
+		spn.getProperties().removeIf(p->doneProps.containsKey(p.getName()));
+	}
+	
+	private void verifyWithLTSmin (SparsePetriNet spn, TGBA negProp, DoneProperties doneProps, int timeout, SpotRunner spot) {
 		LTSminRunner ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, negProp.isStutterInvariant(), false, timeout, spn.isSafe());
 		
 		try {
 			ltsminRunner.configure(null, doneProps);
 			ltsminRunner.setNet(spn);
-			ltsminRunner.setTGBA(negProp);
+			
+			// force state based acceptance
+			String stateBasedHOA = spot.toBuchi(negProp,true);
+			
+			ltsminRunner.setTGBA(negProp, stateBasedHOA);
 
 			ltsminRunner.solve(new Ender() {
 				public void killAll() {
