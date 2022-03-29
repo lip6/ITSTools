@@ -1,5 +1,5 @@
 define([], function() {
-	var keywords = "A|AF|AG|AX|E|EF|EG|EX|F|G|GAL|M|R|TRANSIENT|U|W|X|abort|alias|array|bounds|composite|ctl|else|extends|false|fixpoint|for|gal|hotbit|if|import|int|interface|invariant|label|ltl|main|never|predicate|property|reachable|self|synchronization|transition|true|typedef";
+	var keywords = "A|AF|AG|AX|E|EF|EG|EX|F|G|GAL|M|R|TRANSIENT|U|W|X|abort|alias|array|atom|bounds|composite|ctl|else|extends|false|fixpoint|for|gal|hotbit|if|import|int|interface|invariant|label|ltl|main|never|predicate|property|reachable|self|synchronization|transition|true|typedef";
 	return {
 		id: "xtext.gal",
 		contentTypes: ["xtext/gal"],
