@@ -41,6 +41,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 	private boolean isSafe;
 	private SparsePetriNet spn;
 	private TGBA tgba;
+	private String stateBasedHOA;
 
 	public LTSminRunner(String solverPath, Solver solver, boolean doPOR, boolean onlyGal, long timeout, boolean isSafe) {
 		this.solverPath = solverPath;
@@ -113,14 +114,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 					if (tgba == null) {
 						checkProperties(g2p, p2p, timeout,doneProps);
 					} else {
-						File curAut = Files.createTempFile("curaut", ".hoa").toFile();
-						if (DEBUG == 0) curAut.deleteOnExit();
-						PrintWriter pw = new PrintWriter(curAut);
-						tgba.exportAsHOA(pw, true);
-						pw.close();
-						
-						checkProperty(tgba.getName(), curAut.getCanonicalPath(), timeout, false, PropertyType.LTL);
-						
+						checkProperty(tgba.getName(), stateBasedHOA, timeout, false, PropertyType.LTL);
 					}
 					todo.removeAll(doneProps.keySet());
 					if (! todo.isEmpty()) {
@@ -354,7 +348,8 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 	}
 
 
-	public void setTGBA(TGBA negProp) {
+	public void setTGBA(TGBA negProp, String stateBasedHOA) {
 		this.tgba = negProp;
+		this.stateBasedHOA = stateBasedHOA;
 	}
 }
