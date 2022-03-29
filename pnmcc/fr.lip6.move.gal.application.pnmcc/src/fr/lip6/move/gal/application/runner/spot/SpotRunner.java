@@ -766,6 +766,51 @@ public class SpotRunner {
 		return tgbaout;
 	}
 	
+	public String toBuchi(TGBA tgba, boolean forLTSMin) {
+		try {
+			long time = System.currentTimeMillis();
+			CommandLine cl = new CommandLine();
+			cl.setWorkingDir(new File(workFolder));
+			cl.addArg(pathToautfilt);
+			
+			// build automaton for tgba
+			// pass TGBA in HOAF
+			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
+			if (DEBUG == 0) curAut.deleteOnExit();
+			PrintWriter pw = new PrintWriter(curAut);
+			tgba.exportAsHOA(pw, forLTSMin);
+			pw.close();
+			
+			// this is the flags that LTSmin likes
+			cl.addArg("--buchi");
+			cl.addArg("--state-based-acceptance");
+			cl.addArg("--deterministic");
+			
+			cl.addArg(curAut.getCanonicalPath());
+			
+			if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
+			File stdOutput = Files.createTempFile("stateBased", ".hoa").toFile();
+			if (DEBUG == 0) stdOutput.deleteOnExit();
+			int status = Runner.runTool(timeout, cl, stdOutput, true);
+			if (status == 0 || status == 1) {
+				if (DEBUG >= 1) System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());
+				
+				if (stdOutput.length() > 0) {
+					return stdOutput.getCanonicalPath();
+				}
+				
+			} else {
+				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+				try (Stream<String> stream = Files.lines(Paths.get(stdOutput.getCanonicalPath()))) {
+					stream.forEach(System.out::println);
+				}
+			}
+		} catch (IOException | TimeoutException | InterruptedException e) {
+			e.printStackTrace();
+		}				
+		return null;
+	}
+
 	
 	public boolean isIncludedIn(Expression falseFact, TGBA tgba) {
 		try {
@@ -854,4 +899,5 @@ public class SpotRunner {
 		}				
 		return false;
 	}
+
 }
