@@ -150,7 +150,7 @@ public class TGBA {
 		pw.print("AP: "+atoms.size());
 		if (forLTSmin) {
 			for (AtomicProp ap : atoms) {
-				pw.print(" \"LTLAP" + ap.getName() + "\""); // ==true
+				pw.print(" \"(LTLAP" + ap.getName() + "==true)\""); 
 			}
 		} else {
 			for (AtomicProp ap : atoms) {
