@@ -1213,7 +1213,7 @@ public class DeadlockTester {
 					}
 				}
 			}
-			Logger.getLogger("fr.lip6.move.gal").info("Dead Transitions using invariants and state equation in "+ (System.currentTimeMillis()-orioritime) +" ms returned " + deadTrans);
+			Logger.getLogger("fr.lip6.move.gal").info("Dead Transitions using invariants and state equation in "+ (System.currentTimeMillis()-orioritime) +" ms found " + deadTrans.size() + " transitions.");
 
 
 		} catch (Exception e) {
