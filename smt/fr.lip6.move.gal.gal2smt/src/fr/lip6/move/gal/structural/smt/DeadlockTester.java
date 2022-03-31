@@ -352,7 +352,11 @@ public class DeadlockTester {
 		org.smtlib.SMT smt = new SMT();
 		List<String> verdicts = new ArrayList<>();
 		for (int i=0; i < properties.size() ; i++) {
-			verdicts.add("sat");
+			if (done[i]) {
+				verdicts.add("unsat");
+			} else {
+				verdicts.add("sat");
+			}
 		}
 		
 		ISolver solver = initSolver(solverPath, smt,solveWithReals,timeoutQ,timeoutT);		
