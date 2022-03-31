@@ -998,9 +998,6 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					if (DEBUG>=1) System.out.println("Firing immediate continuation of initial place "+pnames.get(pid) + " emptying place using " + tnames.get(from.keyAt(0)) + " index " + from.keyAt(0));
 					emptyPlaceWithTransition(pid, from.keyAt(0));
 					withPreFire = true;
-					if (rt != ReductionType.DEADLOCKS) {
-						break;
-					}
 				}
 			}
 		}
