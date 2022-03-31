@@ -368,14 +368,24 @@ public class ReachabilitySolver {
 		int initp = sr.getPnames().size();
 		int initt = sr.getTnames().size();
 		int total = 0;
+		
+		int lastReduction = -1;
 		do {
-			System.out.println("Starting structural reductions, iteration "+ it + " : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
+			System.out.println("Starting structural reductions in "+ rt +" mode, iteration "+ it + " : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
 			
 			int reduced = 0; 
 									
 			// The big one ! apply our set of reduction rules, customized by ReductionType, until convergence.
-			reduced += sr.reduce(rt);
+			if (lastReduction == 0) {
+				break;				
+			} else {
+				reduced += sr.reduce(rt);
+			}
 			total+=reduced;
+			
+			if (reduced > 0) {
+				lastReduction = 0;
+			}
 			cont = false;
 			
 			// Quick test for deadlocks, no more transitions.
@@ -386,25 +396,34 @@ public class ReachabilitySolver {
 			// Coming mostly from colored models with an arc <x>+<y> from a colored place
 			// when the net is color safe (unfolded version is 1 safe) all bindings with
 			// x=y become unfeasible. Removing them makes the net much simpler, no more arc weights !=1, less transitions...
-			if (isFirstTime && it==0) {
+			if (lastReduction == 1) {
+				break;
+			} else if (isFirstTime && it==0) {
 				boolean hasReduced = arcValuesTriggerSMTDeadTransitions(sr, solverPath, rt);
 				if (hasReduced) {
 					cont=true;
 					total++;
+					lastReduction=1;
 				}
 			}
 			
 			// implicit and dead transitions test using SMT
 			// We pass iteration counter and reduced counter to delay more costly versions with state equation.
 			if (withSMT && solverPath != null) {
-				boolean hasReduced = applySMTBasedReductionRules(sr, rt, it, solverPath, reduced);
-				if (hasReduced) {
+				int hasReduced = applySMTBasedReductionRules(sr, rt, it, solverPath, reduced, lastReduction);
+				if (hasReduced != -1) {
+					lastReduction=hasReduced;
 					cont = true;
 					total++;
 				}
 			}
-			if (!cont && rt == ReductionType.SAFETY && withSMT) {
-				cont = sr.ruleFreeAgglo(true) > 0;
+			if (lastReduction == 5) {
+				break;
+			} else if (!cont && rt == ReductionType.SAFETY && withSMT) {
+				if (sr.ruleFreeAgglo(true) > 0) {
+					cont=true;
+					lastReduction = 5;
+				}
 			}
 			it++;
 		} while (cont);
@@ -412,63 +431,80 @@ public class ReachabilitySolver {
 		return total > 0;
 	}
 
-	private static boolean applySMTBasedReductionRules(StructuralReduction sr, ReductionType rt, int iteration,
-			String solverPath, int reduced) throws GlobalPropertySolvedException {
+	private static int applySMTBasedReductionRules(StructuralReduction sr, ReductionType rt, int iteration,
+			String solverPath, int reduced, int lastReduction) throws GlobalPropertySolvedException {
 		boolean hasReduced = false;
 		boolean useStateEq = false;
 		// we'd love to do this but it messes up some metrics on token counts.
-		if (rt != ReductionType.STATESPACE &&  (reduced > 0 || iteration ==0) && !sr.isKeepImage()) {
-			long t = System.currentTimeMillis();
-			// 	go for more reductions ?
-			
-			List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, false);							
-			if (!implicitPlaces.isEmpty()) {
-				sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (invariants only)");
-				sr.ruleReduceTrans(rt);
-				hasReduced = true;
-			} else if (sr.getPnames().size() <= 10000 && sr.getTnames().size() < 10000){
-				// limit to 20 k variables for SMT solver with parikh constraints
-				useStateEq = true;
-				// with state equation can we solve more ?
-				implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, true);
+		if (lastReduction != 2) {
+
+			if (rt != ReductionType.STATESPACE &&  (reduced > 0 || iteration ==0) && !sr.isKeepImage()) {
+				long t = System.currentTimeMillis();
+				// 	go for more reductions ?
+
+				List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, false);							
 				if (!implicitPlaces.isEmpty()) {
-					sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (with state equation)");
+					sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (invariants only)");
 					sr.ruleReduceTrans(rt);
-					reduced += implicitPlaces.size();							
 					hasReduced = true;
-				}
-			}							
-			System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
+					lastReduction=2;
+				} else if (sr.getPnames().size() <= 10000 && sr.getTnames().size() < 10000){
+					// limit to 20 k variables for SMT solver with parikh constraints
+					useStateEq = true;
+					// with state equation can we solve more ?
+					implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, true);
+					if (!implicitPlaces.isEmpty()) {
+						sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (with state equation)");
+						sr.ruleReduceTrans(rt);
+						reduced += implicitPlaces.size();							
+						hasReduced = true;
+						lastReduction=2;
+					}
+				}							
+				System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
+			}
+		} else {
+			return -1;
 		}
 		// ok we got some implicit places, let the normal rules have another try.
 		if (hasReduced)
-			return hasReduced;
-		if (rt != ReductionType.LIVENESS && rt != ReductionType.LTL && rt != ReductionType.SLCL_LTL &&(reduced == 0 || iteration==0)) {
-			List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
-			if (! tokill.isEmpty()) {
-				System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
-			}
-			sr.dropTransitions(tokill,"Redundant Transitions using SMT "+ (useStateEq?"with State Equation":"only with invariants") );
-			if (!tokill.isEmpty()) {
-				System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions." /*+ tokill*/);								
-				hasReduced = true;
-			}
-		}
-		if (reduced == 0 || iteration==0) {
-			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath);
-			if (! tokill.isEmpty()) {
-				System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
-				if (rt == ReductionType.LIVENESS) {
-					throw new DeadlockFound();
+			return lastReduction;
+		if (lastReduction != 3) {
+			if (rt != ReductionType.LIVENESS && rt != ReductionType.LTL && rt != ReductionType.SLCL_LTL &&(reduced == 0 || iteration==0)) {
+				List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
+				if (! tokill.isEmpty()) {
+					System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
+				}
+				sr.dropTransitions(tokill,"Redundant Transitions using SMT "+ (useStateEq?"with State Equation":"only with invariants") );
+				if (!tokill.isEmpty()) {
+					System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions." /*+ tokill*/);								
+					hasReduced = true;
+					lastReduction=3;
 				}
 			}
-			sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
-			if (!tokill.isEmpty()) {
-				System.out.println("Dead transitions reduction (with SMT) removed "+tokill.size()+" transitions" /*+ tokill*/);								
-				hasReduced = true;
-			}
+		} else {
+			return -1;
 		}
-		return hasReduced;
+		if (lastReduction != 4) {
+			if (lastReduction != 1 && (reduced == 0 || iteration==0)) {
+				List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath);
+				if (! tokill.isEmpty()) {
+					System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
+					if (rt == ReductionType.LIVENESS) {
+						throw new DeadlockFound();
+					}
+				}
+				sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
+				if (!tokill.isEmpty()) {
+					System.out.println("Dead transitions reduction (with SMT) removed "+tokill.size()+" transitions" /*+ tokill*/);								
+					hasReduced = true;
+					lastReduction=4;
+				}
+			}
+		} else {
+			return -1;
+		}
+		return lastReduction;
 	}
 
 	private static boolean arcValuesTriggerSMTDeadTransitions(StructuralReduction sr, String solverPath, ReductionType rt) throws DeadlockFound {
