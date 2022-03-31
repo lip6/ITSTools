@@ -486,6 +486,9 @@ public class LTLPropertySolver {
 					
 					pw.runProduct(NBSTEPS, 10, false);
 					pw.runProduct(NBSTEPS, 10, true);
+					
+					// restore AP to original state
+					pw.setAPinterpretation(tgbappor.getInitial());
 				}
 				
 			}

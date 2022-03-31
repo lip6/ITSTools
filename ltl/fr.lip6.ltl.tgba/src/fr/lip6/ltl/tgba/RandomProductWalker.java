@@ -54,7 +54,7 @@ public class RandomProductWalker {
 		hasMulti = true;
 	}
 	
-	private void setAPinterpretation (int q) {
+	public void setAPinterpretation (int q) {
 		if (! hasMulti) 
 			return;
 		List<Expression> atoms = apsPerState.get(q);
