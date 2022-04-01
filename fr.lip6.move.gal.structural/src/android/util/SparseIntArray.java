@@ -19,6 +19,7 @@ import com.android.internal.util.GrowingArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 
 import libcore.util.EmptyArray;
@@ -95,7 +96,20 @@ public class SparseIntArray implements Cloneable {
     		}
     	}
     }
-    public int [] toArray (int size) {
+    // produce an entry with value 1 for each set bit in the input
+    public SparseIntArray(BitSet bs) {
+		// set capacity
+		this(bs.cardinality());
+
+		for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i + 1)) {
+			append(i,1);
+			if (i == Integer.MAX_VALUE) {
+				break; // or (i+1) would overflow
+			}
+		}
+	}
+    
+	public int [] toArray (int size) {
     	int [] res = new int [size];
     	int j = 0;
     	for (int i=0; i < size ; i++ ) {
