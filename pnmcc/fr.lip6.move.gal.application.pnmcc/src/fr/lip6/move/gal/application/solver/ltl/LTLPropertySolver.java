@@ -347,7 +347,7 @@ public class LTLPropertySolver {
 				verifyWithLTSmin(spnForPropWithK, tgbak, doneProps, 15, spot);
 				if (doneProps.containsKey(propPN.getName())) 
 					return;
-				SparsePetriNet spnHOA = reduceForProperty(spnForProp, tgbak, null);
+				SparsePetriNet spnHOA = reduceForProperty(spnForPropWithK, tgbak, null);
 				verifyWithLTSmin(spnHOA, tgbak, doneProps, 15, spot);
 				if (doneProps.containsKey(propPN.getName())) 
 					return;
