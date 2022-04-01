@@ -14,14 +14,6 @@
     <name>Projects :: Expressions</name>
     <description>Partial plugin offering an API to parse integer expressions.</description>
 
-<!-- 	<dependencies>
-		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr-runtime</artifactId>
-			<version>3.5.2</version>
-		</dependency>
-	</dependencies> -->
-
     <build>
         <plugins>
             <plugin>
