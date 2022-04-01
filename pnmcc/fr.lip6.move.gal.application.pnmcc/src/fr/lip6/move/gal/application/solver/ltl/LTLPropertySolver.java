@@ -603,9 +603,49 @@ public class LTLPropertySolver {
 			System.out.println("Knowledge obtained : " + knowledge);
 			System.out.println("False Knowledge obtained : " + falseKnowledge);
 
-			tgba = spotIntegrateKnowledge(spn, tgba, knowledge, falseKnowledge, propPN, spot);
+			tgba = spotIntegrateKnowledge(spn, tgba, knowledge, falseKnowledge, propPN, spot);						
 		}
+		
+		if (tgba.isEmptyLanguage() || tgba.isUniversalLanguage()) {
+			return tgba;
+		} else {
+			List<Expression> ff = computeEGknowledge(spn, tgba);
+			if (!ff.isEmpty()) {
+				falseKnowledge.addAll(ff);
+				System.out.println("Knowledge obtained : " + knowledge);
+				System.out.println("False Knowledge obtained : " + falseKnowledge);
+
+				tgba = spotIntegrateKnowledge(spn, tgba, knowledge, falseKnowledge, propPN, spot);						
+			}
+		}
+
 		return tgba;
+	}
+
+	private List<Expression> computeEGknowledge(SparsePetriNet spn, TGBA tgba) {
+		List<Expression> falseKnowledge = new ArrayList<>();
+		SparseIntArray init = new SparseIntArray(spn.getMarks());
+		
+		for (AtomicProp ap : tgba.getAPs()) {
+			boolean isInitiallyTrue = ap.getExpression().eval(init)!=0;
+			
+			if (isInitiallyTrue) {
+				if (DeadlockTester.testEGap(ap.getExpression(),spn, solverPath, 15)) {
+					System.out.println("Proved EG "+ap.getName());
+					falseKnowledge.add(Expression.nop(Op.G,Expression.apRef(ap)));
+				} else {
+					System.out.println("Could not prove EG "+ap.getName());
+				}
+			} else {
+				if (DeadlockTester.testEGap(Expression.not(ap.getExpression()),spn, solverPath, 15)) {
+					System.out.println("Proved EG !"+ap.getName());
+					falseKnowledge.add(Expression.nop(Op.G,Expression.not(Expression.apRef(ap))));
+				} else {
+					System.out.println("Could not prove EG !"+ap.getName());
+				}
+			}
+		}
+		return falseKnowledge;
 	}
 
 	private void addInvarianceKnowledge(List<Expression> knowledge, List<Expression> falseKnowledge, SparsePetriNet spn, TGBA tgba) {
