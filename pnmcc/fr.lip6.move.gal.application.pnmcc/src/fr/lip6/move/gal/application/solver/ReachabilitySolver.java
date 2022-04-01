@@ -78,7 +78,7 @@ public class ReachabilitySolver {
 					if (timeout != -1) {
 						smttime = 5;
 					}
-					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, sr.isSafe(),repr, smttime,true,orders);
+					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, repr, smttime,true,orders);
 					
 					iter += treatSMTVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths);
 					long time = System.currentTimeMillis();
