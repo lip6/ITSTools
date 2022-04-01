@@ -2,6 +2,7 @@ package fr.lip6.move.gal.structural.smt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,10 +38,12 @@ import android.util.SparseIntArray;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
+import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.structural.expr.VarRef;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 import static fr.lip6.move.gal.structural.smt.SMTUtils.* ;
@@ -210,15 +213,15 @@ public class DeadlockTester {
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr, String solverPath,
 			 List<Integer> representative, int timeout, boolean withWitness) {
 
-		return testUnreachableWithSMT(tocheck, sr, solverPath, sr.isSafe(), representative, timeout, withWitness, new ArrayList<>());
+		return testUnreachableWithSMT(tocheck, sr, solverPath, representative, timeout, withWitness, new ArrayList<>());
 	}
 	
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr,
-			String solverPath, boolean isSafe, List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> orders) {
+			String solverPath, List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> orders) {
 		if (tocheck.isEmpty()) { return new ArrayList<>(); }
 		System.out.println("Running SMT prover for "+tocheck.size()+" properties.");
 		if (true || tocheck.size() >= 20 || sr.getPlaceCount() + sr.getTransitionCount() >= 8000) {
-			return testUnreachableWithSMTIncremental(tocheck, sr, solverPath, isSafe, representative, timeout, withWitness, orders);
+			return testUnreachableWithSMTIncremental(tocheck, sr, solverPath, representative, timeout, withWitness, orders);
 		}
 		
 		List<SparseIntArray> verdicts = new ArrayList<>();
@@ -280,7 +283,7 @@ public class DeadlockTester {
 	
 	
 	public static List<SparseIntArray> testUnreachableWithSMTIncremental(List<Expression> tocheck, ISparsePetriNet sr,
-			String solverPath, boolean isSafe, List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> pors) {
+			String solverPath, List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> pors) {
 		
 		List<Integer> tnames = new ArrayList<>();
 		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
@@ -312,7 +315,7 @@ public class DeadlockTester {
 		ReadFeedCache rfc = new ReadFeedCache();
 		try {				
 			// Step 1 : go for solveWithReals = true;				
-			List<String> replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, true, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
+			List<String> replies = verifyPossible(sr, properties, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, true, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
 			Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in real domain returned "
 					+"unsat :" + replies.stream().filter(s->"unsat".equals(s)).count()
 					+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count()
@@ -325,7 +328,7 @@ public class DeadlockTester {
 					}
 				}
 				// Step 2 : go for integer domain				
-				replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
+				replies = verifyPossible(sr, properties, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, false, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
 				Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in nat domain returned " 
 						+"unsat :" + replies.stream().filter(s->"unsat".equals(s)).count()
 						+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count());
@@ -338,7 +341,125 @@ public class DeadlockTester {
 		return parikhs;
 	}
 
+	public static boolean testEGap (Expression ap, ISparsePetriNet sr, String solverPath, int timeout) {		
+		List<Integer> tnames = new ArrayList<>();
+		List<Integer> representative = new ArrayList<>();
+		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative );
+		
+		
+		// a map from index in reduced flow to set of transitions with this effect
+		List<List<Integer>> revMap = new ArrayList<>();
+		for (int tid=0, tide=sumMatrix.getColumnCount() ; tid < tide ; tid++) {
+			revMap.add(new ArrayList<>());
+		}
+		for (int tid=0, tide=sr.getTransitionCount() ; tid < tide ; tid++) {
+			revMap.get(representative.get(tid)).add(tid);
+		}
+		
+		SparseIntArray supp = computeSupport(ap);
+		
+		Script cantStutter = new Script();
+		
+		// assert ap
+		cantStutter.add(new C_assert(ap.accept(new ExprTranslator())));
+		
+		IFactory ef = new SMT().smtConfig.exprFactory;
+		List<IExpr> globalEnable = new ArrayList<>();
+		// assert that all transitions that stutter (because of support of effects not intersecting AP) are disabled
+		for (int tid=0, tide=sumMatrix.getColumnCount() ; tid < tide ; tid++) {
+			SparseIntArray t = sumMatrix.getColumn(tid);
+			if (! SparseIntArray.keysIntersect(supp, t)) {
+				// guaranteed to stutter
+				for (Integer ti : revMap.get(tid)) {
+					IExpr disabled = buildDisabled(ef, sr.getFlowPT().getColumn(ti));
+					cantStutter.add(new C_assert(disabled));
+				}								
+			} else {
+				// more subtle we do touch the target AP
+				// if firing t would go from ap to !ap => add to enabling
+				// if firing t leaves ap => must be disabled
+				
+				// afterT is true if after t ap is still true (we stutter)
+				IExpr apTrueAfterT = rewriteAfterEffect(ap,t).accept(new ExprTranslator());
+				IExpr apFalseAfterT = ef.fcn(ef.symbol("not"), apTrueAfterT);
+				
+				List<IExpr> toDisable = new ArrayList<>();
+				
+				for (Integer ti : revMap.get(tid)) {
+					IExpr disabled = buildDisabled(ef, sr.getFlowPT().getColumn(ti));
+					toDisable.add(disabled);
+					
+					globalEnable.add(ef.fcn(ef.symbol("and"), apFalseAfterT, ef.fcn(ef.symbol("not"), disabled)));
+				}
+				
+				// collect disabled  : ap and X ap => AND_repr t disabled
+				if (! toDisable.isEmpty()) {
+					IExpr stuttImplyDisabled = ef.fcn(ef.symbol("=>"), apTrueAfterT, SMTUtils.makeAnd(toDisable));
+					cantStutter.add(new C_assert(stuttImplyDisabled));
+				}
+			}			
+		}
+		// assert an OR of one modifying transition enabled
+		cantStutter.add(new C_assert(SMTUtils.makeOr(globalEnable)));
+		
+		// ok let's go
+		try {
+			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+			ReadFeedCache rfc = new ReadFeedCache();
+			String reply = verifyPossible(sr, cantStutter, solverPath, sumMatrix, tnames, invar, null, true, null, null, representative, rfc,3000, timeout, null);
+			if ("real".equals(reply)) {
+				reply = verifyPossible(sr, cantStutter, solverPath, sumMatrix, tnames, invar, null, false, null, null, representative, rfc,3000, timeout, null);
+			}
+			if ("unsat".equals(reply)) {
+				return true;
+			}
+		} catch (RuntimeException re) {
+			re.printStackTrace();
+			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expression EG " + ap);
+		}
+		return false;
+	}
+
+
+	private static SparseIntArray computeSupport(Expression ap) {
+		// compute support of e
+		SparseIntArray supp;
+		{
+			BitSet suppbs = new BitSet();
+			SparsePetriNet.addSupport(ap,suppbs);
+			supp=new SparseIntArray(suppbs);
+		}
+		return supp;
+	}
 	
+	private static Expression rewriteAfterEffect (Expression expr, SparseIntArray t) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof VarRef) {
+			VarRef vref = (VarRef) expr;
+			int delta=t.get(vref.getValue());
+			if (delta != 0) {
+				return Expression.nop(Op.ADD, expr, Expression.constant(delta));
+			} else {
+				return expr;
+			}
+		} else {
+			List<Expression> resc = new ArrayList<>();
+			boolean changed = false;
+			for (int i=0,ie=expr.nbChildren(); i < ie; i++) {
+				Expression child = expr.childAt(i);
+				Expression nc = rewriteAfterEffect(child, t);
+				resc.add(nc);
+				if (nc != child) {
+					changed = true;
+				}
+			}
+			if (!changed) {
+				return expr;
+			}
+			return Expression.nop(expr.getOp(), resc);			
+		} 
+	}
 	
 	
 	private static List<String> verifyPossible(ISparsePetriNet sr, List<Script> properties, String solverPath,
@@ -2137,14 +2258,7 @@ public class DeadlockTester {
 			for (int i = 0; i < sr.getFlowPT().getColumnCount() ; i++)
 				preconds.add(sr.getFlowPT().getColumn(i));
 			for (SparseIntArray arr : preconds) {
-				List<IExpr> conds = new ArrayList<>();
-				// one of the preconditions of the transition is not marked enough to fire
-				for (int  i=0; i < arr.size() ; i++) {
-					// use these bounds "<= (arc value - 1)" that are more precise than "< arc value" for Reals
-					conds.add( ef.fcn(ef.symbol("<="), ef.symbol("s"+arr.keyAt(i)), ef.numeral(arr.valueAt(i)-1)));
-				}
-				// any of these is true => t is not fireable								
-				IExpr res = SMTUtils.makeOr(conds);
+				IExpr res = buildDisabled(ef, arr);
 				// add that t is not fireable
 				scriptAssertDead.add(new C_assert(res));
 				if (scriptAssertDead.commands().size() % 10 == 0) {
@@ -2153,6 +2267,19 @@ public class DeadlockTester {
 			}			
 		}
 		return scriptAssertDead;
+	}
+
+
+	public static IExpr buildDisabled(IFactory ef, SparseIntArray flowPT) {
+		List<IExpr> conds = new ArrayList<>();
+		// one of the preconditions of the transition is not marked enough to fire
+		for (int  i=0; i < flowPT.size() ; i++) {
+			// use these bounds "<= (arc value - 1)" that are more precise than "< arc value" for Reals
+			conds.add( ef.fcn(ef.symbol("<="), ef.symbol("s"+flowPT.keyAt(i)), ef.numeral(flowPT.valueAt(i)-1)));
+		}
+		// any of these is true => t is not fireable								
+		IExpr res = SMTUtils.makeOr(conds);
+		return res;
 	}
 
 
