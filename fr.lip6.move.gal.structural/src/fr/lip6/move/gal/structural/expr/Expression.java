@@ -303,7 +303,8 @@ public interface Expression {
 		{
 			return op(op, children.get(0),null);			
 		}
-		case U: case AU: case EU:  
+		case U: case AU: case EU:
+		case EQ: case LEQ: case LT: case NEQ: case GT: case GEQ:
 		{
 			return op(op, children.get(0),children.get(1));						
 		}
@@ -315,6 +316,7 @@ public interface Expression {
 				return constant (new NaryOp(op, children).eval(null));
 			}
 		}
+		
 		return new NaryOp(op, children);
 	}
 	static Expression trans(int transitionIndex) {
