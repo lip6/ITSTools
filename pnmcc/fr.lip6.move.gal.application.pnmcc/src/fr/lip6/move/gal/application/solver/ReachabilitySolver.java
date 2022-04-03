@@ -199,7 +199,7 @@ public class ReachabilitySolver {
 				}
 	*/
 				
-				if (System.currentTimeMillis() - initial >= timeout *1000)
+				if (timeout!=-1 && System.currentTimeMillis() - initial >= timeout *1000)
 					return;
 				
 				if (iter == 0 && !doneAtoms && timeout == -1) {
@@ -222,7 +222,7 @@ public class ReachabilitySolver {
 					iter++;
 				iterations++;
 				
-				if (System.currentTimeMillis() - initial >= timeout *1000)
+				if (timeout!=-1 && System.currentTimeMillis() - initial >= timeout *1000)
 					return;
 			} while ( (iterations<=1 || iter > 0) && ! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished());
 			
