@@ -216,7 +216,7 @@ public class ReachabilitySolver {
 					iter++;
 	
 				int timeSDD = Math.max(5*(iterations+1),15);
-				GlobalPropertySolver.verifyWithSDD(reader, doneProps, "ReachabilityCardinality", solverPath, timeSDD);			
+				// GlobalPropertySolver.verifyWithSDD(reader, doneProps, "ReachabilityCardinality", solverPath, timeSDD);			
 				
 				if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
