@@ -37,6 +37,7 @@ public class KInductionSolver extends NextBMCSolver {
 	private static final String INVAR = "invariants";
 	private static final String FLOW = "flow";
 	private static final String PINVAR = "Pinvariants";
+	private static final int DEBUG = 0;
 	private int invariantOccurrence = 0;
 	private boolean isSafe;
 
@@ -246,7 +247,7 @@ public class KInductionSolver extends NextBMCSolver {
 			}
 			invSupports.add(b);
 		}
-		InvariantCalculator.printInvariant(invariants, nb.getVariableNames(), nb.getInitial());
+		if (DEBUG >= 1) InvariantCalculator.printInvariant(invariants, nb.getVariableNames(), nb.getInitial());
 		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invariants.size()+" place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms");
 		
 		
