@@ -609,6 +609,7 @@ public class LTLPropertySolver {
 		if (tgba.isEmptyLanguage() || tgba.isUniversalLanguage()) {
 			return tgba;
 		} else {
+			spot.computeInfStutter(tgba);
 			List<Expression> ff = computeEGknowledge(spn, tgba);
 			if (!ff.isEmpty()) {
 				falseKnowledge.addAll(ff);
@@ -626,25 +627,26 @@ public class LTLPropertySolver {
 		List<Expression> falseKnowledge = new ArrayList<>();
 		SparseIntArray init = new SparseIntArray(spn.getMarks());
 		
-		for (AtomicProp ap : tgba.getAPs()) {
-			boolean isInitiallyTrue = ap.getExpression().eval(init)!=0;
-			
-			if (isInitiallyTrue) {
-				if (DeadlockTester.testEGap(ap.getExpression(),spn, solverPath, 15)) {
-					System.out.println("Proved EG "+ap.getName());
-					falseKnowledge.add(Expression.nop(Op.G,Expression.apRef(ap)));
-				} else {
-					System.out.println("Could not prove EG "+ap.getName());
-				}
+		Expression ap = tgba.getInfStutter().get(tgba.getInitial());
+		boolean isInitiallyTrue = ap.eval(init)!=0;
+		if (isInitiallyTrue) {
+			if (DeadlockTester.testEGap(ap,spn, solverPath, 15)) {
+				System.out.println("Proved EG "+ap);
+				falseKnowledge.add(Expression.nop(Op.G,ap));
 			} else {
-				if (DeadlockTester.testEGap(Expression.not(ap.getExpression()),spn, solverPath, 15)) {
-					System.out.println("Proved EG !"+ap.getName());
-					falseKnowledge.add(Expression.nop(Op.G,Expression.not(Expression.apRef(ap))));
-				} else {
-					System.out.println("Could not prove EG !"+ap.getName());
-				}
+				System.out.println("Could not prove EG "+ap);
 			}
 		}
+		
+//		else {
+//				if (DeadlockTester.testEGap(Expression.not(ap.getExpression()),spn, solverPath, 15)) {
+//					System.out.println("Proved EG !"+ap.getName());
+//					falseKnowledge.add(Expression.nop(Op.G,Expression.not(Expression.apRef(ap))));
+//				} else {
+//					System.out.println("Could not prove EG !"+ap.getName());
+//				}
+//			}
+//		}
 		return falseKnowledge;
 	}
 
@@ -970,13 +972,15 @@ public class LTLPropertySolver {
 
 	private void addInitialStateKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
 		SparseIntArray init = new SparseIntArray(spn.getMarks());
+		List<Expression> kis = new ArrayList<>();
 		for (AtomicProp ap : tgba.getAPs()) {
 			if (ap.getExpression().eval(init) == 1) {
-				knowledge.add(Expression.apRef(ap));
+				kis.add(Expression.apRef(ap));
 			} else {
-				knowledge.add(Expression.not(Expression.apRef(ap)));
+				kis.add(Expression.not(Expression.apRef(ap)));
 			}
 		}
+		knowledge.add(Expression.nop(Op.AND,kis));
 	}
 
 	private void addConvergenceKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba, boolean isSafe) {
