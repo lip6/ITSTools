@@ -204,10 +204,10 @@ public class ReachabilitySolver {
 				
 				if (iter == 0 && !doneAtoms && timeout == -1) {
 	//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
-					if (new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, null, false) > 0) {
-						checkInInitial(reader.getSPN(), doneProps);
-						iter++;
-					}
+					new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, null, false);
+					checkInInitial(reader.getSPN(), doneProps);
+					iter++;
+					
 					doneAtoms = true;
 	//					reader.rewriteSums();
 	//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/after.gal");
