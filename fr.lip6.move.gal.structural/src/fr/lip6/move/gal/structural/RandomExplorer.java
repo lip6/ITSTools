@@ -296,7 +296,8 @@ public class RandomExplorer {
 		for (; i < nbSteps ; i++) {
 			long dur = System.currentTimeMillis() - time + 1; 
 			if (dur > 1000 * timeout) {
-				System.out.println("Interrupted "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+				int nbSeen=Arrays.stream(verdicts).sum();
+				System.out.println("Interrupted "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen " + nbSeen + (DEBUG >=1 ?  new SparseIntArray(verdicts) + (" reached state " + state):"") );
 				return verdicts;
 			}
 			if (!max) {
