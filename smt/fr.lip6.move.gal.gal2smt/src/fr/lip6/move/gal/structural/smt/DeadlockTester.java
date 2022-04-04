@@ -41,6 +41,7 @@ import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
+import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.VarRef;
@@ -443,6 +444,9 @@ public class DeadlockTester {
 			} else {
 				return expr;
 			}
+		} else if (expr instanceof AtomicPropRef) {
+			AtomicPropRef apr = (AtomicPropRef) expr;
+			return rewriteAfterEffect(apr.getAp().getExpression(),t) ;			
 		} else {
 			List<Expression> resc = new ArrayList<>();
 			boolean changed = false;
