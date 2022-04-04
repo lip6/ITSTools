@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -176,7 +177,16 @@ public class SpotRunner {
 						if (line == null)
 							break;
 						Expression res = PrefixParser.parsePrefix(line, new ArrayList<>(atoms.getAtoms()));
-						prop.setBody(res);
+						
+						BitSet oldsupp = new BitSet();
+						PetriNet.addSupport(prop.getBody(), oldsupp);
+						
+						BitSet support = new BitSet();
+						PetriNet.addSupport(res, support);
+						
+						if (support.cardinality() < oldsupp.cardinality()) {
+							prop.setBody(res);
+						}
 					}
 				}						
 				reader.close();

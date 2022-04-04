@@ -510,31 +510,6 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		}
 		rewriteConstantSums();
 	}
-
-	public BitSet computeSupport() {
-		BitSet supp = new BitSet();
-		for (Property p : getProperties()) {
-			addSupport(p.getBody(),supp);
-		}
-		return supp;
-	}
-	
-	public static Void addSupport(Expression expr, BitSet supp) {
-		if (expr == null) {
-			return null;
-		} else if (expr instanceof BinOp) {
-			BinOp bin = (BinOp) expr;
-			bin.forEachChild(c -> addSupport(c, supp));			
-		} else if (expr instanceof NaryOp) {
-			NaryOp nop = (NaryOp) expr;
-			nop.forEachChild(c -> addSupport(c, supp));
-		} else if (expr instanceof VarRef) {
-			supp.set(expr.getValue());
-		} else if (expr instanceof AtomicPropRef) {
-			addSupport(((AtomicPropRef) expr).getAp().getExpression(), supp);
-		}
-		return null;
-	}
 	
 	public void readFrom(StructuralReduction sr) {
 		readFrom(sr,null);
