@@ -177,13 +177,13 @@ public class RandomExplorer {
 			}
 			int shuffled =0;
 			for (; i < nbSteps && ! todo.isEmpty() && todo.size() < nbSteps ; i++) {
-				SparseIntArray state = todo.remove(todo.size()-1);
-
 				long dur = System.currentTimeMillis() - time + 1; 
 				if (dur > 1000 * timeout) {
-					System.out.println("Interrupted probabilistic random walk after "+ i + "  steps, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+					System.out.println("Interrupted probabilistic random walk after "+ i + "  steps, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts));
 					break;
 				}
+				SparseIntArray state = todo.remove(todo.size()-1);
+
 
 				int [] list = computeEnabled(state);
 				explored++;
