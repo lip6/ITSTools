@@ -820,7 +820,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					flowPT.deleteColumn(td);
 					flowTP.deleteColumn(td);
 				}
-				System.out.println("Reduce isomorphic (modulo) transitions removed "+ reduced +" transitions.");
+				System.out.println("Reduce isomorphic (modulo) transitions removed "+ modred +" transitions.");
 				reduced += modred;
 				maxArcValue = findMax(flowPT);
 				maxArcValue = Math.max(findMax(flowTP),maxArcValue);
@@ -860,19 +860,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					continue;
 				}
 				// test inputs
-				boolean ok = true;
-				for (int ii=0 ; ii < coli.size() ; ii++) {
-					if (coli.keyAt(ii) != colj.keyAt(ii)) {
-						ok  =false;
-						break;
-					} else  {
-						int vvi = coli.valueAt(ii);
-						int vvj = colj.valueAt(ii);
-						if (vvj % vvi != 0 || vvj / vvi != factor) {
-							ok = false;
-							break;
-						}
-					}
+				boolean ok = compareModuloFactor(coli, colj, factor);
+				if (ok) {
+					ok = compareModuloFactor(flowTP.getColumn(ti), flowTP.getColumn(tj), factor);
 				}
 				if (ok) {
 					total++;
@@ -881,6 +871,25 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			}
 		}		
 		return total;
+	}
+
+
+	public boolean compareModuloFactor(SparseIntArray coli, SparseIntArray colj, int factor) {
+		boolean ok = true;
+		for (int ii=0 ; ii < coli.size() ; ii++) {
+			if (coli.keyAt(ii) != colj.keyAt(ii)) {
+				ok  =false;
+				break;
+			} else  {
+				int vvi = coli.valueAt(ii);
+				int vvj = colj.valueAt(ii);
+				if (vvj % vvi != 0 || vvj / vvi != factor) {
+					ok = false;
+					break;
+				}
+			}
+		}
+		return ok;
 	}
 
 	private int ensureUnique(IntMatrixCol mPT, IntMatrixCol mTP, List<String> names, List<Integer> init, boolean trace) {
