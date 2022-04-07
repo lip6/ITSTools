@@ -101,13 +101,7 @@ public class MultiOrderRunner {
 					// decompose + simplify as needed
 					IRunner itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(), timeout,
 							null);
-					itsRunner.configure(reader.getSpec(), doneProps);
-					runners.add(itsRunner);
-					if (doITS) {
-						itsRunner.solve(e);
-						itsRunner.join();
-					}
-					runners.remove(itsRunner);
+					startRunner(doITS, reader, doneProps, wasKilled, runners, e, itsRunner);
 				}
 	
 			}
@@ -125,13 +119,7 @@ public class MultiOrderRunner {
 					// decompose + simplify as needed
 					IRunner itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(), timeout,
 							null);
-					itsRunner.configure(reader.getSpec(), doneProps);
-					runners.add(itsRunner);
-					if (doITS) {
-						itsRunner.solve(e);
-						itsRunner.join();
-					}
-					runners.remove(itsRunner);
+					startRunner(doITS, reader, doneProps, wasKilled, runners, e, itsRunner);
 				}
 	
 			}
@@ -151,18 +139,29 @@ public class MultiOrderRunner {
 					// decompose + simplify as needed
 					IRunner itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(), timeout,
 							myOrderff);
-					itsRunner.configure(reader.getSpec(), doneProps);
-					runners.add(itsRunner);
-					if (doITS) {
-						itsRunner.solve(e);
-						itsRunner.join();
-					}
-					runners.remove(itsRunner);
+					startRunner(doITS, reader, doneProps, wasKilled, runners, e, itsRunner);
 				}
 	
 			}
 	
 			return reader;
 		}
+
+	public static void startRunner(boolean doITS, MccTranslator reader, DoneProperties doneProps,
+			AtomicBoolean wasKilled, List<IRunner> runners, Ender e, IRunner itsRunner)
+			throws IOException, InterruptedException {
+		itsRunner.configure(reader.getSpec(), doneProps);
+		if (doITS) {
+			synchronized (e) {
+				if (! wasKilled.get()) {
+					runners.add(itsRunner);						
+					itsRunner.solve(e);
+				}
+			}						
+			itsRunner.join();
+			
+			runners.remove(itsRunner);
+		}
+	}
 
 }
