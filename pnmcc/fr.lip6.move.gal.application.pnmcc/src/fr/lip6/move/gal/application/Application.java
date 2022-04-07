@@ -749,14 +749,14 @@ public class Application implements IApplication, Ender {
 				if (!reader.getSPN().getProperties().isEmpty())
 					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, -1);
 				
-				if (!reader.getSPN().getProperties().isEmpty()) {
-					List<fr.lip6.move.gal.structural.Property> props = new ArrayList<>(reader.getSPN().getProperties());
-					for (fr.lip6.move.gal.structural.Property pp : props) {
-						MccTranslator reader2 = reader.copy();
-						reader2.getSPN().getProperties().removeIf(p->! pp.getName().equals(p.getName()));
-						ReachabilitySolver.applyReductions(reader2, doneProps, solverPath, -1);
-					}
-				}
+//				if (!reader.getSPN().getProperties().isEmpty()) {
+//					List<fr.lip6.move.gal.structural.Property> props = new ArrayList<>(reader.getSPN().getProperties());
+//					for (fr.lip6.move.gal.structural.Property pp : props) {
+//						MccTranslator reader2 = reader.copy();
+//						reader2.getSPN().getProperties().removeIf(p->! pp.getName().equals(p.getName()));
+//						ReachabilitySolver.applyReductions(reader2, doneProps, solverPath, -1);
+//					}
+//				}
 			} else {
 
 				reader.flattenSpec(false);
