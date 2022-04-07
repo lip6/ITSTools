@@ -107,7 +107,8 @@ public class SMTUtils {
 		return solver;
 	}
 
-	public static IExpr buildSum(IFactory ef, List<IExpr> torem) {
+	public static IExpr buildSum(List<IExpr> torem) {
+		IFactory ef = new SMT().smtConfig.exprFactory;
 		IExpr lhs;
 		if (torem.isEmpty()) {
 			lhs = ef.numeral(0);
