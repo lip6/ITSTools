@@ -1114,7 +1114,7 @@ public class DeadlockTester {
 				added++;
 				// add a constraint
 				List<IExpr> vars = trap.stream().map(n -> ef.symbol("s"+n)).collect(Collectors.toList());
-				IExpr sum = buildSum(ef, vars);
+				IExpr sum = buildSum(vars);
 				Script s = new Script();
 				ICommand constraint = new C_assert(ef.fcn(ef.symbol(">"), sum , ef.numeral(0)));
 				s.add(constraint);
@@ -1455,13 +1455,13 @@ public class DeadlockTester {
 						} else {
 							torem.add(ef.numeral(vali));
 						}
-						IExpr lhs = buildSum(ef, torem);
-						IExpr rhs = buildSum(ef, toadd);
+						IExpr lhs = buildSum(torem);
+						IExpr rhs = buildSum(toadd);
 
 						script.add(new C_assert(ef.fcn(ef.symbol("="), lhs, rhs)));
 
 
-						script.add(new C_assert(ef.fcn(ef.symbol(">="), ef.numeral(prei), buildSum(ef, prePT))));
+						script.add(new C_assert(ef.fcn(ef.symbol(">="), ef.numeral(prei), buildSum(prePT))));
 					}
 					execAndCheckResult(script, solver);
 					String textReply = checkSat(solver,  false);
@@ -2127,7 +2127,9 @@ public class DeadlockTester {
 				for (int i = 0; i < pt.size() ; i++) {
 					int p = pt.keyAt(i);
 					int v = pt.valueAt(i);
-					if (v > sr.getMarks().get(p) && tp.get(p) >= v) {
+					if (v > sr.getMarks().get(p) && tp.get(p) > v) {						
+						// we need at least delta more tokens in p
+						int delta = v - sr.getMarks().get(p);
 						List<IExpr> couldFeed = new ArrayList<>();
 						// find a feeder for p
 						SparseIntArray feeders = tsum.getColumn(p);
@@ -2136,10 +2138,17 @@ public class DeadlockTester {
 							int v2 = feeders.valueAt(j);
 							if (t2 != tid && v2 > 0) {								
 								// true feed effect
-								couldFeed.add(ef.fcn(ef.symbol(">"), ef.symbol("t"+t2), ef.numeral(0)));
+								
+								// basic >0 readFeed constraint from PN20
+								// couldFeed.add(ef.fcn(ef.symbol(">"), ef.symbol("t"+t2), ef.numeral(0)));
+
+								// new refined test counting tokens
+								// count how many tokens are contributed per firing
+								couldFeed.add(ef.fcn(ef.symbol("*"), ef.symbol("t"+t2), ef.numeral(v2)));
 							}
 						}
-						prePlace.add(SMTUtils.makeOr(couldFeed));						
+						// sum it 
+						prePlace.add(ef.fcn(ef.symbol(">="), SMTUtils.buildSum(couldFeed), ef.numeral(delta)));						
 					}					
 				}
 				if (!prePlace.isEmpty()) {
