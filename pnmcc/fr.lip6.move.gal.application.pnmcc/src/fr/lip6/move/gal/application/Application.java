@@ -748,7 +748,15 @@ public class Application implements IApplication, Ender {
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				if (!reader.getSPN().getProperties().isEmpty())
 					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, -1);
-
+				
+				if (!reader.getSPN().getProperties().isEmpty()) {
+					List<fr.lip6.move.gal.structural.Property> props = new ArrayList<>(reader.getSPN().getProperties());
+					for (fr.lip6.move.gal.structural.Property pp : props) {
+						MccTranslator reader2 = reader.copy();
+						reader2.getSPN().getProperties().removeIf(p->! pp.getName().equals(p.getName()));
+						ReachabilitySolver.applyReductions(reader2, doneProps, solverPath, -1);
+					}
+				}
 			} else {
 
 				reader.flattenSpec(false);
@@ -865,7 +873,7 @@ public class Application implements IApplication, Ender {
 					System.out.println("Using solver " + solver + " to compute partial order matrices.");
 					LTSminRunner ltsminRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, timeout / reader.getSpec().getProperties().size(),
 							reader.getSPN().isSafe());
-					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
+					ltsminRunner.configure(null, doneProps);
 					ltsminRunner.setNet(reader.getSPN());
 					runners.add(ltsminRunner);
 					ltsminRunner.solve(this);
