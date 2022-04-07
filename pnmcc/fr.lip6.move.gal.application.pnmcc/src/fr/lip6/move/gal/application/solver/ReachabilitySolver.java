@@ -50,6 +50,7 @@ public class ReachabilitySolver {
 			long initial=System.currentTimeMillis();
 			boolean doneAtoms = false;
 			boolean doneSums = false;
+			boolean doneAtomsSR = false;
 			do {
 				iter =0;
 				SparsePetriNet spn = reader.getSPN();
@@ -224,6 +225,13 @@ public class ReachabilitySolver {
 				
 				if (timeout!=-1 && System.currentTimeMillis() - initial >= timeout *1000)
 					return;
+				
+				if (iterations > 1 && iter==0 && !doneAtomsSR && timeout==-1) {
+					int n = new AtomicReducerSR().checkAtomicPropositions(reader.getSPN(), doneProps, solverPath, true);
+					n += checkInInitial(reader.getSPN(), doneProps);
+					iter +=n;
+					doneAtomsSR = true;
+				}
 			} while ( (iterations<=1 || iter > 0) && ! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished());
 			
 			if (! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished()) {
