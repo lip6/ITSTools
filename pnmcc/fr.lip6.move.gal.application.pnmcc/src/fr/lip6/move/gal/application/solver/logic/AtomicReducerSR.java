@@ -43,8 +43,7 @@ public class AtomicReducerSR {
 		if (spn.getProperties().stream().anyMatch(p -> p.getType() == PropertyType.LTL || p.getType() == PropertyType.CTL)) {
 			return checkAtomicPropositionsLogic(spn, doneProps, solverPath, spot, isOverApprox);
 		} else {
-			int solved = checkAtomicPropositions(spn, doneProps, solverPath, true);
-			solved += checkAtomicPropositions(spn, doneProps, solverPath, false);
+			int solved = checkAtomicPropositions(spn, doneProps, solverPath, false);
 			spn.simplifyLogic();
 			return solved;
 		}
@@ -203,11 +202,11 @@ public class AtomicReducerSR {
 	 * Extract Atomic Propositions, unify them, for each of them test initial state, then try to assert it will not vary => simplifiable.
 	 * @param spn
 	 * @param doneProps
-	 * @param isSafe
 	 * @param solverPath 
-	 * @param comparisonAtoms if true look only at comparisons only as atoms (single predicate), otherwise sub boolean formulas are considered atoms (CTL, LTL) 
+	 * @param withSR 
+	 * @param isSafe
 	 */
-	private int checkAtomicPropositions(SparsePetriNet spn, DoneProperties doneProps, String solverPath, boolean comparisonAtoms) {
+	public int checkAtomicPropositions(SparsePetriNet spn, DoneProperties doneProps, String solverPath, boolean withSR) {
 
 		if (solverPath == null) {
 			return 0;
@@ -219,12 +218,16 @@ public class AtomicReducerSR {
 		int pid = 0;
 		for (Property prop : spn.getProperties()) {
 			if (DEBUG >= 1) System.out.println("p" + pid++ + ":" + prop);
-			extractAtoms(prop.getBody(), atoms, comparisonAtoms);	
+			//if (prop.getBody().nbChildren()>0 && prop.getBody().childAt(0).getOp()== Op.OR || prop.getBody().childAt(0).getOp()== Op.AND || prop.getBody().childAt(0).getOp() == Op.NOT)
+				extractAtoms(prop.getBody(), atoms, true);	
+		}
+		
+		// make sure we don't just go crazy
+		if (spn.getProperties().size()*3 < atoms.size()) {
+			// just too many to deal with
+			return 0;
 		}
 
-		if (comparisonAtoms) {
-			return 0 ;
-		}
 		// build a list of invariants to test with SMT/random
 		// for each of them test value in initial state
 		List<Expression> tocheck = new ArrayList<>();
@@ -263,9 +266,9 @@ public class AtomicReducerSR {
 			return 0;
 		}		
 
-
+		int nsolved = 0;
+		List<String> done = new ArrayList<>();
 		try {
-			int nsolved = 0;
 			int nsimpl = 0;
 			List<Integer> repr = new ArrayList<>();
 			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, spn, solverPath, repr,20,false);
@@ -292,6 +295,8 @@ public class AtomicReducerSR {
 								mapTo.put(cmp, Expression.constant(false));
 						}
 						nsolved ++;
+						
+						done.add(ent.getKey());
 					}
 					cur++;
 					if (cur >= tocheckIndexes.size()) {
@@ -305,7 +310,6 @@ public class AtomicReducerSR {
 				for (Property prop : spn.getProperties()) {
 					prop.setBody(Expression.replaceSubExpressions(prop.getBody(), mapTo));
 				}
-				spn.simplifyLogic();
 				System.out.println("Successfully simplified "+nsolved+" atomic propositions for a total of " + nsimpl +" simplifications.");
 				if (DEBUG >= 1)  {
 					pid = 0;
@@ -314,7 +318,6 @@ public class AtomicReducerSR {
 					}
 				}
 			}
-			return nsolved;
 		} catch (Exception e) {
 			// TODO : this is no longer true with new client isolation API the exception should have been caught before this.
 			// in particular java.lang.ArithmeticException
@@ -323,7 +326,93 @@ public class AtomicReducerSR {
 			System.out.println("Failed to apply SMT based 'atomic proposition is an invariant' test, skipping this step." +e.getMessage());
 			e.printStackTrace();
 		}
-		return 0;
+		
+		for (String d : done) {
+			atoms.remove(d);
+		}
+		if (atoms.isEmpty() || !withSR) {
+			return nsolved;
+		}
+		
+		try {
+			int nsimpl = 0;
+			IdentityHashMap<Expression,Expression> mapTo = new IdentityHashMap<>();
+			
+			String wd = "/tmp";
+			try {
+				File workFolder = Files.createTempDirectory("redAtoms").toFile();
+				workFolder.deleteOnExit();
+				wd = workFolder.getCanonicalPath();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			
+			for (Entry<String, List<Expression>> ent : atoms.entrySet()) {
+				Expression cmp = ent.getValue().get(0); // never empty by cstr
+				boolean val = cmp.eval(istate)==1;
+				String pname = "AtomicProp";
+				
+				SparsePetriNet spnred = new SparsePetriNet(spn);
+				spnred.getProperties().clear();
+				
+				if (val) {
+					Property p = new Property(Expression.nop(Op.AG, cmp), PropertyType.INVARIANT, pname);
+					spnred.getProperties().add(p);					
+				} else {
+					Property p = new Property(Expression.nop(Op.AG, Expression.not(cmp)), PropertyType.INVARIANT, pname);
+					spnred.getProperties().add(p);				
+				}
+				
+				MccTranslator reader = new MccTranslator(wd, false);
+				reader.setSpn(spnred, true);
+				
+				DoneProperties todoProps = new ConcurrentHashDoneProperties();
+				try {
+					ReachabilitySolver.applyReductions(reader, todoProps , solverPath, 100);
+				} catch (GlobalPropertySolvedException e) {
+					e.printStackTrace();
+				}
+				
+				for (Entry<String, Boolean> result : todoProps.entrySet()) {
+					if (result.getValue()) {
+						// cool we've proven an invariant, we can substitute
+						if (DEBUG >= 1) System.out.println("Atom proved invariant; concluding " + cmp + " is always " + val);						
+						
+						for (Expression cc : ent.getValue()) {
+							nsimpl++;
+							if (val)
+								mapTo.put(cc, Expression.constant(true));
+							else
+								mapTo.put(cc, Expression.constant(false));
+						}
+						nsolved ++;
+					}
+				}
+			}
+			
+			if (nsolved > 0) {
+				for (Property prop : spn.getProperties()) {
+					prop.setBody(Expression.replaceSubExpressions(prop.getBody(), mapTo));
+				}
+				System.out.println("Successfully simplified "+nsolved+" atomic propositions using reductions for a total of " + nsimpl +" simplifications.");
+				if (DEBUG >= 1)  {
+					pid = 0;
+					for (Property prop : spn.getProperties()) {
+						System.out.println("p" + pid++ + ":" + prop);
+					}
+				}
+			}
+		} catch (Exception e) {
+			// TODO : this is no longer true with new client isolation API the exception should have been caught before this.
+			// in particular java.lang.ArithmeticException
+			// at uniol.apt.analysis.invariants.InvariantCalculator.test1b2(InvariantCalculator.java:448)
+			// can occur here.
+			System.out.println("Failed to apply Reduction based 'atomic proposition is an invariant' test, skipping this step." +e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return nsolved;
 	}
 
 
