@@ -295,6 +295,7 @@ public class DeadlockTester {
 		timeout *= 5;
 		boolean [] done = new boolean [tocheck.size()];
 		List<Script> properties = new ArrayList<>(tocheck.size());
+		List<Script> propertiesWithSE = new ArrayList<>(tocheck.size());
 		List<SparseIntArray> parikhs = new ArrayList<>(tocheck.size());		
 		
 		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
@@ -306,6 +307,11 @@ public class DeadlockTester {
 			property.add(new C_assert(smtexpr));
 			properties.add(property);
 			
+			// compute predecessor constraint
+			Script s = computePredConstraint(tocheck.get(i),sumMatrix,representative,sr);
+			s.add(new C_assert(smtexpr));
+			propertiesWithSE.add(s);
+			
 			SparseIntArray por = null;
 			if (withWitness)
 				por = new SparseIntArray();
@@ -316,7 +322,7 @@ public class DeadlockTester {
 		ReadFeedCache rfc = new ReadFeedCache();
 		try {				
 			// Step 1 : go for solveWithReals = true;				
-			List<String> replies = verifyPossible(sr, properties, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, true, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
+			List<String> replies = verifyPossible(sr, properties, propertiesWithSE, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, true, parikhs, pors,representative, rfc, 9000, timeout, null, done, true);
 			Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in real domain returned "
 					+"unsat :" + replies.stream().filter(s->"unsat".equals(s)).count()
 					+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count()
@@ -329,7 +335,7 @@ public class DeadlockTester {
 					}
 				}
 				// Step 2 : go for integer domain				
-				replies = verifyPossible(sr, properties, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, false, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
+				replies = verifyPossible(sr, properties, propertiesWithSE, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, false, parikhs, pors,representative, rfc, 9000, timeout, null, done, true);
 				Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in nat domain returned " 
 						+"unsat :" + replies.stream().filter(s->"unsat".equals(s)).count()
 						+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count());
@@ -342,6 +348,80 @@ public class DeadlockTester {
 		return parikhs;
 	}
 
+	private static Script computePredConstraint(Expression ap, IntMatrixCol sumMatrix,
+			List<Integer> representative, ISparsePetriNet sr) {
+		
+		// we know that s satisfies ap
+		// we want to force existence of an immediate predecessor of s satisfying !ap
+		
+		// there must exist a transition t such that
+		// * the predecessor by t of s satisfies !ap; this depends only on the effect of t, not it's precise definition
+		// * t was feasibly the last fired transition, i.e. there is a transition t' that t represents such that s >= post(t')
+		// * t was selected in the Parikh solution to reach s; |t|>0
+		
+		// a map from index in reduced flow to set of transitions with this effect
+		Map<Integer, List<Integer>> revMap = computeImages(representative); 
+		
+		SparseIntArray supp = computeSupport(ap);
+		
+		
+		IFactory ef = new SMT().smtConfig.exprFactory;
+		
+		List<IExpr> allPotentialPred = new ArrayList<>();
+		
+		// scan transition *effects* in sumMatrix
+		for (int tid=0, tide=sumMatrix.getColumnCount() ; tid < tide ; tid++) {
+			SparseIntArray t = sumMatrix.getColumn(tid);
+			if (! SparseIntArray.keysIntersect(supp, t)) {
+				// guaranteed to stutter : this is not a candidate
+				continue;				
+			} else {
+				// more subtle we do touch the target AP
+				// compute if firing t would go from !ap to ap
+				// * the predecessor by t of s satisfies !ap; this depends only on the effect of t, not it's precise definition
+				IExpr apFalseBeforeT = rewriteAfterEffect(Expression.not(ap),t,true).accept(new ExprTranslator());
+				
+				// * t was selected in the Parikh solution to reach s; |t|>0
+				IExpr tselected = ef.fcn(ef.symbol(">="), ef.symbol("t"+tid), ef.numeral(1));
+				
+				// * t was feasibly the last fired transition, i.e. there is a transition t' that t represents such that s >= post(t')
+				List<IExpr> alternatives = new ArrayList<>();
+				for (Integer ti : revMap.get(tid)) {
+					alternatives.add(buildFeasible(ef, sr.getFlowTP().getColumn(ti)));					
+				}
+				
+				// combine
+				List<IExpr> toAnd = new ArrayList<>();
+				toAnd.add(apFalseBeforeT);
+				toAnd.add(tselected);
+				toAnd.add(SMTUtils.makeOr(alternatives));
+				allPotentialPred.add(SMTUtils.makeAnd(toAnd));
+			}			
+		}
+		
+		Script script = new Script();
+		
+		// assert an OR of one of the candidates 
+		script.add(new C_assert(SMTUtils.makeOr(allPotentialPred)));
+				
+		return script;
+	}
+
+
+	private static IExpr buildFeasible(IFactory ef, SparseIntArray tp) {
+		List<IExpr> tojoin = new ArrayList<>();
+		for (int i=0,ie=tp.size();i<ie;i++) {
+			int pid = tp.keyAt(i);
+			int val = tp.valueAt(i);
+			
+			// must be that s is greater than tp
+			tojoin.add(ef.fcn(ef.symbol(">="), ef.symbol("s"+pid), ef.numeral(val)));
+		}
+		
+		return SMTUtils.makeAnd(tojoin);
+	}
+
+
 	public static boolean testEGap (Expression ap, ISparsePetriNet sr, String solverPath, int timeout) {		
 		List<Integer> tnames = new ArrayList<>();
 		List<Integer> representative = new ArrayList<>();
@@ -349,13 +429,7 @@ public class DeadlockTester {
 		
 		
 		// a map from index in reduced flow to set of transitions with this effect
-		List<List<Integer>> revMap = new ArrayList<>();
-		for (int tid=0, tide=sumMatrix.getColumnCount() ; tid < tide ; tid++) {
-			revMap.add(new ArrayList<>());
-		}
-		for (int tid=0, tide=sr.getTransitionCount() ; tid < tide ; tid++) {
-			revMap.get(representative.get(tid)).add(tid);
-		}
+		Map<Integer, List<Integer>> revMap = computeImages(representative); 
 		
 		SparseIntArray supp = computeSupport(ap);
 		
@@ -381,7 +455,7 @@ public class DeadlockTester {
 				// if firing t leaves ap => must be disabled
 				
 				// afterT is true if after t ap is still true (we stutter)
-				IExpr apTrueAfterT = rewriteAfterEffect(ap,t).accept(new ExprTranslator());
+				IExpr apTrueAfterT = rewriteAfterEffect(ap,t,false).accept(new ExprTranslator());
 				IExpr apFalseAfterT = ef.fcn(ef.symbol("not"), apTrueAfterT);
 				
 				List<IExpr> toDisable = new ArrayList<>();
@@ -433,26 +507,29 @@ public class DeadlockTester {
 		return supp;
 	}
 	
-	private static Expression rewriteAfterEffect (Expression expr, SparseIntArray t) {
+	private static Expression rewriteAfterEffect (Expression expr, SparseIntArray t, boolean before) {
 		if (expr == null) {
 			return null;
 		} else if (expr instanceof VarRef) {
 			VarRef vref = (VarRef) expr;
 			int delta=t.get(vref.getValue());
 			if (delta != 0) {
+				if (before) {
+					delta = -delta;
+				}
 				return Expression.nop(Op.ADD, expr, Expression.constant(delta));
 			} else {
 				return expr;
 			}
 		} else if (expr instanceof AtomicPropRef) {
 			AtomicPropRef apr = (AtomicPropRef) expr;
-			return rewriteAfterEffect(apr.getAp().getExpression(),t) ;			
+			return rewriteAfterEffect(apr.getAp().getExpression(),t,before) ;			
 		} else {
 			List<Expression> resc = new ArrayList<>();
 			boolean changed = false;
 			for (int i=0,ie=expr.nbChildren(); i < ie; i++) {
 				Expression child = expr.childAt(i);
-				Expression nc = rewriteAfterEffect(child, t);
+				Expression nc = rewriteAfterEffect(child, t,before);
 				resc.add(nc);
 				if (nc != child) {
 					changed = true;
@@ -466,10 +543,10 @@ public class DeadlockTester {
 	}
 	
 	
-	private static List<String> verifyPossible(ISparsePetriNet sr, List<Script> properties, String solverPath,
-			boolean isSafe, IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar,
-			Set<SparseIntArray> invarT, boolean solveWithReals, List<SparseIntArray> parikhs, List<SparseIntArray> pors,
-			List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax, boolean[] done, boolean withWitness) {
+	private static List<String> verifyPossible(ISparsePetriNet sr, List<Script> properties, List<Script> propertiesWithSE,
+			String solverPath, boolean isSafe, IntMatrixCol sumMatrix, List<Integer> tnames,
+			Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, List<SparseIntArray> parikhs,
+			List<SparseIntArray> pors, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax, boolean[] done, boolean withWitness) {
 		long time;		
 		lastState = null;
 		lastParikh = null;
@@ -513,7 +590,7 @@ public class DeadlockTester {
 		
 		execAndCheckResult(script, solver);
 		// are we finished ?
-		if (checkResults(properties, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
+		if (checkResults(propertiesWithSE, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
 			solver.exit();
 			return verdicts;
 		}	
@@ -531,7 +608,7 @@ public class DeadlockTester {
 				time = System.currentTimeMillis();
 				execAndCheckResult(readFeed, solver);
 				Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Added " + readFeed.commands().size() +" Read/Feed constraints in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);							
-				if (checkResults(properties, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
+				if (checkResults(propertiesWithSE, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
 					solver.exit();
 					return verdicts;
 				}	
@@ -540,7 +617,7 @@ public class DeadlockTester {
 		
 		
 		// are we finished ?
-		if (refineResultsWithTraps(sr, tnames, smt, solverPath, properties, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
+		if (refineResultsWithTraps(sr, tnames, smt, solverPath, propertiesWithSE, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
 				solver.exit();
 				return verdicts;
 		}	
@@ -574,7 +651,7 @@ public class DeadlockTester {
 					System.err.println("Maximisation of solution failed !");
 				}
 			}
-			checkResults(properties, done, parikhs, pors, verdicts, solver, withWitness, representative);
+			checkResults(propertiesWithSE, done, parikhs, pors, verdicts, solver, withWitness, representative);
 			System.out.println("Minimization took " + (System.currentTimeMillis() - ttime) + " ms.");				
 		}	
 		
