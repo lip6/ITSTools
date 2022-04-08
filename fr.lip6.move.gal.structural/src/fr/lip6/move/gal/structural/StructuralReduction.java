@@ -2870,14 +2870,22 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 	public void abstractReads() {
 		for (int tid = 0 ; tid < tnames.size() ; tid++) {
-			SparseIntArray res = SparseIntArray.sumProd(-1, flowPT.getColumn(tid), 1, flowTP.getColumn(tid));
 			SparseIntArray pre = new SparseIntArray();
 			SparseIntArray post = new SparseIntArray();
-			for (int i=0,ie=res.size(); i < ie ;  i++) {
-				if (res.valueAt(i) < 0) {
-					pre.append(res.keyAt(i), - res.valueAt(i));
-				} else {
-					post.append(res.keyAt(i), res.valueAt(i));
+			SparseIntArray cpre = flowPT.getColumn(tid);
+			SparseIntArray cpost = flowTP.getColumn(tid);
+			for (int i=0,ie=cpre.size(); i < ie ;  i++) {
+				int p = cpre.keyAt(i);
+				int v = cpre.valueAt(i);
+				if (cpost.get(p) != v) {
+					pre.append(p, v);
+				}
+			}
+			for (int i=0,ie=cpost.size(); i < ie ;  i++) {
+				int p = cpost.keyAt(i);
+				int v = cpost.valueAt(i);
+				if (cpre.get(p) != v) {
+					post.append(p, v);
 				}
 			}
 			flowPT.setColumn(tid, pre);
