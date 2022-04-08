@@ -2127,7 +2127,7 @@ public class DeadlockTester {
 				for (int i = 0; i < pt.size() ; i++) {
 					int p = pt.keyAt(i);
 					int v = pt.valueAt(i);
-					if (v > sr.getMarks().get(p) && tp.get(p) > v) {						
+					if (v > sr.getMarks().get(p) && tp.get(p) > 0) {						
 						// we need at least delta more tokens in p
 						int delta = v - sr.getMarks().get(p);
 						List<IExpr> couldFeed = new ArrayList<>();
@@ -2136,7 +2136,9 @@ public class DeadlockTester {
 						for (int j=0; j < feeders.size() ; j++) {
 							int t2 = feeders.keyAt(j);
 							int v2 = feeders.valueAt(j);
-							if (t2 != tid && v2 > 0) {								
+							if ( v2 > 0 
+									&& (t2 != tid || images.get(tid).stream().anyMatch(t -> sr.getFlowPT().getColumn(t).get(p)<v)) 
+								) {								
 								// true feed effect
 								
 								// basic >0 readFeed constraint from PN20
