@@ -12,10 +12,12 @@ import fr.lip6.move.gal.application.Application;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.application.solver.logic.AtomicReducerSR;
+import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.PetriNet;
+import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -216,8 +218,14 @@ public class ReachabilitySolver {
 				if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
 	
-				int timeSDD = Math.max(5*(iterations+1),15);
-				// GlobalPropertySolver.verifyWithSDD(reader, doneProps, "ReachabilityCardinality", solverPath, timeSDD);			
+				
+				if (reader.getSPN().getTransitionCount() <= 2000) {
+					int timeSDD = (int) ((System.currentTimeMillis() - initial) / 1000);
+					if (timeSDD == 0) timeSDD=1;
+					if (timeSDD >= 15) timeSDD=15;
+					// a bit of exhaustive for relatively small systems
+		//			GlobalPropertySolver.verifyWithSDD(reader, doneProps, "ReachabilityCardinality", solverPath, timeSDD);			
+				}
 				
 				if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
@@ -252,6 +260,30 @@ public class ReachabilitySolver {
 	
 					iter += treatSMTVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
 				}
+				
+				// give an exhaustive method a try
+				SparsePetriNet spnOri = reader.getSPN();
+				reader.setSpn(spn, true);
+				DoneProperties todoProps = new ConcurrentHashDoneProperties();
+				if (reader.getSPN().getTransitionCount() <= 2000) {					
+					// a bit of exhaustive for relatively small systems
+					GlobalPropertySolver.verifyWithSDD(reader, todoProps , "ReachabilityCardinality", solverPath, 15);
+					
+					for (Entry<String, Boolean> prop : todoProps.entrySet()) {
+						for (Property p : spnOri.getProperties()) {
+							if (p.getName().equals(prop.getKey())) {
+								if (p.getBody().getOp() == Op.AG && prop.getValue()  
+								    || p.getBody().getOp() == Op.EF && !prop.getValue()) {
+									// reliable on over approximation
+									doneProps.put(prop.getKey(), prop.getValue(), "OVER_APPROXIMATION");
+								}
+								break;
+							}
+						}
+					}
+				}
+				reader.setSpn(spnOri, false);
+				checkInInitial(spnOri, doneProps);
 			}
 		}
 
@@ -297,6 +329,7 @@ public class ReachabilitySolver {
 
 	static int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, SparsePetriNet spn,
 			DoneProperties doneProps, int steps) {
+		long time = System.currentTimeMillis();
 		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1);
 		int seen = interpretWalkerVerdict(tocheck, spn, doneProps, verdicts,"RANDOM");
 		if (tocheck.size() >= 15 && tocheck.size() < 100) {
@@ -322,13 +355,15 @@ public class ReachabilitySolver {
 			seen+=seen1;
 			if (seen1 != 0) seen100 = i;
 		}
+		long elapsed = System.currentTimeMillis() - time;
+		int maxt = (int) (elapsed > 1000 ? 3*(elapsed/1000) : 3); 
 		if (seen == 0 || seen <= tocheck.size() / 10) {
 			RandomExplorer.WasExhaustive wex = new RandomExplorer.WasExhaustive();
-			verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,30,-1,false,wex);
+			verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck, maxt ,-1,false,wex);
 			seen += interpretWalkerVerdict(tocheck, spn, doneProps, verdicts,"PROBABILISTIC");
 			if (wex.wasExhaustive) {
 				wex = new RandomExplorer.WasExhaustive();
-				verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,30,-1,true,wex);				
+				verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,maxt,-1,true,wex);				
 				seen += interpretWalkerVerdict(tocheck, spn, doneProps, verdicts,"EXHAUSTIVE",wex.wasExhaustive);
 			}
 		}
