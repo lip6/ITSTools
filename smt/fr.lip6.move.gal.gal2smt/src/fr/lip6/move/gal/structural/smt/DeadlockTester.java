@@ -2223,7 +2223,11 @@ public class DeadlockTester {
 
 								// new refined test counting tokens
 								// count how many tokens are contributed per firing
-								couldFeed.add(ef.fcn(ef.symbol("*"), ef.symbol("t"+t2), ef.numeral(v2)));
+								if (v2 != 1) {
+									couldFeed.add(ef.fcn(ef.symbol("*"), ef.symbol("t"+t2), ef.numeral(v2)));
+								} else {
+									couldFeed.add(ef.symbol("t"+t2));
+								}
 							}
 						}
 						// sum it 
@@ -2235,7 +2239,7 @@ public class DeadlockTester {
 				}
 			}
 			if (!perImage.isEmpty()) {
-				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), SMTUtils.makeOr(perImage)); 
+				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">="), ef.symbol("t"+tid), ef.numeral(1)), SMTUtils.makeOr(perImage)); 
 				script.add(new C_assert(causal));
 				readConstraints ++;
 			}
