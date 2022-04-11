@@ -2204,7 +2204,7 @@ public class DeadlockTester {
 				for (int i = 0; i < pt.size() ; i++) {
 					int p = pt.keyAt(i);
 					int v = pt.valueAt(i);
-					if (v > sr.getMarks().get(p) && tp.get(p) > 0) {						
+					if (v > sr.getMarks().get(p) && tp.get(p) > 0) {
 						// we need at least delta more tokens in p
 						int delta = v - sr.getMarks().get(p);
 						List<IExpr> couldFeed = new ArrayList<>();
@@ -2236,6 +2236,10 @@ public class DeadlockTester {
 				}
 				if (!prePlace.isEmpty()) {
 					perImage.add(SMTUtils.makeAnd(prePlace));
+				} else {
+					// pure transition with no read behavior exists for this transition
+					perImage.clear();
+					break;
 				}
 			}
 			if (!perImage.isEmpty()) {
