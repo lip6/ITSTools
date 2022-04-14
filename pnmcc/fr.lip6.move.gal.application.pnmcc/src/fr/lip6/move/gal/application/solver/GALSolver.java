@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.application.solver;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 
 import org.eclipse.emf.common.util.TreeIterator;
@@ -154,6 +155,7 @@ public class GALSolver {
 
 	public static int runGALReductions(MccTranslator reader, DoneProperties doneProps) {
 		int solved=0;
+		BitSet support = reader.getSPN().computeSupport();
 		boolean isSafe = reader.getSPN().isSafe();
 		Simplifier.deepEquals = false;
 		reader.rebuildSpecification(doneProps);
@@ -164,6 +166,11 @@ public class GALSolver {
 		Simplifier.deepEquals = true;
 		reader.rebuildSPN();
 		reader.getSPN().setSafe(isSafe);
+		
+		BitSet supportf = reader.getSPN().computeSupport();
+		if (! supportf.equals(support)) {
+			System.out.println("Support contains "+supportf.cardinality() + " out of " + reader.getSPN().getPnames().size() + " places (down from "+ support.cardinality() +") after GAL structural reductions.");
+		}
 		return solved;
 	}
 
