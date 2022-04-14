@@ -110,6 +110,8 @@ public class LTLPropertySolver {
 			ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
 		}
 		reader.createSPN();
+		reader.getSPN().simplifyLogic();
+		solved += reader.getSPN().testInInitial();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 		if (isLTL && exportLTL) {
 			SpotRunner.exportLTLProperties(reader.getSPN(),"raw",workDir);
@@ -120,6 +122,8 @@ public class LTLPropertySolver {
 			sr.runLTLSimplifications(reader.getSPN());
 		}
 
+		reader.getSPN().simplifyLogic();
+		solved += reader.getSPN().testInInitial();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 
 		if (reader.getSPN().getProperties().isEmpty()) {
@@ -141,6 +145,8 @@ public class LTLPropertySolver {
 				System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
 				gse.printStackTrace();
 			}
+			support = reader.getSPN().computeSupport();
+			System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places after structural reductions.");
 		}
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 		solved += GALSolver.runGALReductions(reader, doneProps);
@@ -630,11 +636,23 @@ public class LTLPropertySolver {
 		Expression ap = tgba.getInfStutter().get(tgba.getInitial());
 		boolean isInitiallyTrue = ap.eval(init)!=0;
 		if (isInitiallyTrue) {
-			if (DeadlockTester.testEGap(ap,spn, solverPath, 15)) {
-				System.out.println("Proved EG "+ap);
-				falseKnowledge.add(Expression.nop(Op.G,ap));
+			if (ap.getOp() == Op.OR) {
+				for (int i=0;i<ap.nbChildren();i++) {
+					Expression ap2 = ap.childAt(i);
+					if (DeadlockTester.testEGap(ap2,spn, solverPath, 15)) {
+						System.out.println("Proved EG "+ap2);
+						falseKnowledge.add(Expression.nop(Op.G,ap2));
+					} else {
+						System.out.println("Could not prove EG "+ap2);
+					}
+				}
 			} else {
-				System.out.println("Could not prove EG "+ap);
+				if (DeadlockTester.testEGap(ap,spn, solverPath, 15)) {
+					System.out.println("Proved EG "+ap);
+					falseKnowledge.add(Expression.nop(Op.G,ap));
+				} else {
+					System.out.println("Could not prove EG "+ap);
+				}
 			}
 		}
 		
