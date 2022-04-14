@@ -40,8 +40,8 @@ public class BinaryToolsPlugin extends Plugin {
 	private static BinaryToolsPlugin plugin;
 
 	// variants of the tool : multicore, sequential, symbolic...
-	public enum Tool {mc, seq, sym};
-	private static URI toolUri [] = new URI [3];
+	public enum Tool {mc, seq, sym, limit_time};
+	private static URI toolUri [] = new URI [4];
 	
 	/**
 	 * The constructor
@@ -82,17 +82,25 @@ public class BinaryToolsPlugin extends Plugin {
 	
 	public static URI getProgramURI(Tool tool) throws IOException {
 		if (toolUri[tool.ordinal()] == null) {
-			String relativePath = "bin/pins2lts-"+ tool.toString() + "-" + getArchOS();			
+			String relativePath=null;		
+			switch (tool) {
+			case mc : case seq : case sym :
+				relativePath = "bin/pins2lts-"+ tool.toString() + "-" + getArchOS();
+				break;
+			case limit_time :
+				relativePath = "bin/"+ tool.toString() + ".pl";
+				break;
+			}
+
 			URI uri = findRelativeURI(tool.toString(), relativePath);
 			toolUri[tool.ordinal()] = uri;
 			log.fine("Location of the binary : " + toolUri);
 
-			File crocExec = new File(uri);
-			if (!crocExec.setExecutable(true)) {
+			File executable = new File(uri);
+			if (!executable.setExecutable(true)) {
 				log.severe("unable to make the command-line tool executable [" + toolUri + "]");
 				throw new IOException("unable to make the command-line tool executable");
-			}		
-
+			}
 		}
 		return toolUri[tool.ordinal()];
 	}
