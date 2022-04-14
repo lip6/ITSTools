@@ -3,9 +3,11 @@ package fr.lip6.move.gal.structural.expr;
 public class Param {
 	private String name;
 	private int sz;
-	public Param(String name, int sz) {
+	private String sort;
+	public Param(String name, int sz, String sort) {
 		this.name = name;
 		this.sz = sz;
+		this.sort = sort;
 	}
 	public int size() {
 		return sz;
@@ -13,9 +15,12 @@ public class Param {
 	public String getName() {
 		return name;
 	}
+	public String getSort() {
+		return sort;
+	}
 	@Override
 	public String toString() {
-		return "$" + name + "(" + sz + ")";
+		return "$" + name + "(" + sort + ":" + sz + ")";
 	}
 	@Override
 	public int hashCode() {
