@@ -927,8 +927,10 @@ public class LTLPropertySolver {
 
 	private void addNextStateKnowledge(List<Expression> knowledge, List<Expression> falseKnowledge, SparsePetriNet spn, TGBA tgba) {
 		Set<Expression> condX = new HashSet<>();
+		Set<Expression> condXX = new HashSet<>();
 		{
 			Set<Expression> seen = new HashSet<>();
+			Set<Expression> seenX = new HashSet<>();
 			// check if there are true arc from initial state
 			for (TGBAEdge edge : tgba.getEdges().get(tgba.getInitial())) {
 				// not a self loop, that is F as front operator
@@ -940,14 +942,23 @@ public class LTLPropertySolver {
 								// grab formulas labeling edges out of this node
 								condX.add(edgeX.getCondition());
 							}
+						} 
+						for (TGBAEdge edgeXX : tgba.getEdges().get(edgeX.getDest())) {
+							if (seenX.add(edgeXX.getCondition()) && seenX.add(Expression.not(edgeXX.getCondition()))) {
+								// grab formulas labeling edges out of this node
+								condXX.add(edgeXX.getCondition());
+							}
 						}
+						
 					}
 				}
 			}
 		}
-		if (condX.isEmpty())
+		if (condX.isEmpty() && condXX.isEmpty())
 			return;
 		List<Expression> condXlist=new ArrayList<>(condX);
+		int lastCondX = condXlist.size();
+		condXlist.addAll(condXX);
 		boolean [] alltrue = new boolean[condXlist.size()];
 		boolean [] allfalse = new boolean[condXlist.size()];
 		Arrays.fill(alltrue,true);
@@ -960,7 +971,7 @@ public class LTLPropertySolver {
 		for (int i=0 ; i < enabled[0] ; i++) {
 			int ti = enabled[i+1];
 			SparseIntArray dest = wu.fire(ti, init);
-			for (int ei = 0; ei < condXlist.size() ; ei++) {
+			for (int ei = 0; ei < lastCondX ; ei++) {
 				if (!allfalse[ei] && !alltrue[ei]) {
 					continue;
 				}
@@ -972,10 +983,30 @@ public class LTLPropertySolver {
 					allfalse[ei]=false;
 				}
 			}
+			if (! condXX.isEmpty()) {
+				int [] enableX = Arrays.copyOf(enabled, enabled.length);
+				wu.updateEnabled(dest, enableX, ti);
+				for (int ii=0 ; ii < enableX[0] ; ii++) {
+					int tti = enableX[i+1];
+					SparseIntArray destX = wu.fire(tti, dest);
+					for (int ei = lastCondX; ei < condXlist.size() ; ei++) {
+						if (!allfalse[ei] && !alltrue[ei]) {
+							continue;
+						}
+						Expression cond=condXlist.get(ei);
+						int res = cond.eval(destX);
+						if (res==0) {
+							alltrue[ei]=false;
+						} else {
+							allfalse[ei]=false;
+						}
+					}
+				}
+			}
 		}
 		
 		// interpret results as LTL assertions (knowledge)
-		for (int ei = 0; ei < condXlist.size() ; ei++) {
+		for (int ei = 0; ei < lastCondX ; ei++) {
 			if (alltrue[ei]) {
 				knowledge.add(Expression.nop(Op.X,condXlist.get(ei)));
 			} else if (allfalse[ei]) {
@@ -983,6 +1014,17 @@ public class LTLPropertySolver {
 			} else {
 				falseKnowledge.add(Expression.nop(Op.X,condXlist.get(ei)));
 				falseKnowledge.add(Expression.nop(Op.X,Expression.not(condXlist.get(ei))));
+			}
+		}
+		
+		for (int ei = lastCondX; ei < condXlist.size() ; ei++) {
+			if (alltrue[ei]) {
+				knowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,condXlist.get(ei))));
+			} else if (allfalse[ei]) {
+				knowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,Expression.not(condXlist.get(ei)))));				
+			} else {
+				falseKnowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,condXlist.get(ei))));
+				falseKnowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,Expression.not(condXlist.get(ei)))));
 			}
 		}
 		
