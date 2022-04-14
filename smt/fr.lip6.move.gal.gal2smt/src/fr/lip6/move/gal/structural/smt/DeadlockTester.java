@@ -320,32 +320,44 @@ public class DeadlockTester {
 		}
 		
 		ReadFeedCache rfc = new ReadFeedCache();
+		long time = System.currentTimeMillis();
+		boolean solveWithReal = true;
+		List<String> replies = new ArrayList<>();
 		try {				
-			// Step 1 : go for solveWithReals = true;				
-			List<String> replies = verifyPossible(sr, properties, propertiesWithSE, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, true, parikhs, pors,representative, rfc, 9000, timeout, null, done, true);
-			Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in real domain returned "
-					+"unsat :" + replies.stream().filter(s->"unsat".equals(s)).count()
-					+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count()
-					+ " real:" + replies.stream().filter(s->"real".equals(s)).count()
-					);
+			// Step 1 : go for solveWithReals = true;
+			
+			replies = verifyPossible(sr, properties, propertiesWithSE, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, solveWithReal, parikhs, pors,representative, rfc, 9000, timeout, null, done, true);
+			reportReplies(replies,true,"all constraints",time);
 			if (replies.contains("real")) {
 				for (int i=0; i < tocheck.size() ; i++) {
 					if (! "unsat".equals(replies.get(i))) {
 						done [i] = false;
 					}
 				}
-				// Step 2 : go for integer domain				
-				replies = verifyPossible(sr, properties, propertiesWithSE, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, false, parikhs, pors,representative, rfc, 9000, timeout, null, done, true);
-				Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in nat domain returned " 
-						+"unsat :" + replies.stream().filter(s->"unsat".equals(s)).count()
-						+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count());
+				// Step 2 : go for integer domain
+				time = System.currentTimeMillis();
+				solveWithReal = false;
+				replies = verifyPossible(sr, properties, propertiesWithSE, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, solveWithReal, parikhs, pors,representative, rfc, 9000, timeout, null, done, true);
+				reportReplies(replies,false,"all constraints",time);
 			}
 		} catch (RuntimeException re) {
 			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re.getMessage().substring(0, Math.min(50, re.getMessage().length())) + "... while checking expressions."); 
+			
+			reportReplies(replies, solveWithReal, "all constraints", time);
 			// Result is:"+parikhs);	
 			//re.printStackTrace();
 		}
 		return parikhs;
+	}
+
+
+	public static void reportReplies(List<String> replies, boolean solveWithReal, String cause, long time) {
+		long real = replies.stream().filter(s->"real".equals(s)).count();
+		Logger.getLogger("fr.lip6.move.gal").info("After "+(System.currentTimeMillis()-time) +"ms SMT Verify possible using "+ cause +" in " + (solveWithReal ? "real" :"natural" )+ " domain returned "
+				+"unsat :" + replies.stream().filter(s->"unsat".equals(s)).count()
+				+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count()
+				+ (real>0 ? (" real:" + real) : "")
+				);
 	}
 
 	private static Script computePredConstraint(Expression ap, IntMatrixCol sumMatrix,
@@ -585,42 +597,40 @@ public class DeadlockTester {
 
 		// STEP 3 : go heavy, use the state equation to refine our solution
 		time = System.currentTimeMillis();
-		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Adding state equation constraints to refine reachable states.");
 		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, representative, invarT);
-		
 		execAndCheckResult(script, solver);
 		// are we finished ?
 		if (checkResults(propertiesWithSE, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
 			solver.exit();
 			return verdicts;
 		}	
-		
-		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " 
-				+"unsat :" + verdicts.stream().filter(s->"unsat".equals(s)).count()
-				+ " sat :" + verdicts.stream().filter(s->"sat".equals(s)).count()
-				+ (solveWithReals?" real:" + verdicts.stream().filter(s->"real".equals(s)).count():"")				
-				);
-			
+		reportReplies(verdicts, solveWithReals, "state equation", time);
+					
 		// add read => feed constraints
 		{
 			Script readFeed = readFeedCache.getScript(sr, sumMatrix, representative);
 			if (!readFeed.commands().isEmpty()) {
 				time = System.currentTimeMillis();
 				execAndCheckResult(readFeed, solver);
-				Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Added " + readFeed.commands().size() +" Read/Feed constraints in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);							
+				
 				if (checkResults(propertiesWithSE, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
+					reportReplies(verdicts, solveWithReals, readFeed.commands().size() +" Read/Feed constraints", time);
 					solver.exit();
 					return verdicts;
-				}	
+				}
+				reportReplies(verdicts, solveWithReals, readFeed.commands().size() +" Read/Feed constraints", time);
+
 			}
 		}
 		
 		
 		// are we finished ?
 		if (refineResultsWithTraps(sr, tnames, smt, solverPath, propertiesWithSE, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
+			reportReplies(verdicts, solveWithReals,"trap constraints", time);
 				solver.exit();
 				return verdicts;
-		}	
+		}
+		reportReplies(verdicts, solveWithReals,"trap constraints", time);
 		
 //				
 //		String rep = refineWithTraps(sr, tnames, solver, smt, solverPath);
