@@ -295,6 +295,9 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		long time = System.currentTimeMillis();
 		CommandLine clgcc = new CommandLine();
 		clgcc.setWorkingDir(workFolder);
+		clgcc.addArg(BinaryToolsPlugin.getProgramURI(Tool.limit_time).getPath().toString());
+		long timelim = Math.max(1,timeout/1000);
+		clgcc.addArg(Long.toString(timelim));
 		clgcc.addArg("gcc");
 		clgcc.addArg("-c");
 		clgcc.addArg("-I" + BinaryToolsPlugin.getIncludeFolderURI().getPath().toString());
