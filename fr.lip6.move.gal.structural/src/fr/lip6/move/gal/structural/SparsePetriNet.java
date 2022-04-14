@@ -200,73 +200,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 
 	public int testInInitial () {
 		SparseIntArray spinit = new SparseIntArray(marks);
-		int proved = 0;
-		for (Property prop : getProperties()) {
-			if (prop.getType() == PropertyType.INVARIANT && prop.getBody().getOp() != Op.BOOLCONST) {
-				try {
-					int val = ((BinOp)prop.getBody()).left.eval(spinit);
-					if (prop.getBody().getOp() == Op.EF && val==1) {
-						prop.setBody(Expression.constant(true));
-						proved++;
-					} else if (prop.getBody().getOp() == Op.AG && val==0) {
-						prop.setBody(Expression.constant(false));
-						proved++;
-					}
-				} catch (UnsupportedOperationException e) {}
-			} else if (prop.getType() == PropertyType.LTL || prop.getType() == PropertyType.CTL) {
-				try {
-					Expression e = simplifyWithInitial(prop.getBody(),spinit);
-					if (e != prop.getBody()) {
-						prop.setBody(e);
-						proved++;
-					}
-				} catch (UnsupportedOperationException e) {}								
-			}
-		}
-		if (proved > 0) {
-			Logger.getLogger("fr.lip6.move.gal").info("Initial state test concluded for "+proved+ " properties.");
-		}
-		return proved;
-	}
-
-	private Expression simplifyWithInitial(Expression expr, SparseIntArray spinit) {
-		if (expr == null) {
-			return null;
-		} else {
-			switch (expr.getOp()) {
-			case AND:
-			case OR:
-			case NOT: {
-				// recurse
-				List<Expression> resc = new ArrayList<>(expr.nbChildren());
-				boolean changed = false;
-				for (int cid = 0, cide = expr.nbChildren(); cid < cide; cid++) {
-					Expression child = expr.childAt(cid);
-					Expression e = simplifyWithInitial(child, spinit);
-					resc.add(e);
-					if (e != child) {
-						changed = true;
-					}
-				}
-				if (!changed) {
-					return expr;
-				} else {
-					return Expression.nop(expr.getOp(), resc);
-				}
-			}
-			case F: case G : case U :  case X:
-			case AF: case AG : case AU: case AX:
-			case EF: case EG: case EU: case EX:
-			{
-				// stop
-				return expr;
-			}
-			default: {
-				// comparisons and such, evaluate
-				return Expression.constant(expr.eval(spinit) == 1);
-			}
-			}
-		}
+		return LogicSimplifier.simplifyWithInitial(getProperties(),spinit);
 	}
 
 	private Expression simplifyConstants(Expression expr, int[] perm) {
