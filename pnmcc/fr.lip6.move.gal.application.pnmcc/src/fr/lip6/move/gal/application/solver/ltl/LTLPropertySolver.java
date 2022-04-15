@@ -983,7 +983,7 @@ public class LTLPropertySolver {
 					allfalse[ei]=false;
 				}
 			}
-			if (! condXX.isEmpty()) {
+			if (! condXX.isEmpty() && enabled[0] < 2000) {
 				int [] enableX = Arrays.copyOf(enabled, enabled.length);
 				wu.updateEnabled(dest, enableX, ti);
 				for (int ii=0 ; ii < enableX[0] ; ii++) {
