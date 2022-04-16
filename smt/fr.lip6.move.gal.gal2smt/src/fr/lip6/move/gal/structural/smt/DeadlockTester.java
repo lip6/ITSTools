@@ -381,6 +381,7 @@ public class DeadlockTester {
 		
 		List<IExpr> allPotentialPred = new ArrayList<>();
 		
+		int selected = 0;
 		// scan transition *effects* in sumMatrix
 		for (int tid=0, tide=sumMatrix.getColumnCount() ; tid < tide ; tid++) {
 			SparseIntArray t = sumMatrix.getColumn(tid);
@@ -388,6 +389,10 @@ public class DeadlockTester {
 				// guaranteed to stutter : this is not a candidate
 				continue;				
 			} else {
+				if (selected++ > 1000) {
+					// whatever...
+					return new Script();
+				}
 				// more subtle we do touch the target AP
 				// compute if firing t would go from !ap to ap
 				// * the predecessor by t of s satisfies !ap; this depends only on the effect of t, not it's precise definition
