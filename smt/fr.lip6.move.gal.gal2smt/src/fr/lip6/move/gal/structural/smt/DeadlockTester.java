@@ -449,6 +449,7 @@ public class DeadlockTester {
 		
 		// assert ap
 		cantStutter.add(new C_assert(ap.accept(new ExprTranslator())));
+		cantStutter.add(new C_check_sat());
 		
 		IFactory ef = new SMT().smtConfig.exprFactory;
 		List<IExpr> globalEnable = new ArrayList<>();
@@ -460,6 +461,7 @@ public class DeadlockTester {
 				for (Integer ti : revMap.get(tid)) {
 					IExpr disabled = buildDisabled(ef, sr.getFlowPT().getColumn(ti));
 					cantStutter.add(new C_assert(disabled));
+					cantStutter.add(new C_check_sat());
 				}								
 			} else {
 				// more subtle we do touch the target AP
@@ -483,12 +485,13 @@ public class DeadlockTester {
 				if (! toDisable.isEmpty()) {
 					IExpr stuttImplyDisabled = ef.fcn(ef.symbol("=>"), apTrueAfterT, SMTUtils.makeAnd(toDisable));
 					cantStutter.add(new C_assert(stuttImplyDisabled));
+					cantStutter.add(new C_check_sat());
 				}
 			}			
 		}
 		// assert an OR of one modifying transition enabled
 		cantStutter.add(new C_assert(SMTUtils.makeOr(globalEnable)));
-		
+		cantStutter.add(new C_check_sat());
 		// ok let's go
 		try {
 			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
