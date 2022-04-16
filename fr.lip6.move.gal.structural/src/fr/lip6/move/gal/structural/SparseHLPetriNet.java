@@ -3,6 +3,7 @@ package fr.lip6.move.gal.structural;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +28,7 @@ import fr.lip6.move.gal.structural.expr.Simplifier;
 import fr.lip6.move.gal.util.Pair;
 
 public class SparseHLPetriNet extends PetriNet {
-	
+	private List<Sort> sorts = new ArrayList<>();
 	private List<HLPlace> places = new ArrayList<>();
 	private List<HLTrans> transitions= new ArrayList<>();
 	int placeCount=0;
@@ -37,11 +38,15 @@ public class SparseHLPetriNet extends PetriNet {
 		return transitions.size()-1;
 	}
 	
-	public int addPlace (String pname, int [] init, String sname) {
+	public int addPlace (String pname, int [] init, List<Sort> sort) {
 		int index = placeCount;
-		places.add(new HLPlace(pname, index, init, sname));
+		places.add(new HLPlace(pname, index, init, sort));
 		placeCount += init.length;
 		return places.size()-1;
+	}
+	
+	public void addSort (Sort sort) {
+		sorts.add(sort);
 	}
 
 	public void addPreArc (int p, int t, Expression func, int val) {
@@ -50,6 +55,16 @@ public class SparseHLPetriNet extends PetriNet {
 
 	public void addPostArc (int p, int t, Expression func, int val) {
 		transitions.get(t).post.add(new Pair<Expression, Integer>(Expression.array(p, func), val));
+	}
+	
+	public Sort findSort(String name) {
+		for (Sort s : sorts) {
+			if (s.getName().equals(name)) {
+				return s;
+			}
+		}
+		System.err.println("Warning : Sort "+ name+ " not registered in HL net. Existing sorts :" + sorts);
+		return null;
 	}
 
 	public int getPlaceCount() {
@@ -90,7 +105,7 @@ public class SparseHLPetriNet extends PetriNet {
 
 	@Override
 	public String toString() {
-		return "SparseHLPetriNet [places=" + places + ",\n transitions=" + transitions + ",\n getName()=" + getName()
+		return "SparseHLPetriNet\n[places=" + places + ",\n transitions=" + transitions + ",\n getName()=" + getName()
 				+ ",\n getProperties()=" + getProperties() + "]";
 	}
 	
@@ -149,9 +164,13 @@ public class SparseHLPetriNet extends PetriNet {
 		List<List<Integer>> enablings = new ArrayList<>(transitions.size());
 		return unfold(enablings);
 	}
+	public List<Sort> getSorts() {
+		return sorts;
+	}
 	
 	public SparsePetriNet unfold (List<List<Integer>> enablings) {
 		long time = System.currentTimeMillis();
+//		SymmetricUnfolder.testSymmetryConditions(this);
 		SparsePetriNet spn = new SparsePetriNet();
 		spn.setName(getName() +"_unf");
 		
@@ -247,6 +266,9 @@ public class SparseHLPetriNet extends PetriNet {
 			spn.getProperties().add(new Property(bindColors(p.getBody(),enablings),p.getType(),p.getName()));
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Unfolded HLPN properties in " + (System.currentTimeMillis()- time) + " ms.");
+		
+	//	FlowPrinter.drawNet(spn, "After Unfold", Collections.emptySet(), Collections.emptySet());
+		
 		return spn;
 	}
 
@@ -437,7 +459,7 @@ public class SparseHLPetriNet extends PetriNet {
 		return expr;
 	}
 
-	private Expression bind(Param cur, int val, Expression expr) {
+	public static Expression bind(Param cur, int val, Expression expr) {
 		if (expr == null) {
 			return expr;
 		} else if (expr.getOp() == Op.PARAMREF) {
@@ -604,11 +626,18 @@ public class SparseHLPetriNet extends PetriNet {
 		System.out.println("Prefix of Interest using HLPN skeleton for deadlock discarded "+prem+" places and "+trem + " transitions.");		
 	}
 	
+	private static String sortName(List<Sort> sort) {
+		StringBuilder sb = new StringBuilder();
+		for (Sort s : sort) {
+			sb.append(s.getName());
+		}
+		return sb.toString();
+	}
 	
 	public IOrder computeOrder () {
 		Map<String,List<HLPlace>> placeSort = new HashMap<>();
 		for (HLPlace p : places) {
-			placeSort.computeIfAbsent(p.getSort(), v -> new ArrayList<>()).add(p);
+			placeSort.computeIfAbsent( sortName(p.getSort()), v -> new ArrayList<>()).add(p);
 		}
 		List<IOrder> orders = new ArrayList<>();
 		for (Entry<String, List<HLPlace>> ps : placeSort.entrySet()) {
@@ -659,8 +688,10 @@ class HLTrans {
 	@Override
 	public String toString() {
 		return "HLTrans [name=" + name + ", params=" + params + ", guard=" + guard + ", pre=" + pre + ", post=" + post
-				+ "]";
+				+ "]\n";
 	}
-	
+	public String getName() {
+		return name;
+	}
 	
 }

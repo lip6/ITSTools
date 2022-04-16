@@ -2,6 +2,7 @@ package fr.lip6.move.gal.pnml.togal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -99,7 +100,8 @@ public class HLSRTransformer {
 		long time = System.currentTimeMillis();
 		Map<Place,Integer> placeMap = new HashMap<>();
 		Map<String,List<Place>> placeSort = new HashMap<>();
-		
+				
+		Map<String, fr.lip6.move.gal.structural.Sort> sortMap = new HashMap<>();
 		boolean isOneSafe = true;
 		try {
 			for (PnObject n : page.getObjects()) {
@@ -107,16 +109,22 @@ public class HLSRTransformer {
 					Place p = (Place) n;
 
 					Sort psort = p.getType().getStructure();
+					collectSort(psort,sortMap);
 					String sname = getSortName(psort);
+					
 					placeSort.computeIfAbsent(sname, v -> new ArrayList<>()).add(p);
 
 					int[] value = interpretMarking(p.getHlinitialMarking(),psort);
 					if (Arrays.stream(value).sum()>1) {
 						isOneSafe = false;
 					}
-					int index = res.addPlace(Utils.normalizeName(p.getId()), value, Utils.normalizeName(sname));
+					List<fr.lip6.move.gal.structural.Sort> finalSort = getSorts(psort).stream().map(s -> sortMap.get(s)).toList();
+					int index = res.addPlace(Utils.normalizeName(p.getId()), value, finalSort);
 					placeMap.put(p, index);
 				}
+			}
+			for (fr.lip6.move.gal.structural.Sort s : sortMap.values()) {
+				res.addSort(s);
 			}
 		} catch (NegativeArraySizeException nase) {
 			if (! isOneSafe) {
@@ -175,8 +183,8 @@ public class HLSRTransformer {
 					guard = Expression.op(Op.AND, guard, convertToBoolean(g,varMap));
 				}
 
-				Expression constraint = detectBindingSymmetry (varMap, t); 
-				guard = Expression.op(Op.AND, constraint, guard);
+//				Expression constraint = detectBindingSymmetry (varMap, t); 
+//				guard = Expression.op(Op.AND, constraint, guard);
 							
 				int tind = res.addTransition(Utils.normalizeName(t.getId()), params, guard);
 				
@@ -219,10 +227,6 @@ public class HLSRTransformer {
 		getLog().info("Imported "+ res.getPlaces().size() + " HL places and " + res.getTransitions().size()+ " HL transitions for a total of " 
 				+ res.getPlaceCount() + " PT places and " + totalt + " transition bindings in " + (System.currentTimeMillis() - time) + " ms.");
 	}
-
-
-
-
 
 	/** Detect binding symmetries and exploit them to reduce the number of bindings to be considered.
 	 * e.g. <p1>+<p2>  => we can enforce $p1 <= $p2
@@ -878,6 +882,48 @@ public class HLSRTransformer {
 		return val;
 	}
 
+	private List<String> getSorts (Sort psort) {
+		if (psort instanceof Bool) 	{
+			return Collections.singletonList("bool");
+		} else if (psort instanceof Dot) {
+			return Collections.singletonList("dot");
+		} else if (psort instanceof FiniteEnumeration) {
+//			FiniteEnumeration fe = (FiniteEnumeration) psort;
+			return Collections.singletonList("enum");
+		} else if (psort instanceof FiniteIntRange) {
+//			FiniteIntRange fir = (FiniteIntRange) psort;
+			return Collections.singletonList("range");
+		} else if (psort instanceof ProductSort) {
+			ProductSort ps = (ProductSort) psort;
+			List<String> res = new ArrayList<>();
+			for (Sort e : ps.getElementSort()) {
+				res.add(getSortName(e));
+			}
+			return res;
+		} else if (psort instanceof UserSort) {
+			UserSort us = (UserSort) psort;
+			SortDecl sdecl = us.getDeclaration();
+			
+			if (sdecl instanceof NamedSort) {
+				NamedSort names = (NamedSort) sdecl;
+				Sort trueSort = names.getSortdef();
+				if (trueSort instanceof ProductSort) {
+					return getSorts(trueSort);
+				} else {
+					return Collections.singletonList(Utils.normalizeName(names.getName()));
+				}
+			}
+			
+			//		} else if (psort instanceof CyclicEnumeration) {
+			//			CyclicEnumeration ce = (CyclicEnumeration) psort;
+			//			
+		} else {
+			getLog().warning("Unknown Sort element encountered in input file : " + psort);
+		}
+		return Collections.emptyList();
+		
+	}
+	
 	private String getSortName (Sort psort) {
 		if (psort instanceof Bool) 	{
 			return "bool";
@@ -912,6 +958,35 @@ public class HLSRTransformer {
 		}
 		return "";
 		
+	}
+	
+
+
+	private void collectSort(Sort psort, Map<String, fr.lip6.move.gal.structural.Sort> sortMap) {
+		if (psort instanceof Bool) 	{
+			sortMap.computeIfAbsent("bool", x -> new fr.lip6.move.gal.structural.Sort("bool", 2));
+		} else if (psort instanceof Dot) {
+			sortMap.computeIfAbsent("dot", x -> new fr.lip6.move.gal.structural.Sort("dot", 1));
+		} else if (psort instanceof UserSort) {
+			UserSort us = (UserSort) psort;
+			SortDecl sdecl = us.getDeclaration();
+			
+			if (sdecl instanceof NamedSort) {
+				NamedSort names = (NamedSort) sdecl;
+				Sort trueSort = names.getSortdef();
+				if (trueSort instanceof ProductSort) {
+					ProductSort ps = (ProductSort) trueSort;
+					for (Sort e : ps.getElementSort()) {
+						collectSort(e, sortMap);
+					}
+				} else {
+					String name=Utils.normalizeName(names.getName());
+					sortMap.computeIfAbsent(name, x -> new fr.lip6.move.gal.structural.Sort(name, computeSortCardinality(trueSort)));
+				}
+			}
+		} else {
+			getLog().warning("Unknown Sort element encountered in input file : " + psort);
+		}
 	}
 
 	private Integer _computeSortCardinality(Sort psort) {

@@ -12,6 +12,9 @@ public class Param {
 	public int size() {
 		return sz;
 	}
+	public void setSize(int size) {
+		this.sz =size;
+	}
 	public String getName() {
 		return name;
 	}
