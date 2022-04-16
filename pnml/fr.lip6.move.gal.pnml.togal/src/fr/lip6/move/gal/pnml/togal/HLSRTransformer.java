@@ -118,7 +118,7 @@ public class HLSRTransformer {
 					if (Arrays.stream(value).sum()>1) {
 						isOneSafe = false;
 					}
-					List<fr.lip6.move.gal.structural.Sort> finalSort = getSorts(psort).stream().map(s -> sortMap.get(s)).toList();
+					List<fr.lip6.move.gal.structural.Sort> finalSort = getSorts(psort).stream().map(s -> sortMap.get(s)).collect(Collectors.toList());
 					int index = res.addPlace(Utils.normalizeName(p.getId()), value, finalSort);
 					placeMap.put(p, index);
 				}
