@@ -987,7 +987,7 @@ public class LTLPropertySolver {
 				int [] enableX = Arrays.copyOf(enabled, enabled.length);
 				wu.updateEnabled(dest, enableX, ti);
 				for (int ii=0 ; ii < enableX[0] ; ii++) {
-					int tti = enableX[i+1];
+					int tti = enableX[ii+1];
 					SparseIntArray destX = wu.fire(tti, dest);
 					for (int ei = lastCondX; ei < condXlist.size() ; ei++) {
 						if (!allfalse[ei] && !alltrue[ei]) {
