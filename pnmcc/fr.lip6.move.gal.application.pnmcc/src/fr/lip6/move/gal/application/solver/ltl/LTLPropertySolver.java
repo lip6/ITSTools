@@ -963,6 +963,7 @@ public class LTLPropertySolver {
 		boolean [] allfalse = new boolean[condXlist.size()];
 		Arrays.fill(alltrue,true);
 		Arrays.fill(allfalse,true);
+		boolean doXX = true;
 		
 		// run a 1 step test
 		WalkUtils wu = new WalkUtils(spn);
@@ -1002,6 +1003,8 @@ public class LTLPropertySolver {
 						}
 					}
 				}
+			} else {
+				doXX=false;
 			}
 		}
 		
@@ -1016,18 +1019,18 @@ public class LTLPropertySolver {
 				falseKnowledge.add(Expression.nop(Op.X,Expression.not(condXlist.get(ei))));
 			}
 		}
-		
-		for (int ei = lastCondX; ei < condXlist.size() ; ei++) {
-			if (alltrue[ei]) {
-				knowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,condXlist.get(ei))));
-			} else if (allfalse[ei]) {
-				knowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,Expression.not(condXlist.get(ei)))));				
-			} else {
-				falseKnowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,condXlist.get(ei))));
-				falseKnowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,Expression.not(condXlist.get(ei)))));
+		if (doXX) {
+			for (int ei = lastCondX; ei < condXlist.size() ; ei++) {
+				if (alltrue[ei]) {
+					knowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,condXlist.get(ei))));
+				} else if (allfalse[ei]) {
+					knowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,Expression.not(condXlist.get(ei)))));				
+				} else {
+					falseKnowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,condXlist.get(ei))));
+					falseKnowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,Expression.not(condXlist.get(ei)))));
+				}
 			}
 		}
-		
 	}
 
 	private void addInitialStateKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
