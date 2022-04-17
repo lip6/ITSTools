@@ -298,7 +298,7 @@ public class PetriNet2PinsTransformer {
 			for (labindex=0 ; labindex < net.getTransitionCount() ; labindex++) {
 				pw.println("    lts_type_set_state_label_name (ltstype, "+labindex+ ", \"enabled" + labindex + "\");");				
 			}
-			for (AtomicProp atom : atoms.getAtoms()) {
+			for (AtomicProp atom : listAtoms) {
 				pw.println("    lts_type_set_state_label_name (ltstype, "+labindex+ ", \"LTLAP" + atom.getName() + "\");");
 				labindex++;
 			}
@@ -476,8 +476,8 @@ public class PetriNet2PinsTransformer {
 		pw.println("  return " + labelCount() + " ;");
 		pw.println("}");
 
-		List<int[]> lm = new ArrayList<>(atoms.size()+invAtoms.size());
-		for (AtomicProp ap : atoms.getAtoms()) {
+		List<int[]> lm = new ArrayList<>(listAtoms.size()+invAtoms.size());
+		for (AtomicProp ap : listAtoms) {
 			BitSet lr = new BitSet();
 			SparsePetriNet.addSupport(ap.getExpression(), lr);
 			lm.add(convertToLine(lr));
@@ -487,10 +487,10 @@ public class PetriNet2PinsTransformer {
 			SparsePetriNet.addSupport(ap.getExpression(), lr);
 			lm.add(convertToLine(lr));
 		}
-		if (atoms.size() + invAtoms.size() > 0)
+		if (listAtoms.size() + invAtoms.size() > 0)
 			printMatrix(pw, "lm", lm);
 		pw.print("int* label_matrix(int row) {\n" + "  if (row < " + net.getTransitionCount() + ") return rm[row];\n");
-		if (atoms.size() + invAtoms.size() > 0) {
+		if (listAtoms.size() + invAtoms.size() > 0) {
 			pw.print("  else return lm[row-" + net.getTransitionCount() + "];\n");
 		}
 		pw.print("}\n");
@@ -532,7 +532,7 @@ public class PetriNet2PinsTransformer {
 			{
 				IntMatrixCol enab = new IntMatrixCol(net.getTransitionCount(), 0);
 				IntMatrixCol disab = new IntMatrixCol(net.getTransitionCount(), 0);
-				for (AtomicProp ap : atoms.getAtoms()) {
+				for (AtomicProp ap : listAtoms) {
 					SparseIntArray[] lines = nes.computeAblingsForPredicate(ap.getExpression());
 					disab.appendColumn(lines[0]);
 					enab.appendColumn(lines[1]);
@@ -587,7 +587,7 @@ public class PetriNet2PinsTransformer {
 	}
 
 	private int labelCount() {
-		return (net.getTransitionCount() + atoms.size() + invAtoms.size());
+		return (net.getTransitionCount() + listAtoms.size() + invAtoms.size());
 	}
 
 	public void printMatrix(PrintWriter pw, String matrixName, IntMatrixCol matrix) {
@@ -696,7 +696,7 @@ public class PetriNet2PinsTransformer {
 			/////// Handle Labels similarly
 			pw.println("int state_label(void* model, int label, int* src) {");
 			// labels
-			List<AtomicProp> alist = new ArrayList<>(atoms.getAtoms());
+			List<AtomicProp> alist = new ArrayList<>(listAtoms);
 			alist.addAll(invAtoms);
 			
 
@@ -748,8 +748,8 @@ public class PetriNet2PinsTransformer {
 			pw.println("int eval_state_label(int label, const int* src) {");
 			// labels
 			pw.println("    switch (label) {");
-			Iterator<AtomicProp> ap = atoms.getAtoms().iterator();
-			for (int tindex = 0, te = atoms.size() ; tindex < te ; tindex++) {
+			Iterator<AtomicProp> ap = listAtoms.iterator();
+			for (int tindex = 0, te = listAtoms.size() ; tindex < te ; tindex++) {
 				pw.println("      case " + tindex + " : ");
 				pw.append("        return ");
 				ap.next().getExpression().accept(printer);
@@ -760,13 +760,13 @@ public class PetriNet2PinsTransformer {
 			//int (*get_state_size)();
 		    //const char* (*get_state_variable_name)(int var);
 		    
-		    pw.println("int get_state_label_count() { return "+atoms.size() + ";}");
+		    pw.println("int get_state_label_count() { return "+listAtoms.size() + ";}");
 			
-		    pw.println("const char * labelnames ["+atoms.size()+"] = {");
+		    pw.println("const char * labelnames ["+listAtoms.size()+"] = {");
 		    int ind = 0;
-		    for (AtomicProp a : atoms.getAtoms()) {
+		    for (AtomicProp a : listAtoms) {
 		    	pw.print("  \"LTLAP" + a.getName()+ "\"");
-		    	if (ind < atoms.getAtoms().size()) {
+		    	if (ind < listAtoms.size()) {
 		    		pw.print(",");
 		    	}
 		    	pw.println();
@@ -803,10 +803,11 @@ public class PetriNet2PinsTransformer {
 	}
 
 	private AtomicPropManager atoms = new AtomicPropManager();
+	private List<AtomicProp> listAtoms = new ArrayList<>();
 	private boolean forSpot;
 	private List<AtomicProp> invAtoms = new ArrayList<>();
 	
-	public void transform(SparsePetriNet spn, String cwd, boolean withPorMatrix, boolean forSpot, AtomicPropManager providedAPM) {
+	public void transform(SparsePetriNet spn, String cwd, boolean withPorMatrix, boolean forSpot, List<AtomicProp> listAtoms) {
 		this.forSpot = forSpot;
 		//		if ( spec.getMain() instanceof GALTypeDeclaration ) {
 		//			Logger.getLogger("fr.lip6.move.gal").fine("detecting pure GAL");
@@ -824,8 +825,8 @@ public class PetriNet2PinsTransformer {
 			+ ") to apply POR reductions. Disabling POR matrices.");
 		}
 		
-		if (providedAPM != null) {
-			this.atoms = providedAPM;
+		if (listAtoms != null) {
+			this.listAtoms = listAtoms;
 		} else {
 			boolean isLTL = true;
 			if (! spn.getProperties().isEmpty() && spn.getProperties().get(0).getType() == PropertyType.INVARIANT) {
@@ -834,6 +835,7 @@ public class PetriNet2PinsTransformer {
 
 			if (isLTL) {
 				atoms.loadAtomicProps(spn.getProperties());
+				this.listAtoms = new ArrayList<>(atoms.getAtoms());
 			} else {
 				for (Property prop : spn.getProperties()) {
 					if (prop.getType() == PropertyType.INVARIANT) {
