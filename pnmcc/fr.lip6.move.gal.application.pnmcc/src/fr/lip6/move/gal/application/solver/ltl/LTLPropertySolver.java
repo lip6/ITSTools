@@ -969,6 +969,23 @@ public class LTLPropertySolver {
 		WalkUtils wu = new WalkUtils(spn);
 		SparseIntArray init = wu.getInitial();
 		int[] enabled = wu.computeEnabled(init);
+		
+		// we are starting from a deadlock ?
+		if (enabled[0]==0) {
+			for (int ei = 0; ei < condXlist.size() ; ei++) {
+				if (!allfalse[ei] && !alltrue[ei]) {
+					continue;
+				}
+				Expression cond=condXlist.get(ei);
+				int res = cond.eval(init);
+				if (res==0) {
+					alltrue[ei]=false;
+				} else {
+					allfalse[ei]=false;
+				}
+			}			
+		}
+		
 		for (int i=0 ; i < enabled[0] ; i++) {
 			int ti = enabled[i+1];
 			SparseIntArray dest = wu.fire(ti, init);
@@ -987,21 +1004,37 @@ public class LTLPropertySolver {
 			if (! condXX.isEmpty() && enabled[0] < 2000) {
 				int [] enableX = Arrays.copyOf(enabled, enabled.length);
 				wu.updateEnabled(dest, enableX, ti);
-				for (int ii=0 ; ii < enableX[0] ; ii++) {
-					int tti = enableX[ii+1];
-					SparseIntArray destX = wu.fire(tti, dest);
+				if (enableX[0] > 0) {
+					for (int ii=0 ; ii < enableX[0] ; ii++) {
+						int tti = enableX[ii+1];
+						SparseIntArray destX = wu.fire(tti, dest);
+						for (int ei = lastCondX; ei < condXlist.size() ; ei++) {
+							if (!allfalse[ei] && !alltrue[ei]) {
+								continue;
+							}
+							Expression cond=condXlist.get(ei);
+							int res = cond.eval(destX);
+							if (res==0) {
+								alltrue[ei]=false;
+							} else {
+								allfalse[ei]=false;
+							}
+						}
+					}
+				} else {
+					// successor state is a deadlock
 					for (int ei = lastCondX; ei < condXlist.size() ; ei++) {
 						if (!allfalse[ei] && !alltrue[ei]) {
 							continue;
 						}
 						Expression cond=condXlist.get(ei);
-						int res = cond.eval(destX);
+						int res = cond.eval(dest);
 						if (res==0) {
 							alltrue[ei]=false;
 						} else {
 							allfalse[ei]=false;
 						}
-					}
+					}					
 				}
 			} else {
 				doXX=false;
