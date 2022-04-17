@@ -81,14 +81,14 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 					} else {
 						p2p = new PetriNet2PinsTransformer();
 						if (tgba != null) {
-							p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false, tgba.getApm());
+							p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false, tgba.getAPs());
 						} else {
 							p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false, null);
 						}
 						
 					}
 					try {
-						compilePINS(Math.max(1, timeout/5));
+						compilePINS((int)Math.max(2, timeout/5));
 						linkPINS(Math.max(1, timeout/5));
 					} catch (TimeoutException to) {
 						throw new RuntimeException("Compilation or link of executable timed out." + to);
@@ -290,14 +290,13 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		return pbody==null || pbody.contains(".hoa") || ! pbody.contains("X");
 	}
 
-	private void compilePINS(long timeout) throws IOException, TimeoutException, InterruptedException {
+	private void compilePINS(int timeout) throws IOException, TimeoutException, InterruptedException {
 		// compile
 		long time = System.currentTimeMillis();
 		CommandLine clgcc = new CommandLine();
 		clgcc.setWorkingDir(workFolder);
-		clgcc.addArg(BinaryToolsPlugin.getProgramURI(Tool.limit_time).getPath().toString());
-		long timelim = Math.max(1,timeout/1000);
-		clgcc.addArg(Long.toString(timelim));
+		clgcc.addArg(BinaryToolsPlugin.getProgramURI(Tool.limit_time).getPath().toString());		
+		clgcc.addArg(Long.toString(timeout));
 		clgcc.addArg("gcc");
 		clgcc.addArg("-c");
 		clgcc.addArg("-I" + BinaryToolsPlugin.getIncludeFolderURI().getPath().toString());
