@@ -639,11 +639,14 @@ public class LTLPropertySolver {
 			if (ap.getOp() == Op.OR) {
 				for (int i=0;i<ap.nbChildren();i++) {
 					Expression ap2 = ap.childAt(i);
-					if (DeadlockTester.testEGap(ap2,spn, solverPath, 15)) {
-						System.out.println("Proved EG "+ap2);
-						falseKnowledge.add(Expression.nop(Op.G,ap2));
-					} else {
-						System.out.println("Could not prove EG "+ap2);
+					// make sure this term is initially true
+					if (ap2.eval(init)!=0) {
+						if (DeadlockTester.testEGap(ap2,spn, solverPath, 15)) {
+							System.out.println("Proved EG "+ap2);
+							falseKnowledge.add(Expression.nop(Op.G,ap2));
+						} else {
+							System.out.println("Could not prove EG "+ap2);
+						}
 					}
 				}
 			} else {
