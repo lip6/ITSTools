@@ -183,8 +183,8 @@ public class HLSRTransformer {
 					guard = Expression.op(Op.AND, guard, convertToBoolean(g,varMap));
 				}
 
-//				Expression constraint = detectBindingSymmetry (varMap, t); 
-//				guard = Expression.op(Op.AND, constraint, guard);
+				Expression constraint = detectBindingSymmetry (varMap, t); 
+				guard = Expression.op(Op.AND, constraint, guard);
 							
 				int tind = res.addTransition(Utils.normalizeName(t.getId()), params, guard);
 				
