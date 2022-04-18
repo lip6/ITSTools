@@ -105,8 +105,9 @@ public class Partition {
 		
 		// start from 0...0
 		int [] cur = new int [place.getSort().size()];
-		for (int i=0 ; i < initial.length ; i++) {							
-			res[partition[cur[sortindex]]] += initial[i];
+		for (int i=0 ; i < initial.length ; i++) {
+			int delta = cur[sortindex] - partition[cur[sortindex]];
+			res[i - (place.getMultipliers()[sortindex]*delta)] += initial[i];
 			
 			// increment cur
 			int j;

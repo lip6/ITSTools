@@ -37,6 +37,7 @@ public class HLPlace {
 	}
 	public void setInitial(int[] initial) {
 		this.initial = initial;
+		multipliers = null;
 	}
 	public List<Sort> getSort() {
 		return sort;
@@ -47,17 +48,21 @@ public class HLPlace {
 	 * @return the index in flattened array for this cell
 	 */
 	public int resolve(List<Expression> r) {
+		getMultipliers();
+		int sum=0;
+		for (int i=0; i < r.size(); i++) {
+			sum += multipliers[i]*r.get(i).eval(null);
+		}
+		return sum;
+	}
+	public int[] getMultipliers() {
 		if (multipliers ==null) {
 			multipliers = new int[sort.size()];
 			multipliers[sort.size()-1]=1;						
 			for (int i=sort.size()-2 ; i >= 0 ; i--) {
 				multipliers[i] = multipliers[i+1]*sort.get(i+1).size();
 			}			
-		}	
-		int sum=0;
-		for (int i=0; i < r.size(); i++) {
-			sum += multipliers[i]*r.get(i).eval(null);
 		}
-		return sum;
+		return multipliers;
 	}
 }
