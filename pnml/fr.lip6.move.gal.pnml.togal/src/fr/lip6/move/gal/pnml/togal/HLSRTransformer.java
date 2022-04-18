@@ -195,8 +195,8 @@ public class HLSRTransformer {
 					int pind = placeMap.get(pl);
 					seenIn.put(pind,arc.getHlinscription().getText());
 					effective.add(pind);
-					List<Pair<Expression,Integer>> funcs = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), varMap );
-					for (Pair<Expression, Integer> tok : funcs) {
+					List<Pair<List<Expression>,Integer>> funcs = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), varMap );
+					for (Pair<List<Expression>, Integer> tok : funcs) {
 						res.addPreArc(pind, tind, tok.getFirst(), tok.getSecond());						
 					}
 				}
@@ -208,8 +208,8 @@ public class HLSRTransformer {
 					} else {
 						effective.add(pind);
 					}
-					List<Pair<Expression,Integer>> funcs = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), varMap );
-					for (Pair<Expression, Integer> tok : funcs) {
+					List<Pair<List<Expression>, Integer>> funcs = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), varMap );
+					for (Pair<List<Expression>, Integer> tok : funcs) {
 						res.addPostArc(pind, tind, tok.getFirst(), tok.getSecond());						
 					}
 				}
@@ -499,22 +499,22 @@ public class HLSRTransformer {
 		return interpretMarkingTerm(hlinitialMarking.getStructure(), psort);
 	}
 
-	private List<Pair<Expression, Integer>> buildRefsFromArc(Term term, Sort psort, Map<VariableDecl, Param> varMap) {
-		List<Pair<Expression, Integer>> toret = new ArrayList<>();
+	private List<Pair<List<Expression>, Integer>> buildRefsFromArc(Term term, Sort psort, Map<VariableDecl, Param> varMap) {
+		List<Pair<List<Expression>, Integer>> toret = new ArrayList<>();
 
 		if (term instanceof All) {
 			// All all = (All) term;
 			int size = computeSortCardinality(psort);
 			for (int i = 0; i < size; i++) {
-				toret.add(new Pair<Expression, Integer>(Expression.constant(i), 1));
+				toret.add(new Pair<>(Collections.singletonList(Expression.constant(i)), 1));
 			}
 		} else if (term instanceof NumberOf) {
 			NumberOf no = (NumberOf) term;
 			int card = HLUtils.getCardinality(no);
 
-			List<Pair<Expression, Integer>> token = buildRefsFromArc(no.getSubterm().get(1), psort, varMap);
+			List<Pair<List<Expression>, Integer>> token = buildRefsFromArc(no.getSubterm().get(1), psort, varMap);
 			
-			for (Pair<Expression, Integer> it : token) {
+			for (Pair<List<Expression>, Integer> it : token) {
 				toret.add( new Pair<>(it.getFirst(), it.getSecond()*card));
 			}
 		} else if (term instanceof UserOperator) {
@@ -522,24 +522,21 @@ public class HLSRTransformer {
 			UserOperator uo = (UserOperator) term;
 			int index = HLUtils.getConstantIndex(uo);
 
-			toret.add(new Pair<>(Expression.constant(index), 1));
+			toret.add(new Pair<>(Collections.singletonList(Expression.constant(index)), 1));
 		} else if (term instanceof DotConstant) {
-			toret.add(new Pair<>(Expression.constant(0),1));
+			toret.add(new Pair<>(Collections.singletonList(Expression.constant(0)),1));
 		} else if (term instanceof fr.lip6.move.pnml.symmetricnet.terms.Variable) {
 			// Probably designating a constant of the type
 			fr.lip6.move.pnml.symmetricnet.terms.Variable var = (fr.lip6.move.pnml.symmetricnet.terms.Variable) term;
 			Param param = varMap.get(var.getVariableDecl());
 			Expression pr = Expression.paramRef(param);
-			toret.add(new Pair<>(pr,1));
+			toret.add(new Pair<>(Collections.singletonList(pr),1));
 		} else if (term instanceof Tuple) {
 			Tuple tuple = (Tuple) term;
 			// hopefully, only constants in the tuple
-			int tot = 1;
-			Expression zero = Expression.constant(0);
-			List<Expression> targets = new ArrayList<>(); 
-			targets.add(zero);
-			
-			for (int i = tuple.getSubterm().size() -1 ; i >= 0 ; i--) {
+			List<Expression> targets = new ArrayList<>(tuple.getSubterm().size());
+					
+			for (int i = 0 ; i < tuple.getSubterm().size() ; i++) {
 				Term elem = tuple.getSubterm().get(i);
 				Expression value =null;
 				Sort elemSort = null;
@@ -628,39 +625,21 @@ public class HLSRTransformer {
 					throw new UnsupportedOperationException();
 				}
 
-				Expression pres ;
-				if (tot != 1) {
-					pres = Expression.op(Op.MULT, value, Expression.constant(tot));
-				} else {
-					pres = value;
-				}
-				
-				for (int j=0; j < targets.size() ; j++) {
-					Expression target = targets.get(j);
-					if (target != zero) {
-						targets.set(j, Expression.op(Op.ADD, pres, target));
-					} else {
-						targets.set(j, pres);
-					}
-				}
-
-				tot *= computeSortCardinality(elemSort);
+				targets.add(value);
 			}
-			for (Expression target : targets) {
-				toret.add(new Pair<>(target,1));
-			}
+			toret.add(new Pair<>(targets,1));			
 		} else if (term instanceof Add) {
 			Add add = (Add) term;
 			for (Term t : add.getSubterm()) {
-				List<Pair<Expression, Integer>> toadd = buildRefsFromArc(t, psort, varMap);
+				List<Pair<List<Expression>, Integer>> toadd = buildRefsFromArc(t, psort, varMap);
 				toret.addAll(toadd);
 			}
 		} else if (term instanceof Subtract) {
 			Subtract add = (Subtract) term;
 			int nbterm = 0;
 			for (Term t : add.getSubterm()) {
-				List<Pair<Expression, Integer>> toadd = buildRefsFromArc(t, psort, varMap);
-				for (Pair<Expression, Integer> it : toadd) {
+				List<Pair<List<Expression>, Integer>> toadd = buildRefsFromArc(t, psort, varMap);
+				for (Pair<List<Expression>, Integer> it : toadd) {
 					if (nbterm == 0) {
 						// the first term minus the next ones
 						toret.add(it); 
@@ -695,7 +674,7 @@ public class HLSRTransformer {
 			
 			Expression mod2 = Expression.op(Op.MOD, sum, max);
 			
-			toret.add(new Pair<>(mod2,1));
+			toret.add(new Pair<>(Collections.singletonList(mod2),1));
 		} else if (term instanceof Successor) {
 			Successor pred = (Successor) term;
 			// Probably designating a constant of the type
@@ -709,7 +688,7 @@ public class HLSRTransformer {
 
 			Expression mod = Expression.op(Op.MOD,bin, max);
 			
-			toret.add(new Pair<>(mod,1));
+			toret.add(new Pair<>(Collections.singletonList(mod),1));
 		} else {
 			getLog().warning("Encountered unknown term in arc inscription " + term.getClass().getName());
 		}
