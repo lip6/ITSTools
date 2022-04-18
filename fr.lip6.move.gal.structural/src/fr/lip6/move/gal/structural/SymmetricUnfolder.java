@@ -295,36 +295,36 @@ public class SymmetricUnfolder {
 					}
 
 					Set<Param> params = new HashSet<>();
-					for (Pair<Expression, Integer> arc : trans.pre) {
-						List<Param> refs = new ArrayList<>();
-						computeParams(arc.getFirst(),refs);
-						for (Param p : refs) {
-							if (params.contains(p)) {
-								isSortJoinFree.put(p.getSort(), false);
-							}
-						}
-						params.addAll(refs);
-						if (net.getPlaces().get(arc.getSecond()).getInitial().length>1) {
-							Expression e = arc.getFirst();
-							if (isPure(e)) {
-								//		System.out.println("Pure arc " + arc);							
-							} else {
-								System.out.println("Impure arc " + arc);
-								allArcsArePure = false;
-							}
-						}
-					}
-					for (Pair<Expression, Integer> arc : trans.post) {
-						if (net.getPlaces().get(arc.getSecond()).getInitial().length>1) {
-							Expression e = arc.getFirst();
-							if (isPure(e)) {
-								//		System.out.println("Pure arc " + arc);							
-							} else {
-								System.out.println("Impure arc " + arc);
-								allArcsArePure = false;
-							}
-						}
-					}
+//					for (Pair<Expression, Integer> arc : trans.pre) {
+//						List<Param> refs = new ArrayList<>();
+//						computeParams(arc.getFirst(),refs);
+//						for (Param p : refs) {
+//							if (params.contains(p)) {
+//								isSortJoinFree.put(p.getSort(), false);
+//							}
+//						}
+//						params.addAll(refs);
+//						if (net.getPlaces().get(arc.getSecond()).getInitial().length>1) {
+//							Expression e = arc.getFirst();
+//							if (isPure(e)) {
+//								//		System.out.println("Pure arc " + arc);							
+//							} else {
+//								System.out.println("Impure arc " + arc);
+//								allArcsArePure = false;
+//							}
+//						}
+//					}
+//					for (Pair<Expression, Integer> arc : trans.post) {
+//						if (net.getPlaces().get(arc.getSecond()).getInitial().length>1) {
+//							Expression e = arc.getFirst();
+//							if (isPure(e)) {
+//								//		System.out.println("Pure arc " + arc);							
+//							} else {
+//								System.out.println("Impure arc " + arc);
+//								allArcsArePure = false;
+//							}
+//						}
+//					}
 				}
 			}
 		}
