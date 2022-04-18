@@ -99,11 +99,28 @@ public class Partition {
 		return partition.length;
 	}
 
-	public int[] rewriteMarking(int[] initial) {
-		int [] res = new int [nbSubs];
-		for (int i=0 ; i < initial.length ; i++) {
-			res[partition[i]] += initial[i];
+	public int[] rewriteMarking(HLPlace place, int sortindex) {
+		int [] initial = place.getInitial();
+		int [] res = new int [ (initial.length / size()) * getNbSubs()];
+		
+		// start from 0...0
+		int [] cur = new int [place.getSort().size()];
+		for (int i=0 ; i < initial.length ; i++) {							
+			res[partition[cur[sortindex]]] += initial[i];
+			
+			// increment cur
+			int j;
+			for (j = cur.length - 1; j >= 0; j--) {
+				if (cur[j] == place.getSort().get(j).size() - 1) {
+					cur[j] = 0;
+					continue;
+				} else {
+					cur[j]++;
+					break;								
+				}
+			}
 		}
+		
 		return res;
 	}
 	
