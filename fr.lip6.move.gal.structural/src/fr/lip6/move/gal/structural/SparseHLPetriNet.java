@@ -3,7 +3,6 @@ package fr.lip6.move.gal.structural;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -166,7 +165,7 @@ public class SparseHLPetriNet extends PetriNet {
 	
 	public SparsePetriNet unfold (List<List<Integer>> enablings) {
 		long time = System.currentTimeMillis();
-//		SymmetricUnfolder.testSymmetryConditions(this);
+		SymmetricUnfolder.testSymmetryConditions(this);
 		SparsePetriNet spn = new SparsePetriNet();
 		spn.setName(getName() +"_unf");
 		
@@ -266,7 +265,7 @@ public class SparseHLPetriNet extends PetriNet {
 		return spn;
 	}
 
-	private void fuseEqualParameters(HLTrans t) {
+	void fuseEqualParameters(HLTrans t) {
 		if (t.params.size() < 2) {
 			return ;
 		} else {
