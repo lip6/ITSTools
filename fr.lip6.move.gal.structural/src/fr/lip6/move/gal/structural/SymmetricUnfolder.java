@@ -66,6 +66,10 @@ public class SymmetricUnfolder {
 	public static void testSymmetryConditions(SparseHLPetriNet net) {
 		Map<String,Boolean> isSortSymmetric = new HashMap<>();
 
+		for (HLTrans trans : net.getTransitions()) {
+			net.fuseEqualParameters(trans);
+		}
+		
 		// examine each sort one by one.
 		// start with larger domains
 		net.getSorts().sort((a,b)->-Integer.compare(a.size(),b.size()));
@@ -81,8 +85,10 @@ public class SymmetricUnfolder {
 			boolean isSym = true;
 
 			// examine places
-
+			Map<Integer,Integer> touchedPlaces = new HashMap<>();
+			int placeid=-1;
 			for (HLPlace place : net.getPlaces()) {
+				placeid++;
 				// find if we contain this domain
 				int sortindex = -1;
 				for (int i=0; i < place.getSort().size() ; i++) {
@@ -104,6 +110,8 @@ public class SymmetricUnfolder {
 				if (sortindex == -1) {
 					// try next place
 					continue;
+				} else {
+					touchedPlaces.put(placeid,sortindex);
 				}
 
 				// length of sub vectors to be compared
@@ -173,7 +181,7 @@ public class SymmetricUnfolder {
 					System.out.println("Place "+place+" breaks symmetry on sort:"+sort.getName()+ "");
 					break;
 				}
-
+				
 			} // places loop
 
 
@@ -245,121 +253,162 @@ public class SymmetricUnfolder {
 				System.out.println("Sort wr.t. initial and guards " + sort.getName()+ " has partition " + partition);
 			}
 
-			// tests for synchronization
-			// take a good look at color functions on arcs
-
-
-		}
-
-
-		System.out.println("Symmetric sorts wr.t. initial :" + isSortSymmetric);
-		Map<String, Partition> sortParts = new HashMap<>();
-		for (Sort s : net.getSorts()) {
-			sortParts.put(s.getName(), new Partition(s.size()));
-		}
-
-		Map<String,Boolean> isSortJoinFree = new HashMap<>();
-		for (String sort : isSortSymmetric.keySet()) {
-			isSortJoinFree.put(sort, true);
-		}
-		boolean allArcsArePure = true;
-		for (Entry<String, Boolean> entry : isSortSymmetric.entrySet()) {
-			String sort = entry.getKey();
-			if (entry.getValue()) {				
-				for (HLTrans trans : net.getTransitions()) {
-					if (trans.guard != null && trans.guard.getOp() != Op.BOOLCONST) {
-
-						{
-							List<Param> refs = new ArrayList<>();
-							computeParams(trans.guard,refs);
-							for (Param cur : refs) {
-								if (cur.getSort().equals(sort)) {
-									Map<Expression, List<Integer>> partition = new HashMap<>();
-									for (int val = 0; val < cur.size(); val++) {
-										Expression guard = SparseHLPetriNet.bind(cur, val, trans.guard);
-										partition.computeIfAbsent(guard, k -> new ArrayList<>()).add(val);
-									}
-									System.out.println("Guard :" + trans.guard + "introduces in " + sort
-											+ " partition :" + partition);
-									sortParts.compute(sort, (k, v) -> {
-										Partition p = new Partition(partition.values());
-										if (v == null) {
-											return p;
-										} else {
-											return Partition.refine(v, p);
-										}
-									});
-								}
-							}
+			// test for successor/predecessor
+			for (HLTrans trans : net.getTransitions()) {
+				for (HLArc arc : trans.pre) {
+					Integer sortind = touchedPlaces.get(arc.getPlace());
+					if (sortind != null) {
+						if (arc.getCfunc().get(sortind).getOp()==Op.MOD) {
+							isSym = false;
+							System.out.println(
+									"Arc "+arc+" contains successor/predecessor on variables of sort "+ sort.getName());
+							break;
 						}
 					}
-
-					Set<Param> params = new HashSet<>();
-//					for (Pair<Expression, Integer> arc : trans.pre) {
-//						List<Param> refs = new ArrayList<>();
-//						computeParams(arc.getFirst(),refs);
-//						for (Param p : refs) {
-//							if (params.contains(p)) {
-//								isSortJoinFree.put(p.getSort(), false);
-//							}
-//						}
-//						params.addAll(refs);
-//						if (net.getPlaces().get(arc.getSecond()).getInitial().length>1) {
-//							Expression e = arc.getFirst();
-//							if (isPure(e)) {
-//								//		System.out.println("Pure arc " + arc);							
-//							} else {
-//								System.out.println("Impure arc " + arc);
-//								allArcsArePure = false;
-//							}
-//						}
-//					}
-//					for (Pair<Expression, Integer> arc : trans.post) {
-//						if (net.getPlaces().get(arc.getSecond()).getInitial().length>1) {
-//							Expression e = arc.getFirst();
-//							if (isPure(e)) {
-//								//		System.out.println("Pure arc " + arc);							
-//							} else {
-//								System.out.println("Impure arc " + arc);
-//								allArcsArePure = false;
-//							}
-//						}
-//					}
+				}
+				if (!isSym) {
+					break;
+				}
+				for (HLArc arc : trans.post) {
+					Integer sortind = touchedPlaces.get(arc.getPlace());
+					if (sortind != null) {
+						if (arc.getCfunc().get(sortind).getOp()==Op.MOD) {
+							isSym = false;
+							System.out.println(
+									"Arc "+arc+" contains successor/predecessor on variables of sort "+ sort.getName());
+							break;
+						}
+					}
+				}
+				if (!isSym) {
+					break;
 				}
 			}
-		}
-
-		System.out.println("Sort partitions :" + sortParts);
-		System.out.println("Are sorts join free ? " + isSortJoinFree);
-
-		for (String sort : isSortSymmetric.keySet()) {
-			if (allArcsArePure && isSortSymmetric.get(sort) && isSortJoinFree.get(sort)) {
-				Partition p = sortParts.get(sort);
-				if (p!= null && p.getNbSubs() < p.size() && p.getNbSubs() > 1) {
-					// looking good we can rewrite
-					int base = 0;
-					for (HLPlace place : net.getPlaces()) {
-						if (place.getSort().get(0).getName().equals(sort)) {
-							int[] after = p.rewriteMarking(place.getInitial());
-							System.out.println("For place "+place.getName()+ ":" + Arrays.toString(place.getInitial()) + " -> "+ Arrays.toString(after) );
-							place.setInitial(after);
-						}
-						place.startIndex = base;
-						base += place.getInitial().length;
+			
+			if (!isSym) {
+				// break for this sort, successor test broke us
+				continue;
+			}
+			
+			// tests for synchronization
+			for (HLTrans trans : net.getTransitions()) {				
+				for (Param param : trans.params) {					
+					if (param.getSort().equals(sort.getName())) {
+						int seenplace = -1;
+						for (HLArc arc : trans.pre) {
+							Integer sortind = touchedPlaces.get(arc.getPlace());
+							if (sortind != null) {
+								List<Param> refs = new ArrayList<>();
+								computeParams(arc.getCfunc().get(sortind),refs);
+								if (refs.contains(param)) {
+									if (seenplace == -1) {
+										seenplace = arc.getPlace();
+									} else if (seenplace != arc.getPlace()) {
+										System.out.println("Transition "+trans.getName()+ " forces synchronizations/join behavior on parameter "+ param.getName() + " of sort "+ sort.getName());
+										isSym = false;
+										break;
+									}
+								}
+							}
+						}						
 					}
-					for (HLTrans trans : net.getTransitions()) {
-						for (Param par : trans.params) {
-							if (par.getSort().equals(sort)) {
+				}
+				if (!isSym) {
+					break;
+				}
+			}
 
-								Map<Expression, List<Integer>> partition = new HashMap<>();
+			if (!isSym) {
+				// break for this sort, synchronization test broke us
+				continue;
+			}
+			
+			System.out.println("Symmetric sort wr.t. initial and guards and successors and join/free detected :" + sort.getName());
+			
+			// take a good look at color functions on arcs
+			// test for constants
+			// TODO : recognize ALL as being symmetric => take into account the set of arcs from p to t, not just each arc one by one
+			for (HLTrans trans : net.getTransitions()) {
+				for (HLArc arc : trans.pre) {
+					Integer sortind = touchedPlaces.get(arc.getPlace());
+					if (sortind != null) {
+						if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
+							isSym = false;
+							System.out.println(
+									"Arc "+arc+" contains constants of sort "+ sort.getName());
+							break;
+						}
+					}
+				}
+				if (!isSym) {
+					break;
+				}
+				for (HLArc arc : trans.post) {
+					Integer sortind = touchedPlaces.get(arc.getPlace());
+					if (sortind != null) {
+						if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
+							isSym = false;
+							System.out.println(
+									"Arc "+arc+" contains constants of sort "+ sort.getName());
+							break;
+						}
+					}
+				}
+				if (!isSym) {
+					break;
+				}
+			}
+			
+			if (!isSym) {
+				// break for this sort, constants test broke us
+				continue;
+			}
+			
+			
+			if (partition.getNbSubs()==1) {
+				System.out.println("Applying symmetric unfolding of full symmetric sort :" + sort.getName() + " domain size was " + sort.size());
+			} else {
+				System.out.println("Applying symmetric unfolding of partitioned symmetric sort :" + sort.getName() + " domain size was " + sort.size() + " reducing to " + partition.getNbSubs() + " values.");
+			}
+			
+			{
+				// looking good we can rewrite
+				int base = 0;
+				int pind = -1;
+				for (HLPlace place : net.getPlaces()) {
+					pind++;
+					Integer sortindex = touchedPlaces.get(pind);
+					if (sortindex != null) {						
+						int[] after = partition.rewriteMarking(place,sortindex);
+						System.out.println("For place "+place.getName()+ ":" + Arrays.toString(place.getInitial()) + "\n->\n "+ Arrays.toString(after) );
+						net.placeCount -= place.getInitial().length - after.length; 
+					    place.setInitial(after);						
+					}
+					place.startIndex = base;
+					base += place.getInitial().length;
+				}
+				for (HLTrans trans : net.getTransitions()) {
+					List<Param> refs = new ArrayList<>();
+					computeParams(trans.guard, refs);
+					for (Param par : trans.params) {
+						if (par.getSort().equals(sort.getName())) {
+							boolean touchGuard = refs.contains(par);
+								
+							Map<Expression, List<Integer>> partition2 = new HashMap<>();
+							
+							if (touchGuard) {
 								for (int val = 0; val < par.size(); val++) {
 									Expression guard = SparseHLPetriNet.bind(par, val, trans.guard);
-									partition.computeIfAbsent(guard, k -> new ArrayList<>()).add(val);
+									partition2.computeIfAbsent(guard, k -> new ArrayList<>()).add(val);
 								}
-								par.setSize(p.getNbSubs());
-								List<Expression> result = new ArrayList<>();
-								for (Entry<Expression, List<Integer>> ent:partition.entrySet()) {
-									List<Integer> cover = p.covers(ent.getValue());
+							}
+							// resize potential bindings of parameter							
+							par.setSize(partition.getNbSubs());
+							
+							if (touchGuard) {
+								List<Expression> result = new ArrayList<>();							
+								for (Entry<Expression, List<Integer>> ent:partition2.entrySet()) {
+									List<Integer> cover = partition.covers(ent.getValue());
 									List<Expression> toOr = new ArrayList<>();
 									for (Integer i: cover) {
 										toOr.add(Expression.op(Op.EQ, Expression.paramRef(par), Expression.constant(i)));
@@ -367,13 +416,13 @@ public class SymmetricUnfolder {
 									result.add(Expression.op(Op.AND, ent.getKey(), Expression.nop(Op.OR,toOr)));
 								}
 								Expression newguard = Expression.nop(Op.OR,result);
-
+	
 								System.out.println("For transition "+ trans.getName()+ ":" + trans.guard + " -> "+ newguard );
 								trans.guard = newguard;
 							}
 						}
-
 					}
+
 				}
 			}
 		}
