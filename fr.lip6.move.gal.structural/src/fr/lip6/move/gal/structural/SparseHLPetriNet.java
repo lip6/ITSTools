@@ -3,6 +3,7 @@ package fr.lip6.move.gal.structural;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -260,7 +261,7 @@ public class SparseHLPetriNet extends PetriNet {
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Unfolded HLPN properties in " + (System.currentTimeMillis()- time) + " ms.");
 		
-	//	FlowPrinter.drawNet(spn, "After Unfold", Collections.emptySet(), Collections.emptySet());
+		FlowPrinter.drawNet(spn, "After Unfold", Collections.emptySet(), Collections.emptySet());
 		
 		return spn;
 	}
@@ -418,7 +419,7 @@ public class SparseHLPetriNet extends PetriNet {
 							}
 							resc.add(Expression.constant(sum));
 						} else {
-							int si = places.get(child.getValue()).startIndex;
+							int si = places.get(child.getValue()).getStartIndex();
 							for (int i=0,ie=places.get(child.getValue()).getInitial().length ; i<ie;i++) {
 								resc.add(Expression.var(si + i));
 							}
@@ -450,8 +451,9 @@ public class SparseHLPetriNet extends PetriNet {
 				return Expression.nop(nop.getOp(), resc);
 			}
 		} else if (expr instanceof ArrayVarRef) {
-			ArrayVarRef aref = (ArrayVarRef) expr;
-			return Expression.var( places.get(aref.base).startIndex + aref.index.eval(null));
+			throw new IllegalArgumentException("Expression "+ expr+ " is an array.");
+//			ArrayVarRef aref = (ArrayVarRef) expr;
+//			return Expression.var( places.get(aref.base).startIndex + aref.index.eval(null));
 		}
 		return expr;
 	}
@@ -525,8 +527,9 @@ public class SparseHLPetriNet extends PetriNet {
 		boolean hasNeg = false;
 		SparseIntArray pt = new SparseIntArray();
 		for (HLArc arc : bt.pre) {
-			int pind = arc.getPlace();
-			int offset = places.get(pind).resolve(arc.getCfunc());
+			HLPlace hlplace = places.get(arc.getPlace());
+			int pind = hlplace.getStartIndex();
+			int offset = hlplace.resolve(arc.getCfunc());
 			int finalp = pind+offset;
 			int val = pt.get(finalp) + arc.getCoeff();
 			pt.put(finalp, val);
@@ -545,8 +548,9 @@ public class SparseHLPetriNet extends PetriNet {
 		
 		SparseIntArray tp = new SparseIntArray();
 		for (HLArc arc : bt.post) {
-			int pind = arc.getPlace();
-			int offset = places.get(pind).resolve(arc.getCfunc());
+			HLPlace hlplace = places.get(arc.getPlace());
+			int pind = hlplace.getStartIndex();
+			int offset = hlplace.resolve(arc.getCfunc());
 			int finalp = pind+offset;
 			int val = tp.get(finalp) + arc.getCoeff();
 			tp.put(finalp, val);
@@ -610,13 +614,17 @@ public class SparseHLPetriNet extends PetriNet {
 			}
 		}
 		
-		placeCount = 0;
-		for (int pid = 0, pide=places.size() ; pid < pide ;  pid ++ ) {
-			places.get(pid).startIndex = placeCount;
-			placeCount += places.get(pid).getInitial().length;
-		}
+		resetPlaceCount();
 
 		System.out.println("Prefix of Interest using HLPN skeleton for deadlock discarded "+prem+" places and "+trem + " transitions.");		
+	}
+
+	public void resetPlaceCount() {
+		placeCount = 0;
+		for (int pid = 0, pide=places.size() ; pid < pide ;  pid ++ ) {
+			places.get(pid).setStartIndex(placeCount);
+			placeCount += places.get(pid).getInitial().length;
+		}
 	}
 	
 	private static String sortName(List<Sort> sort) {
