@@ -24,7 +24,10 @@ public class HLPlace {
 	}
 	@Override
 	public String toString() {
-		return "[name=" + name + "(" + sort + ")" + ", startIndex=" + startIndex + ", initial=" + Arrays.toString(initial) + "]\n";
+		String init = Arrays.toString(initial);
+		if (init.length() > 30)
+			init = init.substring(0, 30) + "...]";
+		return "[name=" + name + "(" + sort + ")" + ", startIndex=" + startIndex + ", initial=" + init + "]\n";
 	}
 	public void setConstant(boolean b) {
 		this.isConstant = b;
