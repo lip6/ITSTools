@@ -373,20 +373,17 @@ public class SymmetricUnfolder {
 			
 			{
 				// looking good we can rewrite
-				int base = 0;
 				int pind = -1;
 				for (HLPlace place : net.getPlaces()) {
 					pind++;
 					Integer sortindex = touchedPlaces.get(pind);
 					if (sortindex != null) {						
 						int[] after = partition.rewriteMarking(place,sortindex);
-						System.out.println("For place "+place.getName()+ ":" + Arrays.toString(place.getInitial()) + "\n->\n "+ Arrays.toString(after) );
-						net.placeCount -= place.getInitial().length - after.length; 
+						System.out.println("For place "+place.getName()+ ":" + Arrays.toString(place.getInitial()) + "\n->\n "+ Arrays.toString(after) );						 
 					    place.setInitial(after);						
 					}
-					place.startIndex = base;
-					base += place.getInitial().length;
 				}
+				net.resetPlaceCount();
 				for (HLTrans trans : net.getTransitions()) {
 					List<Param> refs = new ArrayList<>();
 					computeParams(trans.guard, refs);
@@ -425,7 +422,8 @@ public class SymmetricUnfolder {
 
 				}
 				sort.setSize(partition.getNbSubs());
-			}
+			} // rewrite step
+
 		}
 	}
 
