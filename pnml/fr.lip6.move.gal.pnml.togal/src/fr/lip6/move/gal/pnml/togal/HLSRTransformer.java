@@ -926,7 +926,7 @@ public class HLSRTransformer {
 			SortDecl sdecl = us.getDeclaration();
 			if (sdecl instanceof NamedSort) {
 				NamedSort names = (NamedSort) sdecl;
-				return names.getName();
+				return Utils.normalizeName(names.getName());
 			}
 
 			//		} else if (psort instanceof CyclicEnumeration) {
