@@ -55,13 +55,6 @@ public class SymmetricUnfolder {
 		return null;
 	}
 
-	private static int sumprod(int[] cur, int[] multipliers) {
-		int res = 0;
-		for (int i=0,ie=cur.length; i < ie ; i++) {
-			res += cur[i]*multipliers[i];
-		}
-		return res;
-	}
 
 	public static void testSymmetryConditions(SparseHLPetriNet net) {
 		Map<String,Boolean> isSortSymmetric = new HashMap<>();
@@ -86,34 +79,162 @@ public class SymmetricUnfolder {
 
 			// examine places
 			Map<Integer,Integer> touchedPlaces = new HashMap<>();
-			int placeid=-1;
-			for (HLPlace place : net.getPlaces()) {
-				placeid++;
-				// find if we contain this domain
-				int sortindex = -1;
-				for (int i=0; i < place.getSort().size() ; i++) {
-					if (place.getSort().get(i).equals(sort)) {
-						if (sortindex != -1) {
-							// condition : no cross products of this domain TODO improve
+			{
+				int placeid=-1;
+				for (HLPlace place : net.getPlaces()) {
+					placeid++;
+					// find if we contain this domain
+					int sortindex = -1;
+					for (int i=0; i < place.getSort().size() ; i++) {
+						if (place.getSort().get(i).equals(sort)) {
+							if (sortindex != -1) {
+								// condition : no cross products of this domain TODO improve
+								isSym = false;
+								System.out.println("Domain "+ place.getSort() + " of place " + place.getName() + " breaks symmetries in sort "+ sort.getName());
+								break;
+							} else {
+								sortindex=i;
+							}
+						}
+					}
+					if (!isSym) {
+						break;
+					}
+
+					if (sortindex == -1) {
+						// try next place
+						continue;
+					} else {
+						touchedPlaces.put(placeid,sortindex);
+					}
+				}
+			}
+			
+
+			if (!isSym) {
+				// break for this sort, successor test broke us
+				continue;
+			}
+			
+			// test for successor/predecessor
+			for (HLTrans trans : net.getTransitions()) {
+				for (HLArc arc : trans.pre) {
+					Integer sortind = touchedPlaces.get(arc.getPlace());
+					if (sortind != null) {
+						if (arc.getCfunc().get(sortind).getOp()==Op.MOD) {
 							isSym = false;
-							System.out.println("Domain "+ place.getSort() + " of place " + place.getName() + " breaks symmetries in sort "+ sort.getName());
+							System.out.println(
+									"Arc "+arc+" contains successor/predecessor on variables of sort "+ sort.getName());
 							break;
-						} else {
-							sortindex=i;
 						}
 					}
 				}
 				if (!isSym) {
 					break;
 				}
-
-				if (sortindex == -1) {
-					// try next place
-					continue;
-				} else {
-					touchedPlaces.put(placeid,sortindex);
+				for (HLArc arc : trans.post) {
+					Integer sortind = touchedPlaces.get(arc.getPlace());
+					if (sortind != null) {
+						if (arc.getCfunc().get(sortind).getOp()==Op.MOD) {
+							isSym = false;
+							System.out.println(
+									"Arc "+arc+" contains successor/predecessor on variables of sort "+ sort.getName());
+							break;
+						}
+					}
 				}
+				if (!isSym) {
+					break;
+				}
+			}
+			
+			if (!isSym) {
+				// break for this sort, successor test broke us
+				continue;
+			}
+			
+			// tests for synchronization
+			for (HLTrans trans : net.getTransitions()) {				
+				for (Param param : trans.params) {					
+					if (param.getSort().equals(sort.getName())) {
+						int seenplace = -1;
+						for (HLArc arc : trans.pre) {
+							Integer sortind = touchedPlaces.get(arc.getPlace());
+							if (sortind != null) {
+								List<Param> refs = new ArrayList<>();
+								computeParams(arc.getCfunc().get(sortind),refs);
+								if (refs.contains(param)) {
+									if (seenplace == -1) {
+										seenplace = arc.getPlace();
+									} else if (seenplace != arc.getPlace()) {
+										System.out.println("Transition "+trans.getName()+ " forces synchronizations/join behavior on parameter "+ param.getName() + " of sort "+ sort.getName());
+										isSym = false;
+										break;
+									}
+								}
+							}
+						}						
+					}
+				}
+				if (!isSym) {
+					break;
+				}
+			}
 
+			if (!isSym) {
+				// break for this sort, synchronization test broke us
+				continue;
+			}
+			
+			System.out.println("Symmetric sort wr.t. initial and guards and successors and join/free detected :" + sort.getName());
+			
+			// take a good look at color functions on arcs
+			// test for constants
+			// TODO : recognize ALL as being symmetric => take into account the set of arcs from p to t, not just each arc one by one
+			for (HLTrans trans : net.getTransitions()) {
+				for (HLArc arc : trans.pre) {
+					Integer sortind = touchedPlaces.get(arc.getPlace());
+					if (sortind != null) {
+						if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
+							isSym = false;
+							System.out.println(
+									"Arc "+arc+" contains constants of sort "+ sort.getName());
+							break;
+						}
+					}
+				}
+				if (!isSym) {
+					break;
+				}
+				for (HLArc arc : trans.post) {
+					Integer sortind = touchedPlaces.get(arc.getPlace());
+					if (sortind != null) {
+						if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
+							isSym = false;
+							System.out.println(
+									"Arc "+arc+" contains constants of sort "+ sort.getName());
+							break;
+						}
+					}
+				}
+				if (!isSym) {
+					break;
+				}
+			}
+			
+			if (!isSym) {
+				// break for this sort, constants test broke us
+				continue;
+			}
+				
+			
+			int placeid = -1;
+			for (HLPlace place : net.getPlaces()) {
+				placeid++;
+				Integer sortindex = touchedPlaces.get(placeid);
+				if (sortindex == null) {
+					continue;
+				}
 				// length of sub vectors to be compared
 
 				// setup data structures for iterating over variants 
@@ -137,11 +258,11 @@ public class SymmetricUnfolder {
 				int [] cur = new int [prodSize];
 				while (true) {
 
-					int val = place.getInitial()[sumprod(cur,multipliers)];
+					int val = place.getInitial()[Partition.sumprod(cur,multipliers)];
 					// for each domain value
 					for (int x = 1; x < sort.size(); x++) {
 						cur[sortindex]=x;
-						int index = sumprod(cur,multipliers);
+						int index = Partition.sumprod(cur,multipliers);
 						if (val != place.getInitial()[index]) {
 							isSym=false;
 							break;
@@ -253,117 +374,7 @@ public class SymmetricUnfolder {
 				System.out.println("Sort wr.t. initial and guards " + sort.getName()+ " has partition " + partition);
 			}
 
-			// test for successor/predecessor
-			for (HLTrans trans : net.getTransitions()) {
-				for (HLArc arc : trans.pre) {
-					Integer sortind = touchedPlaces.get(arc.getPlace());
-					if (sortind != null) {
-						if (arc.getCfunc().get(sortind).getOp()==Op.MOD) {
-							isSym = false;
-							System.out.println(
-									"Arc "+arc+" contains successor/predecessor on variables of sort "+ sort.getName());
-							break;
-						}
-					}
-				}
-				if (!isSym) {
-					break;
-				}
-				for (HLArc arc : trans.post) {
-					Integer sortind = touchedPlaces.get(arc.getPlace());
-					if (sortind != null) {
-						if (arc.getCfunc().get(sortind).getOp()==Op.MOD) {
-							isSym = false;
-							System.out.println(
-									"Arc "+arc+" contains successor/predecessor on variables of sort "+ sort.getName());
-							break;
-						}
-					}
-				}
-				if (!isSym) {
-					break;
-				}
-			}
-			
-			if (!isSym) {
-				// break for this sort, successor test broke us
-				continue;
-			}
-			
-			// tests for synchronization
-			for (HLTrans trans : net.getTransitions()) {				
-				for (Param param : trans.params) {					
-					if (param.getSort().equals(sort.getName())) {
-						int seenplace = -1;
-						for (HLArc arc : trans.pre) {
-							Integer sortind = touchedPlaces.get(arc.getPlace());
-							if (sortind != null) {
-								List<Param> refs = new ArrayList<>();
-								computeParams(arc.getCfunc().get(sortind),refs);
-								if (refs.contains(param)) {
-									if (seenplace == -1) {
-										seenplace = arc.getPlace();
-									} else if (seenplace != arc.getPlace()) {
-										System.out.println("Transition "+trans.getName()+ " forces synchronizations/join behavior on parameter "+ param.getName() + " of sort "+ sort.getName());
-										isSym = false;
-										break;
-									}
-								}
-							}
-						}						
-					}
-				}
-				if (!isSym) {
-					break;
-				}
-			}
 
-			if (!isSym) {
-				// break for this sort, synchronization test broke us
-				continue;
-			}
-			
-			System.out.println("Symmetric sort wr.t. initial and guards and successors and join/free detected :" + sort.getName());
-			
-			// take a good look at color functions on arcs
-			// test for constants
-			// TODO : recognize ALL as being symmetric => take into account the set of arcs from p to t, not just each arc one by one
-			for (HLTrans trans : net.getTransitions()) {
-				for (HLArc arc : trans.pre) {
-					Integer sortind = touchedPlaces.get(arc.getPlace());
-					if (sortind != null) {
-						if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
-							isSym = false;
-							System.out.println(
-									"Arc "+arc+" contains constants of sort "+ sort.getName());
-							break;
-						}
-					}
-				}
-				if (!isSym) {
-					break;
-				}
-				for (HLArc arc : trans.post) {
-					Integer sortind = touchedPlaces.get(arc.getPlace());
-					if (sortind != null) {
-						if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
-							isSym = false;
-							System.out.println(
-									"Arc "+arc+" contains constants of sort "+ sort.getName());
-							break;
-						}
-					}
-				}
-				if (!isSym) {
-					break;
-				}
-			}
-			
-			if (!isSym) {
-				// break for this sort, constants test broke us
-				continue;
-			}
-			
 			
 			if (partition.getNbSubs()==1) {
 				System.out.println("Applying symmetric unfolding of full symmetric sort :" + sort.getName() + " domain size was " + sort.size());
