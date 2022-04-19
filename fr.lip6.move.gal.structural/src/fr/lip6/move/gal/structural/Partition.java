@@ -98,16 +98,45 @@ public class Partition {
 	public int size() {		
 		return partition.length;
 	}
+	
+	public static int sumprod(int[] cur, int[] multipliers) {
+		int res = 0;
+		for (int i=0,ie=cur.length; i < ie ; i++) {
+			res += cur[i]*multipliers[i];
+		}
+		return res;
+	}
 
 	public int[] rewriteMarking(HLPlace place, int sortindex) {
 		int [] initial = place.getInitial();
 		int [] res = new int [ (initial.length / size()) * getNbSubs()];
 		
+		List<Sort> sort = place.getSort();
+		int [] multipliers = new int[sort.size()];		
+		multipliers[sort.size()-1]=1;						
+		for (int i=sort.size()-2 ; i >= 0 ; i--) {
+			if (i+1 == sortindex) {
+				multipliers[i] = multipliers[i+1]*nbSubs;
+			} else {
+				multipliers[i] = multipliers[i+1]*sort.get(i+1).size();
+			}
+		}
+
 		// start from 0...0
 		int [] cur = new int [place.getSort().size()];
 		for (int i=0 ; i < initial.length ; i++) {
-			int delta = cur[sortindex] - partition[cur[sortindex]];
-			res[i - (place.getMultipliers()[sortindex]*delta)] += initial[i];
+			
+			if (initial[i] > 0) {
+				// remap element at sortindex from cur to image in partition
+				int old = cur[sortindex];
+				cur[sortindex] = partition[cur[sortindex]];
+				int target = sumprod(cur, multipliers);
+				if (target >= res.length) {
+					System.out.println("WTF ??");
+				}
+				res[target] += initial[i];
+				cur[sortindex] = old;
+			}
 			
 			// increment cur
 			int j;
