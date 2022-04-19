@@ -3,44 +3,17 @@ package fr.lip6.move.gal.structural;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
-import fr.lip6.move.gal.structural.expr.ArrayVarRef;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.Param;
 import fr.lip6.move.gal.structural.expr.ParamRef;
-import fr.lip6.move.gal.util.Pair;
 
 public class SymmetricUnfolder {
-
-	private static boolean isPure(Expression cfunc) {
-		if (cfunc instanceof ArrayVarRef) {
-			ArrayVarRef aref = (ArrayVarRef) cfunc;
-			Expression e = aref.index;
-			if (e.getOp() == Op.PARAMREF) {
-				return true;
-			} else if (e.getOp() == Op.CONST) {
-				return false;
-			} else if (e.getOp() == Op.ADD) {
-				for (int i=0; i < e.nbChildren() ; i++) {
-					Expression m = e.childAt(i);
-					if (m.getOp() == Op.PARAMREF) {
-						continue;
-					} else if (m.getOp() == Op.MULT && m.childAt(0).getOp()==Op.PARAMREF && m.childAt(1).getOp() == Op.CONST) {
-						continue;
-					} else {
-						return false;
-					}
-				}
-			}			
-		}
-		return false;
-	}
+	private static int DEBUG=1;
 
 	private static Void computeParams(Expression e,  List<Param> params) {
 		if (e == null) {
@@ -57,8 +30,6 @@ public class SymmetricUnfolder {
 
 
 	public static void testSymmetryConditions(SparseHLPetriNet net) {
-		Map<String,Boolean> isSortSymmetric = new HashMap<>();
-
 		for (HLTrans trans : net.getTransitions()) {
 			net.fuseEqualParameters(trans);
 		}
@@ -90,7 +61,8 @@ public class SymmetricUnfolder {
 							if (sortindex != -1) {
 								// condition : no cross products of this domain TODO improve
 								isSym = false;
-								System.out.println("Domain "+ place.getSort() + " of place " + place.getName() + " breaks symmetries in sort "+ sort.getName());
+								if (DEBUG >=1)
+									System.out.println("Domain "+ place.getSort() + " of place " + place.getName() + " breaks symmetries in sort "+ sort.getName());
 								break;
 							} else {
 								sortindex=i;
@@ -123,7 +95,8 @@ public class SymmetricUnfolder {
 					if (sortind != null) {
 						if (arc.getCfunc().get(sortind).getOp()==Op.MOD) {
 							isSym = false;
-							System.out.println(
+							if (DEBUG >=1)
+								System.out.println(
 									"Arc "+arc+" contains successor/predecessor on variables of sort "+ sort.getName());
 							break;
 						}
@@ -137,7 +110,8 @@ public class SymmetricUnfolder {
 					if (sortind != null) {
 						if (arc.getCfunc().get(sortind).getOp()==Op.MOD) {
 							isSym = false;
-							System.out.println(
+							if (DEBUG >=1)
+								System.out.println(
 									"Arc "+arc+" contains successor/predecessor on variables of sort "+ sort.getName());
 							break;
 						}
@@ -167,7 +141,8 @@ public class SymmetricUnfolder {
 									if (seenplace == -1) {
 										seenplace = arc.getPlace();
 									} else if (seenplace != arc.getPlace()) {
-										System.out.println("Transition "+trans.getName()+ " forces synchronizations/join behavior on parameter "+ param.getName() + " of sort "+ sort.getName());
+										if (DEBUG >=1)
+											System.out.println("Transition "+trans.getName()+ " forces synchronizations/join behavior on parameter "+ param.getName() + " of sort "+ sort.getName());
 										isSym = false;
 										break;
 									}
@@ -297,9 +272,11 @@ public class SymmetricUnfolder {
 				}
 
 				if (isSym) {
-					System.out.println("Place "+place+" leaves sort "+sort.getName()+ " symmetric.");
+					if (DEBUG >=1)
+						System.out.println("Place "+place+" leaves sort "+sort.getName()+ " symmetric.");
 				} else {
-					System.out.println("Place "+place+" breaks symmetry on sort:"+sort.getName()+ "");
+					if (DEBUG >=1)
+						System.out.println("Place "+place+" breaks symmetry on sort:"+sort.getName()+ "");
 					break;
 				}
 				
@@ -312,8 +289,8 @@ public class SymmetricUnfolder {
 				// break for this sort, place markings or self cross product domains broke us
 				continue;
 			}
-
-			System.out.println("Symmetric sort wr.t. initial detected :" + sort.getName());
+			if (DEBUG >=1)
+				System.out.println("Symmetric sort wr.t. initial detected :" + sort.getName());
 
 			Partition partition = new Partition(sort.size());
 
@@ -337,8 +314,11 @@ public class SymmetricUnfolder {
 								// trivial partition
 								continue;
 							}
-							System.out.println(
-									"Transition "+trans.getName()+" : guard parameter "+ cur + " in guard " + trans.guard + "introduces in " + sort + " partition :" + localpart);
+							if (DEBUG >=1)
+								System.out.println(
+										"Transition "+trans.getName()+" : guard parameter "+ cur + " in guard " + trans.guard + "introduces in " + sort + " partition with " + localpart.size() + " elements");
+							if (DEBUG >= 2)
+								System.out.println("Partition :" + localpart);
 							partition = Partition.refine(new Partition(localpart.values()), partition);
 							if (partition.getNbSubs()==sort.size()) {
 								isSym = false;
@@ -351,7 +331,8 @@ public class SymmetricUnfolder {
 						if (refs.size() > 1) {
 							// look for x<y or x!=y predicates, we don't like them.
 							if (containsSyncsOn(trans.guard,sort.getName())) {
-								System.out.println(
+								if (DEBUG >=1)
+									System.out.println(
 										"Transition "+trans.getName()+" : guard " + trans.guard + " contains nasty synchronization on some of "+ refs);
 
 								isSym = false;
@@ -369,9 +350,11 @@ public class SymmetricUnfolder {
 				continue;
 			}
 			if (partition.getNbSubs()==1) {
-				System.out.println("Symmetric sort wr.t. initial and guards detected :" + sort.getName());
+				if (DEBUG >=1)
+					System.out.println("Symmetric sort wr.t. initial and guards detected :" + sort.getName());
 			} else {
-				System.out.println("Sort wr.t. initial and guards " + sort.getName()+ " has partition " + partition);
+				if (DEBUG >=1)
+					System.out.println("Sort wr.t. initial and guards " + sort.getName()+ " has partition " + partition);
 			}
 
 
@@ -390,7 +373,8 @@ public class SymmetricUnfolder {
 					Integer sortindex = touchedPlaces.get(pind);
 					if (sortindex != null) {						
 						int[] after = partition.rewriteMarking(place,sortindex);
-						System.out.println("For place "+place.getName()+ ":" + Arrays.toString(place.getInitial()) + "\n->\n "+ Arrays.toString(after) );						 
+						if (DEBUG >=2)
+							System.out.println("For place "+place.getName()+ ":" + Arrays.toString(place.getInitial()) + "\n->\n "+ Arrays.toString(after) );						 
 					    place.setInitial(after);						
 					}
 				}
@@ -424,8 +408,8 @@ public class SymmetricUnfolder {
 									result.add(Expression.op(Op.AND, ent.getKey(), Expression.nop(Op.OR,toOr)));
 								}
 								Expression newguard = Expression.nop(Op.OR,result);
-	
-								System.out.println("For transition "+ trans.getName()+ ":" + trans.guard + " -> "+ newguard );
+								if (DEBUG >=1)
+									System.out.println("For transition "+ trans.getName()+ ":" + trans.guard + " -> "+ newguard );
 								trans.guard = newguard;
 							}
 						}
