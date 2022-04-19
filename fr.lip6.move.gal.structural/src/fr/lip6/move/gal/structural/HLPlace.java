@@ -7,7 +7,7 @@ import fr.lip6.move.gal.structural.expr.Expression;
 
 public class HLPlace {
 	private String name;
-	int startIndex;
+	private int startIndex;
 	private int [] initial;
 	private boolean isConstant = false;
 	private List<Sort> sort;
@@ -39,6 +39,14 @@ public class HLPlace {
 		this.initial = initial;
 		multipliers = null;
 	}
+	public int getStartIndex() {
+		return startIndex;
+	}
+	public void setStartIndex(int startIndex) {
+		this.startIndex = startIndex;
+		multipliers=null;
+	}
+	
 	public List<Sort> getSort() {
 		return sort;
 	}
