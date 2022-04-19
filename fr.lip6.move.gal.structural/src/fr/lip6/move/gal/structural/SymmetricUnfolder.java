@@ -161,7 +161,8 @@ public class SymmetricUnfolder {
 				continue;
 			}
 			
-			System.out.println("Symmetric sort wr.t. initial and guards and successors and join/free detected :" + sort.getName());
+			if (DEBUG >=1)
+				System.out.println("Symmetric sort wr.t. initial and guards and successors and join/free detected :" + sort.getName());
 			
 			// take a good look at color functions on arcs
 			// test for constants
@@ -172,7 +173,8 @@ public class SymmetricUnfolder {
 					if (sortind != null) {
 						if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
 							isSym = false;
-							System.out.println(
+							if (DEBUG >=1)
+								System.out.println(
 									"Arc "+arc+" contains constants of sort "+ sort.getName());
 							break;
 						}
@@ -186,7 +188,8 @@ public class SymmetricUnfolder {
 					if (sortind != null) {
 						if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
 							isSym = false;
-							System.out.println(
+							if (DEBUG >=1)
+								System.out.println(
 									"Arc "+arc+" contains constants of sort "+ sort.getName());
 							break;
 						}
