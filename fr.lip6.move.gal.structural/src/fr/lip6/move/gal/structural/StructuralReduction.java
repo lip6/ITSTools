@@ -2437,7 +2437,30 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			
 			if (DEBUG >= 3) {
 				FlowPrinter.drawNet(pn, "Safe nodes + prefix", safeNodes, Collections.emptySet());
-			}		
+			}
+			if (rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL) {
+				// we need to be a bit more careful here
+				for (int tid=0, e=pn.getTransitionCount() ; tid < e ; tid++) {
+					// consumes in a Safe node ?
+					SparseIntArray col = pn.getFlowPT().getColumn(tid);
+					
+					for (int pi=0, pie=col.size() ; pi < pie ; pi++) {
+						int pid = col.keyAt(pi);
+						if (safeNodes.contains(pid)) {
+							for (int i=0 ; i < pie ; i++) {
+								safeNodes.add(col.keyAt(i));
+							}
+							break;
+						}
+					}
+				}
+				// modifies safeNodes to add any prefix of them in the graph
+				collectPrefix(safeNodes, graph, true);
+				
+				if (DEBUG >= 3) {
+					FlowPrinter.drawNet(pn, "Safe nodes + prefix + LTL", safeNodes, Collections.emptySet());
+				}
+			}
 		}
 		if (safeNodes.size() < nbP) {
 			int nbedges = graph.getColumns().stream().mapToInt(col -> col.size()).sum();
@@ -2532,24 +2555,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			 }			
 			// add all preconditions of transitions touching p				
 			for (int tid=0, e=pn.getTransitionCount() ; tid < e ; tid++) {
-				if (rt == ReductionType.SAFETY && touches(tid, pn, untouchable)) {
+				if (touches(tid, pn, untouchable)) {
 					for (int i=0, ee=pn.getFlowPT().getColumn(tid).size(); i < ee ; i++) {
 						safeNodes.add(pn.getFlowPT().getColumn(tid).keyAt(i));
 					}
-				} else if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL) {
-					// stronger condition
-					boolean touches = false;
-					SparseIntArray pt = pn.getFlowPT().getColumn(tid);
-					for (int i=0,ie=pt.size() ; i < ie ; i++) {
-						if (safeNodes.contains(pt.keyAt(i))) {
-							touches = true;
-							break;
-						}
-					}
-					if (touches)
-						for (int i=0, ee=pn.getFlowPT().getColumn(tid).size(); i < ee ; i++) {
-							safeNodes.add(pn.getFlowPT().getColumn(tid).keyAt(i));
-						}
 				}
 			}
 		}
