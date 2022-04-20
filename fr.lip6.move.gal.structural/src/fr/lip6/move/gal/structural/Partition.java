@@ -153,6 +153,10 @@ public class Partition {
 		
 		return res;
 	}
+
+	public int getImage(int target) {
+		return partition[target];
+	}
 	
 
 }
