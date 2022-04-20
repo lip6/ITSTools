@@ -294,7 +294,9 @@ public interface Expression {
 			children.removeIf(c-> c.getOp()==Op.CONST && c.getValue()==0);			
 			if (children.size() == 1) {
 				return children.get(0);
-			}			
+			} else if (children.size() == 0) {
+				return constant(0);
+			}
 			break;
 		}
 		case NOT:
