@@ -2546,9 +2546,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 							break;
 						}
 					}
-					for (int i=0, ee=pn.getFlowPT().getColumn(tid).size(); i < ee ; i++) {
-						safeNodes.add(pn.getFlowPT().getColumn(tid).keyAt(i));
-					}
+					if (touches)
+						for (int i=0, ee=pn.getFlowPT().getColumn(tid).size(); i < ee ; i++) {
+							safeNodes.add(pn.getFlowPT().getColumn(tid).keyAt(i));
+						}
 				}
 			}
 		}
