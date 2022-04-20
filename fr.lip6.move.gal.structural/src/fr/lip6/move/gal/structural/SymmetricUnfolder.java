@@ -205,7 +205,7 @@ public class SymmetricUnfolder {
 				continue;
 			}
 				
-			
+			if (false) {
 			int placeid = -1;
 			for (HLPlace place : net.getPlaces()) {
 				placeid++;
@@ -284,7 +284,7 @@ public class SymmetricUnfolder {
 				}
 				
 			} // places loop
-
+			}
 
 
 
