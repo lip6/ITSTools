@@ -164,45 +164,48 @@ public class SymmetricUnfolder {
 			if (DEBUG >=1)
 				System.out.println("Symmetric sort wr.t. initial and guards and successors and join/free detected :" + sort.getName());
 			
-			// take a good look at color functions on arcs
-			// test for constants
-			// TODO : recognize ALL as being symmetric => take into account the set of arcs from p to t, not just each arc one by one
-			for (HLTrans trans : net.getTransitions()) {
-				for (HLArc arc : trans.pre) {
-					Integer sortind = touchedPlaces.get(arc.getPlace());
-					if (sortind != null) {
-						if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
-							isSym = false;
-							if (DEBUG >=1)
-								System.out.println(
-									"Arc "+arc+" contains constants of sort "+ sort.getName());
-							break;
+			// in fact, being join free makes this condition useless, who cares about constant colors when they have the same role and are not joined.
+			if (false) {
+				// take a good look at color functions on arcs
+				// test for constants
+				// TODO : recognize ALL as being symmetric => take into account the set of arcs from p to t, not just each arc one by one
+				for (HLTrans trans : net.getTransitions()) {
+					for (HLArc arc : trans.pre) {
+						Integer sortind = touchedPlaces.get(arc.getPlace());
+						if (sortind != null) {
+							if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
+								isSym = false;
+								if (DEBUG >=1)
+									System.out.println(
+											"Arc "+arc+" contains constants of sort "+ sort.getName());
+								break;
+							}
 						}
 					}
-				}
-				if (!isSym) {
-					break;
-				}
-				for (HLArc arc : trans.post) {
-					Integer sortind = touchedPlaces.get(arc.getPlace());
-					if (sortind != null) {
-						if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
-							isSym = false;
-							if (DEBUG >=1)
-								System.out.println(
-									"Arc "+arc+" contains constants of sort "+ sort.getName());
-							break;
+					if (!isSym) {
+						break;
+					}
+					for (HLArc arc : trans.post) {
+						Integer sortind = touchedPlaces.get(arc.getPlace());
+						if (sortind != null) {
+							if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
+								isSym = false;
+								if (DEBUG >=1)
+									System.out.println(
+											"Arc "+arc+" contains constants of sort "+ sort.getName());
+								break;
+							}
 						}
 					}
+					if (!isSym) {
+						break;
+					}
 				}
+
 				if (!isSym) {
-					break;
+					// break for this sort, constants test broke us
+					continue;
 				}
-			}
-			
-			if (!isSym) {
-				// break for this sort, constants test broke us
-				continue;
 			}
 				
 			if (false) {
@@ -417,7 +420,27 @@ public class SymmetricUnfolder {
 							}
 						}
 					}
-
+					//now deal with potential constants on arcs
+					for (HLArc arc : trans.pre) {
+						Integer sortindex = touchedPlaces.get(arc.getPlace());
+						if (sortindex != null) {
+							if (arc.getCfunc().get(sortindex).getOp()==Op.CONST) {
+								int target = arc.getCfunc().get(sortindex).getValue();
+								int img = partition.getImage(target);								
+								arc.setCFuncElt(sortindex, Expression.constant(img));
+							}
+						}
+					}
+					for (HLArc arc : trans.post) {
+						Integer sortindex = touchedPlaces.get(arc.getPlace());
+						if (sortindex != null) {
+							if (arc.getCfunc().get(sortindex).getOp()==Op.CONST) {
+								int target = arc.getCfunc().get(sortindex).getValue();
+								int img = partition.getImage(target);
+								arc.setCFuncElt(sortindex, Expression.constant(img));
+							}
+						}
+					}
 				}
 				sort.setSize(partition.getNbSubs());
 			} // rewrite step
