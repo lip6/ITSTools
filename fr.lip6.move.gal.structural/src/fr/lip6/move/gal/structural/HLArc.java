@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.structural;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -33,6 +34,16 @@ public class HLArc {
 
 	public List<Expression> getCfunc() {
 		return cfunc;
+	}
+	
+	public void setCFuncElt (int index, Expression val) {
+		try {
+			cfunc.set(index, val);
+		} catch (Exception e) {
+			// immutable collection issue
+			cfunc = new ArrayList<>(cfunc);
+			cfunc.set(index, val);
+		}
 	}
 
 	@Override
