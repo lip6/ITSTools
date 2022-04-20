@@ -582,5 +582,102 @@ public class Simplifier {
 	public static Expression existentialQuantification (AtomicProp ap, Expression expr) {				
 		return simplifyBoolean(Expression.op(Op.OR, evalWithAPValue(ap, false, expr), evalWithAPValue(ap, true, expr)));
 	}
+
+	public static Expression simplifySumComparisons(Expression expr) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof BinOp) {
+			BinOp bin = (BinOp) expr;
+			switch (bin.getOp()) {
+			case GEQ:case GT:case EQ:case NEQ:case LT:case LEQ:
+			{
+				Op operator = Op.ADD;
+				Expression left = bin.left;
+				Expression right = bin.right;
+				
+				if (left.getOp() == Op.CARD || right.getOp() == Op.CARD) {
+					operator = Op.CARD;
+				}
+				
+				if (left.getOp() == operator || right.getOp()==operator) {
+					// collect
+					List<Expression> onl = new ArrayList<>();
+					if (left.getOp() == operator) {
+						for (int i=0; i < left.nbChildren() ; i++) {
+							onl.add(left.childAt(i));
+						}
+					} else {
+						onl.add(left);
+					}
+					
+					boolean changed = false;
+					List<Expression> onr = new ArrayList<>();
+					if (right.getOp() == operator) {
+						for (int i=0; i < right.nbChildren() ; i++) {
+							Expression child = right.childAt(i);
+							int li = onl.indexOf(child);
+							if (li==-1) {
+								onr.add(child);
+							} else {
+								onl.remove(li);
+								// and don't add to onr
+								changed = true;
+							}
+						}
+					} else {
+						int li = onl.indexOf(right);
+						if (li==-1) {
+							onr.add(right);
+						} else {
+							onl.remove(li);
+							// and don't add to onr
+							changed = true;
+						}						
+					}
+					
+					if (changed) {
+						Expression nl ;
+						if (onl.size() == 0) {
+							nl = Expression.constant(0);
+						} else {
+							nl = Expression.nop(operator,onl); 
+						}
+						Expression nr ;
+						if (onr.size() == 0) {
+							nr = Expression.constant(0);
+						} else {
+							nr = Expression.nop(operator,onr); 
+						}
+						return Expression.op(bin.getOp(), nl, nr);
+					} else {
+						return bin;
+					}
+				}
+			}
+			default :
+				break;
+			}
+		}
+
+		if (expr.nbChildren() == 0) {
+			return expr;
+		}
+		
+		List<Expression> resc = new ArrayList<>(expr.nbChildren());
+		boolean changed = false;
+		for (int cid = 0, cide = expr.nbChildren() ; cid < cide ; cid++) {
+			Expression child = expr.childAt(cid);
+			Expression e = simplifySumComparisons(child);
+			resc.add(e);
+			if (e != child) {
+				changed = true;
+			}
+		}
+		if (! changed) {
+			return expr;
+		} else {
+			return Expression.nop(expr.getOp(), resc);
+		}
+	}
 	
 }
