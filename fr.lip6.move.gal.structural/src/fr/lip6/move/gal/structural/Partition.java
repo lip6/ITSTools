@@ -34,9 +34,13 @@ public class Partition {
 	 */
 	public Partition (int size, List<Integer> sub) {
 		partition = new int[size];
-		nbSubs = 2;
-		for (int i : sub) {
-			partition[i]=1;
+		if (sub.size() == size) {
+			nbSubs = 1;
+		} else {
+			nbSubs = 2;
+			for (int i : sub) {
+				partition[i]=1;
+			}
 		}
 	}
 	
