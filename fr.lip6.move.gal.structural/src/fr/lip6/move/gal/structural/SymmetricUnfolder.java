@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
@@ -164,48 +165,32 @@ public class SymmetricUnfolder {
 			if (DEBUG >=1)
 				System.out.println("Symmetric sort wr.t. initial and guards and successors and join/free detected :" + sort.getName());
 			
+			
+			Partition partition = new Partition(sort.size());
+			
 			// in fact, being join free makes this condition useless, who cares about constant colors when they have the same role and are not joined.
-			if (false) {
-				// take a good look at color functions on arcs
-				// test for constants
-				// TODO : recognize ALL as being symmetric => take into account the set of arcs from p to t, not just each arc one by one
-				for (HLTrans trans : net.getTransitions()) {
-					for (HLArc arc : trans.pre) {
-						Integer sortind = touchedPlaces.get(arc.getPlace());
-						if (sortind != null) {
-							if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
-								isSym = false;
-								if (DEBUG >=1)
-									System.out.println(
-											"Arc "+arc+" contains constants of sort "+ sort.getName());
-								break;
-							}
-						}
-					}
-					if (!isSym) {
-						break;
-					}
-					for (HLArc arc : trans.post) {
-						Integer sortind = touchedPlaces.get(arc.getPlace());
-						if (sortind != null) {
-							if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
-								isSym = false;
-								if (DEBUG >=1)
-									System.out.println(
-											"Arc "+arc+" contains constants of sort "+ sort.getName());
-								break;
-							}
-						}
-					}
-					if (!isSym) {
-						break;
-					}
-				}
-
+			// take a good look at color functions on arcs
+			// test for constants
+			// TODO : recognize ALL as being symmetric => take into account the set of arcs from p to t, not just each arc one by one
+			for (HLTrans trans : net.getTransitions()) {
+				AtomicBoolean ab = new AtomicBoolean(isSym);
+				partition = computeArcSymmetry(net, sort, trans, trans.pre, touchedPlaces, partition, ab);
+				
+				isSym = ab.get();
 				if (!isSym) {
-					// break for this sort, constants test broke us
-					continue;
+					break;
 				}
+				
+				partition = computeArcSymmetry(net, sort, trans, trans.post, touchedPlaces, partition, ab);
+				isSym = ab.get();
+				if (!isSym) {
+					break;
+				}
+			}
+
+			if (!isSym) {
+				// break for this sort, constants test broke us
+				continue;
 			}
 				
 			if (false) {
@@ -298,7 +283,7 @@ public class SymmetricUnfolder {
 			if (DEBUG >=1)
 				System.out.println("Symmetric sort wr.t. initial detected :" + sort.getName());
 
-			Partition partition = new Partition(sort.size());
+			
 
 			// test transition guards now
 			for (HLTrans trans : net.getTransitions()) {
@@ -446,6 +431,75 @@ public class SymmetricUnfolder {
 			} // rewrite step
 
 		}
+	}
+
+
+	public static Partition computeArcSymmetry(SparseHLPetriNet net, Sort sort, HLTrans trans, List<HLArc> arcs,
+			Map<Integer, Integer> touchedPlaces, Partition partition, AtomicBoolean ab) {
+		Map<Integer,List<HLArc>> constFuncArcs = new HashMap<>();
+		for (HLArc arc : arcs) {
+			Integer sortind = touchedPlaces.get(arc.getPlace());
+			if (sortind != null) {
+				if (arc.getCfunc().get(sortind).getOp()==Op.CONST) {
+					constFuncArcs.computeIfAbsent(arc.getPlace(), x -> new ArrayList<>()).add(arc);
+					if (DEBUG >=1)
+						System.out.println(
+								"Arc "+arc+" contains constants of sort "+ sort.getName());
+					//break;
+				}
+			}
+		}
+		if (! constFuncArcs.isEmpty()) {
+			// try to recognize a partition/All
+			for (Entry<Integer, List<HLArc>> ent:constFuncArcs.entrySet()) {
+				int place = ent.getKey();
+				int sortindex = touchedPlaces.get(place);
+
+				for (HLArc a : ent.getValue()) {
+					if (a.getCoeff() != 1) {
+						// TODO : improve this test
+						ab.set(false);
+						break;
+					}
+				}
+
+				if (!ab.get()) {
+					break;
+				}
+
+				// compute symmetry
+				Map<List<Expression>, List<Integer>> localpart = new HashMap<>();
+
+				List<Sort> psort = net.getPlaces().get(place).getSort();
+
+				for (HLArc a : ent.getValue()) {
+					List<Expression> l = new ArrayList<>(psort.size()-1);
+					for (int i=0; i < psort.size() ; i++) {
+						if (i != sortindex) {
+							l.add(a.getCfunc().get(i));
+						}
+					}
+					localpart.computeIfAbsent(l, k -> new ArrayList<>()).add(a.getCfunc().get(sortindex).getValue());							
+				}
+
+				if (DEBUG >=1)
+					System.out.println(
+							"Transition "+trans.getName()+" : constants on arcs in "+ trans.pre + " introduces in " + sort + " partition with " + localpart.size() + " elements");
+				if (DEBUG >= 2)
+					System.out.println("Partition :" + localpart);
+				
+				for (List<Integer> l : localpart.values()) {
+					Partition p2 = new Partition(sort.size(),l);
+					partition = Partition.refine(p2, partition);
+					
+					if (partition.getNbSubs()==sort.size()) {
+						ab.set(false);
+						break;
+					}
+				}
+			}
+		}
+		return partition;
 	}
 
 	private static boolean containsSyncsOn(Expression e, final String sortname) {
