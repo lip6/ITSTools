@@ -308,9 +308,16 @@ public class DeadlockTester {
 			properties.add(property);
 			
 			// compute predecessor constraint
-			Script s = computePredConstraint(tocheck.get(i),sumMatrix,representative,sr);
-			s.add(new C_assert(smtexpr));
-			propertiesWithSE.add(s);
+			Script s=null;
+			try {
+				s = computePredConstraint(tocheck.get(i),sumMatrix,representative,sr);
+				s.add(new C_assert(smtexpr));				
+			} catch (OutOfMemoryError err) {
+				s = new Script();
+			} finally {
+				propertiesWithSE.add(s);
+			}
+			
 			
 			SparseIntArray por = null;
 			if (withWitness)
