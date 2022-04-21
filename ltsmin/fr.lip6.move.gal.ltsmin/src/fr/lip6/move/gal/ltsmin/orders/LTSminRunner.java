@@ -147,7 +147,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			ltsmin.addArg("--ltl");
 			ltsmin.addArg(g2p.printLTLProperty((LTLProp) prop.getBody()));
 			// ltsmin.addArg("--strategy=renault");
-			ltsmin.addArg("--buchi-type=spotba");
+			ltsmin.addArg("--buchi-type=tgba");
 
 			// ltsmin.addArg("--ltl-semantics");
 			// ltsmin.addArg("spin");
