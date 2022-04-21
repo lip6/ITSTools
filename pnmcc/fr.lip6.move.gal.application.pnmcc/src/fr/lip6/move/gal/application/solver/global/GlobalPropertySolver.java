@@ -589,40 +589,45 @@ public class GlobalPropertySolver {
 
 	public static void verifyWithSDD(MccTranslator reader, DoneProperties doneProps, String examinationForITS,
 			String solverPath, int timeout) {
+		try {
+			for (int i=0; i < 2 ; i++) {
+				reader.rebuildSpecification(doneProps);
+				reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+				
+				if (i==0) {
+					reader.setLouvain(false);
+					reader.setOrder(null);				
+					reader.flattenSpec(false);
+				} else {
+					reader.setLouvain(true);
+					reader.setOrder(null);
+					reader.flattenSpec(true);
+				}			
+				try {
+					// decompose + simplify as needed
+					IRunner itsRunner = new ITSRunner(examinationForITS, reader, true, false, reader.getFolder(), timeout,
+							null);
+					itsRunner.configure(reader.getSpec(), doneProps);
+					itsRunner.solve(new Ender() {
+						public void killAll() {
+							itsRunner.interrupt();
+						}
+					});
+					itsRunner.join();
+				} catch (IOException | InterruptedException e) {
+					System.out.println("ITS runner failed with exception " + e.getMessage());
+					e.printStackTrace();
+				}
+				reader.getSPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
+				if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished()) {
+					break;
+				}
+			}
+		} catch (OutOfMemoryError e) {
+			reader.setSpec(null);
+			System.out.println("ITSRunner failed with out of memory error.");
+		}
 		
-		for (int i=0; i < 2 ; i++) {
-			reader.rebuildSpecification(doneProps);
-			reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-			
-			if (i==0) {
-				reader.setLouvain(false);
-				reader.setOrder(null);				
-				reader.flattenSpec(false);
-			} else {
-				reader.setLouvain(true);
-				reader.setOrder(null);
-				reader.flattenSpec(true);
-			}			
-			try {
-				// decompose + simplify as needed
-				IRunner itsRunner = new ITSRunner(examinationForITS, reader, true, false, reader.getFolder(), timeout,
-						null);
-				itsRunner.configure(reader.getSpec(), doneProps);
-				itsRunner.solve(new Ender() {
-					public void killAll() {
-						itsRunner.interrupt();
-					}
-				});
-				itsRunner.join();
-			} catch (IOException | InterruptedException e) {
-				System.out.println("ITS runner failed with exception " + e.getMessage());
-				e.printStackTrace();
-			}
-			reader.getSPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
-			if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished()) {
-				break;
-			}
-		}		
 		if (doneProps.isFinished()) {
 			return;
 		}
@@ -631,7 +636,7 @@ public class GlobalPropertySolver {
 			LTSminRunner ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, false, false, timeout,
 					reader.getSPN().isSafe());
 			try {
-				ltsminRunner.configure(reader.getSpec(), doneProps);
+				ltsminRunner.configure(null, doneProps);
 				ltsminRunner.setNet(reader.getSPN());
 				
 				ltsminRunner.solve(new Ender() {
