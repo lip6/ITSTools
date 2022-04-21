@@ -19,6 +19,9 @@ import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.pnml.togal.utils.EqualityHelperUpToPerm;
 import fr.lip6.move.gal.pnml.togal.utils.HLUtils;
 import fr.lip6.move.gal.pnml.togal.utils.Utils;
+import fr.lip6.move.gal.structural.HLArc;
+import fr.lip6.move.gal.structural.HLPlace;
+import fr.lip6.move.gal.structural.HLTrans;
 import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
@@ -215,7 +218,31 @@ public class HLSRTransformer {
 				}
 				constPlaces.removeAll(effective);
 			}
-		}		
+		}
+		for (int pid=0; pid < res.getPlaces().size() ; pid++) {
+			if (constPlaces.contains(pid)) {
+				continue;
+			}
+			HLPlace place = res.getPlaces().get(pid);
+			if (Arrays.stream(place.getInitial()).allMatch(x -> x==0)) {
+				// empty place initially
+				// is it ever fed ?
+				boolean fed = false;
+				for (HLTrans trans : res.getTransitions()) {
+					for (HLArc arc : trans.getPost()) {
+						if (arc.getPlace()==pid) {
+							fed = true;
+							break;
+						}
+					}
+					if (fed)
+						break;
+				}
+				if (!fed) {
+					constPlaces.add(pid);
+				}
+			}
+		}
 		long flatp=0;
 		for (Integer ind : constPlaces) {
 			res.getPlaces().get(ind).setConstant(true);
