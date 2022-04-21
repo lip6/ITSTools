@@ -28,6 +28,18 @@ public class Partition {
 		nbSubs = 1;
 	}
 	
+	
+	/**
+	 * A partition into two sets.
+	 */
+	public Partition (int size, List<Integer> sub) {
+		partition = new int[size];
+		nbSubs = 2;
+		for (int i : sub) {
+			partition[i]=1;
+		}
+	}
+	
 	public Partition (Collection<List<Integer>> parts) {
 		int size = parts.stream().mapToInt(List::size).sum();
 		partition = new int[size];
