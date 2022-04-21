@@ -1996,6 +1996,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			} else {
 				if (DEBUG>=1) System.out.println("Net is Pre-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 				
+				// avoid degenerating, e.g DatabaseWithMutex could go nasty here
+				if (keepImage && Fids.size() >= 4) {
+					continue;
+				}
 				red += agglomerateAround(pid, Hids, Fids,"Pre",tflowPT,tflowTP);
 				total++;
 			}
