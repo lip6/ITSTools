@@ -91,7 +91,7 @@ public class SymmetricUnfolder {
 			
 			// test for successor/predecessor
 			for (HLTrans trans : net.getTransitions()) {
-				for (HLArc arc : trans.pre) {
+				for (HLArc arc : trans.getPre()) {
 					Integer sortind = touchedPlaces.get(arc.getPlace());
 					if (sortind != null) {
 						if (arc.getCfunc().get(sortind).getOp()==Op.MOD) {
@@ -106,7 +106,7 @@ public class SymmetricUnfolder {
 				if (!isSym) {
 					break;
 				}
-				for (HLArc arc : trans.post) {
+				for (HLArc arc : trans.getPost()) {
 					Integer sortind = touchedPlaces.get(arc.getPlace());
 					if (sortind != null) {
 						if (arc.getCfunc().get(sortind).getOp()==Op.MOD) {
@@ -130,10 +130,10 @@ public class SymmetricUnfolder {
 			
 			// tests for synchronization
 			for (HLTrans trans : net.getTransitions()) {				
-				for (Param param : trans.params) {					
+				for (Param param : trans.getParams()) {					
 					if (param.getSort().equals(sort.getName())) {
 						int seenplace = -1;
-						for (HLArc arc : trans.pre) {
+						for (HLArc arc : trans.getPre()) {
 							Integer sortind = touchedPlaces.get(arc.getPlace());
 							if (sortind != null) {
 								List<Param> refs = new ArrayList<>();
@@ -174,14 +174,14 @@ public class SymmetricUnfolder {
 			// TODO : recognize ALL as being symmetric => take into account the set of arcs from p to t, not just each arc one by one
 			for (HLTrans trans : net.getTransitions()) {
 				AtomicBoolean ab = new AtomicBoolean(isSym);
-				partition = computeArcSymmetry(net, sort, trans, trans.pre, touchedPlaces, partition, ab);
+				partition = computeArcSymmetry(net, sort, trans, trans.getPre(), touchedPlaces, partition, ab);
 				
 				isSym = ab.get();
 				if (!isSym) {
 					break;
 				}
 				
-				partition = computeArcSymmetry(net, sort, trans, trans.post, touchedPlaces, partition, ab);
+				partition = computeArcSymmetry(net, sort, trans, trans.getPost(), touchedPlaces, partition, ab);
 				isSym = ab.get();
 				if (!isSym) {
 					break;
@@ -288,9 +288,9 @@ public class SymmetricUnfolder {
 			// test transition guards now
 			for (HLTrans trans : net.getTransitions()) {
 				// non trivial
-				if (trans.guard != null && trans.guard.getOp() != Op.BOOLCONST) {
+				if (trans.getGuard() != null && trans.getGuard().getOp() != Op.BOOLCONST) {
 					List<Param> refs = new ArrayList<>();
-					computeParams(trans.guard,refs);
+					computeParams(trans.getGuard(),refs);
 					for (Param cur : refs) {
 						// check Sort of Param
 						if (cur.getSort().equals(sort.getName())) {
@@ -298,7 +298,7 @@ public class SymmetricUnfolder {
 							// compute symmetry
 							Map<Expression, List<Integer>> localpart = new HashMap<>();
 							for (int val = 0; val < cur.size(); val++) {
-								Expression guard = SparseHLPetriNet.bind(cur, val, trans.guard);
+								Expression guard = SparseHLPetriNet.bind(cur, val, trans.getGuard());
 								localpart.computeIfAbsent(guard, k -> new ArrayList<>()).add(val);
 							}
 							if (localpart.size()==1) {
@@ -307,7 +307,7 @@ public class SymmetricUnfolder {
 							}
 							if (DEBUG >=1)
 								System.out.println(
-										"Transition "+trans.getName()+" : guard parameter "+ cur + " in guard " + trans.guard + "introduces in " + sort + " partition with " + localpart.size() + " elements");
+										"Transition "+trans.getName()+" : guard parameter "+ cur + " in guard " + trans.getGuard() + "introduces in " + sort + " partition with " + localpart.size() + " elements");
 							if (DEBUG >= 2)
 								System.out.println("Partition :" + localpart);
 							partition = Partition.refine(new Partition(localpart.values()), partition);
@@ -321,10 +321,10 @@ public class SymmetricUnfolder {
 						refs.removeIf(p -> ! p.getSort().equals(sort.getName()));
 						if (refs.size() > 1) {
 							// look for x<y or x!=y predicates, we don't like them.
-							if (containsSyncsOn(trans.guard,sort.getName())) {
+							if (containsSyncsOn(trans.getGuard(),sort.getName())) {
 								if (DEBUG >=1)
 									System.out.println(
-										"Transition "+trans.getName()+" : guard " + trans.guard + " contains nasty synchronization on some of "+ refs);
+										"Transition "+trans.getName()+" : guard " + trans.getGuard() + " contains nasty synchronization on some of "+ refs);
 
 								isSym = false;
 							}
@@ -372,8 +372,8 @@ public class SymmetricUnfolder {
 				net.resetPlaceCount();
 				for (HLTrans trans : net.getTransitions()) {
 					List<Param> refs = new ArrayList<>();
-					computeParams(trans.guard, refs);
-					for (Param par : trans.params) {
+					computeParams(trans.getGuard(), refs);
+					for (Param par : trans.getParams()) {
 						if (par.getSort().equals(sort.getName())) {
 							boolean touchGuard = refs.contains(par);
 								
@@ -381,7 +381,7 @@ public class SymmetricUnfolder {
 							
 							if (touchGuard) {
 								for (int val = 0; val < par.size(); val++) {
-									Expression guard = SparseHLPetriNet.bind(par, val, trans.guard);
+									Expression guard = SparseHLPetriNet.bind(par, val, trans.getGuard());
 									partition2.computeIfAbsent(guard, k -> new ArrayList<>()).add(val);
 								}
 							}
@@ -400,13 +400,13 @@ public class SymmetricUnfolder {
 								}
 								Expression newguard = Expression.nop(Op.OR,result);
 								if (DEBUG >=1)
-									System.out.println("For transition "+ trans.getName()+ ":" + trans.guard + " -> "+ newguard );
-								trans.guard = newguard;
+									System.out.println("For transition "+ trans.getName()+ ":" + trans.getGuard() + " -> "+ newguard );
+								trans.setGuard(newguard);
 							}
 						}
 					}
 					//now deal with potential constants on arcs
-					for (HLArc arc : trans.pre) {
+					for (HLArc arc : trans.getPre()) {
 						Integer sortindex = touchedPlaces.get(arc.getPlace());
 						if (sortindex != null) {
 							if (arc.getCfunc().get(sortindex).getOp()==Op.CONST) {
@@ -416,7 +416,7 @@ public class SymmetricUnfolder {
 							}
 						}
 					}
-					for (HLArc arc : trans.post) {
+					for (HLArc arc : trans.getPost()) {
 						Integer sortindex = touchedPlaces.get(arc.getPlace());
 						if (sortindex != null) {
 							if (arc.getCfunc().get(sortindex).getOp()==Op.CONST) {
@@ -481,12 +481,6 @@ public class SymmetricUnfolder {
 					}
 					localpart.computeIfAbsent(l, k -> new ArrayList<>()).add(a.getCfunc().get(sortindex).getValue());							
 				}
-
-				if (DEBUG >=1)
-					System.out.println(
-							"Transition "+trans.getName()+" : constants on arcs in "+ trans.pre + " introduces in " + sort + " partition with " + localpart.size() + " elements");
-				if (DEBUG >= 2)
-					System.out.println("Partition :" + localpart);
 				
 				for (List<Integer> l : localpart.values()) {
 					Partition p2 = new Partition(sort.size(),l);
@@ -497,6 +491,13 @@ public class SymmetricUnfolder {
 						break;
 					}
 				}
+				
+				if (DEBUG >=1)
+					System.out.println(
+							"Transition "+trans.getName()+" : constants on arcs in "+ ent.getValue() + " introduces in " + sort + " partition with " + localpart.size() + " elements that refines current partition to "+partition.getNbSubs() + " subsets.");
+				if (DEBUG >= 2)
+					System.out.println("Partition :" + localpart);
+
 			}
 		}
 		return partition;
