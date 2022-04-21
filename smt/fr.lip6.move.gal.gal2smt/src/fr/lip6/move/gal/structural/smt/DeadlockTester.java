@@ -1197,6 +1197,9 @@ public class DeadlockTester {
 		IFactory ef = smt.smtConfig.exprFactory;
 		int added =0;
 		int tested =0;
+		
+		int lasttrapsize = -1;
+		int repeatTraps = 0;
 		do {
 			SparseIntArray state = new SparseIntArray();
 			SparseIntArray pk = new SparseIntArray();
@@ -1206,6 +1209,20 @@ public class DeadlockTester {
 				confirmTrap(sr,trap, state);
 			tested++;
 			if (!trap.isEmpty()) {
+				
+				
+				if (trap.size() == lasttrapsize) {
+					repeatTraps++;
+				} else {
+					lasttrapsize = trap.size();
+					repeatTraps = 0;
+				}
+				if (repeatTraps >= 10) {
+					// this is not looking good, might have a combinatorial number of traps
+					Logger.getLogger("fr.lip6.move.gal").info("Trap strengthening procedure interrupted after too many repetitions " + (System.currentTimeMillis() -time) + " ms");
+					break;
+				}
+				
 				added++;
 				// add a constraint
 				List<IExpr> vars = trap.stream().map(n -> ef.symbol("s"+n)).collect(Collectors.toList());
