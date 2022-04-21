@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.structural;
+package fr.lip6.move.gal.structural.hlpn;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -18,6 +18,11 @@ import android.util.SparseIntArray;
 import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.VarOrder;
+import fr.lip6.move.gal.structural.FlowPrinter;
+import fr.lip6.move.gal.structural.PetriNet;
+import fr.lip6.move.gal.structural.Property;
+import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.ArrayVarRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;

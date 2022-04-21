@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.structural;
+package fr.lip6.move.gal.structural.hlpn;
 
 import java.util.Arrays;
 import java.util.List;

@@ -19,13 +19,13 @@ import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.pnml.togal.utils.EqualityHelperUpToPerm;
 import fr.lip6.move.gal.pnml.togal.utils.HLUtils;
 import fr.lip6.move.gal.pnml.togal.utils.Utils;
-import fr.lip6.move.gal.structural.HLArc;
-import fr.lip6.move.gal.structural.HLPlace;
-import fr.lip6.move.gal.structural.HLTrans;
-import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.Param;
+import fr.lip6.move.gal.structural.hlpn.HLArc;
+import fr.lip6.move.gal.structural.hlpn.HLPlace;
+import fr.lip6.move.gal.structural.hlpn.HLTrans;
+import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
 import fr.lip6.move.gal.util.Pair;
 import fr.lip6.move.pnml.symmetricnet.terms.NamedSort;
 import fr.lip6.move.pnml.symmetricnet.booleans.Bool;
@@ -104,7 +104,7 @@ public class HLSRTransformer {
 		Map<Place,Integer> placeMap = new HashMap<>();
 		Map<String,List<Place>> placeSort = new HashMap<>();
 				
-		Map<String, fr.lip6.move.gal.structural.Sort> sortMap = new HashMap<>();
+		Map<String, fr.lip6.move.gal.structural.hlpn.Sort> sortMap = new HashMap<>();
 		boolean isOneSafe = true;
 		try {
 			for (PnObject n : page.getObjects()) {
@@ -121,12 +121,12 @@ public class HLSRTransformer {
 					if (Arrays.stream(value).sum()>1) {
 						isOneSafe = false;
 					}
-					List<fr.lip6.move.gal.structural.Sort> finalSort = getSorts(psort).stream().map(s -> sortMap.get(s)).collect(Collectors.toList());
+					List<fr.lip6.move.gal.structural.hlpn.Sort> finalSort = getSorts(psort).stream().map(s -> sortMap.get(s)).collect(Collectors.toList());
 					int index = res.addPlace(Utils.normalizeName(p.getId()), value, finalSort);
 					placeMap.put(p, index);
 				}
 			}
-			for (fr.lip6.move.gal.structural.Sort s : sortMap.values()) {
+			for (fr.lip6.move.gal.structural.hlpn.Sort s : sortMap.values()) {
 				res.addSort(s);
 			}
 		} catch (NegativeArraySizeException nase) {
@@ -968,11 +968,11 @@ public class HLSRTransformer {
 	
 
 
-	private void collectSort(Sort psort, Map<String, fr.lip6.move.gal.structural.Sort> sortMap) {
+	private void collectSort(Sort psort, Map<String, fr.lip6.move.gal.structural.hlpn.Sort> sortMap) {
 		if (psort instanceof Bool) 	{
-			sortMap.computeIfAbsent("bool", x -> new fr.lip6.move.gal.structural.Sort("bool", 2));
+			sortMap.computeIfAbsent("bool", x -> new fr.lip6.move.gal.structural.hlpn.Sort("bool", 2));
 		} else if (psort instanceof Dot) {
-			sortMap.computeIfAbsent("dot", x -> new fr.lip6.move.gal.structural.Sort("dot", 1));
+			sortMap.computeIfAbsent("dot", x -> new fr.lip6.move.gal.structural.hlpn.Sort("dot", 1));
 		} else if (psort instanceof UserSort) {
 			UserSort us = (UserSort) psort;
 			SortDecl sdecl = us.getDeclaration();
@@ -987,7 +987,7 @@ public class HLSRTransformer {
 					}
 				} else {
 					String name=Utils.normalizeName(names.getName());
-					sortMap.computeIfAbsent(name, x -> new fr.lip6.move.gal.structural.Sort(name, computeSortCardinality(trueSort)));
+					sortMap.computeIfAbsent(name, x -> new fr.lip6.move.gal.structural.hlpn.Sort(name, computeSortCardinality(trueSort)));
 				}
 			}
 		} else {
