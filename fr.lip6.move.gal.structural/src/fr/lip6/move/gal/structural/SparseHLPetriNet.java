@@ -50,11 +50,11 @@ public class SparseHLPetriNet extends PetriNet {
 	}
 
 	public void addPreArc(int p, int t, List<Expression> func, int val) {
-		transitions.get(t).pre.add(new HLArc(p, val, func));
+		transitions.get(t).getPre().add(new HLArc(p, val, func));
 	}
 
 	public void addPostArc(int p, int t, List<Expression> func, int val) {
-		transitions.get(t).post.add(new HLArc(p, val, func));
+		transitions.get(t).getPost().add(new HLArc(p, val, func));
 	}
 	
 	public Sort findSort(String name) {
@@ -86,7 +86,7 @@ public class SparseHLPetriNet extends PetriNet {
 	@Override
 	public int getTransitionIndex(String name) {
 		for (int i = 0, ie = transitions.size(); i < ie; i++) {
-			if (transitions.get(i).name.equals(name)) {
+			if (transitions.get(i).getName().equals(name)) {
 				return i;
 			}
 		}
@@ -120,13 +120,13 @@ public class SparseHLPetriNet extends PetriNet {
 			spn.addPlace(p.getName(), Arrays.stream(p.getInitial()).sum());
 		}
 		for (HLTrans t : transitions) {
-			spn.addTransition(t.name);
+			spn.addTransition(t.getName());
 
-			SparseIntArray pt = computeCardinality(t.pre);
+			SparseIntArray pt = computeCardinality(t.getPre());
 			for (int i=0,ie=pt.size();i<ie;i++) {
 				spn.addPreArc(pt.keyAt(i), spn.getTransitionCount()-1, pt.valueAt(i));
 			}
-			SparseIntArray tp = computeCardinality(t.post);
+			SparseIntArray tp = computeCardinality(t.getPost());
 			for (int i=0,ie=tp.size();i<ie;i++) {
 				spn.addPostArc(tp.keyAt(i), spn.getTransitionCount()-1, tp.valueAt(i));
 			}
@@ -190,31 +190,31 @@ public class SparseHLPetriNet extends PetriNet {
 		for (HLTrans t : transitions) {
 			Queue<HLTrans> todo  = new ArrayDeque<>();
 			fuseEqualParameters(t);
-			t.params.sort((a,b) -> Integer.compare(a.size(),b.size()));
+			t.getParams().sort((a,b) -> Integer.compare(a.size(),b.size()));
 			todo.add(t);
 			List<Integer> done = new ArrayList<>();
 			while (! todo.isEmpty()) {
 				HLTrans bt = todo.poll();
-				if (bt.params.isEmpty()) {
+				if (bt.getParams().isEmpty()) {
 					int tind = transformHLtoPT(bt,spn);
 					if (tind >= 0) {
 						done.add(tind);
 					}
 				} else {
-					List<Param> pcopy = new ArrayList<>(bt.params.subList(1, bt.params.size()));
-					Param cur = bt.params.get(0);
+					List<Param> pcopy = new ArrayList<>(bt.getParams().subList(1, bt.getParams().size()));
+					Param cur = bt.getParams().get(0);
 					for (int val=0; val < cur.size() ; val++) {
-						Expression guard = bind(cur,val,bt.guard);
+						Expression guard = bind(cur,val,bt.getGuard());
 						if (guard.getOp() == Op.BOOLCONST && guard.getValue() == 0) {
 							// false guard, abort
 							continue;
 						}
-						HLTrans tcopy = new HLTrans(bt.name +cur.getName()+val, pcopy, guard);
+						HLTrans tcopy = new HLTrans(bt.getName() +cur.getName()+val, pcopy, guard);
 						
 						boolean skip = false;
 						// to please compiler in lambda captures
 						final int fval = val;
-						for (HLArc arc : bt.pre) {							
+						for (HLArc arc : bt.getPre()) {							
 							List<Expression> r = arc.getCfunc().stream().map(e -> bind(cur,fval,e)).collect(Collectors.toList());
 							int value = arc.getCoeff();
 							int pind = arc.getPlace();
@@ -230,12 +230,12 @@ public class SparseHLPetriNet extends PetriNet {
 									continue;
 								}
 							}							
-							tcopy.pre.add(new HLArc(pind,value,r));
+							tcopy.getPre().add(new HLArc(pind,value,r));
 						}
 						if (skip) {
 							continue;
 						}						
-						for (HLArc arc : bt.post) {
+						for (HLArc arc : bt.getPost()) {
 							List<Expression> r = arc.getCfunc().stream().map(e -> bind(cur,fval,e)).collect(Collectors.toList());
 							int value = arc.getCoeff();
 							int pind = arc.getPlace();
@@ -243,7 +243,7 @@ public class SparseHLPetriNet extends PetriNet {
 							{
 								continue;
 							}
-							tcopy.post.add(new HLArc(pind,value,r));							
+							tcopy.getPost().add(new HLArc(pind,value,r));							
 						}
 						
 						todo.add(tcopy);
@@ -267,11 +267,11 @@ public class SparseHLPetriNet extends PetriNet {
 	}
 
 	void fuseEqualParameters(HLTrans t) {
-		if (t.params.size() < 2) {
+		if (t.getParams().size() < 2) {
 			return ;
 		} else {
-			if (t.guard.getOp() != Op.BOOLCONST) {
-				while (handleEqual(t.guard,t)) {
+			if (t.getGuard().getOp() != Op.BOOLCONST) {
+				while (handleEqual(t.getGuard(),t)) {
 					continue;
 				}
 			}
@@ -304,18 +304,18 @@ public class SparseHLPetriNet extends PetriNet {
 	}
 
 	private void remapParameter(HLTrans t, Param tokeep, Param todel) {
-		for (HLArc arc : t.pre) {
+		for (HLArc arc : t.getPre()) {
 			for (Expression e : arc.getCfunc()) {
 				remapParameter(e, tokeep, todel);
 			}
 		}
-		for (HLArc arc : t.post) {
+		for (HLArc arc : t.getPost()) {
 			for (Expression e : arc.getCfunc()) {
 				remapParameter(e, tokeep, todel);
 			}
 		}
-		remapParameter(t.guard, tokeep, todel);
-		t.params.remove(todel);		
+		remapParameter(t.getGuard(), tokeep, todel);
+		t.getParams().remove(todel);		
 	}
 
 	private Void remapParameter(Expression expr, Param tokeep, Param todel) {
@@ -527,7 +527,7 @@ public class SparseHLPetriNet extends PetriNet {
 		// finished binding, go to PT					
 		boolean hasNeg = false;
 		SparseIntArray pt = new SparseIntArray();
-		for (HLArc arc : bt.pre) {
+		for (HLArc arc : bt.getPre()) {
 			HLPlace hlplace = places.get(arc.getPlace());
 			int pind = hlplace.getStartIndex();
 			int offset = hlplace.resolve(arc.getCfunc());
@@ -548,7 +548,7 @@ public class SparseHLPetriNet extends PetriNet {
 		}
 		
 		SparseIntArray tp = new SparseIntArray();
-		for (HLArc arc : bt.post) {
+		for (HLArc arc : bt.getPost()) {
 			HLPlace hlplace = places.get(arc.getPlace());
 			int pind = hlplace.getStartIndex();
 			int offset = hlplace.resolve(arc.getCfunc());
@@ -567,7 +567,7 @@ public class SparseHLPetriNet extends PetriNet {
 			}
 		}
 		// done !
-		int tind = spn.addTransition(bt.name);
+		int tind = spn.addTransition(bt.getName());
 		for (int i=0,ie=pt.size() ; i<ie;i++) {
 			spn.addPreArc(pt.keyAt(i), tind, pt.valueAt(i));
 		}
@@ -590,7 +590,7 @@ public class SparseHLPetriNet extends PetriNet {
 
 		int trem=0,prem=0;
 		for (int tid = transitions.size()-1 ; tid >= 0 ;  tid -- ) {
-			for (HLArc arc : transitions.get(tid).pre) {
+			for (HLArc arc : transitions.get(tid).getPre()) {
 				int pid = arc.getPlace();
 				if (!safeNodes.contains(pid)) {
 					transitions.remove(tid);
@@ -602,11 +602,11 @@ public class SparseHLPetriNet extends PetriNet {
 			}			
 		}
 		for (int tid = transitions.size()-1 ; tid >= 0 ;  tid -- ) {
-			for (HLArc arc : transitions.get(tid).post) {
+			for (HLArc arc : transitions.get(tid).getPost()) {
 				int pid = arc.getPlace();
 				arc.setPlace(perm[pid]);
 			}
-			transitions.get(tid).post.removeIf(arc -> arc.getPlace() == -1);
+			transitions.get(tid).getPost().removeIf(arc -> arc.getPlace() == -1);
 		}
 		for (int pid = places.size()-1 ; pid >= 0 ;  pid -- ) {
 			if (! safeNodes.contains(pid)) {
@@ -671,30 +671,6 @@ public class SparseHLPetriNet extends PetriNet {
 		}
 		IOrder order = new CompositeGalOrder(orders, "main");
 		return order;
-	}
-	
-}
-
-
-class HLTrans {
-	String name;
-	List<Param> params;
-	Expression guard;
-	
-	List<HLArc> pre= new ArrayList<>();
-	List<HLArc> post=new ArrayList<>();
-	public HLTrans(String name, List<Param> params, Expression guard) {
-		this.name = name;
-		this.params = params;
-		this.guard = guard;
-	}
-	@Override
-	public String toString() {
-		return "HLTrans [name=" + name + ", params=" + params + ", guard=" + guard + ", pre=" + pre + ", post=" + post
-				+ "]\n";
-	}
-	public String getName() {
-		return name;
 	}
 	
 }
