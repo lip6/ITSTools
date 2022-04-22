@@ -446,78 +446,87 @@ public class DeadlockTester {
 	}
 
 
-	public static boolean testEGap (Expression ap, ISparsePetriNet sr, String solverPath, int timeout) {		
-		List<Integer> tnames = new ArrayList<>();
-		List<Integer> representative = new ArrayList<>();
-		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative );
-		
-		
-		// a map from index in reduced flow to set of transitions with this effect
-		Map<Integer, List<Integer>> revMap = computeImages(representative); 
-		
-		SparseIntArray supp = computeSupport(ap);
-		
-		Script cantStutter = new Script();
-		
-		// assert ap
-		cantStutter.add(new C_assert(ap.accept(new ExprTranslator())));
-		cantStutter.add(new C_check_sat());
-		
-		IFactory ef = new SMT().smtConfig.exprFactory;
-		List<IExpr> globalEnable = new ArrayList<>();
-		// assert that all transitions that stutter (because of support of effects not intersecting AP) are disabled
-		for (int tid=0, tide=sumMatrix.getColumnCount() ; tid < tide ; tid++) {
-			SparseIntArray t = sumMatrix.getColumn(tid);
-			if (! SparseIntArray.keysIntersect(supp, t)) {
-				// guaranteed to stutter
-				for (Integer ti : revMap.get(tid)) {
-					IExpr disabled = buildDisabled(ef, sr.getFlowPT().getColumn(ti));
-					cantStutter.add(new C_assert(disabled));
-					cantStutter.add(new C_check_sat());
-				}								
-			} else {
-				// more subtle we do touch the target AP
-				// if firing t would go from ap to !ap => add to enabling
-				// if firing t leaves ap => must be disabled
-				
-				// afterT is true if after t ap is still true (we stutter)
-				IExpr apTrueAfterT = rewriteAfterEffect(ap,t,false).accept(new ExprTranslator());
-				IExpr apFalseAfterT = ef.fcn(ef.symbol("not"), apTrueAfterT);
-				
-				List<IExpr> toDisable = new ArrayList<>();
-				
-				for (Integer ti : revMap.get(tid)) {
-					IExpr disabled = buildDisabled(ef, sr.getFlowPT().getColumn(ti));
-					toDisable.add(disabled);
-					
-					globalEnable.add(ef.fcn(ef.symbol("and"), apFalseAfterT, ef.fcn(ef.symbol("not"), disabled)));
-				}
-				
-				// collect disabled  : ap and X ap => AND_repr t disabled
-				if (! toDisable.isEmpty()) {
-					IExpr stuttImplyDisabled = ef.fcn(ef.symbol("=>"), apTrueAfterT, SMTUtils.makeAnd(toDisable));
-					cantStutter.add(new C_assert(stuttImplyDisabled));
-					cantStutter.add(new C_check_sat());
-				}
-			}			
-		}
-		// assert an OR of one modifying transition enabled
-		cantStutter.add(new C_assert(SMTUtils.makeOr(globalEnable)));
-		cantStutter.add(new C_check_sat());
-		// ok let's go
+	public static boolean testEGap(Expression ap, ISparsePetriNet sr, String solverPath, int timeout) {
+
 		try {
-			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
-			ReadFeedCache rfc = new ReadFeedCache();
-			String reply = verifyPossible(sr, cantStutter, solverPath, sumMatrix, tnames, invar, null, true, null, null, representative, rfc,3000, timeout, null);
-			if ("real".equals(reply)) {
-				reply = verifyPossible(sr, cantStutter, solverPath, sumMatrix, tnames, invar, null, false, null, null, representative, rfc,3000, timeout, null);
+			List<Integer> tnames = new ArrayList<>();
+			List<Integer> representative = new ArrayList<>();
+			IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+
+			// a map from index in reduced flow to set of transitions with this effect
+			Map<Integer, List<Integer>> revMap = computeImages(representative);
+
+			SparseIntArray supp = computeSupport(ap);
+
+			Script cantStutter = new Script();
+
+			// assert ap
+			cantStutter.add(new C_assert(ap.accept(new ExprTranslator())));
+			cantStutter.add(new C_check_sat());
+
+			IFactory ef = new SMT().smtConfig.exprFactory;
+			List<IExpr> globalEnable = new ArrayList<>();
+			// assert that all transitions that stutter (because of support of effects not
+			// intersecting AP) are disabled
+			for (int tid = 0, tide = sumMatrix.getColumnCount(); tid < tide; tid++) {
+				SparseIntArray t = sumMatrix.getColumn(tid);
+				if (!SparseIntArray.keysIntersect(supp, t)) {
+					// guaranteed to stutter
+					for (Integer ti : revMap.get(tid)) {
+						IExpr disabled = buildDisabled(ef, sr.getFlowPT().getColumn(ti));
+						cantStutter.add(new C_assert(disabled));
+						cantStutter.add(new C_check_sat());
+					}
+				} else {
+					// more subtle we do touch the target AP
+					// if firing t would go from ap to !ap => add to enabling
+					// if firing t leaves ap => must be disabled
+
+					// afterT is true if after t ap is still true (we stutter)
+					IExpr apTrueAfterT = rewriteAfterEffect(ap, t, false).accept(new ExprTranslator());
+					IExpr apFalseAfterT = ef.fcn(ef.symbol("not"), apTrueAfterT);
+
+					List<IExpr> toDisable = new ArrayList<>();
+
+					for (Integer ti : revMap.get(tid)) {
+						IExpr disabled = buildDisabled(ef, sr.getFlowPT().getColumn(ti));
+						toDisable.add(disabled);
+
+						globalEnable.add(ef.fcn(ef.symbol("and"), apFalseAfterT, ef.fcn(ef.symbol("not"), disabled)));
+					}
+
+					// collect disabled : ap and X ap => AND_repr t disabled
+					if (!toDisable.isEmpty()) {
+						IExpr stuttImplyDisabled = ef.fcn(ef.symbol("=>"), apTrueAfterT, SMTUtils.makeAnd(toDisable));
+						cantStutter.add(new C_assert(stuttImplyDisabled));
+						cantStutter.add(new C_check_sat());
+					}
+				}
 			}
-			if ("unsat".equals(reply)) {
-				return true;
+			// assert an OR of one modifying transition enabled
+			cantStutter.add(new C_assert(SMTUtils.makeOr(globalEnable)));
+			cantStutter.add(new C_check_sat());
+			// ok let's go
+			try {
+				Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());
+				ReadFeedCache rfc = new ReadFeedCache();
+				String reply = verifyPossible(sr, cantStutter, solverPath, sumMatrix, tnames, invar, null, true, null,
+						null, representative, rfc, 3000, timeout, null);
+				if ("real".equals(reply)) {
+					reply = verifyPossible(sr, cantStutter, solverPath, sumMatrix, tnames, invar, null, false, null,
+							null, representative, rfc, 3000, timeout, null);
+				}
+				if ("unsat".equals(reply)) {
+					return true;
+				}
+			} catch (RuntimeException re) {
+				re.printStackTrace();
+				Logger.getLogger("fr.lip6.move.gal")
+						.warning("SMT solver failed with error :" + re + " while checking expression EG " + ap);
 			}
-		} catch (RuntimeException re) {
-			re.printStackTrace();
-			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expression EG " + ap);
+
+		} catch (OutOfMemoryError e) {
+			Logger.getLogger("fr.lip6.move.gal").warning("OOM error produced while checking expression EG " + ap);
 		}
 		return false;
 	}
