@@ -79,6 +79,7 @@ import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -121,9 +122,6 @@ public class MccTranslator {
 		return hlpn;
 	}
 	public SparsePetriNet getSPN() {
-		if (spn == null && hlpn != null) {
-			spn = hlpn.unfold();
-		} 
 		return spn;
 	}
 	
@@ -331,7 +329,11 @@ public class MccTranslator {
 	public void createSPN (boolean redPlace, boolean redTrans) {
 		if (hlpn != null) {
 			hlpn.simplifyLogic();
-			spn = hlpn.unfold();
+			if (!redPlace || !redTrans) {
+				spn = hlpn.unfold(ReductionType.STATESPACE);
+			} else {
+				spn = hlpn.unfold(ReductionType.SAFETY);
+			}
 			if (DEBUG >= 1) FlowPrinter.drawNet(new StructuralReduction(spn), "Unfolded");
 		} 
 		if (DEBUG >= 1) System.out.println("initial properties :" + spn.getProperties());

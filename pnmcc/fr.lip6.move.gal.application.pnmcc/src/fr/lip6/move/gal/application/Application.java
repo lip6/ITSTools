@@ -388,6 +388,7 @@ public class Application implements IApplication, Ender {
 		}
 
 		if (examination.equals("StateSpace")) {
+			reader.createSPN(false, false);
 			int totaltok = reader.getSPN().removeConstantPlaces();
 			reader.getSPN().removeRedundantTransitions(true);
 			// above step may lead to additional simplifications
@@ -473,8 +474,10 @@ public class Application implements IApplication, Ender {
 					hlpn.simplifyLogic();
 					if (skeleton) {
 						spn = hlpn.skeleton();
+					} else if (hlpn.getProperties().stream().anyMatch(p->p.getType()==PropertyType.BOUNDS) || hlpn.getProperties().isEmpty()){
+						spn = hlpn.unfold(ReductionType.STATESPACE);
 					} else {
-						spn = hlpn.unfold();
+						spn = hlpn.unfold(ReductionType.SAFETY);
 					}
 				} else {
 					spn = reader.getSPN();

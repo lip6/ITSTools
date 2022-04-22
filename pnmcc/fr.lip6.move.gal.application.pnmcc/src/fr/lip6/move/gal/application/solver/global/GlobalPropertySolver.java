@@ -285,7 +285,7 @@ public class GlobalPropertySolver {
 				{
 
 					List<List<Integer>> en = new ArrayList<>(reader.getHLPN().getTransitionCount());
-					SparsePetriNet spn = reader.getHLPN().unfold(en);
+					SparsePetriNet spn = reader.getHLPN().unfold(en,ReductionType.STATESPACE);
 					reader.setSpn(spn, false);
 					if (!executeSCCLivenessTest(spn, en)) {
 						System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");

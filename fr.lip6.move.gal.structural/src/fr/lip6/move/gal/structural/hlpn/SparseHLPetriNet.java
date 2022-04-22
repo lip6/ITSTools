@@ -23,6 +23,7 @@ import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.ArrayVarRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -33,6 +34,7 @@ import fr.lip6.move.gal.structural.expr.ParamRef;
 import fr.lip6.move.gal.structural.expr.Simplifier;
 
 public class SparseHLPetriNet extends PetriNet {
+	private static final int DEBUG = 0;
 	private List<Sort> sorts = new ArrayList<>();
 	private List<HLPlace> places = new ArrayList<>();
 	private List<HLTrans> transitions= new ArrayList<>();
@@ -145,7 +147,8 @@ public class SparseHLPetriNet extends PetriNet {
 			spn.getProperties().add(new Property(bindSkeletonColors(p.getBody()),p.getType(),p.getName()));
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Skeletonized HLPN properties in " + (System.currentTimeMillis()- time) + " ms.");
-		 FlowPrinter.drawNet(new StructuralReduction(spn), "Skeleton net", new HashSet<>(), new HashSet<>());
+		if (DEBUG >=1)
+			FlowPrinter.drawNet(new StructuralReduction(spn), "Skeleton net", new HashSet<>(), new HashSet<>());
 		return spn;
 	}
 
@@ -161,17 +164,18 @@ public class SparseHLPetriNet extends PetriNet {
 		return pt;
 	}
 
-	public SparsePetriNet unfold () {
+	public SparsePetriNet unfold (ReductionType rt) {
 		List<List<Integer>> enablings = new ArrayList<>(transitions.size());
-		return unfold(enablings);
+		return unfold(enablings, rt);
 	}
 	public List<Sort> getSorts() {
 		return sorts;
 	}
 	
-	public SparsePetriNet unfold (List<List<Integer>> enablings) {
+	public SparsePetriNet unfold (List<List<Integer>> enablings, ReductionType rt) {
 		long time = System.currentTimeMillis();
-		SymmetricUnfolder.testSymmetryConditions(this);
+		if (rt != ReductionType.STATESPACE)
+			SymmetricUnfolder.testSymmetryConditions(this);
 		SparsePetriNet spn = new SparsePetriNet();
 		spn.setName(getName() +"_unf");
 		
@@ -265,8 +269,8 @@ public class SparseHLPetriNet extends PetriNet {
 			spn.getProperties().add(new Property(bindColors(p.getBody(),enablings),p.getType(),p.getName()));
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Unfolded HLPN properties in " + (System.currentTimeMillis()- time) + " ms.");
-		
-		FlowPrinter.drawNet(spn, "After Unfold", Collections.emptySet(), Collections.emptySet());
+		if (DEBUG >=1)
+			FlowPrinter.drawNet(spn, "After Unfold", Collections.emptySet(), Collections.emptySet());
 		
 		return spn;
 	}
