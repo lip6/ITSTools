@@ -26,7 +26,6 @@ import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
-import fr.lip6.move.gal.BoolProp;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.BoundsProp;
 import fr.lip6.move.gal.CTLProp;
@@ -37,7 +36,6 @@ import fr.lip6.move.gal.EF;
 import fr.lip6.move.gal.EG;
 import fr.lip6.move.gal.EU;
 import fr.lip6.move.gal.EX;
-import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
@@ -51,7 +49,6 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transition;
-import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
@@ -862,15 +859,29 @@ public class MccTranslator {
 		} else if (expr instanceof NaryOp) {
 			NaryOp nop = (NaryOp) expr;
 			List<BooleanExpression> resc = new ArrayList<>(); 
-			expr.forEachChild(e -> resc.add(toGal(e, variables)));
-			BooleanExpression sum = resc.get(0);
-			for (int i=1;i<resc.size();i++) {
-				if (nop.getOp() == Op.AND) {
-					sum = GF2.and(sum, resc.get(i));
-				} else if (nop.getOp() == Op.OR) {
-					sum = GF2.or(sum, resc.get(i));
-				}
+			for (int i=0; i < nop.nbChildren() ; i++) {
+				resc.add(toGal(nop.childAt(i), variables));	
 			}
+			
+			// avoid building unbalanced deep trees			
+			List<BooleanExpression> next = new ArrayList<>();
+			while (resc.size() > 1) {
+				for (int i=0 ; i < resc.size() ; i+=2) {					
+					if (i == resc.size()-1) {
+						next.add(resc.get(i));
+					} else {
+						BooleanExpression l = resc.get(i);
+						BooleanExpression r = resc.get(i+1);
+						if (nop.getOp() == Op.AND) {
+							next.add( GF2.and(l,r));
+						} else {
+							next.add( GF2.or(l,r));
+						}
+					}
+				}
+				resc=next;
+			}
+			BooleanExpression sum = resc.get(0);			
 			return sum;
 		} else if (expr.getOp() == Op.BOOLCONST) {
 			if (expr.getValue()==1) {
@@ -912,11 +923,25 @@ public class MccTranslator {
 			return GF2.createVariableRef(variables.get(expr.getValue()));
 		} else if (expr.getOp() == Op.ADD) {
 			List<IntExpression> resc = new ArrayList<>(); 
-			expr.forEachChild(e -> resc.add(toGalInt(e, variables)));
-			IntExpression sum = resc.get(0);
-			for (int i=1;i<resc.size();i++) {
-				sum = GF2.createBinaryIntExpression(sum, "+", resc.get(i));
+			for (int i=0; i < expr.nbChildren() ; i++) {
+				resc.add(toGalInt(expr.childAt(i), variables));	
 			}
+			
+			// avoid building unbalanced deep trees			
+			List<IntExpression> next = new ArrayList<>();
+			while (resc.size() > 1) {
+				for (int i=0 ; i < resc.size() ; i+=2) {					
+					if (i == resc.size()-1) {
+						next.add(resc.get(i));
+					} else {
+						IntExpression l = resc.get(i);
+						IntExpression r = resc.get(i+1);
+						next.add(GF2.createBinaryIntExpression(l, "+", r));
+					}
+				}
+				resc=next;
+			}
+			IntExpression sum = resc.get(0);			
 			return sum;
 		} else if (expr instanceof BinOp) {
 			BinOp bin = (BinOp) expr;
@@ -926,7 +951,7 @@ public class MccTranslator {
 			case MOD :
 				return GF2.createBinaryIntExpression(toGalInt(bin.left, variables), "%", toGalInt(bin.right, variables));
 			case MINUS :
-				return GF2.createBinaryIntExpression(toGalInt(bin.left, variables), "-", toGalInt(bin.right, variables));
+				return GF2.createBinaryIntExpression(toGalInt(bin.left, variables), "-", toGalInt(bin.right, variables));				
 			}			
 		}
 		throw new UnsupportedOperationException();
