@@ -156,6 +156,11 @@ public class LTLPropertySolver {
 		solved += reader.getSPN().testInInitial();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 		
+		if (reader.getSPN().getProperties().stream().anyMatch(p->p.getType()==PropertyType.CTL)) {
+			solved += GALSolver.runGALReductions(reader, doneProps);			
+		}
+		reader.getSPN().simplifyLogic();
+		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);	
 		//verifyWithLTSmin (reader.getSPN(),doneProps,15);
 		
 		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));

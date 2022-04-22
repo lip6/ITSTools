@@ -140,13 +140,13 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
 	}
 	
-	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL, LTL, LIVENESS, STATESPACE, SLCL_LTL }
+	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL, LTL, LIVENESS, STATESPACE, SLCL_LTL, SI_CTL }
 	public int reduce (ReductionType rt) throws NoDeadlockExists, DeadlockFound {
 		//ruleSeqTrans(trans,places);
 		int initP = pnames.size();
 		int initT = tnames.size();
 		
-		if (DEBUG==2) FlowPrinter.drawNet(this, "Before Reduction Start");
+		if (DEBUG==2) FlowPrinter.drawNet(this, "Before Reduction Start in "+rt);
 				
 		long time = System.currentTimeMillis();
 		int total = 0;
@@ -171,7 +171,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		if (findAndReduceSCCSuffixes(rt)) 
 			total++;
 		
-		if (rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL) {
+		if (rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL) {
 			totaliter += ruleReducePlaces(rt,false,true);
 		}
 		
@@ -264,9 +264,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
 				totaliter += rulePartialFreeAgglo();
 			}			
-			if (totaliter == 0 && (rt == ReductionType.SAFETY || ( (rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL) && ! keepImage)) ) {
+			if (totaliter == 0 && (rt == ReductionType.SAFETY || ( (rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL) && ! keepImage)) ) {
 				// this rule is almost legitimate for SI_LTL
 				// but not quite
+				
 				totaliter += rulePartialPostAgglo(rt);
 			}						
 			
@@ -421,7 +422,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					if (todel.contains(ttid)) {
 						continue;
 					}
-					if (rt==ReductionType.SI_LTL &&  toucht && touches(ttid)) {
+					if ( (rt==ReductionType.SI_LTL|| rt == ReductionType.SI_CTL) &&  toucht && touches(ttid)) {
 						continue;
 					}
 					if (SparseIntArray.greaterOrEqual(init, flowPT.getColumn(ttid))) {
@@ -976,7 +977,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		}
 		
 		if (rt != ReductionType.LTL && !keepImage && moveTokens && rt != ReductionType.LIVENESS) {
-			if ((rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL)  && marks.stream().mapToInt(i->i).sum() == 1) {
+			if ((rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL)  && marks.stream().mapToInt(i->i).sum() == 1) {
 				int pid = marks.indexOf(1);
 				SparseIntArray from = tflowPT.getColumn(pid);
 				SparseIntArray to = tflowTP.getColumn(pid);
@@ -1581,6 +1582,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			}
 			if (!ok) continue;
 			
+			if (rt == ReductionType.SI_CTL && Fids.size() > 1) {
+				// we may lose branching properties in this state
+				continue;
+			}
+			
 			for (int hi=0; hi < hcand.size() ; hi++) {
 				int hid = hcand.keyAt(hi);
 				// Make sure no transition is both input and output for p
@@ -1674,7 +1680,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				}
 				if (!ok)
 					continue;				
-			} else if ((rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL) && touches(Fids)) {
+			} else if ((rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL) && touches(Fids)) {
 				continue;
 			}
 
@@ -2442,7 +2448,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			if (DEBUG >= 3) {
 				FlowPrinter.drawNet(pn, "Safe nodes + prefix", safeNodes, Collections.emptySet());
 			}
-			if (rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL) {
+			if (rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL) {
 				// we need to be a bit more careful here
 				for (int tid=0, e=pn.getTransitionCount() ; tid < e ; tid++) {
 					// consumes in a Safe node ?
@@ -2504,10 +2510,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			// TODO : for LTL, we need to know if we have a free stutter available or not.
 			for (int j =0; j < hTP.size() ; j++) {
 				// additional condition : the transition must update the target				
-				if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL || rt==ReductionType.DEADLOCKS || hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
+				if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL || rt==ReductionType.DEADLOCKS || hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
 					for (int i=0; i < hPT.size() ; i++) {
 						// suppress self edges
-						if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL || rt==ReductionType.DEADLOCKS ||  hTP.keyAt(j) != hPT.keyAt(i)) {
+						if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL || rt==ReductionType.DEADLOCKS ||  hTP.keyAt(j) != hPT.keyAt(i)) {
 							// this is the transposed graph					
 							graph.set(hTP.keyAt(j), hPT.keyAt(i), 1);
 						}
@@ -2525,7 +2531,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		Set<Integer> safeNodes = new HashSet<>(nbP*2);
 
 		// Deadlock case : seed from nodes that are in an SCC
-		if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL || rt==ReductionType.DEADLOCKS) {
+		if (rt==ReductionType.SI_LTL || rt == ReductionType.SI_CTL || rt==ReductionType.SLCL_LTL || rt==ReductionType.DEADLOCKS) {
 
 			List<List<Integer>> sccs = kosarajuSCC(graph);
 
@@ -2548,7 +2554,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				safeNodes.addAll(s);
 			
 		} 
-		if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL || rt == ReductionType.SAFETY) {
+		if (rt==ReductionType.SI_LTL || rt == ReductionType.SI_CTL||  rt==ReductionType.SLCL_LTL || rt == ReductionType.SAFETY) {
 			// Safety case : seed from variables of interest only
 			for (int i = untouchable.nextSetBit(0); i >= 0; i = untouchable.nextSetBit(i+1)) {
 				// operate on index i here

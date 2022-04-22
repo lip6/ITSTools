@@ -559,7 +559,7 @@ public class Application implements IApplication, Ender {
 						spnProp.getProperties().clear();
 						spnProp.getProperties().add(prop.copy());
 						StructuralReduction sr = new StructuralReduction (spnProp);
-						sr.reduce(ReductionType.SI_LTL);
+						sr.reduce(ReductionType.SI_CTL);
 						spnProp.readFrom(sr);
 						spnProp.simplifyLogic();
 						ReachabilitySolver.checkInInitial(spnProp, doneProps);
