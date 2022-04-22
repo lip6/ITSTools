@@ -441,8 +441,9 @@ public class GlobalPropertySolver {
 
 				}
 
+				
 				// load "known" stuff about the model
-				if (reader.getSPN().isSafe()) {
+				if (reader.getSPN() != null && reader.getSPN().isSafe()) {
 					// NUPN implies one safe
 					if (examination.equals(ONE_SAFE)) {
 						System.out.println("FORMULA " + examination + " TRUE TECHNIQUES STRUCTURAL");
