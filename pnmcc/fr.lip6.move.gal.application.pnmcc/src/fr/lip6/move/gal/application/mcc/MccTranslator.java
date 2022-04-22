@@ -214,7 +214,12 @@ public class MccTranslator {
 							}
 						}
 					}
-					setOrder(GraphBuilder.computeLouvain(inb,true,constraints));
+					try {
+						IOrder graph = GraphBuilder.computeLouvain(inb,true,constraints);
+						setOrder(graph);
+					} catch (OutOfMemoryError e) {
+						System.out.println("Louvain graph construction failed due to OOM.");
+					}
 
 //					boolean hasLarge = false;
 //					for ( Integer init: inb.getInitial()) {
