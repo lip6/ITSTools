@@ -864,8 +864,8 @@ public class MccTranslator {
 			}
 			
 			// avoid building unbalanced deep trees			
-			List<BooleanExpression> next = new ArrayList<>();
 			while (resc.size() > 1) {
+				List<BooleanExpression> next = new ArrayList<>();
 				for (int i=0 ; i < resc.size() ; i+=2) {					
 					if (i == resc.size()-1) {
 						next.add(resc.get(i));
@@ -928,8 +928,8 @@ public class MccTranslator {
 			}
 			
 			// avoid building unbalanced deep trees			
-			List<IntExpression> next = new ArrayList<>();
 			while (resc.size() > 1) {
+				List<IntExpression> next = new ArrayList<>();				
 				for (int i=0 ; i < resc.size() ; i+=2) {					
 					if (i == resc.size()-1) {
 						next.add(resc.get(i));
@@ -939,7 +939,7 @@ public class MccTranslator {
 						next.add(GF2.createBinaryIntExpression(l, "+", r));
 					}
 				}
-				resc=next;
+				resc=next;				
 			}
 			IntExpression sum = resc.get(0);			
 			return sum;
