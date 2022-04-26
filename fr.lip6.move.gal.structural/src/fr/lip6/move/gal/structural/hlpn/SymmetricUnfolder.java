@@ -2,6 +2,7 @@ package fr.lip6.move.gal.structural.hlpn;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,8 @@ import fr.lip6.move.gal.structural.expr.Param;
 import fr.lip6.move.gal.structural.expr.ParamRef;
 
 public class SymmetricUnfolder {
-	private static int DEBUG=1;
+	private static final int DEBUG=1;
+	private static final boolean THAT_ONE_GUY=false;
 
 	private static Void computeParams(Expression e,  List<Param> params) {
 		if (e == null) {
@@ -128,6 +130,8 @@ public class SymmetricUnfolder {
 				continue;
 			}
 			
+			Partition partition = new Partition(sort.size());
+			
 			// tests for synchronization
 			for (HLTrans trans : net.getTransitions()) {				
 				for (Param param : trans.getParams()) {					
@@ -144,12 +148,20 @@ public class SymmetricUnfolder {
 									} else if (seenplace != arc.getPlace()) {
 										if (DEBUG >=1)
 											System.out.println("Transition "+trans.getName()+ " forces synchronizations/join behavior on parameter "+ param.getName() + " of sort "+ sort.getName());
-										isSym = false;
+										if (THAT_ONE_GUY) {
+											// "that one guy" strategy
+											// this is more refined but still an over approx
+											Partition p2 = new Partition(sort.size(),Collections.singletonList(0));
+											partition = Partition.refine(partition, p2);
+										} else {
+											// conservative strategy
+											isSym = false;
+										}
 										break;
 									}
 								}
 							}
-						}						
+						}
 					}
 				}
 				if (!isSym) {
@@ -166,7 +178,6 @@ public class SymmetricUnfolder {
 				System.out.println("Symmetric sort wr.t. initial and guards and successors and join/free detected :" + sort.getName());
 			
 			
-			Partition partition = new Partition(sort.size());
 			
 			// in fact, being join free makes this condition useless, who cares about constant colors when they have the same role and are not joined.
 			// take a good look at color functions on arcs
