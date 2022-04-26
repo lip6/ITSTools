@@ -41,5 +41,19 @@ public enum Op {
 		default :
 			throw new IllegalArgumentException();
 		}
-	}  
+	}
+
+	public static boolean isComparison(Op op) {
+		switch (op) {
+		case EQ:
+		case NEQ:
+		case GEQ:
+		case GT:
+		case LEQ:
+		case LT:
+			return true;
+		default:
+			return false;
+		}
+	}
 }
