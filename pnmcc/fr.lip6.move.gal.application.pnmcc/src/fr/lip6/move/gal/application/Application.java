@@ -553,38 +553,51 @@ public class Application implements IApplication, Ender {
 				
 				for (fr.lip6.move.gal.structural.Property prop : reader.getSPN().getProperties()) {
 					// try some property specific reductions
+
+					reader.setSpec(null);
+					MccTranslator reader2 = reader.copy();
+					SparsePetriNet spnProp = reader2.getSPN();
+
+					spnProp.getProperties().clear();
+					spnProp.getProperties().add(prop.copy());
+					StructuralReduction sr = new StructuralReduction(spnProp);
+
+					ReductionType rt = ReductionType.LTL;
 					if (fr.lip6.move.gal.structural.expr.Simplifier.isSyntacticallyStuttering(prop)) {
-						MccTranslator reader2 = reader.copy();
-						SparsePetriNet spnProp = reader2.getSPN();
-						spnProp.getProperties().clear();
-						spnProp.getProperties().add(prop.copy());
-						StructuralReduction sr = new StructuralReduction (spnProp);
-						sr.reduce(ReductionType.SI_CTL);
-						spnProp.readFrom(sr);
-						spnProp.simplifyLogic();
-						ReachabilitySolver.checkInInitial(spnProp, doneProps);
-						if (spnProp.getProperties().isEmpty()) {
+						rt = ReductionType.SI_CTL;
+					}
+					ReachabilitySolver.applyReductions(sr, rt, solverPath, doSMT, true);
+					spnProp.readFrom(sr);
+					spnProp.simplifyLogic();
+					ReachabilitySolver.checkInInitial(spnProp, doneProps);
+					if (spnProp.getProperties().isEmpty()) {
+						continue;
+					}
+					GALSolver.runGALReductions(reader2, doneProps);
+					GALSolver.checkInInitial(reader2.getSpec(), doneProps, reader2.getSPN().isSafe());
+					
+					if (reader2.getSpec().getProperties().isEmpty()) {
+						continue;
+					}
+					spnProp = reader2.getSPN();
+
+					fr.lip6.move.gal.structural.Property propRed = spnProp.getProperties().get(0);
+					if (fr.lip6.move.gal.structural.expr.Simplifier.isAnInvariant(propRed)) {
+						// requalify
+						propRed.setType(PropertyType.INVARIANT);
+						// solve with reachability
+						ReachabilitySolver.applyReductions(reader2, doneProps, solverPath, -1);
+
+						if (reader2.getSPN().getProperties().isEmpty()) {
 							continue;
 						}
-						GALSolver.runGALReductions(reader2, doneProps);
-						GALSolver.checkInInitial(reader2.getSpec(), doneProps, reader2.getSPN().isSafe());
-						if (reader2.getSpec().getProperties().isEmpty()) {
-							continue;
-						}
-						fr.lip6.move.gal.structural.Property propRed = spnProp.getProperties().get(0);
-						if (fr.lip6.move.gal.structural.expr.Simplifier.isAnInvariant(propRed)) {
-							// requalify
-							propRed.setType(PropertyType.INVARIANT);
-							// solve with reachability
-							ReachabilitySolver.applyReductions(reader2, doneProps, solverPath, -1);														
-							
-							if (reader2.getSPN().getProperties().isEmpty()) {
-								continue;
-							}
-							propRed.setType(PropertyType.CTL);
-						}
-						GlobalPropertySolver.verifyWithSDD(reader2, doneProps, examination, solverPath, 30);
-					}										
+						propRed.setType(PropertyType.CTL);
+					}
+//					if (fr.lip6.move.gal.structural.expr.Simplifier.isACTLstar(propRed)) {
+//						
+//					}
+					
+					GlobalPropertySolver.verifyWithSDD(reader2, doneProps, examination, solverPath, 30);
 				}
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				reader.rebuildSpecification(doneProps);
