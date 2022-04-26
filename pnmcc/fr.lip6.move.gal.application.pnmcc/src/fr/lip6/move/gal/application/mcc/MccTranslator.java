@@ -92,7 +92,6 @@ public class MccTranslator {
 	private IOrder order;
 	private String folder;
 	private Support simplifiedVars = new Support();
-	private boolean isSafeNet = false;
 	private boolean useLouvain;
 	private boolean isFlatten = false;
 	private boolean isHier = false;
@@ -161,7 +160,6 @@ public class MccTranslator {
 
 			spec = SerializationUtil.fileToGalSystem(ff.getCanonicalPath());
 			order = null;
-			isSafeNet = false;
 			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
 			if (spec.getMain() == null) {
 				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
@@ -486,14 +484,14 @@ public class MccTranslator {
 	public void setSpec(Specification spec) {
 		this.spec = spec;
 		this.isFlatten = false;
-		this.isHier = spec.getTypes().size() > 1;
+		if (spec != null)
+			this.isHier = spec.getTypes().size() > 1;
 	}
 
 
 	public MccTranslator copy() {		
 		MccTranslator copy = new MccTranslator(folder, useLouvain);
 		copy.order = this.order;
-		copy.isSafeNet = this.isSafeNet;
 		copy.simplifiedVars = new Support(simplifiedVars);
 		copy.spec = EcoreUtil.copy(spec);
 		copy.useLouvain = useLouvain;
