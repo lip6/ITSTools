@@ -501,7 +501,7 @@ public class Simplifier {
 			return isNeg;
 		}
 		if (e.getOp() == Op.NOT) {
-			return allEnablingsAreNegated(e.childAt(0));
+			return allEnablingsAreNegated(e.childAt(0), !isNeg);
 		}
 		for (int cid = 0, cide = e.nbChildren() ; cid < cide ; cid++) {
 			if (! allEnablingsAreNegated(e.childAt(cid),isNeg)) {
@@ -510,7 +510,38 @@ public class Simplifier {
 		}
 		return true;
 	}
+	
+	public static boolean isACTLstar (Property prop) {
+		switch (prop.getType()) {
+		case CTL:
+			return isACTLstar(prop.getBody(), false);
+		case LTL:			
+		default:
+			return true;			
+		}	
+	}
 
+	private static boolean isACTLstar (Expression body, boolean isNeg) {
+		if (body == null) {
+			return true;
+		} else if (body.getOp() == Op.AX || body.getOp() == Op.AF || body.getOp() == Op.AU || body.getOp() == Op.AG) {
+			return !isNeg;
+		} else if (body.getOp() == Op.EX || body.getOp() == Op.EF || body.getOp() == Op.EU || body.getOp() == Op.EG) {
+			return isNeg;
+		} else if (Op.isComparison(body.getOp())) {
+			return true;
+		} else if (body.getOp() == Op.NOT) {
+			return isACTLstar(body.childAt(0),!isNeg);
+		} else {
+			for (int cid=0, cide=body.nbChildren() ; cid < cide ; cid++) {
+				if (! isACTLstar(body.childAt(cid),isNeg)) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+	
 	public static boolean isSyntacticallyStuttering(Property prop) {
 		switch (prop.getType()) {
 		case CTL:
