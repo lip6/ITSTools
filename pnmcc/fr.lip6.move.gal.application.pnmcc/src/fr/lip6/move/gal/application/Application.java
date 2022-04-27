@@ -748,19 +748,26 @@ public class Application implements IApplication, Ender {
 					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
 
 					SparsePetriNet skel = reader.getHLPN().skeleton();
-					skel.getProperties().removeIf(p -> ! fr.lip6.move.gal.structural.expr.Simplifier.allEnablingsAreNegated(p.getBody()));
+					skel.getProperties().removeIf(p -> ! fr.lip6.move.gal.structural.expr.Simplifier.allEnablingsAreNegated(p));
 					
-					reader.setSpn(skel,true);
-					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-					new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, null, true);
-					reader.getSPN().simplifyLogic();
-					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-					reader.rebuildSpecification(doneProps);
-					GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
-					reader.flattenSpec(false);
-					GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
+					if (! skel.getProperties().isEmpty() ) {
+						System.out.println("Remains "+skel.getProperties().size()+ " properties that can be checked using skeleton over-approximation.");
+						reader.setSpn(skel,true);
+						ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+						new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, null, true);
+						reader.getSPN().simplifyLogic();
+						ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+						reader.rebuildSpecification(doneProps);
+						GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
+						reader.flattenSpec(false);
+						GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
+					} else {
+						System.out.println("All "+reader.getHLPN().getProperties().size()+ " properties of the HLPN use transition enablings in a way that makes the skeleton too coarse.");
+						
+					}
 				}
 				reader.createSPN();
+				
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				if (!reader.getSPN().getProperties().isEmpty())
 					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, -1);
