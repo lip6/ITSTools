@@ -9,7 +9,7 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class LogicSimplifier {
 
-	public static int simplifyWithInitial(List<Property> properties, SparseIntArray spinit) {
+	public static int simplifyWithInitial(List<Property> properties, SparseIntArray spinit, SparsePetriNet spn) {
 
 		int simplified = 0;
 		for (Property prop : properties) {
@@ -22,8 +22,7 @@ public class LogicSimplifier {
 					continue;
 				}
 				// simplify(body);
-
-				int eval = evalInInitial(body, spinit);
+				int eval = evalInInitial(body, spinit, spn);
 				if (eval == 1) {
 					prop.setBody(Expression.constant(true));
 				} else if (eval == -1) {
@@ -48,8 +47,9 @@ public class LogicSimplifier {
 	 * strategy proposed in Section 3 of the paper : Simplification of CTL Formulae
 	 * for Efficient Model Checking of Petri Nets Published at IC PetriNets'2018 By
 	 * Bonneland, et al. of Jiri Srba's group working on Tapaal.
+	 * @param spn 
 	 */
-	private static int evalInInitial(Expression predicate, SparseIntArray init) {
+	private static int evalInInitial(Expression predicate, SparseIntArray init, SparsePetriNet spn) {
 		switch (predicate.getOp()) {
 
 		case BOOLCONST: {
@@ -66,14 +66,33 @@ public class LogicSimplifier {
 				return -1;
 			}
 		}
+		case ENABLED: {
+			for (int i=0; i < predicate.nbChildren(); i++) {
+				Expression e = predicate.childAt(i);
+				if (e.getOp()!=Op.TRANSREF) {
+					System.out.println("Unexpected child of enabling was not a transitions reference.");
+					return 0;
+				} else {
+					int tid = e.getValue();
+					if (SparseIntArray.greaterOrEqual(init, spn.getFlowPT().getColumn(tid))) {
+						if (spn.isSkeleton()) {
+							return 0;
+						} else {
+							return 1;
+						}
+					}
+				}
+			}
+			return -1;
+		}			
 		case NOT:
-			return -evalInInitial(predicate.childAt(0), init);
+			return -evalInInitial(predicate.childAt(0), init, spn);
 		case AND: {
 			boolean found0 = false;
 
 			for (int i = 0; i < predicate.nbChildren(); i++) {
 				Expression c = predicate.childAt(i);
-				int value = evalInInitial(c, init);
+				int value = evalInInitial(c, init, spn);
 
 				if (value == -1) {
 					// we are also -1
@@ -94,7 +113,7 @@ public class LogicSimplifier {
 
 			for (int i = 0; i < predicate.nbChildren(); i++) {
 				Expression c = predicate.childAt(i);
-				int value = evalInInitial(c, init);
+				int value = evalInInitial(c, init, spn);
 
 				if (value == 1) {
 					// we are also 1
@@ -113,25 +132,25 @@ public class LogicSimplifier {
 		case X:case EX:case AX:
 			return 0;
 		case G:case EG:case AG:{
-			if (evalInInitial(predicate.childAt(0), init) == -1) {
+			if (evalInInitial(predicate.childAt(0), init, spn) == -1) {
 				return -1;
 			} else {
 				return 0;
 			}
 		}
 		case F:case EF:case AF:{
-			if (evalInInitial(predicate.childAt(0), init) == 1) {
+			if (evalInInitial(predicate.childAt(0), init, spn) == 1) {
 				return 1;
 			} else {
 				return 0;
 			}
 		}
 		case U:case EU:case AU: {
-			int evalr = evalInInitial(predicate.childAt(1), init);
+			int evalr = evalInInitial(predicate.childAt(1), init, spn);
 			if (evalr == 1) {
 				return 1;
 			} else if (evalr == -1) {
-				if (evalInInitial(predicate.childAt(0), init) == -1) {
+				if (evalInInitial(predicate.childAt(0), init, spn) == -1) {
 					return -1;
 				}
 			}
