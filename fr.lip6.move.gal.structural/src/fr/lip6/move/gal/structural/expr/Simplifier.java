@@ -489,21 +489,46 @@ public class Simplifier {
 	}
 
 	
-	public static boolean allEnablingsAreNegated (Property p) {
+	public static boolean allEnablingsAreNegated(Property p) {
 		switch (p.getType()) {
 		case LTL:
-			return allEnablingsAreNegated(p.getBody(),false);
-		case INVARIANT:
-			if (p.getBody().getOp()==Op.AG) {
-				return allEnablingsAreNegated(p.getBody().childAt(0),true);
+			return allEnablingsAreNegated(p.getBody(), false);
+		case INVARIANT: {
+			if (p.getBody().getOp() == Op.AG) {
+				return allEnablingsAreNegated(p.getBody().childAt(0), true);
 			} else {
-				return allEnablingsAreNegated(p.getBody().childAt(0),false);
+				return allEnablingsAreNegated(p.getBody().childAt(0), false);
 			}
+		}
 		default:
-			return false;
+		// mostly CTL : we are scared of initial state test and SMT solver unreachable
+		{
+			// any AP that is testing enabling, if it returns true is suspect.
+			// however false is ok.
+			// we just give up currently
+			return !containsEnablings(p.getBody());
+		}
 		}
 	}
 	
+	private static boolean containsEnablings(Expression e) {
+		if (e==null) {
+			return false;
+		}
+		if (e.getOp() == Op.ENABLED) {
+			return true;
+		}
+		if (Op.isComparison(e.getOp())) {
+			return false;
+		}
+		for (int i=0,ie=e.nbChildren(); i < ie ; i++) {
+			if (containsEnablings(e.childAt(i))) {
+				return true;
+			}
+		}		
+		return false;
+	}
+
 	private static boolean allEnablingsAreNegated (Expression e, boolean isNeg) {
 		if (e == null) {
 			return true;
@@ -513,6 +538,9 @@ public class Simplifier {
 		}
 		if (e.getOp() == Op.NOT) {
 			return allEnablingsAreNegated(e.childAt(0), !isNeg);
+		}
+		if (Op.isComparison(e.getOp())) {
+			return true;			
 		}
 		for (int cid = 0, cide = e.nbChildren() ; cid < cide ; cid++) {
 			if (! allEnablingsAreNegated(e.childAt(cid),isNeg)) {
