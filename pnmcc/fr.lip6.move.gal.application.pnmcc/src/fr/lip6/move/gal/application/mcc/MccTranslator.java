@@ -960,7 +960,9 @@ public class MccTranslator {
 		INextBuilder nb = INextBuilder.build(getSpec());
 		IDeterministicNextBuilder dnb = IDeterministicNextBuilder.build(nb);			
 		StructuralReduction sr = new StructuralReduction(dnb);
+		boolean isskel = spn.isSkeleton();
 		spn = new SparsePetriNet();
+		spn.setSkeleton(isskel);
 		spn.readFrom(sr);
 		GalToStructural gts = new GalToStructural(dnb);
 		for (Property p : getSpec().getProperties()) {
