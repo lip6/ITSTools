@@ -121,6 +121,7 @@ public class SparseHLPetriNet extends PetriNet {
 		long time = System.currentTimeMillis();
 		SparsePetriNet spn = new SparsePetriNet();
 		spn.setName(getName() +"_skel");
+		spn.setSkeleton(true);
 		
 		// generate places with appropriate indexes
 		for (HLPlace p : places) {
