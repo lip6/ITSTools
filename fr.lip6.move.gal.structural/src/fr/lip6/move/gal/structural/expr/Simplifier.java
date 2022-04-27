@@ -489,8 +489,19 @@ public class Simplifier {
 	}
 
 	
-	public static boolean allEnablingsAreNegated (Expression e) {
-		return allEnablingsAreNegated(e,false);
+	public static boolean allEnablingsAreNegated (Property p) {
+		switch (p.getType()) {
+		case LTL:
+			return allEnablingsAreNegated(p.getBody(),false);
+		case INVARIANT:
+			if (p.getBody().getOp()==Op.AG) {
+				return allEnablingsAreNegated(p.getBody().childAt(0),true);
+			} else {
+				return allEnablingsAreNegated(p.getBody().childAt(0),false);
+			}
+		default:
+			return false;
+		}
 	}
 	
 	private static boolean allEnablingsAreNegated (Expression e, boolean isNeg) {
