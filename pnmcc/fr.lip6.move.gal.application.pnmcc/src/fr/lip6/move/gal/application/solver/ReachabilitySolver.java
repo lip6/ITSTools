@@ -32,6 +32,7 @@ public class ReachabilitySolver {
 
 	public static int checkInInitial(PetriNet pn, DoneProperties doneProps) {
 		int done = 0;
+		pn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 		for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(pn.getProperties())) {
 			if (prop.getBody().getOp() == Op.BOOLCONST) {
 				doneProps.put(prop.getName(),prop.getBody().getValue()==1,"TOPOLOGICAL INITIAL_STATE");
