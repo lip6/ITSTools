@@ -139,14 +139,14 @@ public class SparseHLPetriNet extends PetriNet {
 			}
 		}
 
-
-		Logger.getLogger("fr.lip6.move.gal").info("Built PT skeleton of HLPN with "+spn.getPlaceCount()+ " places and " + spn.getTransitionCount() + " transitions in " + (System.currentTimeMillis()- time) + " ms.");
+		Logger.getLogger("fr.lip6.move.gal").info("Built PT skeleton of HLPN with "+spn.getPlaceCount()+ " places and " + spn.getTransitionCount() + " transitions " + (spn.getFlowPT().getColumns().stream().mapToInt(c->c.size()).sum() + spn.getFlowTP().getColumns().stream().mapToInt(c->c.size()).sum()) + " arcs in " + (System.currentTimeMillis()- time) + " ms.");
+		
 		time = System.currentTimeMillis();
 		// now resolve enabled + cardinality predicates
 		for (Property p : getProperties()) {
 			spn.getProperties().add(new Property(bindSkeletonColors(p.getBody()),p.getType(),p.getName()));
 		}
-		Logger.getLogger("fr.lip6.move.gal").info("Skeletonized HLPN properties in " + (System.currentTimeMillis()- time) + " ms.");
+		Logger.getLogger("fr.lip6.move.gal").info("Skeletonized "+spn.getProperties().size() +" HLPN properties in " + (System.currentTimeMillis()- time) + " ms.");
 		if (DEBUG >=1)
 			FlowPrinter.drawNet(new StructuralReduction(spn), "Skeleton net", new HashSet<>(), new HashSet<>());
 		return spn;
@@ -268,7 +268,7 @@ public class SparseHLPetriNet extends PetriNet {
 		for (Property p : getProperties()) {
 			spn.getProperties().add(new Property(bindColors(p.getBody(),enablings),p.getType(),p.getName()));
 		}
-		Logger.getLogger("fr.lip6.move.gal").info("Unfolded HLPN properties in " + (System.currentTimeMillis()- time) + " ms.");
+		Logger.getLogger("fr.lip6.move.gal").info("Unfolded "+spn.getProperties().size() +" HLPN properties in " + (System.currentTimeMillis()- time) + " ms.");
 		if (DEBUG >=1)
 			FlowPrinter.drawNet(spn, "After Unfold", Collections.emptySet(), Collections.emptySet());
 		
