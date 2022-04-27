@@ -97,17 +97,25 @@ public class LTLPropertySolver {
 				SpotRunner.exportLTLProperties(reader.getHLPN(),"colred",workDir);
 			}
 			SparsePetriNet skel = reader.getHLPN().skeleton();
+			if (skel.testInInitial()>0) {
+				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+			}
 			skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p));
-			reader.setSpn(skel,true);
-			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-			new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(spotPath, workDir, 10), true);
-			reader.getSPN().simplifyLogic();
-			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-			reader.rebuildSpecification(doneProps);
-			GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
-			reader.flattenSpec(false);
-			GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
-			ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
+			if (! skel.getProperties().isEmpty()) {
+				System.out.println("Remains "+skel.getProperties().size()+ " properties that can be checked using skeleton over-approximation.");
+				reader.setSpn(skel,true);
+				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+				new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(spotPath, workDir, 10), true);
+				reader.getSPN().simplifyLogic();
+				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+				reader.rebuildSpecification(doneProps);
+				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
+				reader.flattenSpec(false);
+				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
+				ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
+			} else {
+				System.out.println("All "+reader.getHLPN().getProperties().size()+ " properties of the HLPN use transition enablings in a way that makes the skeleton too coarse.");
+			}
 		}
 		reader.createSPN();
 		reader.getSPN().simplifyLogic();
