@@ -97,7 +97,7 @@ public class LTLPropertySolver {
 				SpotRunner.exportLTLProperties(reader.getHLPN(),"colred",workDir);
 			}
 			SparsePetriNet skel = reader.getHLPN().skeleton();
-			skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p.getBody()));
+			skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p));
 			reader.setSpn(skel,true);
 			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 			new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(spotPath, workDir, 10), true);
