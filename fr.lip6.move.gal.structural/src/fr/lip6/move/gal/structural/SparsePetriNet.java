@@ -31,6 +31,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	private int maxArcValue=0;
 	private boolean isSafe=false;
 	private static final int DEBUG = 0;
+	private boolean isSkeleton=false;
 	
 	public SparsePetriNet() {
 	}
@@ -45,8 +46,17 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		pnames = new ArrayList<>(spn.pnames);
 		maxArcValue = spn.maxArcValue;
 		isSafe = spn.isSafe;
+		isSkeleton = spn.isSkeleton;
 	}
 
+	public void setSkeleton(boolean isSkeleton) {
+		this.isSkeleton = isSkeleton;
+	}
+	
+	public boolean isSkeleton() {
+		return isSkeleton;
+	}
+	
 	@Override
 	public void setSafe(boolean isSafe) {
 		this.isSafe = isSafe;
@@ -200,7 +210,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 
 	public int testInInitial () {
 		SparseIntArray spinit = new SparseIntArray(marks);
-		return LogicSimplifier.simplifyWithInitial(getProperties(),spinit);
+		return LogicSimplifier.simplifyWithInitial(getProperties(),spinit, this);
 	}
 
 	private Expression simplifyConstants(Expression expr, int[] perm) {
