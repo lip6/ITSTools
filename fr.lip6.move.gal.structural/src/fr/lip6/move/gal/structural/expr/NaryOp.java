@@ -43,6 +43,7 @@ public class NaryOp implements Expression {
 			}
 			return res?1:0;
 		}
+		case CARD:
 		case ADD :
 		{
 			int res = 0;
