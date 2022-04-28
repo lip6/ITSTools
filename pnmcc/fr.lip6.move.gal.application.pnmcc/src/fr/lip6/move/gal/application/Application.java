@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -65,6 +66,7 @@ import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.pnml.togal.OverlargeMarkingException;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
+import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.PropertyType;
@@ -752,6 +754,15 @@ public class Application implements IApplication, Ender {
 					
 					if (skel.testInInitial()>0) {
 						ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+					}
+					skel.removeConstantPlaces();
+					try {
+						StructuralReduction.findSCCSuffixes(skel, ReductionType.DEADLOCKS, new BitSet());			
+					} catch (DeadlockFound e) {
+						// AF dead is true
+						if (skel.testInDeadlock()>0) {
+							ReachabilitySolver.checkInInitial(skel, doneProps);
+						}
 					}
 					skel.getProperties().removeIf(p -> ! fr.lip6.move.gal.structural.expr.Simplifier.allEnablingsAreNegated(p));
 					
