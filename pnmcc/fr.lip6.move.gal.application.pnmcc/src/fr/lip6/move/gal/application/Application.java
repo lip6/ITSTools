@@ -764,7 +764,7 @@ public class Application implements IApplication, Ender {
 							ReachabilitySolver.checkInInitial(skel, doneProps);
 						}
 					}
-					skel.getProperties().removeIf(p -> ! fr.lip6.move.gal.structural.expr.Simplifier.allEnablingsAreNegated(p));
+					skel.getProperties().removeIf(p -> ! fr.lip6.move.gal.structural.expr.Simplifier.allEnablingsAreNegated(p, skel));
 					
 					if (! skel.getProperties().isEmpty() ) {
 						System.out.println("Remains "+skel.getProperties().size()+ " properties that can be checked using skeleton over-approximation.");
