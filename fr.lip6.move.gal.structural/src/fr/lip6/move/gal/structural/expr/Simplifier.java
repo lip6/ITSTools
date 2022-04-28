@@ -491,15 +491,9 @@ public class Simplifier {
 	
 	public static boolean allEnablingsAreNegated(Property p) {
 		switch (p.getType()) {
+		case INVARIANT:
 		case LTL:
 			return allEnablingsAreNegated(p.getBody(), false);
-		case INVARIANT: {
-			if (p.getBody().getOp() == Op.AG) {
-				return allEnablingsAreNegated(p.getBody().childAt(0), true);
-			} else {
-				return allEnablingsAreNegated(p.getBody().childAt(0), false);
-			}
-		}
 		default:
 		// mostly CTL : we are scared of initial state test and SMT solver unreachable
 		{
