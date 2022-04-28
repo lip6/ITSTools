@@ -343,8 +343,9 @@ public class MccTranslator {
 
 	public void simplifySPN(boolean redPlace, boolean redTrans) {
 		spn.simplifyLogic();
-		spn.toPredicates();			
 		spn.testInInitial();
+		spn.toPredicates();			
+				
 		if (redPlace)
 			spn.removeConstantPlaces();
 		if (redTrans)
