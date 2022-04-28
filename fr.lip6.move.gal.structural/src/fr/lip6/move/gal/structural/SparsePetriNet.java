@@ -213,6 +213,10 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		return LogicSimplifier.simplifyWithInitial(getProperties(),spinit, this);
 	}
 
+	public int testInDeadlock() {		
+		return LogicSimplifier.simplifyWithDead(getProperties(), this);
+	}
+
 	private Expression simplifyConstants(Expression expr, int[] perm) {
 		if (expr == null) {
 			return null;
@@ -550,5 +554,6 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		}
 		return todel.size();
 	}
+
 
 }
