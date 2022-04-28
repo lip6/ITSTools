@@ -59,6 +59,7 @@ import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
+import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.pnml.togal.OverlargeMarkingException;
@@ -748,19 +749,40 @@ public class Application implements IApplication, Ender {
 					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
 
 					SparsePetriNet skel = reader.getHLPN().skeleton();
+					
+					if (skel.testInInitial()>0) {
+						ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+					}
 					skel.getProperties().removeIf(p -> ! fr.lip6.move.gal.structural.expr.Simplifier.allEnablingsAreNegated(p));
 					
 					if (! skel.getProperties().isEmpty() ) {
 						System.out.println("Remains "+skel.getProperties().size()+ " properties that can be checked using skeleton over-approximation.");
+						DoneProperties skelProps = new ConcurrentHashDoneProperties();
 						reader.setSpn(skel,true);
-						ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-						new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, null, true);
+						ReachabilitySolver.checkInInitial(reader.getSPN(), skelProps);
+						for (fr.lip6.move.gal.structural.Property p : reader.getHLPN().getProperties()) {
+							Boolean b = doneProps.getValue(p.getName());
+							if (b!=null) {
+								if ((p.getBody().getOp()==Op.AG && b)||(p.getBody().getOp()==Op.EF && !b)) {
+									doneProps.put(p.getName(), b, "CPN_APPROX");
+								}
+							}
+						}
+						new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), skelProps, null, true);
 						reader.getSPN().simplifyLogic();
-						ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-						reader.rebuildSpecification(doneProps);
-						GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
+						ReachabilitySolver.checkInInitial(reader.getSPN(), skelProps);
+						reader.rebuildSpecification(skelProps);
+						GALSolver.checkInInitial(reader.getSpec(), skelProps, reader.getSPN().isSafe());
 						reader.flattenSpec(false);
-						GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
+						GALSolver.checkInInitial(reader.getSpec(), skelProps, reader.getSPN().isSafe());
+						for (fr.lip6.move.gal.structural.Property p : reader.getHLPN().getProperties()) {
+							Boolean b = doneProps.getValue(p.getName());
+							if (b!=null) {
+								if ((p.getBody().getOp()==Op.AG && b)||(p.getBody().getOp()==Op.EF && !b)) {
+									doneProps.put(p.getName(), b, "CPN_APPROX");
+								}
+							}
+						}
 					} else {
 						System.out.println("All "+reader.getHLPN().getProperties().size()+ " properties of the HLPN use transition enablings in a way that makes the skeleton too coarse.");
 						
