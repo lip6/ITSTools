@@ -9,6 +9,74 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class LogicSimplifier {
 
+	
+	public static int simplifyWithDead(List<Property> properties, SparsePetriNet sparsePetriNet) {
+		int simplified = 0;
+		for (Property prop : properties) {
+			switch (prop.getType()) {
+			case INVARIANT: {
+				Expression body = prop.getBody();
+				if (body.getOp() == Op.BOOLCONST) {
+					continue;
+				}
+				// simplify(body);
+				int eval = evalInDeadlock(body.childAt(0));
+				if (eval == -1 && body.getOp()==Op.AG) {
+					prop.setBody(Expression.constant(false));
+					simplified++;
+				} else if (eval == 1 && body.getOp()==Op.EF) {
+					prop.setBody(Expression.constant(true));
+					simplified++;
+				}
+			}
+			case LTL:
+			case CTL:
+			default:
+				continue;
+			}
+		}
+		if (simplified != 0) {
+			System.out.println("AF dead knowledge conclusive for " + simplified + " formulas.");
+		}
+		return simplified;
+	}
+
+	
+	
+	private static int evalInDeadlock(Expression body) {
+		if (body.getOp() == Op.ENABLED) {
+			return -1;
+		} else if (body.getOp() == Op.OR) {			
+			for (int i=0,ie=body.nbChildren() ; i < ie ; i++) {
+				Expression c = body.childAt(i);
+				int v = evalInDeadlock(c);
+				if (v==0) {
+					return 0;					
+				} else if (v==1) {
+					return 1;
+				}
+			}
+			return -1;			
+		} else if (body.getOp() == Op.AND) {
+			for (int i=0,ie=body.nbChildren() ; i < ie ; i++) {
+				Expression c = body.childAt(i);
+				int v = evalInDeadlock(c);
+				if (v==0) {
+					return 0;					
+				} else if (v==-1) {
+					return -1;
+				}
+			}
+			return 1;						
+		} else if (body.getOp() == Op.NOT) {
+			return -evalInDeadlock(body.childAt(0));
+		} else {
+			return 0;			
+		}
+	}
+
+
+
 	public static int simplifyWithInitial(List<Property> properties, SparseIntArray spinit, SparsePetriNet spn) {
 
 		int simplified = 0;
@@ -161,5 +229,6 @@ public class LogicSimplifier {
 			return 0;
 		}		
 	}
+
 
 }
