@@ -5,8 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
+import fr.lip6.move.gal.structural.SparsePetriNet;
 
 public class Simplifier {
 
@@ -489,11 +491,14 @@ public class Simplifier {
 	}
 
 	
-	public static boolean allEnablingsAreNegated(Property p) {
+	public static boolean allEnablingsAreNegated(Property p, SparsePetriNet spn) {
+		SparseIntArray init = new SparseIntArray(spn.getMarks());
 		switch (p.getType()) {
 		case INVARIANT:
-		case LTL:
 			return allEnablingsAreNegated(p.getBody(), false);
+		case CTL:
+		case LTL:
+			return allEnablingsAreInitiallyFalse(p.getBody(), init, spn);
 		default:
 		// mostly CTL : we are scared of initial state test and SMT solver unreachable
 		{
@@ -505,6 +510,29 @@ public class Simplifier {
 		}
 	}
 	
+	private static boolean allEnablingsAreInitiallyFalse(Expression e, SparseIntArray init, SparsePetriNet spn) {
+		if (e == null) {
+			return true;
+		} 
+		if (e.getOp() == Op.ENABLED) {
+			for (int cid = 0, cide = e.nbChildren() ; cid < cide ; cid++) {
+				if (SparseIntArray.greaterOrEqual(init, spn.getFlowPT().getColumn(e.childAt(cid).getValue()))) {
+					return false;
+				}
+			}
+			return true;
+		}
+		if (Op.isComparison(e.getOp())) {
+			return true;			
+		}
+		for (int cid = 0, cide = e.nbChildren() ; cid < cide ; cid++) {
+			if (! allEnablingsAreInitiallyFalse(e.childAt(cid),init,spn)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private static boolean containsEnablings(Expression e) {
 		if (e==null) {
 			return false;

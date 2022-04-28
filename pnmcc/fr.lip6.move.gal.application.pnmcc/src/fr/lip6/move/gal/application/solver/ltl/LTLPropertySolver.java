@@ -100,7 +100,7 @@ public class LTLPropertySolver {
 			if (skel.testInInitial()>0) {
 				ReachabilitySolver.checkInInitial(skel, doneProps);
 			}
-			skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p));
+			skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p,skel));
 			if (! skel.getProperties().isEmpty()) {
 				System.out.println("Remains "+skel.getProperties().size()+ " properties that can be checked using skeleton over-approximation.");
 				reader.setSpn(skel,true);
