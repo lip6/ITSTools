@@ -751,48 +751,63 @@ public class Application implements IApplication, Ender {
 					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
 
 					SparsePetriNet skel = reader.getHLPN().skeleton();
-					
-					if (skel.testInInitial()>0) {
-						ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-					}
-					skel.removeConstantPlaces();
-					try {
-						StructuralReduction.findSCCSuffixes(skel, ReductionType.DEADLOCKS, new BitSet());			
-					} catch (DeadlockFound e) {
-						// AF dead is true
-						if (skel.testInDeadlock()>0) {
-							ReachabilitySolver.checkInInitial(skel, doneProps);
-						}
-					}
 					skel.getProperties().removeIf(p -> ! fr.lip6.move.gal.structural.expr.Simplifier.allEnablingsAreNegated(p, skel));
 					
 					if (! skel.getProperties().isEmpty() ) {
 						System.out.println("Remains "+skel.getProperties().size()+ " properties that can be checked using skeleton over-approximation.");
+						if (skel.testInInitial()>0) {
+							ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+						}
+						skel.removeConstantPlaces();
+						try {
+							if (skel.getFlowPT().getColumns().stream().allMatch(c -> c.size() > 0)) {
+								StructuralReduction.findSCCSuffixes(skel, ReductionType.DEADLOCKS, new BitSet());
+							}
+						} catch (DeadlockFound e) {
+							// AF dead is true
+							if (skel.testInDeadlock()>0) {
+								ReachabilitySolver.checkInInitial(skel, doneProps);
+							}
+						}
+					
+					
+					
+						
 						DoneProperties skelProps = new ConcurrentHashDoneProperties();
 						reader.setSpn(skel,true);
 						ReachabilitySolver.checkInInitial(reader.getSPN(), skelProps);
+						List<fr.lip6.move.gal.structural.Property> todel = new ArrayList<>();
 						for (fr.lip6.move.gal.structural.Property p : reader.getHLPN().getProperties()) {
 							Boolean b = doneProps.getValue(p.getName());
 							if (b!=null) {
 								if ((p.getBody().getOp()==Op.AG && b)||(p.getBody().getOp()==Op.EF && !b)) {
 									doneProps.put(p.getName(), b, "CPN_APPROX");
+								} else {
+									todel.add(p);
 								}
 							}
 						}
-						new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), skelProps, null, true);
-						reader.getSPN().simplifyLogic();
-						ReachabilitySolver.checkInInitial(reader.getSPN(), skelProps);
-						reader.rebuildSpecification(skelProps);
-						GALSolver.checkInInitial(reader.getSpec(), skelProps, reader.getSPN().isSafe());
-						reader.flattenSpec(false);
-						GALSolver.checkInInitial(reader.getSpec(), skelProps, reader.getSPN().isSafe());
-						for (fr.lip6.move.gal.structural.Property p : reader.getHLPN().getProperties()) {
-							Boolean b = doneProps.getValue(p.getName());
-							if (b!=null) {
-								if ((p.getBody().getOp()==Op.AG && b)||(p.getBody().getOp()==Op.EF && !b)) {
-									doneProps.put(p.getName(), b, "CPN_APPROX");
+						reader.getHLPN().getProperties().removeAll(todel);
+						
+						if (! skel.getProperties().isEmpty()) {
+							new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), skelProps, null, true);
+							reader.getSPN().simplifyLogic();
+							ReachabilitySolver.checkInInitial(reader.getSPN(), skelProps);
+							reader.rebuildSpecification(skelProps);
+							GALSolver.checkInInitial(reader.getSpec(), skelProps, reader.getSPN().isSafe());
+							reader.flattenSpec(false);
+							GALSolver.checkInInitial(reader.getSpec(), skelProps, reader.getSPN().isSafe());
+						
+							for (fr.lip6.move.gal.structural.Property p : reader.getHLPN().getProperties()) {
+								Boolean b = doneProps.getValue(p.getName());
+								if (b!=null) {
+									if ((p.getBody().getOp()==Op.AG && b)||(p.getBody().getOp()==Op.EF && !b)) {
+										doneProps.put(p.getName(), b, "CPN_APPROX");
+									}
 								}
 							}
+						} else {
+							System.out.println("Skeleton over-approximation was not fine enough to positively prove more properties of the HLPN.");							
 						}
 					} else {
 						System.out.println("All "+reader.getHLPN().getProperties().size()+ " properties of the HLPN use transition enablings in a way that makes the skeleton too coarse.");
