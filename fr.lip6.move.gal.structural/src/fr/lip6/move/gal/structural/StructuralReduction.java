@@ -2429,8 +2429,17 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	
 	public static Set<Integer> findSCCSuffixes(ISparsePetriNet pn, ReductionType rt, BitSet untouchable) throws DeadlockFound {
 		long time = System.currentTimeMillis();
+		
 		// extract all transitions to a PxP matrix
-		IntMatrixCol graph = buildGraph(pn, rt, -1);
+		IntMatrixCol graph;
+		if (rt == ReductionType.DEADLOCKS) {
+			Set<Integer> stablePlaces = new HashSet<>();
+			Set<Integer> stableTrans = new HashSet<>();
+			computeStabilizing(pn, stablePlaces,stableTrans);
+			graph = buildGraph(pn, rt, stableTrans);
+		} else {
+			graph = buildGraph(pn, rt, -1);			
+		}
 		// the set of nodes that are "safe"
 		Set<Integer> safeNodes = computeSafeNodes(pn, rt, graph, untouchable);
 		
@@ -2498,11 +2507,19 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 
 	public static IntMatrixCol buildGraph(ISparsePetriNet pn, ReductionType rt, int skipped) {
+		if (skipped == -1) {
+			return buildGraph(pn, rt, Collections.emptySet());
+		} else {
+			return buildGraph(pn, rt, Collections.singleton(skipped));
+		}
+	}
+		
+	private static IntMatrixCol buildGraph(ISparsePetriNet pn, ReductionType rt, Set<Integer> skippedTrans) {
 		int nbP = pn.getPlaceCount();
 		IntMatrixCol graph = new IntMatrixCol(nbP,nbP);
 		
 		for (int tid = 0, tide = pn.getTransitionCount(); tid < tide ; tid++) {
-			if (tid == skipped) {
+			if (skippedTrans.contains(tid)) {
 				continue;
 			}
 			SparseIntArray hPT = pn.getFlowPT().getColumn(tid);
@@ -2939,6 +2956,60 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return keepImage;
 	}
 
+	private static void computeStabilizing (ISparsePetriNet pn, Set<Integer> stablePlaces, Set<Integer> stableTransitions) {
+		IntMatrixCol flow = new IntMatrixCol(pn.getPlaceCount(), 0);
+		for (int ti=0, tie=pn.getTransitionCount() ; ti < tie ; ti++) {
+			flow.appendColumn(SparseIntArray.sumProd(-1, pn.getFlowPT().getColumn(ti), 1, pn.getFlowTP().getColumn(ti)));
+		}
+			
+		IntMatrixCol tflow = flow.transpose();
+		
+		boolean changed = true;
+		while (changed) {
+			changed = false;
+			// any place that is never fed, will stabilize.
+			for (int pid=0, pide = pn.getPlaceCount(); pid < pide ; pid++) {
+				if (stablePlaces.contains(pid)) {
+					continue;
+				}
 
+				boolean isFed = false;
+				SparseIntArray effect = tflow.getColumn(pid);
+				for (int i=0,ie=effect.size() ; i < ie ; i++) {
+					if (!stableTransitions.contains(effect.keyAt(i)) && effect.valueAt(i) >0) {
+						isFed = true;
+						break;
+					}
+				}
+				if (! isFed) {
+					stablePlaces.add(pid);
+					changed = true;
+				}
+			}
+			// any transition that truly consumes tokens from a stable place will not be infinitely fired.		
+			for (int tid=0, tide=pn.getTransitionCount() ; tid < tide ; tid++) {
+				if (stableTransitions.contains(tid)) {
+					continue;
+				}
+				boolean isStable = false;
+				SparseIntArray effect = flow.getColumn(tid);
+				for (int i=0,ie=effect.size() ; i < ie ; i++) {
+					if (effect.valueAt(i) < 0 && stablePlaces.contains(effect.keyAt(i))) {
+						isStable = true;
+						break;
+					}
+				}
+
+				if (isStable) {
+					stableTransitions.add(tid);
+					changed = true;
+				}			
+			}
+		}
+		System.out.println("Computed a total of "+stablePlaces.size() + " stabilizing places and " + stableTransitions.size() + " stable transitions");
+		if (DEBUG >= 1) {
+			FlowPrinter.drawNet(pn, "Stabilizing places/transitions", stablePlaces, stableTransitions);
+		}
+	}
 	
 }
