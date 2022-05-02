@@ -214,7 +214,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	}
 
 	public int testInDeadlock() {		
-		return LogicSimplifier.simplifyWithDead(getProperties(), this);
+		return LogicSimplifier.simplifyWithDead(getProperties());
 	}
 
 	private Expression simplifyConstants(Expression expr, int[] perm) {
