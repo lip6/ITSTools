@@ -756,7 +756,7 @@ public class Application implements IApplication, Ender {
 					if (! skel.getProperties().isEmpty() ) {
 						System.out.println("Remains "+skel.getProperties().size()+ " properties that can be checked using skeleton over-approximation.");
 						if (skel.testInInitial()>0) {
-							ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+							ReachabilitySolver.checkInInitial(skel, doneProps);
 						}
 						skel.removeConstantPlaces();
 						try {
