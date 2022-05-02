@@ -100,11 +100,17 @@ public class LTLPropertySolver {
 			if (skel.testInInitial()>0) {
 				ReachabilitySolver.checkInInitial(skel, doneProps);
 			}
+			if (testAFDead(skel) && skel.testInDeadlock()>0) {
+				ReachabilitySolver.checkInInitial(skel, doneProps);
+			}
 			skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p,skel));
 			if (! skel.getProperties().isEmpty()) {
 				System.out.println("Remains "+skel.getProperties().size()+ " properties that can be checked using skeleton over-approximation.");
 				reader.setSpn(skel,true);
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+				if (testAFDead(skel) && skel.testInDeadlock()>0) {
+					ReachabilitySolver.checkInInitial(skel, doneProps);
+				}
 				new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(spotPath, workDir, 10), true);
 				reader.getSPN().simplifyLogic();
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
@@ -134,6 +140,10 @@ public class LTLPropertySolver {
 		solved += reader.getSPN().testInInitial();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 
+		if (testAFDead(reader.getSPN()) && reader.getSPN().testInDeadlock()>0) {
+			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+		}
+		
 		if (reader.getSPN().getProperties().isEmpty()) {
 			System.out.println("All properties solved without resorting to model-checking.");
 			return solved;
@@ -1124,8 +1134,13 @@ public class LTLPropertySolver {
 
 	private boolean testAFDead(ISparsePetriNet spn) {
 		try {
-			Set<Integer> safe = StructuralReduction.findSCCSuffixes(spn, ReductionType.DEADLOCKS, new BitSet());			
+			if (spn.getFlowPT().getColumns().stream().allMatch(c -> c.size() > 0)) {
+				StructuralReduction.findSCCSuffixes(spn, ReductionType.DEADLOCKS, new BitSet());
+			}
 		} catch (DeadlockFound e) {
+			// AF dead is true
+			System.out.println("Detected that all paths lead to deadlock. Applying this knowledge to assert that all AP eventually converge (and all enablings converge to false).");
+
 			return true;
 		}
 		return false;
