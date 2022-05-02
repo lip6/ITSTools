@@ -1,16 +1,19 @@
 package fr.lip6.move.gal.structural;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.structural.expr.AtomicPropManager;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.structural.expr.Simplifier;
 
 public class LogicSimplifier {
 
 	
-	public static int simplifyWithDead(List<Property> properties, SparsePetriNet sparsePetriNet) {
+	public static int simplifyWithDead(List<Property> properties) {
 		int simplified = 0;
 		for (Property prop : properties) {
 			switch (prop.getType()) {
@@ -27,10 +30,19 @@ public class LogicSimplifier {
 				} else if (eval == 1 && body.getOp()==Op.EF) {
 					prop.setBody(Expression.constant(true));
 					simplified++;
+				}			
+			}
+			
+			case CTL:{
+				prop.setBody(Simplifier.pushNegation(prop.getBody()));
+				Expression withDead = evalWithAFdead(prop.getBody());
+				if (withDead != prop.getBody()) {
+					prop.setBody(withDead);
+					simplified++;
 				}
 			}
 			case LTL:
-			case CTL:
+				// TODO : add convergence knowledge
 			default:
 				continue;
 			}
@@ -43,6 +55,57 @@ public class LogicSimplifier {
 
 	
 	
+	private static Expression evalWithAFdead(Expression expr) {
+		if (expr==null) {
+			return expr;
+		} else {
+			switch (expr.getOp()) {
+			case EF:
+			case AF:
+			{
+				if (AtomicPropManager.isPureBool(expr.childAt(0))) {
+					if (evalInDeadlock(expr.childAt(0))==1) {
+						return Expression.constant(true);
+					}
+				}
+				break;
+			}
+			case EG:
+			case AG:
+			{
+				if (AtomicPropManager.isPureBool(expr.childAt(0))) {
+					if (evalInDeadlock(expr.childAt(0))==-1) {
+						return Expression.constant(false);
+					}
+				}
+				break;	
+			}
+			default:
+				break;
+			}
+			if (Op.isComparison(expr.getOp())) {
+				return expr;
+			}
+			List<Expression> resc = new ArrayList<>(expr.nbChildren());
+			boolean changed = false;
+			for (int cid = 0, cide = expr.nbChildren() ; cid < cide ; cid++) {
+				Expression child = expr.childAt(cid);
+				Expression e = evalWithAFdead(child);
+				resc.add(e);
+				if (e != child) {
+					changed = true;
+				}
+			}
+			if (! changed) {
+				return expr;
+			} else {
+				return Expression.nop(expr.getOp(), resc);
+			}			
+		}
+	}
+
+
+
 	private static int evalInDeadlock(Expression body) {
 		if (body.getOp() == Op.ENABLED) {
 			return -1;
