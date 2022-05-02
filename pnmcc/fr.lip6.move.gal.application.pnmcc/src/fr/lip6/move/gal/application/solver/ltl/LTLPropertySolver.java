@@ -603,7 +603,7 @@ public class LTLPropertySolver {
 
 		addNextStateKnowledge(knowledge, falseKnowledge, spn, tgba);
 		
-		addConvergenceKnowledge(knowledge, spn, tgba, spn.isSafe());
+		addConvergenceKnowledge(knowledge, spn, tgba);
 		
 		System.out.println("Knowledge obtained : " + knowledge);
 		System.out.println("False Knowledge obtained : " + falseKnowledge);
@@ -1095,7 +1095,7 @@ public class LTLPropertySolver {
 		knowledge.add(Expression.nop(Op.AND,kis));
 	}
 
-	private void addConvergenceKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba, boolean isSafe) {
+	private void addConvergenceKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
 		// we are SCC free hence structurally we will meet a deadlock in all traces
 		// hence we must be accepted in one of these states, and they are by definition stuttering
 		boolean allPathsAreDead = testAFDead (spn);
@@ -1103,7 +1103,7 @@ public class LTLPropertySolver {
 		if (allPathsAreDead) {
 			System.out.println("Detected that all paths lead to deadlock. Applying this knowledge to assert that all AP eventually converge : F ( (Ga|G!a) & (Gb|G!b)...)");
 
-			boolean [] results = DeadlockTester.testAPInDeadlocksWithSMT(spn, tgba.getAPs(), solverPath, isSafe);						
+			boolean [] results = DeadlockTester.testAPInDeadlocksWithSMT(spn, tgba.getAPs(), solverPath);						
 
 			// build expressions :  G p | G !p 
 			// for each ap "p", but remove bad values eliminated through SMT

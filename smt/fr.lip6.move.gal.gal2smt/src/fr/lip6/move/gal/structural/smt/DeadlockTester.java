@@ -95,7 +95,7 @@ public class DeadlockTester {
 	 * @param isSafe 
 	 * @return two booleans per AP : can it be true in a deadlock ? can it be false in a deadlock ? In doubt we set to true.
 	 */
-	public static boolean[] testAPInDeadlocksWithSMT(ISparsePetriNet sr, List<AtomicProp> atoms, String solverPath, boolean isSafe) {
+	public static boolean[] testAPInDeadlocksWithSMT(ISparsePetriNet sr, List<AtomicProp> atoms, String solverPath) {
 		List<Integer> tnames = new ArrayList<>();
 		List<Integer> representative = new ArrayList<>();
 
@@ -111,7 +111,7 @@ public class DeadlockTester {
 		ISolver solver = initSolver(solverPath, smt,solveWithReals,4000,6000);
 		{
 			// STEP 1 : declare variables
-			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
+			Script varScript = declareVariables(sr.getPnames().size(), "s", sr.isSafe(), smt,solveWithReals);
 			execAndCheckResult(varScript, solver);			
 		}
 
