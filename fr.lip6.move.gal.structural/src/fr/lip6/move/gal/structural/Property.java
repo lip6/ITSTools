@@ -36,6 +36,6 @@ public class Property {
 	}
 	@Override
 	public String toString() {
-		return "Property [prop=" + prop + ", type=" + type + ", name=" + name + "]";
+		return type+":"+name +"=" + prop ;
 	}
 }
