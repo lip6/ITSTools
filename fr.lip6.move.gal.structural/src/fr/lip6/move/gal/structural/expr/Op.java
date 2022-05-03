@@ -43,7 +43,7 @@ public enum Op {
 		case X: return X;
 		case U: return U;
 		case AF: return EG;
-		case EG:return EF;
+		case EG:return AF;
 		case EF:return AG;
 		case AG:return EF;
 		case EX:return AX;
