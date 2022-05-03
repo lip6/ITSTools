@@ -48,8 +48,6 @@ public enum Op {
 		case AG:return EF;
 		case EX:return AX;
 		case AX:return EX;
-		case AU:return EU;
-		case EU:return AU;
 		case AND:return OR;
 		case OR:return AND;
 		default :

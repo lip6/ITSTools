@@ -251,7 +251,7 @@ public class Simplifier {
 			} else {
 				return expr;
 			}
-		} else if (expr.getOp() == Op.ENABLED) {
+		} else if (expr.getOp() == Op.ENABLED || expr.getOp()==Op.EU || expr.getOp()==Op.AU) {
 			if (isNeg) {
 				return Expression.not(expr);
 			} else {
