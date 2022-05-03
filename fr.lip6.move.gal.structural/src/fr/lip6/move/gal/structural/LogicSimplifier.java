@@ -63,8 +63,15 @@ public class LogicSimplifier {
 			case EF:
 			case AF:
 			{
-				if (AtomicPropManager.isPureBool(expr.childAt(0))) {
-					if (evalInDeadlock(expr.childAt(0))==1) {
+				Expression son = expr.childAt(0);
+				
+				if (son.getOp()==Op.AX) {
+					// EF AX f -> true
+					// AF AX f -> true
+					return Expression.constant(true);
+				}
+				if (AtomicPropManager.isPureBool(son)) {
+					if (evalInDeadlock(son)==1) {
 						return Expression.constant(true);
 					}
 				}
@@ -73,8 +80,15 @@ public class LogicSimplifier {
 			case EG:
 			case AG:
 			{
-				if (AtomicPropManager.isPureBool(expr.childAt(0))) {
-					if (evalInDeadlock(expr.childAt(0))==-1) {
+				Expression son = expr.childAt(0);
+				
+				if (son.getOp()==Op.EX) {
+					// AG EX f -> false
+					// EG EX f -> false
+					return Expression.constant(false);
+				}
+				if (AtomicPropManager.isPureBool(son)) {
+					if (evalInDeadlock(son)==-1) {
 						return Expression.constant(false);
 					}
 				}
