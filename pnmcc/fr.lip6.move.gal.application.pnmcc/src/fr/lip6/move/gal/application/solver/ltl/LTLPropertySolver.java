@@ -140,9 +140,6 @@ public class LTLPropertySolver {
 		solved += reader.getSPN().testInInitial();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 
-		if (testAFDead(reader.getSPN()) && reader.getSPN().testInDeadlock()>0) {
-			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-		}
 		
 		if (reader.getSPN().getProperties().isEmpty()) {
 			System.out.println("All properties solved without resorting to model-checking.");
@@ -182,6 +179,10 @@ public class LTLPropertySolver {
 		//verifyWithLTSmin (reader.getSPN(),doneProps,15);
 		
 		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+		if (testAFDead(reader.getSPN()) && reader.getSPN().testInDeadlock()>0) {
+			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+		}
+		
 		
 		if (isLTL && spotPath != null) {
 			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
