@@ -228,7 +228,6 @@ public class Simplifier {
 	}
 
 	
-	
 	/**
 	 * Recursive helper for push negations.
 	 * @param expr expression to rewrite
@@ -239,82 +238,47 @@ public class Simplifier {
 		if (expr == null) {
 			return expr;
 		} else if (expr.getOp() == Op.BOOLCONST) {
+			// Boolean leaves
 			if (!isNeg) {
 				return expr;
 			} else {
 				return Expression.constant(expr.getValue()==0);
 			}		
-		} else if (expr instanceof BinOp) {
-			BinOp bin = (BinOp) expr;
-			switch (bin.getOp()) {
-			case GEQ: case GT: case LEQ: case LT: case EQ: case NEQ:
-				if (isNeg) {					
-					return Expression.op(Op.negate(bin.getOp()),bin.left, bin.right);
-				} else {
-					return bin;
-				}
-			default : 
-				break;
-			}
-			if (bin.getOp() == Op.NOT) {
-				return pushNegation(bin.left,!isNeg);
-			}
-			Expression l = pushNegation(bin.left,false);
-			Expression r = pushNegation(bin.right,false);
-			if (l == bin.left && r == bin.right) {
-				if (!isNeg) {
-					return expr;
-				} else {
-					return Expression.not(expr);
-				}
-			}
-			if (!isNeg) {
-				return Expression.op(bin.op, l, r);
+		} else if (Op.isComparison(expr.getOp())) {
+			// Comparisons => push on comparison operator
+			if (isNeg) {					
+				return Expression.op(Op.negate(expr.getOp()),expr.childAt(0), expr.childAt(1));
 			} else {
-				return Expression.not(Expression.op(bin.op, l, r));
+				return expr;
 			}
-		} else if (expr instanceof NaryOp) {
-			NaryOp nop = (NaryOp) expr;
-			List<Expression> resc = new ArrayList<>();
-			
-			switch (nop.getOp()) {
-			case CARD: case ENABLED: case BOUND:
-			{
-				if (!isNeg)
-					return expr;
-				else 
-					return Expression.not(expr);
+		} else if (expr.getOp() == Op.ENABLED) {
+			if (isNeg) {
+				return Expression.not(expr);
+			} else {
+				return expr;
 			}
-			default:
-				break;
-			}
-			
+		} else if (expr.getOp() == Op.NOT) {
+			return pushNegation(expr.childAt(0),!isNeg);
+		} else {
+			// recurse with current polarity
+			List<Expression> resc = new ArrayList<>(expr.nbChildren());
 			boolean changed = false;
-			for (Expression child : nop.getChildren()) {
-				Expression nc = pushNegation(child,isNeg);
-				resc.add(nc);
-				if (nc != child) {
+			for (int cid = 0, cide = expr.nbChildren() ; cid < cide ; cid++) {
+				Expression child = expr.childAt(cid);
+				Expression e = pushNegation(child,isNeg);
+				resc.add(e);
+				if (e != child) {
 					changed = true;
 				}
 			}
-			if (!changed) {
-				if (!isNeg)
-					return expr;
-				else 
-					return Expression.not(expr);
-			}
 			if (isNeg) {
-				if (nop.getOp() == Op.OR) {
-					return Expression.nop(Op.AND, resc);
-				} else if (nop.getOp() == Op.AND) {
-					return Expression.nop(Op.OR, resc);
-				} else {
-					return Expression.not(Expression.nop(nop.getOp(), resc));
-				}
+				return Expression.nop(Op.negate(expr.getOp()), resc);
+			} else if (!changed) {
+				return expr;
+			} else {
+				return Expression.nop(expr.getOp(), resc);
 			}
-			return Expression.nop(nop.getOp(), resc);
-		} 
-		return expr;
+		}		
 	}
 	
 	public static Expression assumeVarsPositive (Expression expr) {
