@@ -38,6 +38,20 @@ public enum Op {
 		case GEQ : return LT;
 		case LEQ : return GT;
 		case LT : return GEQ;
+		case F: return G;
+		case G: return F;
+		case X: return X;
+		case U: return U;
+		case AF: return EG;
+		case EG:return EF;
+		case EF:return AG;
+		case AG:return EF;
+		case EX:return AX;
+		case AX:return EX;
+		case AU:return EU;
+		case EU:return AU;
+		case AND:return OR;
+		case OR:return AND;
 		default :
 			throw new IllegalArgumentException();
 		}
@@ -56,4 +70,5 @@ public enum Op {
 			return false;
 		}
 	}
+	
 }
