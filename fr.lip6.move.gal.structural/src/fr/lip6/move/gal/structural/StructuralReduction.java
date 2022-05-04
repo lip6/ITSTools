@@ -2956,7 +2956,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return keepImage;
 	}
 
-	private static void computeStabilizing (ISparsePetriNet pn, Set<Integer> stablePlaces, Set<Integer> stableTransitions) {
+	public static void computeStabilizing (ISparsePetriNet pn, Set<Integer> stablePlaces, Set<Integer> stableTransitions) {
 		IntMatrixCol flow = new IntMatrixCol(pn.getPlaceCount(), 0);
 		for (int ti=0, tie=pn.getTransitionCount() ; ti < tie ; ti++) {
 			flow.appendColumn(SparseIntArray.sumProd(-1, pn.getFlowPT().getColumn(ti), 1, pn.getFlowTP().getColumn(ti)));
