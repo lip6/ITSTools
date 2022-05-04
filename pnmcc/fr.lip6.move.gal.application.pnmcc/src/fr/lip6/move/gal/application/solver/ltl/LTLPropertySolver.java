@@ -1130,6 +1130,42 @@ public class LTLPropertySolver {
 					System.out.println("Strange error detected, AP can be neither true nor false in deadlock.");
 				}
 			}
+		} else {
+			// recompute stable though testAFDead did it, but it's basically a graph traversal no big deal
+			Set<Integer> stablePlaces = new HashSet<>();
+			Set<Integer> stableTrans = new HashSet<>();
+			StructuralReduction.computeStabilizing(spn, stablePlaces,stableTrans);
+			if (!stablePlaces.isEmpty()) {
+				int nbstable=0;
+				for (int apid=0,ie=tgba.getAPs().size() ; apid < ie ; apid++) {
+					AtomicProp ap = tgba.getAPs().get(apid);
+					BitSet supp = new BitSet(); 
+					SparsePetriNet.addSupport(ap.getExpression(), supp);
+					
+					boolean covered = true;
+					for (int i = supp.nextSetBit(0); i >= 0; i = supp.nextSetBit(i+1)) {
+						// operate on index i here
+						if (!stablePlaces.contains(i)) {
+							covered=false;
+							break;
+						}
+						if (i == Integer.MAX_VALUE) {
+							break; // or (i+1) would overflow
+						}
+					}
+					if (covered) {
+						nbstable++;
+						knowledge.add(
+								Expression.op(Op.F, 
+										Expression.op(Op.OR, 
+												Expression.op(Op.G, Expression.apRef(tgba.getAPs().get(apid)), null), 
+												Expression.op(Op.G, Expression.not(Expression.apRef(tgba.getAPs().get(apid))),null)),null));						
+					}
+				}
+				if (nbstable >0) {
+					System.out.println("Detected a total of "+stablePlaces.size()+"/"+ spn.getPlaceCount()+ " stabilizing places and "+stableTrans.size()+"/"+ spn.getTransitionCount()+ " transitions leading to convergence knowledge of the form 'F(Gp|G!p)' for "+nbstable+"/"+ tgba.getAPs().size()+" atomic propositions.");
+				}
+			}
 		}
 	}
 
