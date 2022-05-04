@@ -24,16 +24,20 @@ public class StructuralToPNML {
 		pw.append("<net id=\"ITS Tools generated\" type=\"http://www.pnml.org/version-2009/grammar/ptnet\">\n");
 		pw.append("<page id=\"page0\"><name><text>DefaultPage</text></name>\n");
 		
+		int nbplaces=0;
 		for (int p = 0 ; p < sr.getPnames().size() ; p++) {
 			pw.append("<place id=\"p"+p+"\">");
 			pw.append("<name><text>"+sr.getPnames().get(p)+"</text></name>");
 			pw.append("<initialMarking><text>" + sr.getMarks().get(p) + "</text></initialMarking>");
 			pw.append("</place>\n");
+			nbplaces++;
 		}
+		int nbtrans=0;
 		for (int t = 0 ; t < sr.getTnames().size() ; t++) {
 			pw.append("<transition id=\"t"+t+"\">");
 			pw.append("<name><text>"+sr.getTnames().get(t)+"</text></name>");
 			pw.append("</transition>\n");
+			nbtrans++;
 		}
 		int arcid = 0;
 		for (int t = 0; t < sr.getTnames().size() ; t++) {
@@ -60,7 +64,7 @@ public class StructuralToPNML {
 		pw.append("<name><text>"+sr.getName()+"</text></name></net>\n");
 		pw.append("</pnml>\n");
 		pw.close();
-		getLog().info("Export to PNML in file "+path +" took "+ (System.currentTimeMillis()-time) + " ms.");
+		getLog().info("Export to PNML in file "+path +"of net with "+nbplaces +" places, "+ nbtrans+" transitions and "+ arcid + " arcs took "+ (System.currentTimeMillis()-time) + " ms.");
 	}
 
 }

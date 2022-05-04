@@ -46,6 +46,7 @@ public class PropertiesToPNML {
 		
 		pw.append("<property-set xmlns=\"http://mcc.lip6.fr/\">\n");
 		boolean usesConstants = false;
+		int exported=0;
 		for (Property prop : spn.getProperties()) {
 			if (! doneProps.containsKey(prop.getName())) {
 				pw.append("  <property>\n" + 
@@ -58,6 +59,7 @@ public class PropertiesToPNML {
 				pw.append("    </formula>\n" + 
 						"  </property>\n" + 
 						"");
+				exported++;
 			} else {
 				continue;
 				// This block would output trivially true/false properties.
@@ -72,7 +74,7 @@ public class PropertiesToPNML {
 		}
 		pw.append("</property-set>\n\n");
 		pw.close();
-		getLog().info("Export to MCC properties in file "+path +" took "+ (System.currentTimeMillis()-time) + " ms.");
+		getLog().info("Export to MCC of "+ exported +" properties in file "+path +" took "+ (System.currentTimeMillis()-time) + " ms.");
 		return usesConstants;
 	}
 
