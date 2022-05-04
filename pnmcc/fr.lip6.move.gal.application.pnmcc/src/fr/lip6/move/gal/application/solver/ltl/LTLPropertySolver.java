@@ -98,29 +98,38 @@ public class LTLPropertySolver {
 			}
 			SparsePetriNet skel = reader.getHLPN().skeleton();
 			if (skel.testInInitial()>0) {
-				ReachabilitySolver.checkInInitial(skel, doneProps);
+				solved += ReachabilitySolver.checkInInitial(skel, doneProps);
 			}
-			if (testAFDead(skel) && skel.testInDeadlock()>0) {
-				ReachabilitySolver.checkInInitial(skel, doneProps);
-			}
-			skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p,skel));
 			if (! skel.getProperties().isEmpty()) {
-				System.out.println("Remains "+skel.getProperties().size()+ " properties that can be checked using skeleton over-approximation.");
-				reader.setSpn(skel,true);
-				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+				
 				if (testAFDead(skel) && skel.testInDeadlock()>0) {
-					ReachabilitySolver.checkInInitial(skel, doneProps);
+					solved += ReachabilitySolver.checkInInitial(skel, doneProps);
 				}
-				new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(spotPath, workDir, 10), true);
-				reader.getSPN().simplifyLogic();
-				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-				reader.rebuildSpecification(doneProps);
-				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
-				reader.flattenSpec(false);
-				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
-				ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
-			} else {
-				System.out.println("All "+reader.getHLPN().getProperties().size()+ " properties of the HLPN use transition enablings in a way that makes the skeleton too coarse.");
+				skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p,skel));
+				if (! skel.getProperties().isEmpty()) {
+					System.out.println("Remains "+skel.getProperties().size()+ " properties that can be checked using skeleton over-approximation.");
+					reader.setSpn(skel,true);
+					solved += ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+					if (testAFDead(skel) && skel.testInDeadlock()>0) {
+						solved +=ReachabilitySolver.checkInInitial(skel, doneProps);
+					}
+					new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(spotPath, workDir, 10), true);
+					reader.getSPN().simplifyLogic();
+					solved +=ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+					reader.rebuildSpecification(doneProps);
+					GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
+					reader.flattenSpec(false);
+					solved +=GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
+					solved +=ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
+				} else {
+					System.out.println("All "+reader.getHLPN().getProperties().size()+ " properties of the HLPN use transition enablings in a way that makes the skeleton too coarse.");
+				}
+			}
+			solved +=ReachabilitySolver.checkInInitial(reader.getHLPN(),doneProps);
+			if (reader.getHLPN().getProperties().isEmpty()) {
+				reader.setSpn(new SparsePetriNet(), false);
+				System.out.println("All properties of the HLPN proved before fully unfolding the net.");
+				return solved;
 			}
 		}
 		reader.createSPN();
