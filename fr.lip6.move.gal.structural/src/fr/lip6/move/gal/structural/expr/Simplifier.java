@@ -1,8 +1,11 @@
 package fr.lip6.move.gal.structural.expr;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import android.util.SparseIntArray;
@@ -657,35 +660,43 @@ public class Simplifier {
 				
 				if (left.getOp() == operator || right.getOp()==operator) {
 					// collect
-					List<Expression> onl = new ArrayList<>();
+					Map<Expression,Integer> onl = new HashMap<>();
 					if (left.getOp() == operator) {
 						for (int i=0; i < left.nbChildren() ; i++) {
-							onl.add(left.childAt(i));
+							onl.compute(left.childAt(i), (k,v)-> v==null ? 1 : v +1);
 						}
 					} else {
-						onl.add(left);
+						onl.put(left,1);
 					}
 					
 					boolean changed = false;
-					List<Expression> onr = new ArrayList<>();
+					Map<Expression,Integer> onr = new HashMap<>();
 					if (right.getOp() == operator) {
 						for (int i=0; i < right.nbChildren() ; i++) {
 							Expression child = right.childAt(i);
-							int li = onl.indexOf(child);
-							if (li==-1) {
-								onr.add(child);
+							Integer li = onl.get(child);
+							if (li==null) {
+								onr.compute(child, (k,v)-> v==null ? 1 : v +1);								
 							} else {
-								onl.remove(li);
+								if (li==1) {
+									onl.remove(child);
+								} else {
+									onl.put(child, li-1);
+								}
 								// and don't add to onr
 								changed = true;
 							}
 						}
 					} else {
-						int li = onl.indexOf(right);
-						if (li==-1) {
-							onr.add(right);
+						Integer li = onl.get(right);
+						if (li==null) {
+							onr.compute(right, (k,v)-> v==null ? 1 : v +1);
 						} else {
-							onl.remove(li);
+							if (li==1) {
+								onl.remove(right);
+							} else {
+								onl.put(right, li-1);
+							}
 							// and don't add to onr
 							changed = true;
 						}						
@@ -696,13 +707,25 @@ public class Simplifier {
 						if (onl.size() == 0) {
 							nl = Expression.constant(0);
 						} else {
-							nl = Expression.nop(operator,onl); 
+							List<Expression> args = new ArrayList<>(onl.size());
+							for (Entry<Expression, Integer> e : onl.entrySet()) {
+								for (int i=0; i < e.getValue(); i++) {
+									args.add(e.getKey());
+								}
+							}
+							nl = Expression.nop(operator,args);
 						}
 						Expression nr ;
 						if (onr.size() == 0) {
 							nr = Expression.constant(0);
 						} else {
-							nr = Expression.nop(operator,onr); 
+							List<Expression> args = new ArrayList<>(onr.size());
+							for (Entry<Expression, Integer> e : onr.entrySet()) {
+								for (int i=0; i < e.getValue(); i++) {
+									args.add(e.getKey());
+								}
+							}
+							nr = Expression.nop(operator,args);
 						}
 						return Expression.op(bin.getOp(), nl, nr);
 					} else {
