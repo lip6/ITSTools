@@ -169,12 +169,15 @@ public class Application implements IApplication, Ender {
 	 */
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
+		long time = System.currentTimeMillis();
 		try {
 			return startNoEx(context);
 		} catch (Exception e) {
 			System.err.println("Application raised an uncaught exception " + e.getMessage());
 			e.printStackTrace();
 			return null;
+		} finally {
+			System.out.println("Total runtime "+(System.currentTimeMillis()-time)+ " ms.");
 		}
 	}
 
