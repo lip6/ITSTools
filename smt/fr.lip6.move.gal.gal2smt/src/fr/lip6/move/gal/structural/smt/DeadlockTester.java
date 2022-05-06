@@ -310,8 +310,13 @@ public class DeadlockTester {
 			// compute predecessor constraint
 			Script s=null;
 			try {
-				s = computePredConstraint(tocheck.get(i),sumMatrix,representative,sr);
-				s.add(new C_assert(smtexpr));				
+				// let's not go overboard, we haven't even started the solver yet.
+				if (sumMatrix.getColumnCount() < 20000) {
+					s = computePredConstraint(tocheck.get(i),sumMatrix,representative,sr);
+					s.add(new C_assert(smtexpr));
+				} else {
+					s = new Script();
+				}
 			} catch (OutOfMemoryError err) {
 				s = new Script();
 			} finally {
