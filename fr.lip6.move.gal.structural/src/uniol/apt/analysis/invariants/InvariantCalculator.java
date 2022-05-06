@@ -526,7 +526,11 @@ public class InvariantCalculator {
 		
 		if (DEBUG) System.out.println("Rule 1b2 : "+pnames.get(tCol));
 		// for all cols j with j != tCol and c[tRow][j] != 0
-		for (int j = 0; j < matC.getColumnCount(); ++j) {
+		PpPm rowppm = pppms.get(tRow);
+		SparseBoolArray toVisit = SparseBoolArray.or(rowppm.pMinus, rowppm.pPlus);
+		
+		for (int i=0; i < toVisit.size() ; i++) {
+			int j=toVisit.keyAt(i);
 			SparseIntArray colj = matC.getColumn(j); 
 			
 			if (j == tCol) {
