@@ -2443,6 +2443,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		// the set of nodes that are "safe"
 		Set<Integer> safeNodes = computeSafeNodes(pn, rt, graph, untouchable);
 		
+		if (rt == ReductionType.DEADLOCKS) {
+			// rebuild with all the nodes in there for prefix computation
+			graph = buildGraph(pn, rt, -1);
+		}
+		
 		if (DEBUG >= 3) {
 			FlowPrinter.drawNet(pn, "Safe nodes", safeNodes, Collections.emptySet());
 		}
