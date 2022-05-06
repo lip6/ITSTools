@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -64,24 +65,60 @@ public class GlobalPropertySolver {
 	}
 
 	// **** solving global properties ****
+	void buildOneSafeProperty(PetriNet pn) {
+		Set<Integer> osPlaces = new HashSet<>();
+		Set<Integer> oneFireTrans = new HashSet<>();
 
-	void buildOneSafeProperty(PetriNet spn) {
+		if (pn instanceof SparsePetriNet) {
+			SparsePetriNet spn = (SparsePetriNet) pn;
+			
+			IntMatrixCol tflowTP = spn.getFlowTP().transpose();
+			IntMatrixCol tflowPT = spn.getFlowPT().transpose();
+			
+			boolean changed;
+			do {
+				changed = false;
+				// look for places that cannot be fed => we already checked initial so they are one safe  
+				for (int pid=0 ; pid < tflowTP.getColumnCount() ; pid++) {
+					if (osPlaces.contains(pid)) {
+						continue;
+					}
+					// cannot be fed at all
+					// or can only be fed exactly once at most
+					if (tflowTP.getColumn(pid).size()==0 || tflowTP.getColumn(pid).size()==1 && oneFireTrans.contains(tflowTP.getColumn(pid).keyAt(0))) {
+						changed = true;
+						osPlaces.add(pid);
+						// consumers from this place are hence single fireable
+						SparseIntArray cons = tflowPT.getColumn(pid);
+						for (int i=0, ie=cons.size() ;i< ie; i++) {
+							int tid = cons.keyAt(i);
+							oneFireTrans.add(tid);
+						}
+					}
+				}
+			} while (changed);
+			
+			if (! osPlaces.isEmpty()) {
+				System.out.println("Structural unfed/single firing approximation deduced that "+ osPlaces.size()+ "/" + spn.getPlaceCount() + " places are one safe.");
+			}
+		}
 
-		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
+		for (int pid = 0; pid < pn.getPlaceCount(); pid++) {
 
 			// in case colored models
-			if (spn instanceof SparseHLPetriNet) {
-				SparseHLPetriNet hlpn = (SparseHLPetriNet) spn;
+			if (pn instanceof SparseHLPetriNet) {
+				SparseHLPetriNet hlpn = (SparseHLPetriNet) pn;
 				if (pid >= hlpn.getPlaces().size())
 					break;
 			}
-
-			Expression pInfOne = Expression.op(Op.LEQ,
-					Expression.nop(Op.CARD, Collections.singletonList(Expression.var(pid))), Expression.constant(1));
-			// unary op ignore right
-			Expression ag = Expression.op(Op.AG, pInfOne, null);
-			Property oneSafeProperty = new Property(ag, PropertyType.INVARIANT, "osplace_" + pid);
-			spn.getProperties().add(oneSafeProperty);
+			if (!osPlaces.contains(pid)) {
+				Expression pInfOne = Expression.op(Op.LEQ,
+						Expression.nop(Op.CARD, Collections.singletonList(Expression.var(pid))), Expression.constant(1));
+				// unary op ignore right
+				Expression ag = Expression.op(Op.AG, pInfOne, null);
+				Property oneSafeProperty = new Property(ag, PropertyType.INVARIANT, "osplace_" + pid);
+				pn.getProperties().add(oneSafeProperty);
+			}
 		}
 
 	}
