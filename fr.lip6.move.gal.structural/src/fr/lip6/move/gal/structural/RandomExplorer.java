@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.lovasoa.bloomfilter.BloomFilter;
 
@@ -296,20 +297,40 @@ public class RandomExplorer {
 		for (; i < nbSteps ; i++) {
 			long dur = System.currentTimeMillis() - time + 1; 
 			if (dur > 1000 * timeout) {
+				// we might not have tested the current state, which is a shame.
+				// worst case is double evaluating when timeout is reached, who cares on small problems.
+				if (! updateVerdicts(exprs, state, verdicts)) {
+					System.out.println("Finished "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
+					return verdicts;
+				}
 				int nbSeen=Arrays.stream(verdicts).sum();
 				System.out.println("Interrupted "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen " + nbSeen + (DEBUG >=1 ?  new SparseIntArray(verdicts) + (" reached state " + state):"") );
 				return verdicts;
 			}
+			boolean skipVerdict = false;
 			if (!max) {
-				if (! updateVerdicts(exprs, state, verdicts)) {
-					System.out.println("Finished "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
-					return verdicts;
+				
+				if (exprs.size() >= 10000 && (i/dur) <= 5) {
+					// skip some updateVerdicts
+					skipVerdict = i % 100 != 0;
+				}
+				if (!skipVerdict) {
+					if (! updateVerdicts(exprs, state, verdicts)) {
+						System.out.println("Finished "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
+						return verdicts;
+					}
 				}
 			} else {
 				updateMaxVerdicts(exprs, state, verdicts);
 			}
 			if (list[0] == 0 || ( i >= nbSteps / 3 && nbresets == 0 ) || ( i >= 2*nbSteps/3 && nbresets <= 1) ){
 				//System.out.println("Dead end with self loop(s) found at step " + i);
+				if (skipVerdict) {
+					if (! updateVerdicts(exprs, state, verdicts)) {
+						System.out.println("Finished "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
+						return verdicts;
+					}
+				}
 				nbresets ++;
 				last = -1;
 				state = initstate.clone();
@@ -381,16 +402,25 @@ public class RandomExplorer {
 	}
 
 	private boolean updateVerdicts(List<Expression> exprs, SparseIntArray state, int[] verdicts) {
-		boolean remains = false;
-		for (int v = 0; v < verdicts.length; v++) {
-			if (verdicts[v] == 0) {
-				remains = true;
-				if (exprs.get(v).eval(state) == 1) {
-					verdicts[v] = 1;
-				}
-			}
+		int [] todo = new int[(int) Arrays.stream(verdicts).filter(v->v==0).count()];
+		if (todo.length == 0) {
+			return false;
 		}
-		return remains;
+		for (int i=0,ie=todo.length;i<ie;i++) {
+			if (verdicts[i]==0) {
+				todo[i]=i;
+			}
+		}		
+		AtomicBoolean remains = new AtomicBoolean(false);
+		Arrays.stream(todo).parallel()
+				.forEach(v -> {					
+					if (exprs.get(v).eval(state) == 1) {
+						verdicts[v] = 1;
+					} else {
+						remains.set(true);
+					}
+				});
+		return remains.get();
 	}
 
 	
