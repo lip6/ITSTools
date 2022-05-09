@@ -75,6 +75,17 @@ public class GlobalPropertySolver {
 			IntMatrixCol tflowTP = spn.getFlowTP().transpose();
 			IntMatrixCol tflowPT = spn.getFlowPT().transpose();
 			
+			// test initial state first
+			for (int mark : spn.getMarks()) {
+				if (mark > 1) {
+					// not one safe, definitely
+					System.out.println("Due to initial marking, net is not one safe.");
+					Property oneSafeProperty = new Property(Expression.constant(false), PropertyType.INVARIANT, "OneSafe");
+					pn.getProperties().add(oneSafeProperty);
+					return;
+				}
+			}
+			
 			boolean changed;
 			do {
 				changed = false;
@@ -98,6 +109,7 @@ public class GlobalPropertySolver {
 				}
 			} while (changed);
 			
+			if (DEBUG==2) FlowPrinter.drawNet(spn, "Finally : Detected single feed",osPlaces,oneFireTrans);
 			if (! osPlaces.isEmpty()) {
 				System.out.println("Structural unfed/single firing approximation deduced that "+ osPlaces.size()+ "/" + spn.getPlaceCount() + " places are one safe.");
 			}
