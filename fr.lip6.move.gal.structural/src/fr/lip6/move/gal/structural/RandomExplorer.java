@@ -56,15 +56,17 @@ public class RandomExplorer {
 		int mode = 0 ;
 		
 		if (list[0] == 0) {
-			System.out.println("This parikh vector is obviously unfeasible : no match in initial state.");
+			if (DEBUG >= 1)
+				System.out.println("This parikh vector is obviously unfeasible : no match in initial state.");
 			return verdicts;
 		}
 		
 		for (; i < nbSteps ; i++) {			
 			long dur = System.currentTimeMillis() - time + 1; 
 			if (dur > 1000 * timeout) {
-				System.out.println("Interrupted Parikh walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties (out of " + exprs.size()
-				+ ") seen :" + Arrays.stream(verdicts).sum() +(DEBUG >=1 ? (" reached state " + state):"") );
+				if (DEBUG >= 1)
+					System.out.println("Interrupted Parikh walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties (out of " + exprs.size()
+					+ ") seen :" + Arrays.stream(verdicts).sum() +(DEBUG >=1 ? (" reached state " + state):"") );
 				return verdicts;
 			}
 			if (!max) {
@@ -139,12 +141,13 @@ public class RandomExplorer {
 			state = newstate;									
 		}
 		
-		long dur = System.currentTimeMillis() - time + 1; 
-		System.out.println("Incomplete Parikh walk after " + i + " steps, including " + nbresets
-				+ " resets, run finished after " + dur + " ms. (steps per millisecond=" + (i / dur) + " )"
-				+ " properties (out of " + exprs.size()
-				+ ") seen :" + Arrays.stream(verdicts).sum() + " could not realise parikh vector "
-				+ (DEBUG >= 1 ? parikhori : "") + (DEBUG >= 1 ? (" reached state " + state) : ""));
+		long dur = System.currentTimeMillis() - time + 1;
+		if (DEBUG >= 1)
+			System.out.println("Incomplete Parikh walk after " + i + " steps, including " + nbresets
+					+ " resets, run finished after " + dur + " ms. (steps per millisecond=" + (i / dur) + " )"
+					+ " properties (out of " + exprs.size()
+					+ ") seen :" + Arrays.stream(verdicts).sum() + " could not realise parikh vector "
+					+ (DEBUG >= 1 ? parikhori : "") + (DEBUG >= 1 ? (" reached state " + state) : ""));
 		return verdicts;
 	}
 
@@ -247,20 +250,20 @@ public class RandomExplorer {
 			if (todo.isEmpty()) {
 				wex.wasExhaustive = true;
 				if (! exhaustive) {
-					System.out.println("Probably explored full state space saw : "+ seen + "  states, properties seen :" + new SparseIntArray(verdicts) );
+					System.out.println("Probably explored full state space saw : "+ seen + "  states, properties seen :" + Arrays.stream(verdicts).filter(x->x>0).count());
 				} else {
-					System.out.println("Explored full state space saw : "+ seen + "  states, properties seen :" + new SparseIntArray(verdicts) );
+					System.out.println("Explored full state space saw : "+ seen + "  states, properties seen :" + Arrays.stream(verdicts).filter(x->x>0).count() );
 				}
 			}
 			long dur = System.currentTimeMillis() - time + 1; 
 			if (! exhaustive) {
-				System.out.println("Probabilistic random walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts)  );
+				System.out.println("Probabilistic random walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.stream(verdicts).filter(x->x>0).count()  );
 			} else {
-				System.out.println("Exhaustive walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts)  );
+				System.out.println("Exhaustive walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.stream(verdicts).filter(x->x>0).count()  );
 			}
 		} catch (OutOfMemoryError e) {
 			long dur = System.currentTimeMillis() - time + 1; 
-			System.out.println("Probabilistic random walk exhausted memory after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts)  );
+			System.out.println("Probabilistic random walk exhausted memory after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.stream(verdicts).filter(x->x>0).count()  );
 		}
 		return verdicts;
 	}
