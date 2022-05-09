@@ -100,6 +100,8 @@ public class ReachabilitySolver {
 					if (indexMap.size() >= 20 || timeout != -1) {
 						maxTime = 30;
 					}
+					int beforeParikh = reader.getSPN().getProperties().size();
+					long timeParikh = System.currentTimeMillis();
 			        for (Entry<SparseIntArray, List<Integer>> ent:indexMap.entrySet()) {
 			        	int v = ent.getValue().get(0);
 						if (System.currentTimeMillis() - time >= maxTime * 1000) {
@@ -165,10 +167,14 @@ public class ReachabilitySolver {
 					if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 						iter++;
 					
+					int afterParikh = spn.getProperties().size(); 
+					System.out.println("Parikh walk visited "+(beforeParikh - afterParikh)+ " properties in "+ (System.currentTimeMillis() - timeParikh) + " ms.");
 				}
 				ReachabilitySolver.checkInInitial(spn, doneProps);
 				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
+								
+				
 				if (spn.getProperties().isEmpty())
 					break;
 				
