@@ -406,11 +406,14 @@ public class RandomExplorer {
 		if (todo.length == 0) {
 			return false;
 		}
-		for (int i=0,ie=todo.length;i<ie;i++) {
-			if (verdicts[i]==0) {
-				todo[i]=i;
+		{
+			int cur=0;
+			for (int i=0,ie=verdicts.length;i<ie;i++) {
+				if (verdicts[i]==0) {
+					todo[cur++]=i;
+				}
 			}
-		}		
+		}
 		AtomicBoolean remains = new AtomicBoolean(false);
 		Arrays.stream(todo).parallel()
 				.forEach(v -> {					
