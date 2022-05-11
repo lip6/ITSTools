@@ -43,12 +43,11 @@ jobs:
          name: Command Line ITS-Tools
          path: website
     - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@3.7.1
+      uses: JamesIves/github-pages-deploy-action@v4.3.3
       with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: website # The folder the action should deploy.
-          CLEAN: true # Automatically remove deleted files from the deploy branch
-          SINGLE_COMMIT: true # clear history
+          branch: gh-pages # The branch the action should deploy to.
+          folder: website # The folder the action should deploy.
+          clean: true # Automatically remove deleted files from the deploy branch
+          single-commit: true # clear history
 
          
