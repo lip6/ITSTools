@@ -511,7 +511,7 @@ public class HLSRTransformer {
 	private Param createParameter(VariableDecl var) {
 		Sort sort = var.getSort();
 		if (sort instanceof UserSort) {
-			return new Param(var.getName(), computeSortCardinality(sort), getSortName(sort));
+			return new Param(Utils.normalizeName(var.getName()), computeSortCardinality(sort), getSortName(sort));
 		} else {
 			getLog().warning("problem finding type for variable");
 			return null;
