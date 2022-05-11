@@ -106,6 +106,13 @@
 		<!-- SDK Feature and update site -->
 		<module>../fr.lip6.move.gal.feature.sdk</module>
 		<module>../fr.lip6.move.gal.updatesite</module>
+		<!-- Application plugin -->
+		<module>../ITS-commandline/fr.lip6.move.gal.itscl.application</module>
+		<!-- feature plugin -->
+		<module>../ITS-commandline/fr.lip6.move.gal.itscl.feature</module>
+		<!-- Build a product with it -->
+		<module>../ITS-commandline/fr.lip6.move.gal.itscl.product</module>
+		
 	</modules>
 
 	<scm>
@@ -139,8 +146,8 @@
 
 	<!-- Serveur d'integration continue -->
 	<ciManagement>
-		<system>travis-ci</system>
-		<url>https://travis-ci.org/lip6/ITSTools</url>
+		<system>GitHub Actions</system>
+		<url>https://github.com/lip6/ITSTools/actions</url>
 	</ciManagement>
 
 	<!-- Uncomment following and run mvn versions:display-plugin-updates -->
@@ -181,9 +188,6 @@
 					<resolver>p2</resolver>
 					<pomDependencies>consider</pomDependencies>
 					<executionEnvironment>JavaSE-11</executionEnvironment>
-					<!-- <target> <artifact> <groupId>org.eclipselabs.spray</groupId> <artifactId>org.eclipselabs.spray.targetplatform</artifactId> 
-						<version>0.4.0-SNAPSHOT</version> <classifier>spray</classifier> </artifact> 
-						</target> -->
 					<environments>
 						<environment>
 							<os>win32</os>
@@ -414,10 +418,7 @@
 						<execution>
 							<goals>
 								<goal>compile</goal>
-<!-- 								<goal>xtend-install-debug-info</goal>
-								<goal>testCompile</goal>
-								<goal>xtend-test-install-debug-info</goal>
- -->							</goals>
+							</goals>
 						</execution>
 					</executions>
 					<configuration>
