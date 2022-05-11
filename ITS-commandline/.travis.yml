@@ -1,0 +1,45 @@
+install: true
+
+language: java
+
+before_script:
+ - echo $JAVA_OPTS
+ - export JAVA_OPTS='-Xms1g -Xmx3g'
+
+script :
+ - cd fr.lip6.move.gal.itscl.parent 
+ - mvn clean generate-sources install
+ - cd ..
+ - cp fr.lip6.move.gal.itscl.product/target/products/*.zip website/
+ - cd website
+ - zip -d fr.lip6.move.gal.itscl.product-linux.gtk.x86_64.zip '*its-*-win64' '*its-*-Darwin'
+ - zip -d fr.lip6.move.gal.itscl.product-macosx.cocoa.x86_64.zip '*its-*-win64' '*its-*-linux64'
+ - zip -d fr.lip6.move.gal.itscl.product-win32.win32.x86_64.zip '*its-*-linux64' '*its-*-Darwin'
+ - cd ..
+ 
+# Old pre RCP build : about 100 megabytes
+# - ./install_eclipse.sh 
+# - cd eclipse/plugins/fr.lip6.move.gal.itstools.binaries_1.0.0.*/bin/
+# - \rm *Darwin* *win64*
+# - cd -
+# - tar czf itscl_linux.tgz eclipse/ runeclipse.sh
+# - mv itscl_linux.tgz website/
+# - ls -lah website/
+
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+
+
+deploy:  
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  local_dir: website/
+  on:
+    branch: master
+   
+after_deploy:
+  - curl -s -X POST -H "Content-Type:application/json" -H "Accept:application/json"   -H "Travis-API-Version:3" -H "Authorization:token $APITOKEN" -d '{"request":{"message":"Triggered by ITS-commandline build.","branch":"master"}}' https://api.travis-ci.org/repo/yanntm%2FITS-Tools-pnmcc/requests
+    
