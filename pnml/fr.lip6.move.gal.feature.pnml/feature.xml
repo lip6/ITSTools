@@ -305,25 +305,12 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </url>
 
    <requires>
-      <import plugin="fr.lip6.move.gal.ui" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.gal.pnml.saxparse" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ocl.ecore"/>
-      <import plugin="org.eclipse.emf.codegen.ecore"/>
-      <import plugin="javax.xml"/>
-      <import plugin="fr.lip6.move.gal" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.gal.nupn" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="fr.lip6.pnml.framework.ptnet" version="2.2.7" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.symmetricnet" version="2.2.7" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.utils" version="2.2.7" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.gal.pnml.togal" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.ptnet" version="2.2.10" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.symmetricnet" version="2.2.10" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.utils" version="2.2.10" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.3rdpartimports" version="2.2.12" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.emf.ecore"/>
+      <import plugin="org.apache.ws.commons.axiom.axiom-api" version="1.3.0" match="greaterOrEqual"/>
+      <import plugin="wrapped.com.thaiopensource.jing" version="20091111.0.0" match="greaterOrEqual"/>
+      <import plugin="org.apache.ws.commons.axiom.axiom-impl"/>
+      <import plugin="org.eclipse.ocl" version="3.0.0" match="compatible"/>
    </requires>
 
    <plugin
