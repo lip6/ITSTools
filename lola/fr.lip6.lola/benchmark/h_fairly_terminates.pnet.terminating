@@ -1,0 +1,55 @@
+PLACE 'sigma,'m1,'m2,x,not_x,scheduler,h,g,pending_h,pending_g,'x,'not_x,'scheduler,'h,'g,'pending_h,'pending_g,dg_out,dh_out;
+
+MARKING 'm1:1,'pending_h:1,'scheduler:1,'x:1,pending_h:1,scheduler:1,x:1;
+
+TRANSITION 'switch
+CONSUME 'm1:1;
+PRODUCE 'm2:1;
+
+TRANSITION dh
+CONSUME 'scheduler:1,'pending_h:1,scheduler:1,pending_h:1,'m1:1;
+PRODUCE 'h:1,h:1,'m1:1;
+
+TRANSITION 'dh
+CONSUME 'scheduler:1,'pending_h:1,'m2:1;
+PRODUCE 'h:1,'sigma:1,'m2:1,dh_out:1;
+
+TRANSITION dg
+CONSUME 'scheduler:1,'pending_g:1,scheduler:1,pending_g:1,'m1:1;
+PRODUCE 'g:1,g:1,'m1:1;
+
+TRANSITION 'dg
+CONSUME 'scheduler:1,'pending_g:1,'m2:1;
+PRODUCE 'g:1,'sigma:1,'m2:1,dg_out:1;
+
+TRANSITION ht
+CONSUME 'h:1,'x:1,h:1,x:1,'m1:1;
+PRODUCE 'x:1,'pending_h:1,'pending_g:1,'scheduler:1,x:1,pending_h:1,pending_g:1,scheduler:1,'m1:1;
+
+TRANSITION 'ht
+CONSUME 'h:1,'x:1,'m2:1;
+PRODUCE 'x:1,'pending_h:1,'pending_g:1,'scheduler:1,'sigma:1,'m2:1;
+
+TRANSITION hf
+CONSUME 'h:1,'not_x:1,h:1,not_x:1,'m1:1;
+PRODUCE 'not_x:1,'scheduler:1,not_x:1,scheduler:1,'m1:1;
+
+TRANSITION 'hf
+CONSUME 'h:1,'not_x:1,'m2:1;
+PRODUCE 'not_x:1,'scheduler:1,'sigma:1,'m2:1;
+
+TRANSITION gt
+CONSUME 'g:1,'x:1,g:1,x:1,'m1:1;
+PRODUCE 'not_x:1,'scheduler:1,not_x:1,scheduler:1,'m1:1;
+
+TRANSITION 'gt
+CONSUME 'g:1,'x:1,'m2:1;
+PRODUCE 'not_x:1,'scheduler:1,'sigma:1,'m2:1;
+
+TRANSITION gf
+CONSUME 'g:1,'not_x:1,g:1,not_x:1,'m1:1;
+PRODUCE 'not_x:1,'scheduler:1,not_x:1,scheduler:1,'m1:1;
+
+TRANSITION 'gf
+CONSUME 'g:1,'not_x:1,'m2:1;
+PRODUCE 'not_x:1,'scheduler:1,'sigma:1,'m2:1;

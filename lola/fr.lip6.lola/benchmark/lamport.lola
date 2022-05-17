@@ -1,0 +1,50 @@
+PLACE
+    p1, p2, p3,         b1, nb1,
+    q1, q2, q3, q4, q5, b2, nb2;
+
+MARKING
+    p1, q1, nb1, nb2;
+
+TRANSITION s1
+    CONSUME p1, nb1;
+    PRODUCE p2,  b1;
+
+TRANSITION s2
+    CONSUME p2,  b2;
+    PRODUCE p2,  b2;
+
+TRANSITION s3
+    CONSUME p2, nb2;
+    PRODUCE p3, nb2;
+
+TRANSITION s4
+    CONSUME p3,  b1;
+    PRODUCE p1, nb1;
+
+TRANSITION t1
+    CONSUME q1, nb2;
+    PRODUCE q2,  b2;
+
+TRANSITION t2
+    CONSUME q2,  b1;
+    PRODUCE q3,  b1;
+
+TRANSITION t3
+    CONSUME q3,  b2;
+    PRODUCE q4, nb2;
+
+TRANSITION t4
+    CONSUME q4, nb1;
+    PRODUCE q1, nb1;
+
+TRANSITION t5
+    CONSUME q4,  b1;
+    PRODUCE q4,  b1;
+
+TRANSITION t6
+    CONSUME q2, nb1;
+    PRODUCE q5, nb1;
+
+TRANSITION t7
+    CONSUME q5,  b2;
+    PRODUCE q1, nb2;
