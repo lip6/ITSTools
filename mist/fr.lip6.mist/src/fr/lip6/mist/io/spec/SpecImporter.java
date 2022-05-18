@@ -1,4 +1,4 @@
-package fr.lip6.mist.io;
+package fr.lip6.mist.io.spec;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,16 +14,16 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 import android.util.SparseIntArray;
-import fr.lip6.mist.io.SpecParser.EqVarContext;
-import fr.lip6.mist.io.SpecParser.GeqVarContext;
-import fr.lip6.mist.io.SpecParser.Mark2Context;
-import fr.lip6.mist.io.SpecParser.MarkContext;
-import fr.lip6.mist.io.SpecParser.PlaceContext;
-import fr.lip6.mist.io.SpecParser.PostvalueContext;
-import fr.lip6.mist.io.SpecParser.PrecondContext;
-import fr.lip6.mist.io.SpecParser.PrevalueContext;
-import fr.lip6.mist.io.SpecParser.TargetDeclContext;
-import fr.lip6.mist.io.SpecParser.TransDeclContext;
+import fr.lip6.mist.io.spec.SpecParser.EqVarContext;
+import fr.lip6.mist.io.spec.SpecParser.GeqVarContext;
+import fr.lip6.mist.io.spec.SpecParser.Mark2Context;
+import fr.lip6.mist.io.spec.SpecParser.MarkContext;
+import fr.lip6.mist.io.spec.SpecParser.PlaceContext;
+import fr.lip6.mist.io.spec.SpecParser.PostvalueContext;
+import fr.lip6.mist.io.spec.SpecParser.PrecondContext;
+import fr.lip6.mist.io.spec.SpecParser.PrevalueContext;
+import fr.lip6.mist.io.spec.SpecParser.TargetDeclContext;
+import fr.lip6.mist.io.spec.SpecParser.TransDeclContext;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
