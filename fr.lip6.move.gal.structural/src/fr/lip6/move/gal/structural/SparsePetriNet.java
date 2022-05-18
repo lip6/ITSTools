@@ -555,5 +555,9 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		return todel.size();
 	}
 
+	public int getArcCount() {
+		return (this.getFlowPT().getColumns().stream().mapToInt(c->c.size()).sum() + this.getFlowTP().getColumns().stream().mapToInt(c->c.size()).sum());
+	}
+
 
 }
