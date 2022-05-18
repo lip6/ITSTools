@@ -1,4 +1,4 @@
-package fr.lip6.lola.io;
+package fr.lip6.mist.io.lola;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,12 +14,12 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
-import fr.lip6.lola.io.LolaParser.BoolPredContext;
-import fr.lip6.lola.io.LolaParser.ComparisonContext;
-import fr.lip6.lola.io.LolaParser.ConstantContext;
-import fr.lip6.lola.io.LolaParser.CtlContext;
-import fr.lip6.lola.io.LolaParser.ExprContext;
-import fr.lip6.lola.io.LolaParser.PlacerefContext;
+import fr.lip6.mist.io.lola.LolaParser.BoolPredContext;
+import fr.lip6.mist.io.lola.LolaParser.ComparisonContext;
+import fr.lip6.mist.io.lola.LolaParser.ConstantContext;
+import fr.lip6.mist.io.lola.LolaParser.CtlContext;
+import fr.lip6.mist.io.lola.LolaParser.ExprContext;
+import fr.lip6.mist.io.lola.LolaParser.PlacerefContext;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;

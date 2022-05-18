@@ -1,8 +1,10 @@
-package fr.lip6.lola.io;
+package fr.lip6.mist.io;
 
 import java.io.File;
 import java.io.IOException;
 
+import fr.lip6.mist.io.lola.LolaImporter;
+import fr.lip6.mist.io.lola.LolaTaskImporter;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.structural.FlowPrinter;

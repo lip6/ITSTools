@@ -1,4 +1,4 @@
-package fr.lip6.lola.io;
+package fr.lip6.mist.io.lola;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -11,11 +11,11 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
-import fr.lip6.lola.io.LolaParser.MarkContext;
-import fr.lip6.lola.io.LolaParser.PlaceContext;
-import fr.lip6.lola.io.LolaParser.PostvalueContext;
-import fr.lip6.lola.io.LolaParser.PrevalueContext;
-import fr.lip6.lola.io.LolaParser.TransitionContext;
+import fr.lip6.mist.io.lola.LolaParser.MarkContext;
+import fr.lip6.mist.io.lola.LolaParser.PlaceContext;
+import fr.lip6.mist.io.lola.LolaParser.PostvalueContext;
+import fr.lip6.mist.io.lola.LolaParser.PrevalueContext;
+import fr.lip6.mist.io.lola.LolaParser.TransitionContext;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 
 public class LolaImporter {
