@@ -32,22 +32,23 @@ postvalue : pref=Name (':' val=Int)? ;
 ctl : 'EF' pred=boolPred;
 
 boolPred : 
+	op='NOT' left=boolPred | 
+	left=boolPred op='AND' right=boolPred  |
+	left=boolPred op='OR' right=boolPred  |	
 	sub=comparison |
-	'(' nested=boolPred ')' |
-	first=boolPred op='AND' children+=boolPred ('AND' children+=boolPred)* |
-	first=boolPred op='OR' children+=boolPred ('OR' children+=boolPred)* |
-	op='NOT' children+=boolPred 
+	tt=('TRUE'|'FALSE') |
+	'(' nested=boolPred ')' 	
 	;
 	
 
 comparison : lhs=expr op=('<'|'<='|'='|'!='|'>='|'>') rhs=expr;
 
 expr :
+	l=expr op='+' r=expr |
+	l=expr op='-' r=expr | 
 	constant | 
 	placeref |	
 	'(' nested2=expr  ')' |
-	l=expr op='+' r=expr |
-	l=expr op='-' r=expr 
 	;
 	
 placeref : name=Name;
@@ -68,7 +69,7 @@ fragment DIGIT : '0'..'9'
 Int: ('0'..'9')+;
 
 //Ignore white spaces
-WS  : (' ' | '\t' | '\n' | '\r'| ',' ) -> skip
+WS  : (' ' | '\t' | '\n' | '\r' ) -> skip
   ;
 
 //LoLA identifiers forbidden characters 
@@ -80,5 +81,5 @@ WS  : (' ' | '\t' | '\n' | '\r'| ',' ) -> skip
 //         | 'EVENTUALLY' | 'AND' | 'OR' | 'NOT') -> skip;
 
 //Identifier representation  
-Name  : (LETTER | DIGIT | '_' | '-' | '\'' )+;
+Name  : (LETTER | DIGIT | '_' | '-' | '\'' | '#' | '.' )+;
 
