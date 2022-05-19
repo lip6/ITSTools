@@ -19,9 +19,9 @@ public class TestSpec {
 		// String ff=args[0]; // "benchmark/x0_BUG_REPORT_q1.spec"
 		// "benchmark/Model.10om__0_____u__.xml.tpn"
 		// "benchmark/h_fairly_terminates.pnet.terminating" "benchmark/terminating.lola"
-		String ff = "benchmark/Model.10om__0_____u__.xml.tpn";
+		String ff = args[0]; // "benchmark/Model.10om__0_____u__.xml.tpn";
+		//String ff="benchmark/h_fairly_terminates.pnet.terminating.task1";
 		String folder = ".";
-
 		System.out.println("Transforming Mist Spec file at : " + ff + " to folder " + folder);
 
 		try {
@@ -50,7 +50,7 @@ public class TestSpec {
 
 		SparsePetriNet pn = LolaImporter.loadLola(path);
 
-		System.out.println("Lola file parsed successfully !");
+		System.out.println("Lola file "+path+" parsed successfully !");
 
 		LolaTaskImporter lti = new LolaTaskImporter();
 		lti.loadLolaTask(path + ".task1", pn);
