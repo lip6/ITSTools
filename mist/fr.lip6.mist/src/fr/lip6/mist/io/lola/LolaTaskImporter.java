@@ -1,11 +1,8 @@
 package fr.lip6.mist.io.lola;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -55,7 +52,7 @@ public class LolaTaskImporter {
 
 		// Start parsing
 		ExprVisitor ev = new ExprVisitor();
-		prop.setBody(ev.visit(parser.ctl()));
+		prop.setBody(parser.ctl().accept(ev));
 		
 		System.out.println("Parsed Lola task file at "+path+ " to a property in "+ (System.currentTimeMillis()-time) + " ms.");        	
 		
@@ -77,8 +74,14 @@ public class LolaTaskImporter {
 				return ctx.sub.accept(this);				
 			} else if (ctx.nested != null) {
 				return ctx.nested.accept(this);
+			} else if (ctx.tt != null) {
+				if ("TRUE".equals(ctx.tt.getText())) {
+					return Expression.constant(true);
+				} else {
+					return Expression.constant(false);
+				}
 			}
-			
+						
 			Op op;
 			String sop = ctx.op.getText();
 			if ("AND".equals(sop)) {
@@ -92,13 +95,10 @@ public class LolaTaskImporter {
 			}
 			
 			if (op == Op.NOT) {
-				Expression res = ctx.children.get(0).accept(this);
+				Expression res = ctx.left.accept(this);
 				return Expression.not(res);
 			} else {
-				List<Expression> children = new ArrayList<>(ctx.children.size()+1);
-				children.add(ctx.first.accept(this));
-				ctx.children.stream().map(c -> c.accept(ExprVisitor.this)).forEach(e -> children.add(e));
-				return Expression.nop(op,children);
+				return Expression.op(op,ctx.left.accept(this),ctx.right.accept(this));
 			}
 		}
 		
