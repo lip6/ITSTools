@@ -17,6 +17,7 @@ public class ConverterMain {
 
 	private static final String CONVERT_FLAG = "-convert";
 	private static final String OUT_FOLDER = "-o";
+	private static final String DOT_OUT = "-dot";
 
 	public static void main(String[] args) {
 		// String ff=args[0]; // "benchmark/x0_BUG_REPORT_q1.spec"
@@ -27,13 +28,15 @@ public class ConverterMain {
 		
 		String ff = null; 
 		String folder = ".";
-			
+		boolean doDotOutput=false;
 		for (int i=0; i < args.length ; i++) {			
 			if (CONVERT_FLAG.equals(args[i])) {
 				ff = args[++i];
 			} else if (OUT_FOLDER.equals(args[i])) {
 				folder = args[++i];
-			} 
+			} else if (DOT_OUT.equals(args[i])) {
+				doDotOutput= true;
+			}
 		}
 		
 		// argument validity checks
@@ -65,7 +68,8 @@ public class ConverterMain {
 			}
 			exportPNML(pn, folder);
 
-			FlowPrinter.drawNet(pn, ff);
+			if (doDotOutput)
+				FlowPrinter.drawNet(pn, ff);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
