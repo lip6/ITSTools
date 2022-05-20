@@ -13,17 +13,45 @@ import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralToPNML;
 
-public class TestSpec {
+public class ConverterMain {
+
+	private static final String CONVERT_FLAG = "-convert";
+	private static final String OUT_FOLDER = "-o";
 
 	public static void main(String[] args) {
 		// String ff=args[0]; // "benchmark/x0_BUG_REPORT_q1.spec"
 		// "benchmark/Model.10om__0_____u__.xml.tpn"
 		// "benchmark/h_fairly_terminates.pnet.terminating" "benchmark/terminating.lola"
-		String ff = args[0]; // "benchmark/Model.10om__0_____u__.xml.tpn";
 		//String ff="benchmark/h_fairly_terminates.pnet.terminating.task1";
+		// "benchmark/Model.10om__0_____u__.xml.tpn";
+		
+		String ff = null; 
 		String folder = ".";
-		System.out.println("Transforming Mist Spec file at : " + ff + " to folder " + folder);
+			
+		for (int i=0; i < args.length ; i++) {			
+			if (CONVERT_FLAG.equals(args[i])) {
+				ff = args[++i];
+			} else if (OUT_FOLDER.equals(args[i])) {
+				folder = args[++i];
+			} 
+		}
+		
+		// argument validity checks
+		{
+			if (ff == null) {
+				System.err.println("Please provide input file after -convert option");
+				return ;
+			}
 
+			File fileff = new File(ff);
+			if (! fileff.exists()) {
+				System.err.println("Input file "+ff +" does not exist");
+				return ;
+			}
+		}
+		System.out.println("Transforming source file at : " + ff + " to folder " + folder);
+			
+		
 		try {
 			SparsePetriNet pn = null;
 			if (ff.endsWith(".spec")) {
