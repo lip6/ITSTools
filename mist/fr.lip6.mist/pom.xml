@@ -29,6 +29,7 @@
             <configuration>
                 <visitor>true</visitor>
                 <listener>true</listener>
+                <outputDirectory>${basedir}/src/</outputDirectory>
             </configuration>
           </execution>
         </executions>

@@ -1,2 +1,8 @@
 /target/
 /bin/
+/src/**.tokens
+/src/**/*Lexer.java
+/src/**/*Parser.java
+/src/**/*Listener.java
+/src/**/*Visitor.java
+/src/**/*.interp
