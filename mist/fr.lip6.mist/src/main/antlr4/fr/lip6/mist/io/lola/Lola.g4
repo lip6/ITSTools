@@ -1,8 +1,5 @@
 grammar Lola;
 
-@header {
-package fr.lip6.mist.io.lola;
-}
 
 //Net description
 net : placeDecl markDecl transDecl* ;

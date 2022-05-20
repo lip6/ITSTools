@@ -1,11 +1,5 @@
 grammar Spec;
 
-
-@header {
-package fr.lip6.mist.io.spec;
-}
-
-
 //Net description
 spec : placeDecl 'rules' transDecl* markDecl targetDecl invariantDecl?;
 
