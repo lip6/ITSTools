@@ -1,5 +1,11 @@
 grammar Tpn;
 
+
+@header {
+package fr.lip6.mist.io.tpn;
+}
+
+
 //Net description
 spec : place* transition*;
 

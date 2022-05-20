@@ -1,66 +1,60 @@
-grammar Lola;
+grammar Spec;
+
+
+@header {
+package fr.lip6.mist.io.spec;
+}
+
 
 //Net description
-net : placeDecl markDecl transDecl* ;
+spec : placeDecl 'rules' transDecl* markDecl targetDecl invariantDecl?;
 
 //Places declaration
-placeDecl : 'PLACE' place (',' place )* ';' ;
+placeDecl : 'vars' place ( place )* ;
 
 place : name=Name ;
 
 //Markings declaration
-markDecl : 'MARKING' mark (',' mark)*  ';';
+markDecl : 'init' (mark|mark2) (',' (mark|mark2))*  ;
 
-mark : pref=Name (':' val=Int)?;
+mark : pref=Name '=' val=Int;
+mark2 : pref=Name '>=' val=Int;
 
 //Transitions declaration
-transDecl : 'TRANSITION'  transition 
-  'CONSUME' (prevalue (','prevalue)*)? ';'
-  'PRODUCE' (postvalue (','postvalue)*)? ';'
+transDecl : 
+  guard '->' 
+  ( (prevalue|postvalue) (',' (prevalue|postvalue))*)? ';'
   ;
 
-transition : name=Name ;
+guard :
+	precond (',' precond)* ;
+	
+precond : pref=Name '>=' val=Int ;
 
 //Place value
-prevalue : pref=Name (':' val=Int)? ;
+prevalue : prefl=Name '=' prefr=Name '-' val=Int ;
 
-postvalue : pref=Name (':' val=Int)? ;
+postvalue : prefl=Name '=' prefr=Name '+' val=Int ;
 
+targetDecl : 'target' (geqVar | eqVar) (',' (geqVar | eqVar))*;
+
+geqVar : pref=Name '>=' val=Int ;
+
+eqVar : pref=Name '=' val=Int ;
 
 /** Task parsing */
 
-ctl : 'EF' pred=boolPred;
+invariantDecl : 'invariants' invariant *;
 
-boolPred : 
-	op='NOT' left=boolPred | 
-	left=boolPred op='AND' right=boolPred  |
-	left=boolPred op='OR' right=boolPred  |	
-	sub=comparison |
-	tt=('TRUE'|'FALSE') |
-	'(' nested=boolPred ')' 	
-	;
-	
-
-comparison : lhs=expr op=('<'|'<='|'='|'!='|'>='|'>') rhs=expr;
-
-expr :
-	l=expr op='+' r=expr |
-	l=expr op='-' r=expr | 
-	constant | 
-	placeref |	
-	'(' nested2=expr  ')' |
-	;
-	
-placeref : name=Name;
- 
-constant : val=Int;
+invariant : invVar (',' invVar)* ;
+invVar : pref=Name '=' val=Int ;
 
 /****** Basics ********/
 //Letters representation
 fragment LETTER : 'a'..'z' | 'A'..'Z' | '_' | '\''
   ;
 //Ignore comments
-COMMENT : '{'.*?'}'  -> skip
+COMMENT : '#' .*? '\n'  -> skip
   ; 
 
 fragment DIGIT : '0'..'9'
@@ -69,7 +63,7 @@ fragment DIGIT : '0'..'9'
 Int: ('0'..'9')+;
 
 //Ignore white spaces
-WS  : (' ' | '\t' | '\n' | '\r' ) -> skip
+WS  : (' ' | '\t' | '\r'| '\n' ) -> skip
   ;
 
 //LoLA identifiers forbidden characters 
@@ -81,5 +75,5 @@ WS  : (' ' | '\t' | '\n' | '\r' ) -> skip
 //         | 'EVENTUALLY' | 'AND' | 'OR' | 'NOT') -> skip;
 
 //Identifier representation  
-Name  : (LETTER | DIGIT | '_' | '-' | '\'' | '#' | '.' )+;
+Name  : (LETTER | DIGIT | '_' )+ '\''?;
 
