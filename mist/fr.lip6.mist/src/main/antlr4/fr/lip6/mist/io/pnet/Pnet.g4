@@ -38,7 +38,7 @@ arc:
 //Markings declaration
 initDecl : 'initial' init=placeSet ;
 
-property : type=('liveness'|'safety') 'property' name=STRING '{' pred=boolPred '}' ;
+property : type=('liveness'|'safety') 'property' name=STRING? '{' pred=boolPred '}' ;
 
 /** Task parsing */
 
