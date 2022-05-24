@@ -27,12 +27,16 @@ transition : name=Name ;
 // arcs
 arcsDecl : 
 	'arcs' '{' 
-	arc*
+	arc|singleArc*
 	'}'
 ;
 
 arc: 
 	(pre=placeSet '->')? tref=Name ('->' post=placeSet)? 
+;
+
+singleArc:
+	pre=Name '->' tref=Name '->' post=Name
 ;
 
 //Markings declaration
