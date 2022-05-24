@@ -14,7 +14,10 @@ net :
 //Places declaration
 placeDecl : 'places' decl=placeSet ;
 
-placeSet : '{' places+=place* '}' ;
+placeSet : 
+	'{' places+=place* '}' 
+	| places+=place
+	;
 
 place : name=Name ;
 
@@ -27,16 +30,12 @@ transition : name=Name ;
 // arcs
 arcsDecl : 
 	'arcs' '{' 
-	(arc|singleArc)*
+	arc*
 	'}'
 ;
 
 arc: 
 	(pre=placeSet '->')? tref=Name ('->' post=placeSet)? 
-;
-
-singleArc:
-	pre=Name '->' tref=Name '->' post=Name
 ;
 
 //Markings declaration
