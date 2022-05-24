@@ -16,7 +16,6 @@ import fr.lip6.mist.io.pnet.PnetParser.InitDeclContext;
 import fr.lip6.mist.io.pnet.PnetParser.NetContext;
 import fr.lip6.mist.io.pnet.PnetParser.PlaceContext;
 import fr.lip6.mist.io.pnet.PnetParser.PlaceDeclContext;
-import fr.lip6.mist.io.pnet.PnetParser.SingleArcContext;
 import fr.lip6.mist.io.pnet.PnetParser.TransDeclContext;
 import fr.lip6.mist.io.pnet.PnetParser.TransitionContext;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -69,7 +68,25 @@ public class PnetImporter {
 			@Override
 			public void exitArc(ArcContext ctx) {
 				String tname = ctx.tref.getText();
-				int tid = tmap.get(tname);
+				Integer tid = tmap.get(tname);
+
+				if (tid==null) {
+					if (ctx.post==null) {
+						// x -> y is ambiguous and could be : p->t  or t->p
+						if (ctx.pre.places.size() == 1) {
+							// reinterpret pre->t as t->post
+							tname = ctx.pre.places.get(0).name.getText();
+							tid = tmap.get(tname);
+
+							String pname=ctx.tref.getText();
+							int pid = pmap.get(pname);
+							pn.addPostArc(pid, tid, 1);						
+							return;
+						}
+					} else {
+						throw new IllegalArgumentException("Bad format");
+					}
+				}
 				if (ctx.pre != null) {
 					for (PlaceContext p : ctx.pre.places) {
 						String pname=p.name.getText();
@@ -85,23 +102,7 @@ public class PnetImporter {
 					}
 				}
 			}
-			
-			
-			@Override
-			public void exitSingleArc(SingleArcContext ctx) {
-				String tname = ctx.tref.getText();
-				int tid = tmap.get(tname);
-				{
-					String pname=ctx.pre.getText();
-					int pid = pmap.get(pname);
-					pn.addPreArc(pid, tid, 1);
-				}
-				{
-					String pname=ctx.post.getText();
-					int pid = pmap.get(pname);
-					pn.addPostArc(pid, tid, 1);
-				}
-			}
+									
 			
 			@Override
 			public void exitInitDecl(InitDeclContext ctx) {
