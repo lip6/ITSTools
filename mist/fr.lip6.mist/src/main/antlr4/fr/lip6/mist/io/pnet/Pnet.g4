@@ -78,6 +78,10 @@ fragment LETTER : 'a'..'z' | 'A'..'Z' | '_' | '\''
 COMMENT : '/*'.*?'*/'  -> skip
   ; 
 
+SL_COMMENT : '//'.*?'\n'  -> skip
+  ; 
+
+
 fragment DIGIT : '0'..'9'
   ;
 
