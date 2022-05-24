@@ -27,7 +27,7 @@ transition : name=Name ;
 // arcs
 arcsDecl : 
 	'arcs' '{' 
-	arc|singleArc*
+	(arc|singleArc)*
 	'}'
 ;
 
