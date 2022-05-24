@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import fr.lip6.mist.io.lola.LolaImporter;
 import fr.lip6.mist.io.lola.LolaTaskImporter;
+import fr.lip6.mist.io.pnet.PnetImporter;
 import fr.lip6.mist.io.spec.SpecImporter;
 import fr.lip6.mist.io.tpn.TpnImporter;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
@@ -61,6 +62,8 @@ public class ConverterMain {
 				pn = readSpecFile(ff, folder);
 			} else if (ff.endsWith(".tpn")) {
 				pn = readTpnFile(ff, folder);
+			} else if (ff.endsWith(".pnet")) {
+				pn = readPnetFile(ff, folder);
 			} else if (ff.endsWith(".lola")) {
 				pn = readLolaFile(ff, folder);
 			} else if (ff.endsWith(".task1")) {
@@ -97,6 +100,17 @@ public class ConverterMain {
 		SparsePetriNet pn = LolaImporter.loadLola(path);
 
 		System.out.println("Lola file parsed successfully !");
+
+		return pn;
+	}
+	
+	private static SparsePetriNet readPnetFile(String pathff, String folder) throws IOException {
+		File ff = new File(pathff);
+		String path = ff.getCanonicalPath();
+
+		SparsePetriNet pn = PnetImporter.loadPnet(path);
+
+		System.out.println("PNet file parsed successfully !");
 
 		return pn;
 	}
