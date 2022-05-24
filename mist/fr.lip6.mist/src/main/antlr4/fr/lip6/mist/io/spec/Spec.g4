@@ -60,14 +60,6 @@ Int: ('0'..'9')+;
 WS  : (' ' | '\t' | '\r'| '\n' ) -> skip
   ;
 
-//LoLA identifiers forbidden characters 
-//EXCLUDE : ('(' | ')' | '{' | '}' | ',' | ';' | ':' | ' ' | '\t' | '\n' | '\r' );  
-//OPERATOR : ('<->' | '<>' | '->' | '=' | '[]' | '.' | '+' | '-' | '*' | '/' | '|' | '>' | '<' | '#' | '>=' | '<=' ) -> skip;
-//KEYWORD : ('RECORD' | 'END' | 'SORT' | 'FUNCTION' | 'DO' | 'ARRAY' | 'ENUMERATE' | 'CONSTANT' | 'BOOLEAN' | 'OF' | 'BEGIN' | 'WHILE' | 'IF' | 'THEN' | 'ELSE' 
-//         | 'SWITCH' | 'CASE' | 'NEXTSTEP' | 'REPEAT' | 'FOR' | 'TO' | 'ALL' | 'EXIT' | 'EXISTS' | 'RETURN' | 'TRUE' | 'FALSE' | 'MOD' | 'VAR' | 'GUARD' | 'STATE' 
-//         | 'PATH' | 'GENERATOR' | 'ANALYSE' | 'PLACE' | 'TRANSITION' | 'MARKING' | 'CONSUME' | 'PRODUCE' | 'FORMULA' | 'EXPATH' | 'ALLPATH' | 'ALWAYS' | 'UNTIL' 
-//         | 'EVENTUALLY' | 'AND' | 'OR' | 'NOT') -> skip;
-
 //Identifier representation  
 Name  : (LETTER | DIGIT | '_' )+ '\''?;
 
