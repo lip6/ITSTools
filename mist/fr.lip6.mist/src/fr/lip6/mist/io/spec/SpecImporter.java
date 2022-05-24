@@ -39,7 +39,7 @@ public class SpecImporter {
 		SpecParser parser = new SpecParser(new CommonTokenStream(lexer));
 		
 		final SparsePetriNet pn = new SparsePetriNet();
-		pn.setName(path);
+		pn.setName("MistSpecification"); // path would be another option
 		
         parser.addErrorListener(new BaseErrorListener() {
             @Override
