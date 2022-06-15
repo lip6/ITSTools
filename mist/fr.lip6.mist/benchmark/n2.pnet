@@ -1,0 +1,41 @@
+petri net "leader election 2" {
+  places {
+    s1n1 s1n2 
+    s1m1 s1m2 
+
+    s2n1 s2n2 
+    s2m1 s2m2 
+
+    lead
+  }
+  transitions {
+    s1send1 s1send2 
+    s1acpt1 s1pass2 
+
+    s2send1 s2send2 
+    s2disc1 s2acpt2 
+
+    newleader
+  }
+  arcs {
+    s1n1 -> s1send1 -> s1m1
+    s1n2 -> s1send2 -> s1m2
+
+    s2m1 -> s1acpt1 -> lead
+    s2m2 -> s1pass2 -> s1m2
+
+
+    s2n1 -> s2send1 -> s2m1
+    s2n2 -> s2send2 -> s2m2
+
+    s1m1 -> s2disc1 
+    s1m2 -> s2acpt2 -> lead
+	s2disc1 -> s1m1 
+
+    lead -> newleader -> { s1n1 s2n2 }
+  }
+  initial { s1n1 s2n2 }
+}
+liveness property {
+  newleader = 0
+}

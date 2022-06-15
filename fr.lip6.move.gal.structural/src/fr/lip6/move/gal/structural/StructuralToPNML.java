@@ -64,7 +64,7 @@ public class StructuralToPNML {
 		pw.append("<name><text>"+sr.getName()+"</text></name></net>\n");
 		pw.append("</pnml>\n");
 		pw.close();
-		getLog().info("Export to PNML in file "+path +"of net with "+nbplaces +" places, "+ nbtrans+" transitions and "+ arcid + " arcs took "+ (System.currentTimeMillis()-time) + " ms.");
+		getLog().info("Export to PNML in file "+path +" of net with "+nbplaces +" places, "+ nbtrans+" transitions and "+ arcid + " arcs took "+ (System.currentTimeMillis()-time) + " ms.");
 	}
 
 }

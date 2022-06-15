@@ -1,0 +1,56 @@
+
+petri net "Dekker's algorithm" {
+    places {
+        p1 p2 p3 p4 p5 p6 p7 p8
+        q1 q2 q3 q4 q5 q6 q7 q8
+        flag1t flag1f flag2t flag2f turn1 turn2
+    }
+    transitions {
+        u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12
+        v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12
+    }
+    arcs {
+        { p1 flag1f } -> u1  -> { p2 flag1t }
+        { p2 flag2f } -> u2  -> { p7 flag2f }
+        { p2 flag2t } -> u3  -> { p3 flag2t }
+        { p3 turn1  } -> u4  -> { p2 turn1  }
+        { p3 turn2  } -> u5  -> { p4 turn2  }
+        { p4 flag1t } -> u6  -> { p5 flag1f }
+        { p5 turn1  } -> u7  -> { p6 turn1  }
+        { p5 turn2  } -> u8  -> { p5 turn2  }
+        { p6 flag1f } -> u9  -> { p2 flag1t }
+        { p7 turn1  } -> u10 -> { p8 turn2  }
+        { p7 turn2  } -> u11 -> { p8 turn2  }
+        { p8 flag1t } -> u12 -> { p1 flag1f }
+
+        { q1 flag2f } -> v1  -> { q2 flag2t }
+        { q2 flag1f } -> v2  -> { q7 flag1f }
+        { q2 flag1t } -> v3  -> { q3 flag1t }
+        { q3 turn1  } -> v4  -> { q4 turn1  }
+        { q3 turn2  } -> v5  -> { q2 turn2  }
+        { q4 flag2t } -> v6  -> { q5 flag2f }
+        { q5 turn1  } -> v7  -> { q5 turn1  }
+        { q5 turn2  } -> v8  -> { q6 turn2  }
+        { q6 flag2f } -> v9  -> { q2 flag2t }
+        { q7 turn1  } -> v10 -> { q8 turn1  }
+        { q7 turn2  } -> v11 -> { q8 turn1  }
+        { q8 flag2t } -> v12 -> { q1 flag2f }
+    }
+    initial {
+        p1 q1 flag1f flag2f turn1
+    }
+}
+liveness property "fairness for first process" {
+    u1 + u2 + u3 + u4 + u5 + u6 + u7 + u8 + u9 + u10 + u11 + u12 > 0 &&
+    v1 + v2 + v3 + v4 + v5 + v6 + v7 + v8 + v9 + v10 + v11 + v12 > 0 &&
+    u2 = 0
+}
+liveness property "fairness for second process" {
+    u1 + u2 + u3 + u4 + u5 + u6 + u7 + u8 + u9 + u10 + u11 + u12 > 0 &&
+    v1 + v2 + v3 + v4 + v5 + v6 + v7 + v8 + v9 + v10 + v11 + v12 > 0 &&
+    v2 = 0
+}
+safety property "mutual exclusion" {
+    p7 >= 1 && q7 >= 1
+}
+

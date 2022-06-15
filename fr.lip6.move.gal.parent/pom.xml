@@ -106,6 +106,8 @@
 		<!-- SDK Feature and update site -->
 		<module>../fr.lip6.move.gal.feature.sdk</module>
 		<module>../fr.lip6.move.gal.updatesite</module>
+		<!-- Converter tools -->
+		<module>../mist/fr.lip6.mist</module>
 		<!-- Application plugin -->
 		<module>../ITS-commandline/fr.lip6.move.gal.itscl.application</module>
 		<!-- feature plugin -->
@@ -461,7 +463,7 @@
 			<layout>p2</layout>
 			<!-- <url>http://pnml.lip6.fr/pnmlframework/updatesite-previous/</url> -->
 			<!-- <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url> -->
-			<url>https://lip6.github.io/pnmlframework/</url> 
+			<url>https://yanntm.github.io/pnmlframework/</url> 
 		</repository>
 
 

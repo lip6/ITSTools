@@ -1,0 +1,23 @@
+PLACE 'sigma,'m1,'m2,p1,p2,'p1,'p2;
+
+MARKING 'm1:1,'p1:1,p1:1;
+
+TRANSITION 'switch
+CONSUME 'm1:1;
+PRODUCE 'm2:1;
+
+TRANSITION t1
+CONSUME 'p1:1,p1:1,'m1:1;
+PRODUCE 'p2:1,p2:1,'m1:1;
+
+TRANSITION 't1
+CONSUME 'p1:1,'m2:1;
+PRODUCE 'p2:1,'sigma:1,'m2:1;
+
+TRANSITION t2
+CONSUME 'p2:1,p2:1,'m1:1;
+PRODUCE 'p1:1,p1:1,'m1:1;
+
+TRANSITION 't2
+CONSUME 'p2:1,'m2:1;
+PRODUCE 'p1:1,'sigma:1,'m2:1;

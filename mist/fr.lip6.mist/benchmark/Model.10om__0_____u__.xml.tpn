@@ -1,0 +1,412 @@
+place "i" init 1;
+place "o";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:InputCondition";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Split_and (10qo)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Join_and (10qo)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_Split_Product description using Configuration Management (10tm)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_Join_Product description using Configuration Management (10tm)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:outputCondition";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Yes_and (10qo)*and (10qo)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Document Structure Processing (10p7)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Material Master Processing (10pz)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Characteristic Processing (10r2)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Edit Classes (10ry)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Classification (10su)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Material BOM Processing (10yv)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Document Processing (110o)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Document Structure Processing (10p7)*and (10ya)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10ya)*and (10z2)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Configuration Profile Processing (10u0)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Object Dependency Maintenance (10us)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Variant Table Processing (10vs)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Variant Function Processing (10x3)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Variant Condition Processing (10y3)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Material Variant Processing (1112)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Profile Processing (10u0)*and (10yh)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10yh)*Configuration Simulation (10qh)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Simulation (10qh)*and (10t1)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1)*Routing Processing (10zi)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1)*Inspection Plan Processing (10zw)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Routing Processing (10zi)*and (10t8)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t8)*Production Resource/ Tool Processing (10pl)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Production Resource/ Tool Processing (10pl)*Order BOM Processing (10ri)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Order BOM Processing (10ri)*and (10u7)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7)*Graphical Product Structure Processing (10sg)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7)*Integrated Product and Process Data Processing - EWB (110a)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Graphical Product Structure Processing (10sg)*and (10ue)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10ue)*Product description using Configuration Management (10tm)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Product description using Configuration Management (10tm)*Join_Yes_Product description using Configuration Management (10tm)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Material Master Processing (10pz)*and (10ya)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Characteristic Processing (10r2)*and (10ya)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Edit Classes (10ry)*and (10ya)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Classification (10su)*and (10ya)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Material BOM Processing (10yv)*and (10ya)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Document Processing (110o)*and (10ya)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Object Dependency Maintenance (10us)*and (10yh)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Table Processing (10vs)*and (10yh)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Function Processing (10x3)*and (10yh)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Condition Processing (10y3)*and (10yh)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Material Variant Processing (1112)*and (10yh)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Inspection Plan Processing (10zw)*and (10t8)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Integrated Product and Process Data Processing - EWB (110a)*and (10ue)";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Split:busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_No_and (10qo):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Yes_and (10qo):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Skip:busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Document Structure Processing (10p7):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10ya):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Profile Processing (10u0):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10yh):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Simulation (10qh):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Routing Processing (10zi):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t8):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Production Resource/ Tool Processing (10pl):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Order BOM Processing (10ri):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Graphical Product Structure Processing (10sg):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10ue):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Product description using Configuration Management (10tm):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Material Master Processing (10pz):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Characteristic Processing (10r2):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Edit Classes (10ry):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Classification (10su):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Material BOM Processing (10yv):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Document Processing (110o):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Object Dependency Maintenance (10us):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Table Processing (10vs):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Function Processing (10x3):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Condition Processing (10y3):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Material Variant Processing (1112):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Inspection Plan Processing (10zw):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Integrated Product and Process Data Processing - EWB (110a):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_No_Product description using Configuration Management (10tm):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_Yes_Product description using Configuration Management (10tm):busy";
+place "p:Model.10om--0-----u--:Model.10om--0-----u--:Output:busy";
+trans "*:Model.10om--0-----u--:Model.10om--0-----u--:start"~"*:Model.10om--0-----u--:Model.10om--0-----u--:start"
+    in "i"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:InputCondition"
+;
+trans "*:Model.10om--0-----u--:Model.10om--0-----u--:end"~"*:Model.10om--0-----u--:Model.10om--0-----u--:end"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:outputCondition"
+   out "o"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Split:join:InputCondition"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Split:join:InputCondition"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:InputCondition"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Split:busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Split:split:Split_Split_and (10qo)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Split:split:Split_Split_and (10qo)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Split:busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Split_and (10qo)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Split_No_and (10qo):join:Split_Split_and (10qo)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Split_No_and (10qo):join:Split_Split_and (10qo)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Split_and (10qo)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_No_and (10qo):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Split_No_and (10qo):split:Split_Join_and (10qo)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Split_No_and (10qo):split:Split_Join_and (10qo)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_No_and (10qo):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Join_and (10qo)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Split_Yes_and (10qo):join:Split_Split_and (10qo)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Split_Yes_and (10qo):join:Split_Split_and (10qo)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Split_and (10qo)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Yes_and (10qo):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Split_Yes_and (10qo):split:Split_Join_and (10qo):Split_Yes_and (10qo)*and (10qo)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Split_Yes_and (10qo):split:Split_Join_and (10qo):Split_Yes_and (10qo)*and (10qo)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Yes_and (10qo):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Join_and (10qo)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Yes_and (10qo)*and (10qo)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Skip:join:Split_Join_and (10qo)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Skip:join:Split_Join_and (10qo)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Join_and (10qo)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Skip:busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Skip:split:Join_Split_Product description using Configuration Management (10tm)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Skip:split:Join_Split_Product description using Configuration Management (10tm)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Skip:busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_Split_Product description using Configuration Management (10tm)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo):join:Split_Yes_and (10qo)*and (10qo)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo):join:Split_Yes_and (10qo)*and (10qo)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Split_Yes_and (10qo)*and (10qo)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo):split:and (10qo)*Document Structure Processing (10p7):and (10qo)*Material Master Processing (10pz):and (10qo)*Characteristic Processing (10r2):and (10qo)*Edit Classes (10ry):and (10qo)*Classification (10su):and (10qo)*Material BOM Processing (10yv):and (10qo)*Document Processing (110o)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo):split:and (10qo)*Document Structure Processing (10p7):and (10qo)*Material Master Processing (10pz):and (10qo)*Characteristic Processing (10r2):and (10qo)*Edit Classes (10ry):and (10qo)*Classification (10su):and (10qo)*Material BOM Processing (10yv):and (10qo)*Document Processing (110o)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Document Structure Processing (10p7)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Material Master Processing (10pz)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Characteristic Processing (10r2)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Edit Classes (10ry)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Classification (10su)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Material BOM Processing (10yv)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Document Processing (110o)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Document Structure Processing (10p7):join:and (10qo)*Document Structure Processing (10p7)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Document Structure Processing (10p7):join:and (10qo)*Document Structure Processing (10p7)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Document Structure Processing (10p7)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Document Structure Processing (10p7):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Document Structure Processing (10p7):split:Document Structure Processing (10p7)*and (10ya)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Document Structure Processing (10p7):split:Document Structure Processing (10p7)*and (10ya)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Document Structure Processing (10p7):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Document Structure Processing (10p7)*and (10ya)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10ya):join:Document Structure Processing (10p7)*and (10ya):Material Master Processing (10pz)*and (10ya):Characteristic Processing (10r2)*and (10ya):Edit Classes (10ry)*and (10ya):Classification (10su)*and (10ya):Material BOM Processing (10yv)*and (10ya):Document Processing (110o)*and (10ya)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10ya):join:Document Structure Processing (10p7)*and (10ya):Material Master Processing (10pz)*and (10ya):Characteristic Processing (10r2)*and (10ya):Edit Classes (10ry)*and (10ya):Classification (10su)*and (10ya):Material BOM Processing (10yv)*and (10ya):Document Processing (110o)*and (10ya)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Document Structure Processing (10p7)*and (10ya)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Material Master Processing (10pz)*and (10ya)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Characteristic Processing (10r2)*and (10ya)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Edit Classes (10ry)*and (10ya)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Classification (10su)*and (10ya)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Material BOM Processing (10yv)*and (10ya)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Document Processing (110o)*and (10ya)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10ya):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10ya):split:and (10ya)*and (10z2)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10ya):split:and (10ya)*and (10z2)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10ya):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10ya)*and (10z2)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2):join:and (10ya)*and (10z2)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2):join:and (10ya)*and (10z2)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10ya)*and (10z2)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2):split:and (10z2)*Configuration Profile Processing (10u0):and (10z2)*Object Dependency Maintenance (10us):and (10z2)*Variant Table Processing (10vs):and (10z2)*Variant Function Processing (10x3):and (10z2)*Variant Condition Processing (10y3):and (10z2)*Material Variant Processing (1112)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2):split:and (10z2)*Configuration Profile Processing (10u0):and (10z2)*Object Dependency Maintenance (10us):and (10z2)*Variant Table Processing (10vs):and (10z2)*Variant Function Processing (10x3):and (10z2)*Variant Condition Processing (10y3):and (10z2)*Material Variant Processing (1112)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Configuration Profile Processing (10u0)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Object Dependency Maintenance (10us)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Variant Table Processing (10vs)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Variant Function Processing (10x3)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Variant Condition Processing (10y3)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Material Variant Processing (1112)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Profile Processing (10u0):join:and (10z2)*Configuration Profile Processing (10u0)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Profile Processing (10u0):join:and (10z2)*Configuration Profile Processing (10u0)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Configuration Profile Processing (10u0)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Profile Processing (10u0):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Profile Processing (10u0):split:Configuration Profile Processing (10u0)*and (10yh)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Profile Processing (10u0):split:Configuration Profile Processing (10u0)*and (10yh)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Profile Processing (10u0):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Profile Processing (10u0)*and (10yh)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10yh):join:Configuration Profile Processing (10u0)*and (10yh):Object Dependency Maintenance (10us)*and (10yh):Variant Table Processing (10vs)*and (10yh):Variant Function Processing (10x3)*and (10yh):Variant Condition Processing (10y3)*and (10yh):Material Variant Processing (1112)*and (10yh)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10yh):join:Configuration Profile Processing (10u0)*and (10yh):Object Dependency Maintenance (10us)*and (10yh):Variant Table Processing (10vs)*and (10yh):Variant Function Processing (10x3)*and (10yh):Variant Condition Processing (10y3)*and (10yh):Material Variant Processing (1112)*and (10yh)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Profile Processing (10u0)*and (10yh)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Object Dependency Maintenance (10us)*and (10yh)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Table Processing (10vs)*and (10yh)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Function Processing (10x3)*and (10yh)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Condition Processing (10y3)*and (10yh)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Material Variant Processing (1112)*and (10yh)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10yh):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10yh):split:and (10yh)*Configuration Simulation (10qh)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10yh):split:and (10yh)*Configuration Simulation (10qh)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10yh):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10yh)*Configuration Simulation (10qh)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Simulation (10qh):join:and (10yh)*Configuration Simulation (10qh)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Simulation (10qh):join:and (10yh)*Configuration Simulation (10qh)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10yh)*Configuration Simulation (10qh)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Simulation (10qh):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Simulation (10qh):split:Configuration Simulation (10qh)*and (10t1)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Simulation (10qh):split:Configuration Simulation (10qh)*and (10t1)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Simulation (10qh):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Simulation (10qh)*and (10t1)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1):join:Configuration Simulation (10qh)*and (10t1)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1):join:Configuration Simulation (10qh)*and (10t1)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Configuration Simulation (10qh)*and (10t1)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1):split:and (10t1)*Routing Processing (10zi):and (10t1)*Inspection Plan Processing (10zw)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1):split:and (10t1)*Routing Processing (10zi):and (10t1)*Inspection Plan Processing (10zw)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1)*Routing Processing (10zi)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1)*Inspection Plan Processing (10zw)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Routing Processing (10zi):join:and (10t1)*Routing Processing (10zi)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Routing Processing (10zi):join:and (10t1)*Routing Processing (10zi)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1)*Routing Processing (10zi)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Routing Processing (10zi):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Routing Processing (10zi):split:Routing Processing (10zi)*and (10t8)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Routing Processing (10zi):split:Routing Processing (10zi)*and (10t8)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Routing Processing (10zi):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Routing Processing (10zi)*and (10t8)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10t8):join:Routing Processing (10zi)*and (10t8):Inspection Plan Processing (10zw)*and (10t8)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10t8):join:Routing Processing (10zi)*and (10t8):Inspection Plan Processing (10zw)*and (10t8)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Routing Processing (10zi)*and (10t8)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Inspection Plan Processing (10zw)*and (10t8)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t8):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10t8):split:and (10t8)*Production Resource/ Tool Processing (10pl)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10t8):split:and (10t8)*Production Resource/ Tool Processing (10pl)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t8):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t8)*Production Resource/ Tool Processing (10pl)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Production Resource/ Tool Processing (10pl):join:and (10t8)*Production Resource/ Tool Processing (10pl)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Production Resource/ Tool Processing (10pl):join:and (10t8)*Production Resource/ Tool Processing (10pl)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t8)*Production Resource/ Tool Processing (10pl)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Production Resource/ Tool Processing (10pl):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Production Resource/ Tool Processing (10pl):split:Production Resource/ Tool Processing (10pl)*Order BOM Processing (10ri)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Production Resource/ Tool Processing (10pl):split:Production Resource/ Tool Processing (10pl)*Order BOM Processing (10ri)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Production Resource/ Tool Processing (10pl):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Production Resource/ Tool Processing (10pl)*Order BOM Processing (10ri)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Order BOM Processing (10ri):join:Production Resource/ Tool Processing (10pl)*Order BOM Processing (10ri)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Order BOM Processing (10ri):join:Production Resource/ Tool Processing (10pl)*Order BOM Processing (10ri)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Production Resource/ Tool Processing (10pl)*Order BOM Processing (10ri)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Order BOM Processing (10ri):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Order BOM Processing (10ri):split:Order BOM Processing (10ri)*and (10u7)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Order BOM Processing (10ri):split:Order BOM Processing (10ri)*and (10u7)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Order BOM Processing (10ri):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Order BOM Processing (10ri)*and (10u7)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7):join:Order BOM Processing (10ri)*and (10u7)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7):join:Order BOM Processing (10ri)*and (10u7)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Order BOM Processing (10ri)*and (10u7)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7):split:and (10u7)*Graphical Product Structure Processing (10sg):and (10u7)*Integrated Product and Process Data Processing - EWB (110a)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7):split:and (10u7)*Graphical Product Structure Processing (10sg):and (10u7)*Integrated Product and Process Data Processing - EWB (110a)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7)*Graphical Product Structure Processing (10sg)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7)*Integrated Product and Process Data Processing - EWB (110a)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Graphical Product Structure Processing (10sg):join:and (10u7)*Graphical Product Structure Processing (10sg)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Graphical Product Structure Processing (10sg):join:and (10u7)*Graphical Product Structure Processing (10sg)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7)*Graphical Product Structure Processing (10sg)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Graphical Product Structure Processing (10sg):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Graphical Product Structure Processing (10sg):split:Graphical Product Structure Processing (10sg)*and (10ue)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Graphical Product Structure Processing (10sg):split:Graphical Product Structure Processing (10sg)*and (10ue)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Graphical Product Structure Processing (10sg):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Graphical Product Structure Processing (10sg)*and (10ue)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10ue):join:Graphical Product Structure Processing (10sg)*and (10ue):Integrated Product and Process Data Processing - EWB (110a)*and (10ue)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10ue):join:Graphical Product Structure Processing (10sg)*and (10ue):Integrated Product and Process Data Processing - EWB (110a)*and (10ue)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Graphical Product Structure Processing (10sg)*and (10ue)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Integrated Product and Process Data Processing - EWB (110a)*and (10ue)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10ue):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:and (10ue):split:and (10ue)*Product description using Configuration Management (10tm)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:and (10ue):split:and (10ue)*Product description using Configuration Management (10tm)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10ue):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10ue)*Product description using Configuration Management (10tm)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Product description using Configuration Management (10tm):join:and (10ue)*Product description using Configuration Management (10tm)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Product description using Configuration Management (10tm):join:and (10ue)*Product description using Configuration Management (10tm)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10ue)*Product description using Configuration Management (10tm)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Product description using Configuration Management (10tm):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Product description using Configuration Management (10tm):split:Product description using Configuration Management (10tm)*Join_Yes_Product description using Configuration Management (10tm)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Product description using Configuration Management (10tm):split:Product description using Configuration Management (10tm)*Join_Yes_Product description using Configuration Management (10tm)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Product description using Configuration Management (10tm):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Product description using Configuration Management (10tm)*Join_Yes_Product description using Configuration Management (10tm)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Material Master Processing (10pz):join:and (10qo)*Material Master Processing (10pz)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Material Master Processing (10pz):join:and (10qo)*Material Master Processing (10pz)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Material Master Processing (10pz)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Material Master Processing (10pz):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Material Master Processing (10pz):split:Material Master Processing (10pz)*and (10ya)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Material Master Processing (10pz):split:Material Master Processing (10pz)*and (10ya)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Material Master Processing (10pz):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Material Master Processing (10pz)*and (10ya)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Characteristic Processing (10r2):join:and (10qo)*Characteristic Processing (10r2)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Characteristic Processing (10r2):join:and (10qo)*Characteristic Processing (10r2)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Characteristic Processing (10r2)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Characteristic Processing (10r2):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Characteristic Processing (10r2):split:Characteristic Processing (10r2)*and (10ya)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Characteristic Processing (10r2):split:Characteristic Processing (10r2)*and (10ya)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Characteristic Processing (10r2):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Characteristic Processing (10r2)*and (10ya)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Edit Classes (10ry):join:and (10qo)*Edit Classes (10ry)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Edit Classes (10ry):join:and (10qo)*Edit Classes (10ry)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Edit Classes (10ry)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Edit Classes (10ry):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Edit Classes (10ry):split:Edit Classes (10ry)*and (10ya)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Edit Classes (10ry):split:Edit Classes (10ry)*and (10ya)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Edit Classes (10ry):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Edit Classes (10ry)*and (10ya)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Classification (10su):join:and (10qo)*Classification (10su)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Classification (10su):join:and (10qo)*Classification (10su)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Classification (10su)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Classification (10su):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Classification (10su):split:Classification (10su)*and (10ya)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Classification (10su):split:Classification (10su)*and (10ya)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Classification (10su):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Classification (10su)*and (10ya)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Material BOM Processing (10yv):join:and (10qo)*Material BOM Processing (10yv)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Material BOM Processing (10yv):join:and (10qo)*Material BOM Processing (10yv)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Material BOM Processing (10yv)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Material BOM Processing (10yv):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Material BOM Processing (10yv):split:Material BOM Processing (10yv)*and (10ya)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Material BOM Processing (10yv):split:Material BOM Processing (10yv)*and (10ya)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Material BOM Processing (10yv):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Material BOM Processing (10yv)*and (10ya)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Document Processing (110o):join:and (10qo)*Document Processing (110o)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Document Processing (110o):join:and (10qo)*Document Processing (110o)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10qo)*Document Processing (110o)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Document Processing (110o):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Document Processing (110o):split:Document Processing (110o)*and (10ya)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Document Processing (110o):split:Document Processing (110o)*and (10ya)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Document Processing (110o):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Document Processing (110o)*and (10ya)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Object Dependency Maintenance (10us):join:and (10z2)*Object Dependency Maintenance (10us)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Object Dependency Maintenance (10us):join:and (10z2)*Object Dependency Maintenance (10us)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Object Dependency Maintenance (10us)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Object Dependency Maintenance (10us):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Object Dependency Maintenance (10us):split:Object Dependency Maintenance (10us)*and (10yh)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Object Dependency Maintenance (10us):split:Object Dependency Maintenance (10us)*and (10yh)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Object Dependency Maintenance (10us):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Object Dependency Maintenance (10us)*and (10yh)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Variant Table Processing (10vs):join:and (10z2)*Variant Table Processing (10vs)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Variant Table Processing (10vs):join:and (10z2)*Variant Table Processing (10vs)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Variant Table Processing (10vs)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Table Processing (10vs):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Variant Table Processing (10vs):split:Variant Table Processing (10vs)*and (10yh)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Variant Table Processing (10vs):split:Variant Table Processing (10vs)*and (10yh)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Table Processing (10vs):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Table Processing (10vs)*and (10yh)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Variant Function Processing (10x3):join:and (10z2)*Variant Function Processing (10x3)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Variant Function Processing (10x3):join:and (10z2)*Variant Function Processing (10x3)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Variant Function Processing (10x3)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Function Processing (10x3):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Variant Function Processing (10x3):split:Variant Function Processing (10x3)*and (10yh)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Variant Function Processing (10x3):split:Variant Function Processing (10x3)*and (10yh)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Function Processing (10x3):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Function Processing (10x3)*and (10yh)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Variant Condition Processing (10y3):join:and (10z2)*Variant Condition Processing (10y3)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Variant Condition Processing (10y3):join:and (10z2)*Variant Condition Processing (10y3)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Variant Condition Processing (10y3)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Condition Processing (10y3):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Variant Condition Processing (10y3):split:Variant Condition Processing (10y3)*and (10yh)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Variant Condition Processing (10y3):split:Variant Condition Processing (10y3)*and (10yh)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Condition Processing (10y3):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Variant Condition Processing (10y3)*and (10yh)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Material Variant Processing (1112):join:and (10z2)*Material Variant Processing (1112)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Material Variant Processing (1112):join:and (10z2)*Material Variant Processing (1112)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10z2)*Material Variant Processing (1112)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Material Variant Processing (1112):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Material Variant Processing (1112):split:Material Variant Processing (1112)*and (10yh)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Material Variant Processing (1112):split:Material Variant Processing (1112)*and (10yh)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Material Variant Processing (1112):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Material Variant Processing (1112)*and (10yh)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Inspection Plan Processing (10zw):join:and (10t1)*Inspection Plan Processing (10zw)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Inspection Plan Processing (10zw):join:and (10t1)*Inspection Plan Processing (10zw)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10t1)*Inspection Plan Processing (10zw)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Inspection Plan Processing (10zw):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Inspection Plan Processing (10zw):split:Inspection Plan Processing (10zw)*and (10t8)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Inspection Plan Processing (10zw):split:Inspection Plan Processing (10zw)*and (10t8)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Inspection Plan Processing (10zw):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Inspection Plan Processing (10zw)*and (10t8)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Integrated Product and Process Data Processing - EWB (110a):join:and (10u7)*Integrated Product and Process Data Processing - EWB (110a)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Integrated Product and Process Data Processing - EWB (110a):join:and (10u7)*Integrated Product and Process Data Processing - EWB (110a)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:and (10u7)*Integrated Product and Process Data Processing - EWB (110a)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Integrated Product and Process Data Processing - EWB (110a):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Integrated Product and Process Data Processing - EWB (110a):split:Integrated Product and Process Data Processing - EWB (110a)*and (10ue)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Integrated Product and Process Data Processing - EWB (110a):split:Integrated Product and Process Data Processing - EWB (110a)*and (10ue)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Integrated Product and Process Data Processing - EWB (110a):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Integrated Product and Process Data Processing - EWB (110a)*and (10ue)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Join_No_Product description using Configuration Management (10tm):join:Join_Split_Product description using Configuration Management (10tm)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Join_No_Product description using Configuration Management (10tm):join:Join_Split_Product description using Configuration Management (10tm)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_Split_Product description using Configuration Management (10tm)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_No_Product description using Configuration Management (10tm):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Join_No_Product description using Configuration Management (10tm):split:Join_Join_Product description using Configuration Management (10tm)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Join_No_Product description using Configuration Management (10tm):split:Join_Join_Product description using Configuration Management (10tm)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_No_Product description using Configuration Management (10tm):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_Join_Product description using Configuration Management (10tm)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Join_Yes_Product description using Configuration Management (10tm):join:Product description using Configuration Management (10tm)*Join_Yes_Product description using Configuration Management (10tm):Join_Split_Product description using Configuration Management (10tm)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Join_Yes_Product description using Configuration Management (10tm):join:Product description using Configuration Management (10tm)*Join_Yes_Product description using Configuration Management (10tm):Join_Split_Product description using Configuration Management (10tm)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Product description using Configuration Management (10tm)*Join_Yes_Product description using Configuration Management (10tm)"
+       "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_Split_Product description using Configuration Management (10tm)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_Yes_Product description using Configuration Management (10tm):busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Join_Yes_Product description using Configuration Management (10tm):split:Join_Join_Product description using Configuration Management (10tm)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Join_Yes_Product description using Configuration Management (10tm):split:Join_Join_Product description using Configuration Management (10tm)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_Yes_Product description using Configuration Management (10tm):busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_Join_Product description using Configuration Management (10tm)"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Output:join:Join_Join_Product description using Configuration Management (10tm)"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Output:join:Join_Join_Product description using Configuration Management (10tm)"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Join_Join_Product description using Configuration Management (10tm)"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:Output:busy"
+;
+trans "t:Model.10om--0-----u--:Model.10om--0-----u--:Output:split:outputCondition"~"t:Model.10om--0-----u--:Model.10om--0-----u--:Output:split:outputCondition"
+    in "p:Model.10om--0-----u--:Model.10om--0-----u--:Output:busy"
+   out "p:Model.10om--0-----u--:Model.10om--0-----u--:outputCondition"
+;
+
