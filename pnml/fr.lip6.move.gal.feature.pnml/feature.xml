@@ -301,7 +301,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </license>
 
    <url>
-      <discovery label="PNML framework distribution" url="http://pnml.lip6.fr/pnmlframework/updatesite/"/>
+      <discovery label="PNML framework distribution" url="https://lip6.github.io/pnmlframework/"/>
    </url>
 
    <requires>

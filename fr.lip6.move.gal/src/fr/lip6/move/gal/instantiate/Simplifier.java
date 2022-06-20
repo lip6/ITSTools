@@ -812,6 +812,7 @@ public abstract class Simplifier {
 			Map<ArrayPrefix, Set<Integer>> constantArrs, 
 			List<EObject> todel, EObject t) {
 		int totalexpr =0;
+		List<VariableReference> revisit = new ArrayList<>();
 		for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
 
@@ -855,9 +856,28 @@ public abstract class Simplifier {
 						totalexpr++;
 					}
 					it.prune();
+				} else {
+					revisit.add(va);
 				}
 			}
 		}
+		
+		Collections.reverse(revisit);
+		for (VariableReference va : revisit) {
+			if ( va.getIndex() instanceof Constant ) {
+				int index = ((Constant) va.getIndex()).getValue();
+				Set<Integer> cstIndexes = constantArrs.get(va.getRef());
+				if (cstIndexes != null && cstIndexes.contains(index) ) {
+					if (((ArrayPrefix) va.getRef()).getValues().size() > index) {
+						EcoreUtil.replace(va, EcoreUtil.copy(((ArrayPrefix) va.getRef()).getValues().get(index)));						
+					} else {
+						EcoreUtil.replace(va, GF2.constant(0));
+					}
+					totalexpr++;
+				}
+			}
+		}
+		
 		return totalexpr;
 	}
 
