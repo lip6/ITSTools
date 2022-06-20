@@ -27,8 +27,8 @@ import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.gal2smt.tosmt.QualifiedExpressionTranslator;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
+import fr.lip6.move.gal.struct2gal.MatrixBuilder;
 import fr.lip6.move.gal.structural.InvariantCalculator;
-import fr.lip6.move.gal.structural.MatrixBuilder;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class KInductionSolver extends NextBMCSolver {

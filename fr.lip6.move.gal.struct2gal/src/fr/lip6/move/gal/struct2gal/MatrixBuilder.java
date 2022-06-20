@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.structural;
+package fr.lip6.move.gal.struct2gal;
 
 import java.util.List;
 
@@ -19,6 +19,7 @@ import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.LeafNextVisitor;
 import fr.lip6.move.gal.semantics.Predicate;
+import fr.lip6.move.gal.structural.FlowMatrix;
 
 public class MatrixBuilder {
 

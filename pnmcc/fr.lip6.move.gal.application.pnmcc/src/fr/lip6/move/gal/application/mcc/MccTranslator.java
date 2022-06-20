@@ -72,6 +72,8 @@ import fr.lip6.move.gal.pnml.togal.PnmlToStructuralTransformer;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
+import fr.lip6.move.gal.struct2gal.SpecBuilder;
+import fr.lip6.move.gal.struct2gal.StructuralReductionBuilder;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -722,7 +724,7 @@ public class MccTranslator {
 
 
 	public void rebuildSpecification(DoneProperties doneProps) {
-		Specification reduced = getSPN().rebuildSpecification();
+		Specification reduced = SpecBuilder.rebuildSpecification(getSPN());
 		for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
 			if (! doneProps.containsKey(prop.getName()))
 				reduced.getProperties().add(toGal(prop, ((GALTypeDeclaration)reduced.getMain()).getVariables()));
@@ -960,7 +962,7 @@ public class MccTranslator {
 	public void rebuildSPN() {
 		INextBuilder nb = INextBuilder.build(getSpec());
 		IDeterministicNextBuilder dnb = IDeterministicNextBuilder.build(nb);			
-		StructuralReduction sr = new StructuralReduction(dnb);
+		StructuralReduction sr = StructuralReductionBuilder.createStructuralReduction(dnb);
 		boolean isskel = spn.isSkeleton();
 		spn = new SparsePetriNet();
 		spn.setSkeleton(isskel);

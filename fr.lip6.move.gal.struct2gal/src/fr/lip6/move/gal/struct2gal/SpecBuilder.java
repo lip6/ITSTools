@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.structural;
+package fr.lip6.move.gal.struct2gal;
 
 import java.util.List;
 
@@ -12,10 +12,15 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class SpecBuilder {
 
+	
+	public static Specification rebuildSpecification (ISparsePetriNet net) {
+		return buildSpec(net.getFlowPT(),net.getFlowTP(),net.getPnames(),net.getTnames(),net.getMarks());
+	}
 	
 	public static Specification buildSpec (IntMatrixCol flowPT, IntMatrixCol flowTP, List<String> pnames, List<String> tnames, List<Integer> initial) {
 		GalFactory gf = GalFactory.eINSTANCE;

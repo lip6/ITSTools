@@ -29,8 +29,8 @@ import fr.lip6.move.gal.semantics.DependencyMatrix;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
+import fr.lip6.move.gal.struct2gal.MatrixBuilder;
 import fr.lip6.move.gal.structural.FlowMatrix;
-import fr.lip6.move.gal.structural.MatrixBuilder;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class NecessaryEnablingsolver extends KInductionSolver {

@@ -66,6 +66,9 @@ import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.pnml.togal.OverlargeMarkingException;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
+import fr.lip6.move.gal.struct2gal.ExpressionBuilder;
+import fr.lip6.move.gal.struct2gal.SpecBuilder;
+import fr.lip6.move.gal.struct2gal.StructuralReductionBuilder;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.InvariantCalculator;
@@ -845,7 +848,7 @@ public class Application implements IApplication, Ender {
 					}
 					INextBuilder nb = INextBuilder.build(specnocol);
 					IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);
-					StructuralReduction sr = new StructuralReduction(idnb);
+					StructuralReduction sr = StructuralReductionBuilder.createStructuralReduction(idnb);
 
 					// need to protect some variables
 					List<Property> l = reader.getSpec().getProperties();
@@ -984,7 +987,7 @@ public class Application implements IApplication, Ender {
 	}
 
 	public int rebuildSpecification(MccTranslator reader, StructuralReduction sr) {
-		Specification reduced = sr.rebuildSpecification();
+		Specification reduced = SpecBuilder.rebuildSpecification(sr);
 		reduced.getProperties().addAll(reader.getSpec().getProperties());
 		Instantiator.normalizeProperties(reduced);
 		Set<String> constants = sr.computeConstants().stream().map(n -> sr.getPnames().get(n))
@@ -1034,13 +1037,13 @@ public class Application implements IApplication, Ender {
 		for (Property prop : props) {
 			if (prop.getBody() instanceof NeverProp) {
 				NeverProp never = (NeverProp) prop.getBody();
-				tocheck.add(Expression.buildExpression(never.getPredicate(), idnb));
+				tocheck.add(ExpressionBuilder.buildExpression(never.getPredicate(), idnb));
 			} else if (prop.getBody() instanceof InvariantProp) {
 				InvariantProp invar = (InvariantProp) prop.getBody();
-				tocheck.add(Expression.not(Expression.buildExpression(invar.getPredicate(), idnb)));
+				tocheck.add(Expression.not(ExpressionBuilder.buildExpression(invar.getPredicate(), idnb)));
 			} else if (prop.getBody() instanceof ReachableProp) {
 				ReachableProp reach = (ReachableProp) prop.getBody();
-				tocheck.add(Expression.buildExpression(reach.getPredicate(), idnb));
+				tocheck.add(ExpressionBuilder.buildExpression(reach.getPredicate(), idnb));
 			}
 		}
 		return tocheck;

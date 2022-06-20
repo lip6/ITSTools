@@ -14,8 +14,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.IntMatrixCol;
@@ -44,29 +42,27 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 	private static final int DEBUG = 0;
 	
-	public StructuralReduction(IDeterministicNextBuilder idnb) {
-		FlowMatrix fm = new MatrixBuilder(idnb).getMatrix();
-		marks = new ArrayList<>(idnb.getInitial());
-		flowPT = fm.getFlowPT();
-		flowTP = fm.getFlowTP();
-		pnames = new ArrayList<>(idnb.getVariableNames());
-		tnames = new ArrayList<>();
-		int sz = idnb.getDeterministicNext().size();
-		for (int i=0 ; i < sz ; i++) {
-			tnames.add("t"+i);
-		}
-		maxArcValue = findMax(flowPT);
-		maxArcValue = Math.max(findMax(flowTP),maxArcValue);
-		untouchable = new BitSet();
-		tokeepImages = new BitSet();
-		image = new ArrayList<> (pnames.size());
-		for (int i=0,ie=pnames.size(); i < ie ; i++) {
-			image.add(Expression.var(i));
-		}
-		
+	
+	
+	
+	public StructuralReduction(List<Expression> image, List<Integer> marks, IntMatrixCol flowPT, IntMatrixCol flowTP,
+			List<String> tnames, List<String> pnames, int maxArcValue, BitSet untouchable, BitSet tokeepImages,
+			boolean keepImage, boolean isSafe) {
+		super();
+		this.image = image;
+		this.marks = marks;
+		this.flowPT = flowPT;
+		this.flowTP = flowTP;
+		this.tnames = tnames;
+		this.pnames = pnames;
+		this.maxArcValue = maxArcValue;
+		this.untouchable = untouchable;
+		this.tokeepImages = tokeepImages;
+		this.keepImage = keepImage;
+		this.isSafe = isSafe;
 	}
 
-	
+
 	private StructuralReduction(IntMatrixCol flowPT, IntMatrixCol flowTP, List<Integer> marks, List<String> tnames,
 			List<String> pnames, int maxArcValue, BitSet untouchable) {
 		this.flowPT = new IntMatrixCol(flowPT);
@@ -106,16 +102,6 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return tokeepImages;
 	}
 	
-	private int findMax(IntMatrixCol mat) {
-		int max =0;
-		for (int ti = 0 ; ti < mat.getColumnCount() ; ti++) {
-			SparseIntArray trcol = mat.getColumn(ti);
-			for (int i=0 ; i < trcol.size() ; i++) {
-				max = Math.max(max, trcol.valueAt(i));
-			}
-		}
-		return max;
-	}
 	
 	public StructuralReduction clone() {
 		StructuralReduction clone = new StructuralReduction(flowPT, flowTP, marks, tnames, pnames, maxArcValue, untouchable);
@@ -136,9 +122,6 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return maxArcValue;
 	}
 	
-	public Specification rebuildSpecification () {
-		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
-	}
 	
 	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL, LTL, LIVENESS, STATESPACE, SLCL_LTL, SI_CTL }
 	public int reduce (ReductionType rt) throws NoDeadlockExists, DeadlockFound {
@@ -823,8 +806,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				}
 				System.out.println("Reduce isomorphic (modulo) transitions removed "+ modred +" transitions.");
 				reduced += modred;
-				maxArcValue = findMax(flowPT);
-				maxArcValue = Math.max(findMax(flowTP),maxArcValue);
+				maxArcValue = flowPT.findMax();
+				maxArcValue = Math.max(flowTP.findMax(),maxArcValue);
 			}
 		}
 		return reduced;

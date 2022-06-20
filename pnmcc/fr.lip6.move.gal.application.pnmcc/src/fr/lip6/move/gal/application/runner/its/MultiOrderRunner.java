@@ -16,6 +16,9 @@ import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
+import fr.lip6.move.gal.struct2gal.HLPNOrderComputer;
+import fr.lip6.move.gal.struct2gal.SpecBuilder;
+import fr.lip6.move.gal.struct2gal.StructuralReductionBuilder;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralToGreatSPN;
 
@@ -29,7 +32,7 @@ public class MultiOrderRunner {
 	
 				INextBuilder nb = INextBuilder.build(reader.getSpec());
 				IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);
-				StructuralReduction sr = new StructuralReduction(idnb);
+				StructuralReduction sr = StructuralReductionBuilder.createStructuralReduction(idnb);
 				StructuralToGreatSPN s2gspn = new StructuralToGreatSPN();
 				String gspnmodelff = pwd + "/gspn";
 				s2gspn.transform(sr, gspnmodelff);
@@ -46,7 +49,7 @@ public class MultiOrderRunner {
 				run.run();
 				String[] order = run.getOrder();
 	
-				Specification reduced = sr.rebuildSpecification();
+				Specification reduced = SpecBuilder.rebuildSpecification(sr);
 				reduced.getProperties().addAll(reader.getSpec().getProperties());
 				Instantiator.normalizeProperties(reduced);
 				reader.setSpec(reduced);
@@ -111,7 +114,7 @@ public class MultiOrderRunner {
 					reader = reader2.copy();
 				reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				if (reader.getHLPN() != null) {
-					reader.setOrder(reader.getHLPN().computeOrder());
+					reader.setOrder(HLPNOrderComputer.computeOrder(reader.getHLPN()));
 				}
 				reader.flattenSpec(true);
 	
