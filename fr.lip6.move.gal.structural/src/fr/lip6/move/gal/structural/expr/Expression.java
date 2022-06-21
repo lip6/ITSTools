@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.function.Function;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.BooleanExpression;
-import fr.lip6.move.gal.semantics.INextBuilder;
 
 public interface Expression {
 	int eval(SparseIntArray state);
@@ -40,11 +38,6 @@ public interface Expression {
 		throw new UnsupportedOperationException();
 	}
 	
-	static Expression buildExpression(BooleanExpression be, INextBuilder inb) {
-		ExpressionBuilder eb = new ExpressionBuilder(inb);
-		return eb.doSwitch(be);
-	}
-
 	static Expression not(Expression be) {
 		return op(Op.NOT, be, null);
 	}

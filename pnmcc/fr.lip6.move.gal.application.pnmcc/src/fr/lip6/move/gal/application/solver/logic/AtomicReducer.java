@@ -33,6 +33,8 @@ import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.instantiate.PropertySimplifier;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
+import fr.lip6.move.gal.struct2gal.ExpressionBuilder;
+import fr.lip6.move.gal.struct2gal.StructuralReductionBuilder;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -103,7 +105,7 @@ public class AtomicReducer {
 		if (comparisonAtoms) {
 			sr = testAndRewriteBoundedComparison(atoms, dnb, solverPath, isSafe);
 		} else {
-			sr = new StructuralReduction(dnb);
+			sr = StructuralReductionBuilder.createStructuralReduction(dnb);
 		}
 
 		// build a list of invariants to test with SMT/random
@@ -117,10 +119,10 @@ public class AtomicReducer {
 			initialValues.add(val);
 			if (val) {
 				// UNSAT => it never becomes false
-				tocheck.add(Expression.not(Expression.buildExpression(cmp, dnb)));
+				tocheck.add(Expression.not(ExpressionBuilder.buildExpression(cmp, dnb)));
 			} else {
 				// UNSAT => it never becomes true
-				tocheck.add(Expression.buildExpression(cmp, dnb));
+				tocheck.add(ExpressionBuilder.buildExpression(cmp, dnb));
 			}			
 		}
 		
@@ -209,16 +211,16 @@ public class AtomicReducer {
 			Comparison cmp = (Comparison) ent.getValue().get(0); // never empty by cstr
 			if (! (cmp.getLeft() instanceof Constant || cmp.getRight() instanceof Constant)) {
 				BooleanExpression be = GF2.createComparison(EcoreUtil.copy(cmp.getLeft()), ComparisonOperators.GT, GF2.constant(1));
-				tocheckBounds.add(Expression.buildExpression(be, dnb));
+				tocheckBounds.add(ExpressionBuilder.buildExpression(be, dnb));
 				be = GF2.createComparison(EcoreUtil.copy(cmp.getRight()), ComparisonOperators.GT, GF2.constant(1));
-				tocheckBounds.add(Expression.buildExpression(be, dnb));
+				tocheckBounds.add(ExpressionBuilder.buildExpression(be, dnb));
 				totreat.add(ent);
 			}
 		}
 
 		// to build a random explorer and fast SMT checker
 		// we do not apply reductions here to be context free.
-		StructuralReduction sr = new StructuralReduction(dnb);
+		StructuralReduction sr = StructuralReductionBuilder.createStructuralReduction(dnb);
 
 		if (! tocheckBounds.isEmpty()) {
 			try {

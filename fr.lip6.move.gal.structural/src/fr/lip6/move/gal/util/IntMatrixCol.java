@@ -340,4 +340,15 @@ public class IntMatrixCol {
 		return mat;
 	}
 	
+	public int findMax() {
+		int max = 0;
+		for (int ti = 0, tie = getColumnCount(); ti < tie; ti++) {
+			SparseIntArray trcol = getColumn(ti);
+			for (int i = 0, ie = trcol.size(); i < ie; i++) {
+				max = Math.max(max, trcol.valueAt(i));
+			}
+		}
+		return max;
+	}
+	
 }

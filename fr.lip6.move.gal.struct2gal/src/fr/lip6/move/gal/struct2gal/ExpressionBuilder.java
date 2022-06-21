@@ -1,12 +1,19 @@
-package fr.lip6.move.gal.structural.expr;
+package fr.lip6.move.gal.struct2gal;
 
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.semantics.INextBuilder;
+import fr.lip6.move.gal.structural.expr.BinOp;
+import fr.lip6.move.gal.structural.expr.BoolConstant;
+import fr.lip6.move.gal.structural.expr.Constant;
+import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.structural.expr.VarRef;
 import fr.lip6.move.gal.util.GalSwitch;
 
 import java.util.logging.Logger;
 
 import fr.lip6.move.gal.BinaryIntExpression;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.Not;
@@ -116,5 +123,10 @@ public class ExpressionBuilder extends GalSwitch<Expression> {
 	@Override
 	public Expression caseVariableReference(VariableReference object) {
 		return new VarRef(inb.getIndex(object));
+	}
+
+	public static Expression buildExpression(BooleanExpression be, INextBuilder inb) {
+		ExpressionBuilder eb = new ExpressionBuilder(inb);
+		return eb.doSwitch(be);
 	}
 }

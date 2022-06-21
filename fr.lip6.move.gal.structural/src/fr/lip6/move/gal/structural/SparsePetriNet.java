@@ -1,7 +1,6 @@
 package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,8 +11,6 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.NaryOp;
@@ -524,10 +521,6 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		if (reduced > 0) {
 			System.out.println("Reduce redundant transitions removed "+ reduced +" transitions.");
 		}
-	}
-	
-	public Specification rebuildSpecification () {
-		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
 	}
 	
 	private int ensureUnique(IntMatrixCol mPT, IntMatrixCol mTP, List<String> names) {

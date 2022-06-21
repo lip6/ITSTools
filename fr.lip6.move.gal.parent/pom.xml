@@ -23,6 +23,7 @@
 		<!-- GAL language modules and editor -->
 		<module>../fr.lip6.move.gal</module>
 		<module>../fr.lip6.move.gal.structural</module>
+		<module>../fr.lip6.move.gal.struct2gal</module>		
 		<module>../fr.lip6.move.gal.ide</module>
 		<module>../fr.lip6.move.gal.ui</module>
 	<!-- 	<module>../fr.lip6.move.gal.web</module> -->		
