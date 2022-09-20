@@ -196,11 +196,11 @@ public class WalkUtils {
 		}
 	}
 
-	private static void add(int[] enabled, int value) {
+	public static void add(int[] enabled, int value) {
 		enabled[enabled[0] + 1] = value;
 		enabled[0]++;
 	}
-	private static void dropAt(int[] enabled, int index) {
+	public static void dropAt(int[] enabled, int index) {
 		if (index < enabled[0]) {
 			enabled[index] = enabled[enabled[0]];
 		}
