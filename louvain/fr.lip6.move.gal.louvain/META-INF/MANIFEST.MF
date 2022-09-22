@@ -3,10 +3,10 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Louvain community detection
 Bundle-SymbolicName: fr.lip6.move.gal.louvain;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Require-Bundle: fr.lip6.move.gal;bundle-version="1.0.0",
- fr.lip6.move.gal.structural;bundle-version="1.0.0",
- fr.lip6.move.gal.process;bundle-version="1.0.0",
- fr.lip6.move.gal.louvain.binaries;bundle-version="1.0.0"
+Require-Bundle: fr.lip6.move.gal,
+ fr.lip6.move.gal.structural,
+ fr.lip6.move.gal.process,
+ fr.lip6.move.gal.louvain.binaries
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: LIP6
 Export-Package: fr.lip6.move.gal.louvain
