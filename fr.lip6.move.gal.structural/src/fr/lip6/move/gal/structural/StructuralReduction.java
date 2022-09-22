@@ -2082,6 +2082,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 	
 	private int ruleFusePlaceByFuture(ReductionType rt) {
+		// we cannot allow this rule since one of the two places might not be markable
+		if (rt == ReductionType.LIVENESS)
+			return 0;
+		
 		IntMatrixCol tflowPT = flowPT.transpose();
 		List<Integer> ints = new ArrayList<>(tflowPT.getColumnCount());
 		for (int i=0 ; i < tflowPT.getColumnCount() ; i++ ) {
