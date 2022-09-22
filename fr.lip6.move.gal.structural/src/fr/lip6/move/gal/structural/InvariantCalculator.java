@@ -97,18 +97,43 @@ public class InvariantCalculator {
 		return new HashSet<>();
 	}
 	
-	public static Set<SparseIntArray> computePInvariants (IntMatrixCol pn, List<String> pnames, boolean onlyPositive) {
-		Set<SparseIntArray> invar ;
+	private static void cache(IntMatrixCol pn, Set<SparseIntArray> inv) {
+		synchronized (lock) {
+			last = new IntMatrixCol(pn);
+			lastInv = new HashSet<>(inv);
+		}
+	}
+
+	private static Set<SparseIntArray> checkCache(IntMatrixCol pn) {
+		synchronized (lock) {
+			if (pn.equals(last)) {
+				Logger.getLogger("fr.lip6.move.gal").info("Invariant cache hit.");
+				return lastInv;
+			} else {
+				return null;
+			}
+		}
+	}
+
+	public static Set<SparseIntArray> computePInvariants(IntMatrixCol pn, List<String> pnames, boolean onlyPositive) {
+		Set<SparseIntArray> invar = checkCache(pn);
+		if (invar != null) {
+			return invar;
+		}
 		long time = System.currentTimeMillis();
 		try {
-			invar = uniol.apt.analysis.invariants.InvariantCalculator.calcInvariantsPIPE(pn.transpose(), onlyPositive, pnames);		
-			//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-			Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
+			invar = uniol.apt.analysis.invariants.InvariantCalculator.calcInvariantsPIPE(pn.transpose(), onlyPositive,
+					pnames);
+			cache(pn, invar);
+			// InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+			Logger.getLogger("fr.lip6.move.gal").info(
+					"Computed " + invar.size() + " place invariants in " + (System.currentTimeMillis() - time) + " ms");
 		} catch (ArithmeticException e) {
 			invar = new HashSet<>();
-			Logger.getLogger("fr.lip6.move.gal").info("Invariants computation overflowed in "+ (System.currentTimeMillis()-time) +" ms");
+			Logger.getLogger("fr.lip6.move.gal")
+					.info("Invariants computation overflowed in " + (System.currentTimeMillis() - time) + " ms");
 		}
-		return invar;		
+		return invar;
 	}
 	/**
 	 * Worst case exponential (time and memory), returns semi-flows (with positive coefficients only) which are reputed easier to interpret.
@@ -119,6 +144,8 @@ public class InvariantCalculator {
 		return uniol.apt.analysis.invariants.InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE, true, pnames);
 	}
 	
-	
+	private static IntMatrixCol last = null;	
+	private static Object lock = new Object();
+	private static Set<SparseIntArray> lastInv = null;
 	
 }
