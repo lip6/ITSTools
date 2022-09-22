@@ -303,26 +303,8 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </license>
 
    <url>
-      <discovery label="PNML framework distribution" url="http://pnml.lip6.fr/pnmlframework/updatesite/"/>
+      <discovery label="PNML framework distribution" url="https://lip6.github.io/pnmlframework/"/>
    </url>
-
-   <requires>
-      <import plugin="fr.lip6.move.gal" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.equinox.common" version="3.5.0" match="greaterOrEqual"/>
-      <import plugin="org.antlr.runtime"/>
-      <import plugin="org.eclipse.xtext.util"/>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="fr.lip6.move.gal.pnml.togal"/>
-      <import plugin="fr.lip6.move.gal.itstools.binaries"/>
-      <import plugin="fr.lip6.move.gal.cegar"/>
-      <import plugin="fr.lip6.move.gal.gal2smt"/>
-      <import plugin="lip6.smtlib.SMT"/>
-      <import plugin="fr.lip6.move.gal.structural"/>
-      <import plugin="fr.lip6.move.gal.ltsmin.binaries"/>
-      <import plugin="fr.lip6.move.gal.struct2gal"/>
-      <import plugin="fr.lip6.move.gal.process"/>
-      <import plugin="org.antlr.runtime" version="4.7.2" match="greaterOrEqual"/>
-   </requires>
 
    <plugin
          id="fr.lip6.move.gal.logic"
