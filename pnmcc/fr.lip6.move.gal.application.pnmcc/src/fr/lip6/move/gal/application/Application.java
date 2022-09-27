@@ -805,7 +805,7 @@ public class Application implements IApplication, Ender {
 							GALSolver.checkInInitial(reader.getSpec(), skelProps, reader.getSPN().isSafe());
 						
 							for (fr.lip6.move.gal.structural.Property p : reader.getHLPN().getProperties()) {
-								Boolean b = doneProps.getValue(p.getName());
+								Boolean b = skelProps.getValue(p.getName());
 								if (b!=null) {
 									if ((p.getBody().getOp()==Op.AG && b)||(p.getBody().getOp()==Op.EF && !b)) {
 										doneProps.put(p.getName(), b, "CPN_APPROX");
