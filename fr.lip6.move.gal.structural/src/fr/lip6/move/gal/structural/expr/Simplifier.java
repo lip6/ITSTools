@@ -368,6 +368,10 @@ public class Simplifier {
 						}
 						// else : guard is false
 					}
+					if (res.size() == 2) {
+						// both 0 and 1 are compatible, so this is just true.
+						return Expression.constant(true);
+					}
 					return Expression.nop(Op.OR, res);				
 				} else if (l.getOp() == Op.PLACEREF && r.getOp() == Op.PLACEREF){
 					// case 2 : arbitrary variable vs variable (no add !)
