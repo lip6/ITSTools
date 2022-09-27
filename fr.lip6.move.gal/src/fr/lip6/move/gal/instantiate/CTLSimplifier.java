@@ -250,8 +250,8 @@ public class CTLSimplifier {
 					}
 				}
 			} else if (ef.getProp() instanceof AG && ((AG) ef.getProp()).getProp() instanceof EF && ((EF) ((AG) ef.getProp()).getProp()).getProp() instanceof AG) {
-				// EF AG EF AG f -> AG EF AG f 
-				EcoreUtil.replace(predicate, ef.getProp());
+				// EF AG EF AG f -> EF AG f 
+				EcoreUtil.replace(predicate, ((AG) ef.getProp()).getProp());
 			}	
 		} else if (predicate instanceof EG) {
 			EG eg = (EG) predicate;
