@@ -51,6 +51,16 @@ public class PropHandler extends DefaultHandler {
 			// NOTHING
 		} else if ("integer-le".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
+		} else if ("integer-lt".equals(baliseName)) { //$NON-NLS-1$
+			// NOTHING
+		} else if ("integer-eq".equals(baliseName)) { //$NON-NLS-1$
+			// NOTHING
+		} else if ("integer-neq".equals(baliseName)) { //$NON-NLS-1$
+			// NOTHING
+		} else if ("integer-ge".equals(baliseName)) { //$NON-NLS-1$
+			// NOTHING
+		} else if ("integer-gt".equals(baliseName)) { //$NON-NLS-1$
+			// NOTHING
 		} else if ("all-paths".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
 		} else if ("finally".equals(baliseName)) { //$NON-NLS-1$
@@ -65,6 +75,12 @@ public class PropHandler extends DefaultHandler {
 		} else if ("conjunction".equals(baliseName)) { //$NON-NLS-1$
 			// prepare Nary operator
 			stack.push(Op.AND);
+		} else if ("product".equals(baliseName)) { //$NON-NLS-1$
+			// prepare Nary operator
+			stack.push(Op.MULT);
+		} else if ("sum".equals(baliseName)) { //$NON-NLS-1$
+			// prepare Nary operator
+			stack.push(Op.ADD);
 		} else if ("until".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
 		} else if ("before".equals(baliseName)) { //$NON-NLS-1$
@@ -117,6 +133,16 @@ public class PropHandler extends DefaultHandler {
 			
 		} else if ("integer-le".equals(baliseName)) { //$NON-NLS-1$
 			popBinary(Op.LEQ);
+		} else if ("integer-lt".equals(baliseName)) { //$NON-NLS-1$
+			popBinary(Op.LT);
+		} else if ("integer-eq".equals(baliseName)) { //$NON-NLS-1$
+			popBinary(Op.EQ);
+		} else if ("integer-neq".equals(baliseName)) { //$NON-NLS-1$
+			popBinary(Op.NEQ);
+		} else if ("integer-ge".equals(baliseName)) { //$NON-NLS-1$
+			popBinary(Op.GEQ);
+		} else if ("integer-gt".equals(baliseName)) { //$NON-NLS-1$
+			popBinary(Op.GT);
 		} else if ("negation".equals(baliseName)) { //$NON-NLS-1$
 			stack.push(Expression.not((Expression) stack.pop()));
 		} else if ("is-fireable".equals(baliseName)) { //$NON-NLS-1$
@@ -152,6 +178,10 @@ public class PropHandler extends DefaultHandler {
 			popNary(Op.OR);
 		} else if ("conjunction".equals(baliseName)) { //$NON-NLS-1$
 			popNary(Op.AND);
+		} else if ("product".equals(baliseName)) { //$NON-NLS-1$
+			popNary(Op.MULT);
+		} else if ("sum".equals(baliseName)) { //$NON-NLS-1$
+			popNary(Op.ADD);
  		} else if ("transition".equals(baliseName)) {
 			String name = (String) stack.pop();
 			NaryOp enab = (NaryOp) stack.peek();
