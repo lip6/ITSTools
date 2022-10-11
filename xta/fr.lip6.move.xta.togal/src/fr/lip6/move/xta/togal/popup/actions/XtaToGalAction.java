@@ -83,7 +83,7 @@ public abstract class XtaToGalAction implements IObjectActionDelegate {
 					FileOutputStream out = new FileOutputStream(new File(outpath));
 					out.write(0);
 					out.close();					
-					fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
+					fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath, true);
 					java.lang.System.err.println("GAL model written to file: " + outpath);
 					sb.append(" " + outpath);
 					
@@ -96,7 +96,7 @@ public abstract class XtaToGalAction implements IObjectActionDelegate {
 					FileOutputStream out2 = new FileOutputStream(new File(outpath2));
 					out2.write(0);
 					out2.close();					
-					fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath2);
+					fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath2, true);
 					java.lang.System.err.println("GAL flat model written to file: " + outpath2);
 					sb.append(" " + outpath2);
 					
