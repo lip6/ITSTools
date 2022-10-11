@@ -338,7 +338,7 @@ public class DeadlockTester {
 		try {				
 			// Step 1 : go for solveWithReals = true;
 			
-			replies = verifyPossible(sr, properties, propertiesWithSE, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, solveWithReal, parikhs, pors,representative, rfc, 9000, timeout, null, done, true);
+			replies = verifyPossible(sr, properties, propertiesWithSE, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, solveWithReal, parikhs, pors,representative, rfc, 9000, timeout, null, done, withWitness);
 			reportReplies(replies,true,"all constraints",time);
 			if (replies.contains("real")) {
 				for (int i=0; i < tocheck.size() ; i++) {
@@ -349,10 +349,11 @@ public class DeadlockTester {
 				// Step 2 : go for integer domain
 				time = System.currentTimeMillis();
 				solveWithReal = false;
-				replies = verifyPossible(sr, properties, propertiesWithSE, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, solveWithReal, parikhs, pors,representative, rfc, 9000, timeout, null, done, true);
+				replies = verifyPossible(sr, properties, propertiesWithSE, solverPath, sr.isSafe(), sumMatrix, tnames, invar, invarT, solveWithReal, parikhs, pors,representative, rfc, 9000, timeout, null, done, withWitness);
 				reportReplies(replies,false,"all constraints",time);
 			}
 		} catch (RuntimeException re) {
+			re.printStackTrace();
 			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re.getMessage().substring(0, Math.min(50, re.getMessage().length())) + "... while checking expressions."); 
 			
 			reportReplies(replies, solveWithReal, "all constraints", time);
