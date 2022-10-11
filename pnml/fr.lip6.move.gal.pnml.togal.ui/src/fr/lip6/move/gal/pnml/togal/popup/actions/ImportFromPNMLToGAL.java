@@ -66,7 +66,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 				if (spec.getMain() == null) {
 					spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
 				}
-				SerializationUtil.systemToFile(spec,file.getLocationURI().getPath()+".img.gal");
+				SerializationUtil.systemToFile(spec,file.getLocationURI().getPath()+".img.gal",true);
 				if (trans.getOrder() != null) {
 					getLog().info("Applying decomposition : " + trans.getOrder());
 					GALRewriter.flatten(spec, true);
@@ -123,7 +123,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 			throws FileNotFoundException, IOException {	
 		String outpath = uri.getPath() + ".gal";
 
-		SerializationUtil.systemToFile(spec,outpath);
+		SerializationUtil.systemToFile(spec,outpath, true);
 	}
 
 
