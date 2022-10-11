@@ -844,7 +844,7 @@ public class Application implements IApplication, Ender {
 					specnocol.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 					if (pwd.contains("COL") || new File(pwd + "/model.pnml").length() < 1000000) {
 						String outpath = pwd + "/model.pnml.unc.gal";
-						SerializationUtil.systemToFile(specnocol, outpath);
+						SerializationUtil.systemToFile(specnocol, outpath, true);
 					}
 					INextBuilder nb = INextBuilder.build(specnocol);
 					IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);
