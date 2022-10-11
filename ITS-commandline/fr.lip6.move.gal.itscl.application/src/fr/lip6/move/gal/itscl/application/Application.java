@@ -157,14 +157,7 @@ public class Application implements IApplication {
 	}
 	
 	public void outputGalFile(Specification spec, String outpath) throws IOException {
-		if (! spec.getProperties().isEmpty()) {
-			List<Property> props = new ArrayList<Property>(spec.getProperties());
-			spec.getProperties().clear();
-			SerializationUtil.systemToFile(spec, outpath);
-			spec.getProperties().addAll(props);
-		} else {
-			SerializationUtil.systemToFile(spec, outpath);
-		}
+		SerializationUtil.systemToFile(spec, outpath, false);
 	}
 	
 	private CommandLine buildCommandLine(String modelff, Tool tool) throws IOException {
