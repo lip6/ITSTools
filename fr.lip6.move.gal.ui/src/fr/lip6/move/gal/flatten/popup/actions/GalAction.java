@@ -62,7 +62,7 @@ public abstract class GalAction extends FileAction {
 			FileOutputStream out = new FileOutputStream(new File(outpath));
 			out.write(0);
 			out.close();
-			SerializationUtil.systemToFile(s,outpath);
+			SerializationUtil.systemToFile(s,outpath,true);
 			FileUtils.refreshDisplay(outpath);
 			getLog().info("GAL model written to file : " +outpath);
 			log.append("  " + outpath);
