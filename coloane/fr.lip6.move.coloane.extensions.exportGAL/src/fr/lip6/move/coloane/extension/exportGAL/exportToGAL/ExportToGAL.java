@@ -453,7 +453,7 @@ public class ExportToGAL implements IExportTo {
 			Simplifier.simplify(gal);
 			Specification spec = gf.createSpecification();
 			spec.getTypes().add(gal);
-			SerializationUtil.systemToFile(spec, filePath);
+			SerializationUtil.systemToFile(spec, filePath, true);
 		} catch (FileNotFoundException fe) {
 			Logger.getLogger("fr.lip6.move.coloane.core").warning("Echec lors de la création du fichier : Nom de fichier invalide");
 			throw new ExtensionException("Invalid filename !");
