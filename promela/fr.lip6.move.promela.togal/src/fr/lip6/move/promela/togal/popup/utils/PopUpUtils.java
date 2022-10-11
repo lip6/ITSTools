@@ -28,7 +28,7 @@ public class PopUpUtils {
 		out.write(0);
 		out.close();
 
-		SerializationUtil.systemToFile(galSpec, outPath);
+		SerializationUtil.systemToFile(galSpec, outPath, true);
 		java.lang.System.err.println("GAL model written to file: " + outPath);
 	}
 
