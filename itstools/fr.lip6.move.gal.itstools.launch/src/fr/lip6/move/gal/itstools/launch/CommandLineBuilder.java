@@ -81,7 +81,7 @@ public class CommandLineBuilder {
 			if (spec.getMain() instanceof CompositeTypeDeclaration) {
 				FusionBuilder.toSingleGAL(spec);
 				try {
-					SerializationUtil.systemToFile(spec, workingDirectory.getPath() + "/" + oriPath.lastSegment()+".fuse.gal");
+					SerializationUtil.systemToFile(spec, workingDirectory.getPath() + "/" + oriPath.lastSegment()+".fuse.gal", true);
 				} catch (IOException e) {
 					e.printStackTrace();
 					throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, "Unable to create working file :"+workingDirectory.getPath() + "/" + oriPath.lastSegment()+".fuse.gal"+". Please check location is open to write in.",e));
@@ -129,9 +129,9 @@ public class CommandLineBuilder {
 		File modelff = new File(tmpPath);
 
 		List<Property> props = new ArrayList<Property>(spec.getProperties());
-		spec.getProperties().clear();
+		
 		try {
-			SerializationUtil.systemToFile(spec, tmpPath);
+			SerializationUtil.systemToFile(spec, tmpPath,false);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, "Unable to create working file :"+tmpPath+". Please check location is open to write in.",e));
