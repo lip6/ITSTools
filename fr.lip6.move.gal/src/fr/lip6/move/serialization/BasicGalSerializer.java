@@ -81,11 +81,12 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 
 	private boolean isStrict;
 	private final String SPACE ;
+	private boolean skipProperties=false;
 	
 	public BasicGalSerializer() {
 		this(false);
 	}
-	
+		
 	public BasicGalSerializer(boolean strictForITS) {
 		if (strictForITS) {
 			isStrict = true;
@@ -96,6 +97,10 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		}
 	}
 
+	public void setSkip (boolean skipProperties) {
+		this.skipProperties = skipProperties;
+	}
+	
 	protected IndentedPrintWriter pw;
 	private boolean isCTL = false;
 	private boolean isInQRef;
@@ -148,9 +153,10 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		if (spec.getMain() != null) {
 			pw.println("main "+ spec.getMain().getName() +" ;");
 		}
-		for (Property prop : spec.getProperties()) {
-			caseProperty(prop);
-		}
+		if (!skipProperties)
+			for (Property prop : spec.getProperties()) {
+				caseProperty(prop);
+			}
 		return true;
 	}
 	

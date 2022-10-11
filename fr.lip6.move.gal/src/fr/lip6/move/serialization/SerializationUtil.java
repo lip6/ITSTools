@@ -59,15 +59,16 @@ public class SerializationUtil  {
 	{
 		Specification spec = GalFactory.eINSTANCE.createSpecification();
 		spec.getTypes().add(system);
-		systemToFile(spec, filename);
+		systemToFile(spec, filename, true);
 	}
 	
 	/**
 	 * This method serialize a Gal System in the file {@code filename} 
 	 * @param system The root of Gal system
 	 * @param filename The output filename.
+	 * @param withProperties 
 	 */
-	public static void systemToFile(Specification system, final String filename) throws IOException
+	public static void systemToFile(Specification system, final String filename, boolean withProperties) throws IOException
 	{
 		long debut = System.currentTimeMillis();
 
@@ -91,6 +92,7 @@ public class SerializationUtil  {
 			
 			FileOutputStream os = new FileOutputStream(filename);
 			BasicGalSerializer bser = new BasicGalSerializer();
+			bser.setSkip(! withProperties);
 			BufferedOutputStream buff = new BufferedOutputStream(os);
 			bser.serialize(system, buff);
 //			system.eResource().save(os, map);
