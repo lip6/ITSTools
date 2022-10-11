@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
+
+import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Property;
@@ -44,6 +46,7 @@ public class ITSRunner extends AbstractRunner {
 	private Thread itsReader;
 	private long timeout;
 	private String orderff;
+	private TGBA tgba=null;
 
 
 
@@ -58,7 +61,9 @@ public class ITSRunner extends AbstractRunner {
 		this.orderff = orderff;
 	}
 
-
+	public void setTGBA(TGBA prop) {
+		this.tgba = prop;
+	}
 
 	@Override
 	public void configure(Specification spec, DoneProperties doneProps) throws IOException {
@@ -400,14 +405,7 @@ public class ITSRunner extends AbstractRunner {
 		File file = Files.createTempFile(examination, ".gal").toFile();
 		if (DEBUG == 0) file.deleteOnExit();		
 		String outpath = file.getCanonicalPath();
-		if (! spec.getProperties().isEmpty()) {
-			List<Property> props = new ArrayList<Property>(spec.getProperties());
-			spec.getProperties().clear();
-			SerializationUtil.systemToFile(spec, outpath);
-			spec.getProperties().addAll(props);
-		} else {
-			SerializationUtil.systemToFile(spec, outpath);
-		}
+		SerializationUtil.systemToFile(spec, outpath, false);
 		return outpath;
 	}
 
