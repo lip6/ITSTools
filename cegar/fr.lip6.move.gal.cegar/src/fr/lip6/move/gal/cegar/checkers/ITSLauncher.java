@@ -73,7 +73,7 @@ public class ITSLauncher {
 			GALRewriter.flatten(spec, true);
 
 			// produce the model file
-			SerializationUtil.systemToFile(spec, modelff);
+			SerializationUtil.systemToFile(spec, modelff, false);
 
 			clb.setModelFile(modelff);
 			clb.setModelType("CGAL");
