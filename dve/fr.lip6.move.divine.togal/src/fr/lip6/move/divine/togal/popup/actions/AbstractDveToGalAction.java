@@ -151,7 +151,7 @@ public abstract class AbstractDveToGalAction implements IObjectActionDelegate {
 		out.write(0);
 		out.close();
 
-		fr.lip6.move.serialization.SerializationUtil.systemToFile(galSpec, outPath);
+		fr.lip6.move.serialization.SerializationUtil.systemToFile(galSpec, outPath,true);
 		java.lang.System.err.println("GAL model written to file: " + outPath);
 	}
 
