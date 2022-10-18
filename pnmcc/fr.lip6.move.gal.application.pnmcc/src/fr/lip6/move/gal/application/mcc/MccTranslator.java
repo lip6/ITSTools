@@ -17,6 +17,7 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.AF;
 import fr.lip6.move.gal.AG;
 import fr.lip6.move.gal.AU;
@@ -79,6 +80,7 @@ import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
+import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -101,6 +103,7 @@ public class MccTranslator {
 	private SparsePetriNet spn;
 	private static boolean withSeparation = false;
 	private static final int DEBUG = 0;
+	private TGBA tgba = null;
 	
 	public MccTranslator(String pwd, boolean useLouvain) {
 		this.folder = pwd;
@@ -112,6 +115,14 @@ public class MccTranslator {
 		simplifySPN(reduce, reduce);
 	}
 
+	public void setTgba(TGBA tgba) {
+		this.tgba = tgba;
+	}
+	
+	public TGBA getTgba() {
+		return tgba;
+	}
+	
 	public Specification getSpec() {
 		return spec;
 	}
@@ -725,6 +736,11 @@ public class MccTranslator {
 
 	public void rebuildSpecification(DoneProperties doneProps) {
 		Specification reduced = SpecBuilder.rebuildSpecification(getSPN());
+		if (tgba != null) {
+			for (AtomicProp atom : tgba.getAPs()) {
+				reduced.getProperties().add(toGal(atom, ((GALTypeDeclaration)reduced.getMain()).getVariables()));
+			}
+		}
 		for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
 			if (! doneProps.containsKey(prop.getName()))
 				reduced.getProperties().add(toGal(prop, ((GALTypeDeclaration)reduced.getMain()).getVariables()));
@@ -734,6 +750,15 @@ public class MccTranslator {
 		setSpec(reduced);		
 	}
 
+
+	private Property toGal(AtomicProp atom, EList<Variable> variables) {
+		Property img = GalFactory.eINSTANCE.createProperty();
+		img.setName(atom.getName());
+		fr.lip6.move.gal.AtomicProp aprop = GalFactory.eINSTANCE.createAtomicProp();
+		aprop.setPredicate(toGal(atom.getExpression(),variables));		
+		img.setBody(aprop);
+		return img;
+	}
 
 	private Property toGal(fr.lip6.move.gal.structural.Property prop, EList<Variable> variables) {
 		Property img = GalFactory.eINSTANCE.createProperty();
