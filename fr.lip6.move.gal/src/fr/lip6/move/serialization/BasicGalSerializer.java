@@ -16,6 +16,7 @@ import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayInstanceDeclaration;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.AtomicProp;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BitComplement;
 import fr.lip6.move.gal.BooleanExpression;
@@ -643,6 +644,13 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		return true;
 	}
 
+	@Override
+	public Boolean caseAtomicProp(AtomicProp np) {
+		pw.print(SPACE + "[atom] : " );
+		printPredicate(np.getPredicate());
+		return true;
+	}
+	
 	@Override
 	public Boolean caseCTLProp(CTLProp np) {
 		if (! isCTL) {
