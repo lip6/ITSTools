@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +47,7 @@ public class ITSRunner extends AbstractRunner {
 	private Thread itsReader;
 	private long timeout;
 	private String orderff;
-	private TGBA tgba=null;
+	private String outputPath;
 
 
 
@@ -59,10 +60,6 @@ public class ITSRunner extends AbstractRunner {
 		this.workFolder = workFolder;
 		this.timeout = timeout;
 		this.orderff = orderff;
-	}
-
-	public void setTGBA(TGBA prop) {
-		this.tgba = prop;
 	}
 
 	@Override
@@ -99,12 +96,36 @@ public class ITSRunner extends AbstractRunner {
 
 			if (doITS || onlyGal) {
 				String outpath = outputGalFile();
-				String ltlpath = outputPropertyFile();
-
-
 				cl = buildCommandLine(outpath, Tool.ltl);
-				cl.addArg("-LTL");
-				cl.addArg(ltlpath);	
+				
+				if (reader.getTgba() != null) {
+					TGBA tgba = reader.getTgba();
+					File curAut = Files.createTempFile("aut", ".hoa").toFile();
+					if (DEBUG == 0) curAut.deleteOnExit();
+					PrintWriter pw = new PrintWriter(curAut);
+					tgba.exportAsHOA(pw, false);
+					pw.close();
+					
+					cl.addArg("-hoa");
+					cl.addArg(curAut.getCanonicalPath());
+					
+					// We will put properties in a file
+					// Reachability
+					File file = Files.createTempFile(examination, ".prop").toFile();
+					if (DEBUG == 0) file.deleteOnExit();
+					String propPath = file.getCanonicalPath();	
+					SerializationUtil.serializePropertiesForITSTools(getOutputPath(), spec.getProperties(), propPath);
+					
+					cl.addArg("-atoms");
+					cl.addArg(propPath);
+							
+					
+				} else {
+					String ltlpath = outputPropertyFile();
+					cl.addArg("-LTL");
+					cl.addArg(ltlpath);	
+				}
+
 
 				cl.addArg("-c");
 				//cl.addArg("-SSLAP-FSA");
@@ -398,7 +419,7 @@ public class ITSRunner extends AbstractRunner {
 
 
 	private String getOutputPath() {
-		return workFolder + "/"+ examination +".pnml.gal";
+		return outputPath;
 	}
 
 	public String outputGalFile() throws IOException {
@@ -406,6 +427,7 @@ public class ITSRunner extends AbstractRunner {
 		if (DEBUG == 0) file.deleteOnExit();		
 		String outpath = file.getCanonicalPath();
 		SerializationUtil.systemToFile(spec, outpath, false);
+		outputPath = outpath;
 		return outpath;
 	}
 
