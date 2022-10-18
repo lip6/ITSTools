@@ -390,6 +390,11 @@ public class LTLPropertySolver {
 				verifyWithLTSmin(spnHOA, tgbak, doneProps, 15, spot);
 				if (doneProps.containsKey(propPN.getName())) 
 					return;
+				
+				MccTranslator reader2 = reader.copy();
+				reader2.setSpn(spnHOA, false);
+				reader2.setTgba(tgbak);
+				GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", solverPath, 15);
 			}
 			
 			// Last step, try exhaustive methods
@@ -404,6 +409,10 @@ public class LTLPropertySolver {
 				sr.setProtected(support);
 				try {
 					ReductionType rt = tgba.isStutterInvariant() ? ReductionType.SI_LTL : ReductionType.LTL; 
+					
+					// Danger here if TGBA became stutter inv, but property was not.
+					// rt = ReductionType.LTL;
+					
 					ReachabilitySolver.applyReductions(sr, rt, solverPath, true, true);			
 				} catch (GlobalPropertySolvedException gse) {
 					System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
