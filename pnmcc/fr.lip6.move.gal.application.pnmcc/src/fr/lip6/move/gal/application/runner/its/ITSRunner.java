@@ -295,8 +295,13 @@ public class ITSRunner extends AbstractRunner {
 							String [] tab = line.split(" ");
 							int formindex = Integer.parseInt(tab[1]);
 							String res = tab[3];
-							String pname = reader.getSpec().getProperties().get(formindex).getName();
-							seen.put(pname, "TRUE".equals(res),"DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
+							if (reader.getTgba() != null) {
+								String pname = reader.getTgba().getName();
+								seen.put(pname, "TRUE".equals(res),"KNOWLEDGE HOA DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
+							} else {
+								String pname = reader.getSpec().getProperties().get(formindex).getName();
+								seen.put(pname, "TRUE".equals(res),"DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
+							}
 						}
 					}
 
