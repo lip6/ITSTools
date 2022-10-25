@@ -123,7 +123,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 	
 	
-	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL, LTL, LIVENESS, STATESPACE, SLCL_LTL, SI_CTL }
+	public enum ReductionType { DEADLOCK, REACHABILITY, SI_LTL, LTL, LIVENESS, STATESPACE, LI_LTL, SI_CTL, NONE }
 	public int reduce (ReductionType rt) throws NoDeadlockExists, DeadlockFound {
 		//ruleSeqTrans(trans,places);
 		int initP = pnames.size();
@@ -154,7 +154,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		if (findAndReduceSCCSuffixes(rt)) 
 			total++;
 		
-		if (rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL) {
+		if (rt == ReductionType.SI_LTL || rt == ReductionType.LI_LTL || rt == ReductionType.SI_CTL) {
 			totaliter += ruleReducePlaces(rt,false,true);
 		}
 		
@@ -238,16 +238,16 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				totaliter += ruleRedundantCompositions(rt);
 			}
 			
-			if (totaliter == 0 && rt == ReductionType.SAFETY) {
+			if (totaliter == 0 && rt == ReductionType.REACHABILITY) {
 				totaliter += ruleFreeAgglo(false);
 			}
-			if (totaliter == 0 && rt == ReductionType.SAFETY) {
+			if (totaliter == 0 && rt == ReductionType.REACHABILITY) {
 				totaliter += ruleFreeAgglo(true);
 			}
-			if (totaliter == 0 && rt == ReductionType.SAFETY) {
+			if (totaliter == 0 && rt == ReductionType.REACHABILITY) {
 				totaliter += rulePartialFreeAgglo();
 			}			
-			if (totaliter == 0 && (rt == ReductionType.SAFETY || ( (rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL) && ! keepImage)) ) {
+			if (totaliter == 0 && (rt == ReductionType.REACHABILITY || ( (rt == ReductionType.SI_LTL || rt == ReductionType.LI_LTL || rt == ReductionType.SI_CTL) && ! keepImage)) ) {
 				// this rule is almost legitimate for SI_LTL
 				// but not quite
 				
@@ -377,7 +377,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			});
 		}
 		
-		if (rt != ReductionType.LTL && rt != ReductionType.SLCL_LTL) {
+		if (rt != ReductionType.LTL && rt != ReductionType.LI_LTL) {
 			IntMatrixCol tflowPT = flowPT.transpose();
 			tids.sort((a,b) -> -Integer.compare(flowPT.getColumn(a).size()+ flowTP.getColumn(a).size(), flowPT.getColumn(b).size()+ flowTP.getColumn(b).size()) );
 			for (int id=0, e=tids.size() ; id < e ; id++) {
@@ -485,7 +485,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				SparseIntArray ttp = tflowTP.getColumn(pid);
 				SparseIntArray tpt = tflowPT.getColumn(pid);
 				// avoid any potential explosion
-				if (rt != ReductionType.DEADLOCKS && ttp.size() > 1) {
+				if (rt != ReductionType.DEADLOCK && ttp.size() > 1) {
 					continue;
 				}
 				// feeders and consumers should not intersect
@@ -752,14 +752,14 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 	public int ruleReduceTrans(ReductionType rt) throws NoDeadlockExists {
 		int reduced = 0;
-		if (rt == ReductionType.SAFETY || rt == ReductionType.STATESPACE) {
+		if (rt == ReductionType.REACHABILITY || rt == ReductionType.STATESPACE) {
 			
 			List<Integer> todrop = new ArrayList<>();
 			for (int i = tnames.size()-1 ;  i >= 0 ; i--) {
-				if ( (rt == ReductionType.SAFETY || rt == ReductionType.STATESPACE) && flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
+				if ( (rt == ReductionType.REACHABILITY || rt == ReductionType.STATESPACE) && flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
 					// transitions with no effect => no use to safety
 					todrop.add(i);
-				} else if (rt == ReductionType.SAFETY && flowTP.getColumn(i).size() == 0 && ! touches(i)) {
+				} else if (rt == ReductionType.REACHABILITY && flowTP.getColumn(i).size() == 0 && ! touches(i)) {
 					// sink transitions that are stealing tokens from the net are not helpful
 					// they lead to strictly weaker nets
 					todrop.add(i);
@@ -774,7 +774,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		if (reduced > 0) {
 			System.out.println("Reduce isomorphic transitions removed "+ reduced +" transitions.");
 		}
-		if (rt == ReductionType.DEADLOCKS) {
+		if (rt == ReductionType.DEADLOCK) {
 			for (int i = 0; i < flowPT.getColumnCount() ; i++) {
 				if (flowPT.getColumn(i).size()==0) {
 					System.out.println("Found a source transition so no deadlocks exist. place count " + pnames.size() + " transition count " + tnames.size());					
@@ -960,7 +960,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		}
 		
 		if (rt != ReductionType.LTL && !keepImage && moveTokens && rt != ReductionType.LIVENESS) {
-			if ((rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL)  && marks.stream().mapToInt(i->i).sum() == 1) {
+			if ((rt == ReductionType.SI_LTL || rt == ReductionType.LI_LTL || rt == ReductionType.SI_CTL)  && marks.stream().mapToInt(i->i).sum() == 1) {
 				int pid = marks.indexOf(1);
 				SparseIntArray from = tflowPT.getColumn(pid);
 				SparseIntArray to = tflowTP.getColumn(pid);
@@ -1059,7 +1059,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		Set<Integer> moredel = new HashSet<>();
 		// Loop back rule is currently disabled in DEADLOCK, we need stronger conditions on other places fed by forward transition
 		// find a place that has a single input
-		for (int pid = 0, e=tflowPT.getColumnCount() ; rt==ReductionType.SAFETY && pid < e ; pid++ ) {
+		for (int pid = 0, e=tflowPT.getColumnCount() ; rt==ReductionType.REACHABILITY && pid < e ; pid++ ) {
 			// and is initially empty
 			if (marks.get(pid) > 0) {
 				continue;
@@ -1115,7 +1115,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 							e1.printStackTrace();
 						}
 						// also replace if deadlock mode by a loop
-						if (rt == ReductionType.DEADLOCKS) {			
+						if (rt == ReductionType.DEADLOCK) {			
 							toloop.add(feeder);
 						}
 						break;
@@ -1654,7 +1654,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			if (!ok) {
 				continue;
 			}
-			if (rt==ReductionType.SAFETY &&  ! untouchable.isEmpty() && touches(Fids)) {
+			if (rt==ReductionType.REACHABILITY &&  ! untouchable.isEmpty() && touches(Fids)) {
 				for (int h : Hids) {
 					if (SparseIntArray.sumProd(1, flowPT.getColumn(h), -1, flowTP.getColumn(h)).size()>1) {
 						ok = false;
@@ -1663,7 +1663,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				}
 				if (!ok)
 					continue;				
-			} else if ((rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL) && touches(Fids)) {
+			} else if ((rt == ReductionType.SI_LTL || rt == ReductionType.LI_LTL || rt == ReductionType.SI_CTL) && touches(Fids)) {
 				continue;
 			}
 
@@ -2419,7 +2419,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		
 		// extract all transitions to a PxP matrix
 		IntMatrixCol graph;
-		if (rt == ReductionType.DEADLOCKS) {
+		if (rt == ReductionType.DEADLOCK) {
 			Set<Integer> stablePlaces = new HashSet<>();
 			Set<Integer> stableTrans = new HashSet<>();
 			computeStabilizing(pn, stablePlaces,stableTrans);
@@ -2430,7 +2430,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		// the set of nodes that are "safe"
 		Set<Integer> safeNodes = computeSafeNodes(pn, rt, graph, untouchable);
 		
-		if (rt == ReductionType.DEADLOCKS) {
+		if (rt == ReductionType.DEADLOCK) {
 			// rebuild with all the nodes in there for prefix computation
 			graph = buildGraph(pn, rt, -1);
 		}
@@ -2449,7 +2449,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			if (DEBUG >= 3) {
 				FlowPrinter.drawNet(pn, "Safe nodes + prefix", safeNodes, Collections.emptySet());
 			}
-			if (rt == ReductionType.SI_LTL || rt == ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL) {
+			if (rt == ReductionType.SI_LTL || rt == ReductionType.LI_LTL || rt == ReductionType.SI_CTL) {
 				// we need to be a bit more careful here
 				for (int tid=0, e=pn.getTransitionCount() ; tid < e ; tid++) {
 					// consumes in a Safe node ?
@@ -2519,10 +2519,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			// TODO : for LTL, we need to know if we have a free stutter available or not.
 			for (int j =0; j < hTP.size() ; j++) {
 				// additional condition : the transition must update the target				
-				if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL || rt==ReductionType.DEADLOCKS || hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
+				if (rt==ReductionType.SI_LTL || rt==ReductionType.LI_LTL || rt == ReductionType.SI_CTL || rt==ReductionType.DEADLOCK || hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
 					for (int i=0; i < hPT.size() ; i++) {
 						// suppress self edges
-						if (rt==ReductionType.SI_LTL || rt==ReductionType.SLCL_LTL || rt == ReductionType.SI_CTL || rt==ReductionType.DEADLOCKS ||  hTP.keyAt(j) != hPT.keyAt(i)) {
+						if (rt==ReductionType.SI_LTL || rt==ReductionType.LI_LTL || rt == ReductionType.SI_CTL || rt==ReductionType.DEADLOCK ||  hTP.keyAt(j) != hPT.keyAt(i)) {
 							// this is the transposed graph					
 							graph.set(hTP.keyAt(j), hPT.keyAt(i), 1);
 						}
@@ -2540,14 +2540,14 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		Set<Integer> safeNodes = new HashSet<>(nbP*2);
 
 		// Deadlock case : seed from nodes that are in an SCC
-		if (rt==ReductionType.SI_LTL || rt == ReductionType.SI_CTL || rt==ReductionType.SLCL_LTL || rt==ReductionType.DEADLOCKS) {
+		if (rt==ReductionType.SI_LTL || rt == ReductionType.SI_CTL || rt==ReductionType.LI_LTL || rt==ReductionType.DEADLOCK) {
 
 			List<List<Integer>> sccs = kosarajuSCC(graph);
 
 			// remove elementary SCC that are not actually their own successor
 			sccs.removeIf(scc -> scc.size()==1 && graph.get(scc.get(0), scc.get(0))==0);
 
-			if (sccs.isEmpty() && rt==ReductionType.DEADLOCKS) {
+			if (sccs.isEmpty() && rt==ReductionType.DEADLOCK) {
 				System.out.println("Complete graph has no SCC; deadlocks are unavoidable." +" place count " + pn.getPlaceCount() + " transition count " + pn.getTransitionCount());
 				throw new DeadlockFound();
 			}
@@ -2563,7 +2563,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				safeNodes.addAll(s);
 			
 		} 
-		if (rt==ReductionType.SI_LTL || rt == ReductionType.SI_CTL||  rt==ReductionType.SLCL_LTL || rt == ReductionType.SAFETY) {
+		if (rt==ReductionType.SI_LTL || rt == ReductionType.SI_CTL||  rt==ReductionType.LI_LTL || rt == ReductionType.REACHABILITY) {
 			// Safety case : seed from variables of interest only
 			for (int i = untouchable.nextSetBit(0); i >= 0; i = untouchable.nextSetBit(i+1)) {
 				// operate on index i here

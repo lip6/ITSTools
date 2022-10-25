@@ -124,7 +124,7 @@ public class GraphSuffix {
 		}
 		sr.setProtected(bs);
 
-		if (sr.findFreeSCC(ReductionType.SAFETY)) {
+		if (sr.findFreeSCC(ReductionType.REACHABILITY)) {
 			doneProps.put("unMarkedSccTest", false, "TRIVIAL_UNMARKED_SCC_TEST");
 			reduced += spn.getPlaceCount() - sr.getPlaceCount();
 			spn.readFrom(sr);

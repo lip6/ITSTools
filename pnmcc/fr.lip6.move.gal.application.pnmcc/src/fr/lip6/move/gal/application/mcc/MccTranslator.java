@@ -345,7 +345,7 @@ public class MccTranslator {
 			if (!redPlace || !redTrans) {
 				spn = hlpn.unfold(ReductionType.STATESPACE);
 			} else {
-				spn = hlpn.unfold(ReductionType.SAFETY);
+				spn = hlpn.unfold(ReductionType.REACHABILITY);
 			}
 			if (DEBUG >= 1) FlowPrinter.drawNet(new StructuralReduction(spn), "Unfolded");
 		} 

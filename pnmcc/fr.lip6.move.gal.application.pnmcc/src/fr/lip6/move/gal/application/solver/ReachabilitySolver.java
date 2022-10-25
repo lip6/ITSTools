@@ -183,9 +183,9 @@ public class ReachabilitySolver {
 				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 				
 				sr.setProtected(support);
-				if (applyReductions(sr, ReductionType.SAFETY, solverPath, false,iterations==0)) {
+				if (applyReductions(sr, ReductionType.REACHABILITY, solverPath, false,iterations==0)) {
 					iter++;					
-				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, ReductionType.SAFETY, solverPath, true,false)) {
+				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, ReductionType.REACHABILITY, solverPath, true,false)) {
 					iter++;
 				}
 				// FlowPrinter.drawNet(sr, "Final Model", 1000);
@@ -253,7 +253,7 @@ public class ReachabilitySolver {
 				// try to disprove on an overapprox.
 				StructuralReduction sr = new StructuralReduction(reader.getSPN());
 				sr.abstractReads();
-				sr.reduce(ReductionType.SAFETY);
+				sr.reduce(ReductionType.REACHABILITY);
 				
 				List<Integer> tocheckIndexes = new ArrayList<>();
 				SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
@@ -439,7 +439,7 @@ public class ReachabilitySolver {
 			cont = false;
 			
 			// Quick test for deadlocks, no more transitions.
-			if (rt == ReductionType.DEADLOCKS && sr.getTnames().isEmpty()) {
+			if (rt == ReductionType.DEADLOCK && sr.getTnames().isEmpty()) {
 				throw new DeadlockFound();
 			}
 			
@@ -469,7 +469,7 @@ public class ReachabilitySolver {
 			}
 			if (lastReduction == 5) {
 				break;
-			} else if (!cont && rt == ReductionType.SAFETY && withSMT) {
+			} else if (!cont && rt == ReductionType.REACHABILITY && withSMT) {
 				if (sr.ruleFreeAgglo(true) > 0) {
 					cont=true;
 					lastReduction = 5;
@@ -520,7 +520,7 @@ public class ReachabilitySolver {
 		if (hasReduced)
 			return lastReduction;
 		if (lastReduction != 3) {
-			if (rt != ReductionType.LIVENESS && rt != ReductionType.LTL && rt != ReductionType.SLCL_LTL &&(reduced == 0 || iteration==0)) {
+			if (rt != ReductionType.LIVENESS && rt != ReductionType.LTL && rt != ReductionType.LI_LTL &&(reduced == 0 || iteration==0)) {
 				List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
 				if (! tokill.isEmpty()) {
 					System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );

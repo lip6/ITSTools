@@ -251,7 +251,7 @@ public class LTLPropertySolver {
 				sr.setProtected(support);
 
 				try {
-					ReductionType rt = ReductionType.SLCL_LTL ; 
+					ReductionType rt = ReductionType.LI_LTL ; 
 					ReachabilitySolver.applyReductions(sr, rt, solverPath, true, true);			
 				} catch (GlobalPropertySolvedException gse) {
 					System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
@@ -1190,7 +1190,7 @@ public class LTLPropertySolver {
 	private boolean testAFDead(ISparsePetriNet spn) {
 		try {
 			if (spn.getFlowPT().getColumns().stream().allMatch(c -> c.size() > 0)) {
-				StructuralReduction.findSCCSuffixes(spn, ReductionType.DEADLOCKS, new BitSet());
+				StructuralReduction.findSCCSuffixes(spn, ReductionType.DEADLOCK, new BitSet());
 			}
 		} catch (DeadlockFound e) {
 			// AF dead is true

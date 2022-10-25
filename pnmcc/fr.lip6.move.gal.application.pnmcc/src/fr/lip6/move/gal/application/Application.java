@@ -137,7 +137,8 @@ public class Application implements IApplication, Ender {
 	private static final String NOSLCLTEST="--no-slcl";
 	private static final String NOKNOWLEDGE="--no-knowledge";
 	private static final String NOSTUTTERLTL="--no-stutterltl";
-	
+	private static final String REDUCE="--reduce";
+		
 	
 	private List<IRunner> runners = new ArrayList<>();
 
@@ -224,6 +225,8 @@ public class Application implements IApplication, Ender {
 		
 		boolean analyzeSensitivity = false;
 		long timeout = 3600;
+		
+		ReductionType redForExport = ReductionType.NONE;
 
 		for (int i = 0; i < args.length; i++) {
 			if (PNFOLDER.equals(args[i])) {
@@ -252,6 +255,14 @@ public class Application implements IApplication, Ender {
 				readGAL = args[++i];
 			} else if (TIMEOUT.equals(args[i])) {
 				timeout = Long.parseLong(args[++i]);
+			} else if (REDUCE.equals(args[i])) {
+				String mode = args[++i];
+				try {
+					redForExport = ReductionType.valueOf(mode);
+				} catch (IllegalArgumentException iae) {
+					System.err.println("Sorry this reduction mode '"+ mode +"' is not recognized. Please use one of " + Arrays.toString(ReductionType.values()));
+					return IApplication.EXIT_OK;
+				}
 			} else if (REBUILDPNML.equals(args[i])) {
 				rebuildPNML = true;
 			} else if (CEGAR.equals(args[i])) {
@@ -474,6 +485,44 @@ public class Application implements IApplication, Ender {
 		// uses a SAX parser to load to Logic MM, then an M2M to GAL properties.
 		reader.loadProperties(examination);
 		
+		if (redForExport != ReductionType.NONE) {
+			// reduce the model for each property
+			reader.createSPN(false, false);
+			SparsePetriNet spn = reader.getSPN();
+			if (spn.getProperties().isEmpty()) {
+				StructuralReduction sr = new StructuralReduction(spn);
+				sr.reduce(redForExport);
+				spn.readFrom(sr);
+				String outsr = pwd + "/model."+redForExport+".pnml";
+				StructuralToPNML.transform(spn, outsr);
+			} else {
+				List<fr.lip6.move.gal.structural.Property> props = new ArrayList<>(spn.getProperties());
+				spn.getProperties().clear();
+				for (int index = 0; index < props.size() ; index++) {
+					SparsePetriNet spncopy = new SparsePetriNet(spn);
+					spncopy.getProperties().add(props.get(index));
+					
+					StructuralReduction sr = new StructuralReduction(spncopy);
+					sr.reduce(redForExport);
+					spncopy.readFrom(sr);
+					
+					String outform = pwd + "/" + examination + "." + index + "."+redForExport+".xml";
+					boolean usesConstants = PropertiesToPNML.transform(spncopy, outform, doneProps);
+					
+					if (usesConstants) {
+						// we exported constants to a place with index = current place count
+						// to be consistent now add a trivially constant place with initial marking 1
+						// token
+						System.out.println("Added a place called one to the net.");
+						spn.addPlace("one", 1);
+					}
+					String outsr = pwd + "/model."+index+ "."+redForExport+".pnml";
+					StructuralToPNML.transform(spncopy, outsr);					
+				}
+			}
+			// output the model
+			
+		}
 		
 		if (unfold) {
 			SparsePetriNet spn;
@@ -486,7 +535,7 @@ public class Application implements IApplication, Ender {
 					} else if (hlpn.getProperties().stream().anyMatch(p->p.getType()==PropertyType.BOUNDS) || hlpn.getProperties().isEmpty()){
 						spn = hlpn.unfold(ReductionType.STATESPACE);
 					} else {
-						spn = hlpn.unfold(ReductionType.SAFETY);
+						spn = hlpn.unfold(ReductionType.REACHABILITY);
 					}
 				} else {
 					spn = reader.getSPN();
@@ -525,7 +574,7 @@ public class Application implements IApplication, Ender {
 							ReachabilitySolver.applyReductions(sr, ReductionType.LTL, solverPath, true, true);
 						}
 					} else {
-						ReachabilitySolver.applyReductions(sr, ReductionType.SAFETY, solverPath, true, true);
+						ReachabilitySolver.applyReductions(sr, ReductionType.REACHABILITY, solverPath, true, true);
 					}
 					copy.getSPN().readFrom(sr);
 					
@@ -767,7 +816,7 @@ public class Application implements IApplication, Ender {
 						skel.removeConstantPlaces();
 						try {
 							if (skel.getFlowPT().getColumns().stream().allMatch(c -> c.size() > 0)) {
-								StructuralReduction.findSCCSuffixes(skel, ReductionType.DEADLOCKS, new BitSet());
+								StructuralReduction.findSCCSuffixes(skel, ReductionType.DEADLOCK, new BitSet());
 							}
 						} catch (DeadlockFound e) {
 							// AF dead is true

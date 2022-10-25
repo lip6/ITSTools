@@ -271,9 +271,9 @@ public class UpperBoundsSolver {
 				}
 				
 				try {
-					if (ReachabilitySolver.applyReductions(sr, ReductionType.SAFETY, solverPath, false,iterations==0)) {
+					if (ReachabilitySolver.applyReductions(sr, ReductionType.REACHABILITY, solverPath, false,iterations==0)) {
 						iter++;					
-					} else if (iterations>0 && iter==0  /*&& doneSums*/ && ReachabilitySolver.applyReductions(sr, ReductionType.SAFETY, solverPath, true,false)) {
+					} else if (iterations>0 && iter==0  /*&& doneSums*/ && ReachabilitySolver.applyReductions(sr, ReductionType.REACHABILITY, solverPath, true,false)) {
 						iter++;
 					}
 				} catch (GlobalPropertySolvedException e) {
