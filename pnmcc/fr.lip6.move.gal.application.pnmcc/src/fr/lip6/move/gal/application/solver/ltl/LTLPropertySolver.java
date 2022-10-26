@@ -57,7 +57,6 @@ public class LTLPropertySolver {
 	private String solverPath;
 	private String workDir;
 	private boolean exportLTL;
-	public static boolean noSLCLtest=false;
 	public static boolean noKnowledgetest=false;
 	public static boolean noStutterTest=false;
 
@@ -201,101 +200,6 @@ public class LTLPropertySolver {
 		return solved;
 	}
 	
-	public int runSLCLLTLTest(MccTranslator reader, DoneProperties doneProps)
-			throws TimeoutException, LTLException {
-		if (noSLCLtest) {
-			return 0;
-		}
-		SpotRunner spot = new SpotRunner(spotPath, workDir, 10);
-
-		int solved =0;
-
-		for (fr.lip6.move.gal.structural.Property propPN : reader.getSPN().getProperties()) {
-			if (doneProps.containsKey(propPN.getName())) 
-				continue;
-			long time = System.currentTimeMillis();
-			if (DEBUG >= 1) System.out.println("Starting run for "+propPN.getName()+" :" + SpotRunner.printLTLProperty(propPN.getBody()));
-			TGBA tgba = spot.transformToTGBA(propPN);
-			try {
-				spot.analyzeCLSL(tgba);
-			} catch (IOException e) {
-				System.out.println("Warning : SL/CL computation failed.");
-			}
-			
-			if (! tgba.isStutterInvariant() && (tgba.isCLInvariant() || tgba.isSLInvariant())) {
-				// semi decision approach
-				
-				System.out.println("Found a " + (tgba.isSLInvariant() ? "SL":"CL") + " insensitive property : " + propPN.getName());
-				
-				// annotate it with Infinite Stutter Accepted Formulas
-				spot.computeInfStutter(tgba);
-			
-				// build a new copy of the model, with only this property				
-				List<AtomicProp> aps = tgba.getAPs();
-					
-				SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
-				
-				// get rid of these, go for tgba
-				spn.getProperties().clear();
-				spn.getProperties().add(propPN.copy());
-				
-				StructuralReduction sr = new StructuralReduction(spn);
-				
-				BitSet support = new BitSet();
-				for (AtomicProp ap : aps) {
-					SparsePetriNet.addSupport(ap.getExpression(),support);
-				}
-				
-				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
-
-				sr.setProtected(support);
-
-				try {
-					ReductionType rt = ReductionType.LI_LTL ; 
-					ReachabilitySolver.applyReductions(sr, rt, solverPath, true, true);			
-				} catch (GlobalPropertySolvedException gse) {
-					System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
-					gse.printStackTrace();
-				}
-				
-				// rebuild and reinterpret the reduced net
-				// index of places may have changed, formula might be syntactically simpler 
-				// recompute fresh tgba with correctly indexed AP					
-				List<Expression> atoms = aps.stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
-				List<Expression> atoms2 = spn.readFrom(sr,atoms);
-				// we can maybe simplify some predicates now : apply some basic tests
-				spn.removeConstantPlaces(atoms2);
-				
-				for (int i =0,ie=atoms.size(); i<ie; i++) {
-					aps.get(i).setExpression(atoms2.get(i));
-				}
-				
-				if (doneProps.containsKey(propPN.getName())) 
-					continue;
-				
-				DoneProperties tmpDoneProps = new ConcurrentHashDoneProperties();
-				checkLTLProperty(spn.getProperties().get(0), tgba, spn, reader, tmpDoneProps , spot, time);
-				if (tmpDoneProps.containsKey(propPN.getName())) {
-					boolean verdict = tmpDoneProps.getValue(propPN.getName());
-					if (verdict && tgba.isCLInvariant()) {
-						// true formula + CL = real proof
-						doneProps.put(propPN.getName(), verdict, "CL_INSENSITIVE");
-						solved++;
-					} else if (!verdict && tgba.isSLInvariant()) {
-						// false formula + SL = real proof
-						doneProps.put(propPN.getName(), verdict, "SL_INSENSITIVE");
-						solved++;
-					} else {
-						System.out.println("CL/SL decision was in the wrong direction : "+ (tgba.isSLInvariant() ? "SL":"CL") + " + " + verdict);					
-					}
-				}
-			}
-
-			
-		}
-		return solved;
-	}
-	
 
 	public void runStutteringLTLTest(MccTranslator reader, DoneProperties doneProps)
 			throws TimeoutException, LTLException {
@@ -323,7 +227,7 @@ public class LTLPropertySolver {
 		}
 	}
 
-	private void checkLTLProperty(fr.lip6.move.gal.structural.Property propPN, TGBA tgba, SparsePetriNet spnForProp,
+	void checkLTLProperty(fr.lip6.move.gal.structural.Property propPN, TGBA tgba, SparsePetriNet spnForProp,
 			MccTranslator reader, DoneProperties doneProps, SpotRunner spot, long time)
 			throws LTLException, TimeoutException {
 		try {
