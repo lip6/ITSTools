@@ -51,7 +51,8 @@ import fr.lip6.move.gal.application.solver.UpperBoundsSolver;
 import fr.lip6.move.gal.application.solver.global.DeadlockSolver;
 import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.application.solver.logic.AtomicReducerSR;
-import fr.lip6.move.gal.application.solver.ltl.LTLAnalyzer;
+import fr.lip6.move.gal.application.solver.ltl.LTLLengthAwareSolver;
+import fr.lip6.move.gal.application.solver.ltl.LTLLengthSensitivityAnalyzer;
 import fr.lip6.move.gal.application.solver.ltl.LTLPropertySolver;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
@@ -223,6 +224,8 @@ public class Application implements IApplication, Ender {
 		boolean genDeadTransitions = false;
 		boolean genDeadPlaces = false;
 		
+		boolean noSLCLtest = false;
+		
 		boolean analyzeSensitivity = false;
 		long timeout = 3600;
 		
@@ -301,7 +304,7 @@ public class Application implements IApplication, Ender {
 			} else if (EXPORT_LTL.equals(args[i])) {
 				exportLTL = true;
 			} else if (NOSLCLTEST.equals(args[i])) {
-				LTLPropertySolver.noSLCLtest = true;
+				noSLCLtest = true;
 			} else if (NOKNOWLEDGE.equals(args[i])) {
 				LTLPropertySolver.noKnowledgetest = true;
 			} else if (NOSTUTTERLTL.equals(args[i])) {
@@ -352,7 +355,7 @@ public class Application implements IApplication, Ender {
 
 		if (analyzeSensitivity) {
 			SpotRunner spot = new SpotRunner(spotPath, pwd, 10);
-			LTLAnalyzer.doSensitivityAnalysis(reader,spot,pwd,examination,solverPath);
+			LTLLengthSensitivityAnalyzer.doSensitivityAnalysis(reader,spot,pwd,examination,solverPath);
 			return IApplication.EXIT_OK;			
 		}
 		
@@ -736,7 +739,9 @@ public class Application implements IApplication, Ender {
 					LTLPropertySolver ltlsolve = new LTLPropertySolver(spotPath, solverPath, pwd, exportLTL);
 					
 					ltlsolve.runStructuralLTLCheck(reader, doneProps);
-					ltlsolve.runSLCLLTLTest(reader, doneProps);
+					if (! noSLCLtest) {
+						new LTLLengthAwareSolver(spotPath, solverPath, pwd, ltlsolve).runSLCLLTLTest(reader, doneProps);
+					}
 					
 					if (! reader.getSPN().getProperties().isEmpty()) {
 						reader.rebuildSpecification(doneProps);
