@@ -15,8 +15,17 @@ import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralToPNML;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 
-public class LTLAnalyzer {
+public class LTLLengthSensitivityAnalyzer {
 
+	/**
+	 * If property is short/length insensitive, but not both, build two model/property pairs, one reduced with SLCL_LTL, one reduced with LTL.	 * 
+	 * Also produce some CSV stats. See FORTE'22 paper for more details.
+	 * @param reader the input model
+	 * @param spot to run spot scripts
+	 * @param pwd work dir
+	 * @param examination in MCC format
+	 * @param solverPath path for Z3
+	 */
 	public static void doSensitivityAnalysis(MccTranslator reader, SpotRunner spot, String pwd, String examination, String solverPath) {
 
 		int nbP,nbT,nbP2,nbT2,nbP3,nbT3;
