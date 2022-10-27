@@ -64,7 +64,6 @@ import fr.lip6.move.gal.logic.togal.ToGalTransformer;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.mcc.properties.MCCExporter;
-import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.pnml.togal.OverlargeMarkingException;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
@@ -78,12 +77,12 @@ import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
+import fr.lip6.move.gal.structural.StructuralToPNML;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
-import fr.lip6.move.gal.structural.StructuralToPNML;
 import fr.lip6.move.serialization.SerializationUtil;
 
 /**
@@ -140,8 +139,8 @@ public class Application implements IApplication, Ender {
 	private static final String NOKNOWLEDGE="--no-knowledge";
 	private static final String NOSTUTTERLTL="--no-stutterltl";
 	private static final String REDUCE="--reduce";
-		
-	
+
+
 	private List<IRunner> runners = new ArrayList<>();
 
 	private static Logger logger = Logger.getLogger("fr.lip6.move.gal");
@@ -169,7 +168,7 @@ public class Application implements IApplication, Ender {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.equinox.app.IApplication#start(org.eclipse.equinox.app.
 	 * IApplicationContext)
 	 */
@@ -221,15 +220,15 @@ public class Application implements IApplication, Ender {
 		boolean nosimplifications = false;
 		boolean invariants = false;
 		boolean applySR = false;
-		
+
 		boolean genDeadTransitions = false;
 		boolean genDeadPlaces = false;
-		
+
 		boolean noSLCLtest = false;
-		
+
 		boolean analyzeSensitivity = false;
 		long timeout = 3600;
-		
+
 		ReductionType redForExport = null;
 
 		for (int i = 0; i < args.length; i++) {
@@ -357,18 +356,18 @@ public class Application implements IApplication, Ender {
 		if (analyzeSensitivity) {
 			SpotRunner spot = new SpotRunner(spotPath, pwd, 10);
 			LTLLengthSensitivityAnalyzer.doSensitivityAnalysis(reader,spot,pwd,examination,solverPath);
-			return IApplication.EXIT_OK;			
+			return IApplication.EXIT_OK;
 		}
-		
+
 		if (invariants) {
 			reader.createSPN();
 			List<Integer> tnames = new ArrayList<>();
 			List<Integer> repr = new ArrayList<>();
 			IntMatrixCol sumMatrix = computeReducedFlow(reader.getSPN(), tnames, repr);
 			SparsePetriNet spn = reader.getSPN();
-			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, reader.getSPN().getPnames());		
+			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, reader.getSPN().getPnames());
 			InvariantCalculator.printInvariant(invar, spn.getPnames(), reader.getSPN().getMarks());
-			
+
 			Set<SparseIntArray> invarT = DeadlockTester.computeTinvariants(reader.getSPN(), sumMatrix, tnames);
 			List<Integer> empty = new ArrayList<>(tnames.size());
 			for (int i=0 ; i < tnames.size(); i++) empty.add(0);
@@ -376,7 +375,7 @@ public class Application implements IApplication, Ender {
 			InvariantCalculator.printInvariant(invarT, strtnames, empty );
 			return null;
 		}
-		
+
 		// for debug and control COL files are small, otherwise 1MB PNML limit (i.e.
 		// roughly 200kB GAL max).
 		if (pwd.contains("COL") || new File(pwd + "/model.pnml").length() < 1000000) {
@@ -395,7 +394,7 @@ public class Application implements IApplication, Ender {
 
 		}
 
-		
+
 
 		// initialize a shared container to detect help detect termination in portfolio
 		// case
@@ -427,7 +426,7 @@ public class Application implements IApplication, Ender {
 
 				// Breaks max token per marking metric.
 				int curtok = spn.getMarks().stream().mapToInt(i->i).sum();
-				int newtok = sr.getMarks().stream().mapToInt(i->i).sum();				
+				int newtok = sr.getMarks().stream().mapToInt(i->i).sum();
 				spn.readFrom(sr);
 				reader.setMissingTokens( (curtok-newtok) + reader.countMissingTokens());
 			}
@@ -466,20 +465,20 @@ public class Application implements IApplication, Ender {
 				examination = "ReachabilityCardinality";
 			} else if (genDeadTransitions) {
 				for (int tid=0, tide=spn.getTransitionCount(); tid < tide; ++tid) {
-					spn.getProperties().add(new fr.lip6.move.gal.structural.Property(Expression.op(Op.EF, Expression.nop(Op.ENABLED, Expression.trans(tid)), null),PropertyType.INVARIANT,"t"+tid));				
+					spn.getProperties().add(new fr.lip6.move.gal.structural.Property(Expression.op(Op.EF, Expression.nop(Op.ENABLED, Expression.trans(tid)), null),PropertyType.INVARIANT,"t"+tid));
 				}
 				examination = "ReachabilityFireability";
 			}
-			
+
 			String outform = pwd + "/" + examination + ".sr.xml";
 			String outsr = pwd + "/model.sr.pnml";
 			MCCExporter.exportToMCCFormat(outsr, outform, spn);
-			return null;			
+			return null;
 		}
-		
+
 		// Now load properties from examination
 		reader.loadProperties(examination);
-		
+
 		if (redForExport != null) {
 			// reduce the model for each property
 			reader.createSPN(false, false);
@@ -495,15 +494,15 @@ public class Application implements IApplication, Ender {
 				// export one model per property, reduced specifically for that properties alphabet.
 				List<fr.lip6.move.gal.structural.Property> props = new ArrayList<>(spn.getProperties());
 				spn.getProperties().clear();
-				
+
 				for (int index = 0; index < props.size() ; index++) {
 					SparsePetriNet spncopy = new SparsePetriNet(spn);
 					spncopy.getProperties().add(props.get(index));
-					
+
 					StructuralReduction sr = new StructuralReduction(spncopy);
 					sr.reduce(redForExport);
 					spncopy.readFrom(sr);
-					
+
 					String outform = pwd + "/" + examination + "." + index + "."+redForExport+".xml";
 					String outsr = pwd + "/model."+index+ "."+redForExport+".pnml";
 
@@ -513,7 +512,7 @@ public class Application implements IApplication, Ender {
 			}
 			return null;
 		}
-		
+
 		if (unfold) {
 			SparsePetriNet spn;
 			if (nosimplifications) {
@@ -540,14 +539,14 @@ public class Application implements IApplication, Ender {
 				String outsr = pwd + "/model.sr.pnml";
 				MCCExporter.exportToMCCFormat(outsr, outform, spn);
 			} else {
-				
+
 				// going for full blown SMT supported reductions.
 				for (int propid = 0; propid < spn.getProperties().size() ; propid++) {
 					SparsePetriNet copy = new SparsePetriNet(reader.getSPN());
 					fr.lip6.move.gal.structural.Property prop = copy.getProperties().get(propid);
 					copy.getProperties().clear();
 					copy.getProperties().add(prop);
-					
+
 					StructuralReduction sr = new StructuralReduction(copy);
 					sr.setProtected(copy.computeSupport());
 					if (examination.startsWith("CTL") || examination.startsWith("LTL")) {
@@ -560,7 +559,7 @@ public class Application implements IApplication, Ender {
 						ReachabilitySolver.applyReductions(sr, ReductionType.REACHABILITY, solverPath, true, true);
 					}
 					copy.readFrom(sr);
-					
+
 					String outform = pwd + "/" + examination + "." + propid + ".sr.xml";
 					String outsr = pwd + "/model."+ propid +".sr.pnml";
 					MCCExporter.exportToMCCFormat(outsr, outform, copy);
@@ -568,7 +567,7 @@ public class Application implements IApplication, Ender {
 			}
 			return IApplication.EXIT_OK;
 		}
-		
+
 		// are we going for CTL ? only ITSRunner answers this.
 		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
 
@@ -580,8 +579,8 @@ public class Application implements IApplication, Ender {
 						return null;
 					}
 				}
-				
-				
+
+
 				for (fr.lip6.move.gal.structural.Property prop : reader.getSPN().getProperties()) {
 					// try some property specific reductions
 
@@ -606,7 +605,7 @@ public class Application implements IApplication, Ender {
 					}
 					GALSolver.runGALReductions(reader2, doneProps);
 					GALSolver.checkInInitial(reader2.getSpec(), doneProps, reader2.getSPN().isSafe());
-					
+
 					if (reader2.getSpec().getProperties().isEmpty()) {
 						continue;
 					}
@@ -625,9 +624,9 @@ public class Application implements IApplication, Ender {
 						propRed.setType(PropertyType.CTL);
 					}
 //					if (fr.lip6.move.gal.structural.expr.Simplifier.isACTLstar(propRed)) {
-//						
+//
 //					}
-					
+
 					GlobalPropertySolver.verifyWithSDD(reader2, doneProps, examination, solverPath, 30);
 				}
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
@@ -636,8 +635,8 @@ public class Application implements IApplication, Ender {
 				reader.flattenSpec(false);
 				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-				
-				
+
+
 				if (reader.getSPN().getProperties().isEmpty()) {
 					return null;
 				}
@@ -702,17 +701,17 @@ public class Application implements IApplication, Ender {
 				|| examination.equals("GlobalProperties")) {
 
 			if (examination.startsWith("LTL")) {
-				
+
 				if (spotPath == null) {
 					System.out.println("Warning : spot flags not provided. Please use flag : -spotpath $BINDIR/ltlfilt ");
 				} else {
 					LTLPropertySolver ltlsolve = new LTLPropertySolver(spotPath, solverPath, pwd, exportLTL);
-					
+
 					ltlsolve.runStructuralLTLCheck(reader, doneProps);
 					if (! noSLCLtest) {
 						new LTLLengthAwareSolver(spotPath, solverPath, pwd, ltlsolve).runSLCLLTLTest(reader, doneProps);
 					}
-					
+
 					if (! reader.getSPN().getProperties().isEmpty()) {
 						reader.rebuildSpecification(doneProps);
 					}
@@ -782,7 +781,7 @@ public class Application implements IApplication, Ender {
 
 					SparsePetriNet skel = reader.getHLPN().skeleton();
 					skel.getProperties().removeIf(p -> ! fr.lip6.move.gal.structural.expr.Simplifier.allEnablingsAreNegated(p, skel));
-					
+
 					if (! skel.getProperties().isEmpty() ) {
 						System.out.println("Remains "+skel.getProperties().size()+ " properties that can be checked using skeleton over-approximation.");
 						if (skel.testInInitial()>0) {
@@ -799,10 +798,10 @@ public class Application implements IApplication, Ender {
 								ReachabilitySolver.checkInInitial(skel, doneProps);
 							}
 						}
-					
-					
-					
-						
+
+
+
+
 						DoneProperties skelProps = new ConcurrentHashDoneProperties();
 						reader.setSpn(skel,true);
 						ReachabilitySolver.checkInInitial(reader.getSPN(), skelProps);
@@ -818,7 +817,7 @@ public class Application implements IApplication, Ender {
 							}
 						}
 						reader.getHLPN().getProperties().removeAll(todel);
-						
+
 						if (! skel.getProperties().isEmpty()) {
 							new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), skelProps, null, true);
 							reader.getSPN().simplifyLogic();
@@ -827,7 +826,7 @@ public class Application implements IApplication, Ender {
 							GALSolver.checkInInitial(reader.getSpec(), skelProps, reader.getSPN().isSafe());
 							reader.flattenSpec(false);
 							GALSolver.checkInInitial(reader.getSpec(), skelProps, reader.getSPN().isSafe());
-						
+
 							for (fr.lip6.move.gal.structural.Property p : reader.getHLPN().getProperties()) {
 								Boolean b = skelProps.getValue(p.getName());
 								if (b!=null) {
@@ -837,19 +836,19 @@ public class Application implements IApplication, Ender {
 								}
 							}
 						} else {
-							System.out.println("Skeleton over-approximation was not fine enough to positively prove more properties of the HLPN.");							
+							System.out.println("Skeleton over-approximation was not fine enough to positively prove more properties of the HLPN.");
 						}
 					} else {
 						System.out.println("All "+reader.getHLPN().getProperties().size()+ " properties of the HLPN use transition enablings in a way that makes the skeleton too coarse.");
-						
+
 					}
 				}
 				reader.createSPN();
-				
+
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				if (!reader.getSPN().getProperties().isEmpty())
 					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, -1);
-				
+
 //				if (!reader.getSPN().getProperties().isEmpty()) {
 //					List<fr.lip6.move.gal.structural.Property> props = new ArrayList<>(reader.getSPN().getProperties());
 //					for (fr.lip6.move.gal.structural.Property pp : props) {
@@ -909,20 +908,20 @@ public class Application implements IApplication, Ender {
 //				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
 //					if (! doneProps.contains(prop.getName())) {
 //						INextBuilder nb2 = INextBuilder.build(reader.getSpec());
-//						IDeterministicNextBuilder idnb2 = IDeterministicNextBuilder.build(nb2);			
+//						IDeterministicNextBuilder idnb2 = IDeterministicNextBuilder.build(nb2);
 //						StructuralReduction sr2 = new StructuralReduction(idnb2);
 //						BitSet support2 = new BitSet();
-//						NextSupportAnalyzer.computeQualifiedSupport(prop, support2, idnb2);						
+//						NextSupportAnalyzer.computeQualifiedSupport(prop, support2, idnb2);
 //						sr2.setProtected(support);
 //						MccTranslator reader2 = reader.copy();
 //						applyReductions(sr2, reader2, ReductionType.SAFETY, solverPath, isSafe);
-//						
+//
 //						Specification reduced2 = sr2.rebuildSpecification();
 //						reduced2.getProperties().add(EcoreUtil.copy(prop));
 //						Instantiator.normalizeProperties(reduced2);
 //						reader2.setSpec(reduced2);
 //						reader2.flattenSpec(false);
-//						checkInInitial(reader2.getSpec(), doneProps);						
+//						checkInInitial(reader2.getSpec(), doneProps);
 //					}
 //				}
 
@@ -996,7 +995,7 @@ public class Application implements IApplication, Ender {
 
 	private void tryRebuildPNML(String pwd, String examination, boolean rebuildPNML, MccTranslator reader,
 			DoneProperties doneProps) throws IOException {
-		if (rebuildPNML) {			
+		if (rebuildPNML) {
 			String outform = pwd + "/" + examination + ".sr.xml";
 			String outsr = pwd + "/model.sr.pnml";
 			MCCExporter.exportToMCCFormat(outsr, outform, reader.getSPN());
@@ -1050,7 +1049,7 @@ public class Application implements IApplication, Ender {
 	}
 
 	private List<Expression> translateProperties(List<Property> props, IDeterministicNextBuilder idnb) {
-		List<Expression> tocheck = new ArrayList<Expression>();
+		List<Expression> tocheck = new ArrayList<>();
 		for (Property prop : props) {
 			if (prop.getBody() instanceof NeverProp) {
 				NeverProp never = (NeverProp) prop.getBody();
@@ -1068,7 +1067,7 @@ public class Application implements IApplication, Ender {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.equinox.app.IApplication#stop()
 	 */
 	@Override
