@@ -63,6 +63,7 @@ import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
+import fr.lip6.move.gal.mcc.properties.MCCExporter;
 import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.pnml.togal.OverlargeMarkingException;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
@@ -229,7 +230,7 @@ public class Application implements IApplication, Ender {
 		boolean analyzeSensitivity = false;
 		long timeout = 3600;
 		
-		ReductionType redForExport = ReductionType.NONE;
+		ReductionType redForExport = null;
 
 		for (int i = 0; i < args.length; i++) {
 			if (PNFOLDER.equals(args[i])) {
@@ -471,36 +472,30 @@ public class Application implements IApplication, Ender {
 			}
 			
 			String outform = pwd + "/" + examination + ".sr.xml";
-			boolean usesConstants = PropertiesToPNML.transform(spn, outform, doneProps);
-			if (usesConstants) {
-				// we exported constants to a place with index = current place count
-				// to be consistent now add a trivially constant place with initial marking 1
-				// token
-				System.out.println("Added a place called one to the net.");
-				spn.addPlace("one", 1);
-			}
 			String outsr = pwd + "/model.sr.pnml";
-			StructuralToPNML.transform(spn, outsr);
+			MCCExporter.exportToMCCFormat(outsr, outform, spn);
 			return null;			
 		}
 		
-		// Now translate and load properties into GAL
-		// uses a SAX parser to load to Logic MM, then an M2M to GAL properties.
+		// Now load properties from examination
 		reader.loadProperties(examination);
 		
-		if (redForExport != ReductionType.NONE) {
+		if (redForExport != null) {
 			// reduce the model for each property
 			reader.createSPN(false, false);
 			SparsePetriNet spn = reader.getSPN();
 			if (spn.getProperties().isEmpty()) {
+				// only export one model
 				StructuralReduction sr = new StructuralReduction(spn);
 				sr.reduce(redForExport);
 				spn.readFrom(sr);
 				String outsr = pwd + "/model."+redForExport+".pnml";
 				StructuralToPNML.transform(spn, outsr);
 			} else {
+				// export one model per property, reduced specifically for that properties alphabet.
 				List<fr.lip6.move.gal.structural.Property> props = new ArrayList<>(spn.getProperties());
 				spn.getProperties().clear();
+				
 				for (int index = 0; index < props.size() ; index++) {
 					SparsePetriNet spncopy = new SparsePetriNet(spn);
 					spncopy.getProperties().add(props.get(index));
@@ -510,21 +505,13 @@ public class Application implements IApplication, Ender {
 					spncopy.readFrom(sr);
 					
 					String outform = pwd + "/" + examination + "." + index + "."+redForExport+".xml";
-					boolean usesConstants = PropertiesToPNML.transform(spncopy, outform, doneProps);
-					
-					if (usesConstants) {
-						// we exported constants to a place with index = current place count
-						// to be consistent now add a trivially constant place with initial marking 1
-						// token
-						System.out.println("Added a place called one to the net.");
-						spn.addPlace("one", 1);
-					}
 					String outsr = pwd + "/model."+index+ "."+redForExport+".pnml";
-					StructuralToPNML.transform(spncopy, outsr);					
+
+					// output the model
+					MCCExporter.exportToMCCFormat(outsr, outform, spncopy);
 				}
 			}
-			// output the model
-			
+			return null;
 		}
 		
 		if (unfold) {
@@ -550,26 +537,19 @@ public class Application implements IApplication, Ender {
 			}
 			if (! applySR) {
 				String outform = pwd + "/" + examination + ".sr.xml";
-				boolean usesConstants = PropertiesToPNML.transform(spn, outform, doneProps);
-				if (usesConstants) {
-					// we exported constants to a place with index = current place count
-					// to be consistent now add a trivially constant place with initial marking 1
-					// token
-					System.out.println("Added a place called one to the net.");
-					spn.addPlace("one", 1);
-				}
 				String outsr = pwd + "/model.sr.pnml";
-				StructuralToPNML.transform(spn, outsr);
+				MCCExporter.exportToMCCFormat(outsr, outform, spn);
 			} else {
 				
+				// going for full blown SMT supported reductions.
 				for (int propid = 0; propid < spn.getProperties().size() ; propid++) {
-					MccTranslator copy = reader.copy();
-					fr.lip6.move.gal.structural.Property prop = copy.getSPN().getProperties().get(propid);
-					copy.getSPN().getProperties().clear();
-					copy.getSPN().getProperties().add(prop);
+					SparsePetriNet copy = new SparsePetriNet(reader.getSPN());
+					fr.lip6.move.gal.structural.Property prop = copy.getProperties().get(propid);
+					copy.getProperties().clear();
+					copy.getProperties().add(prop);
 					
-					StructuralReduction sr = new StructuralReduction(copy.getSPN());
-					sr.setProtected(copy.getSPN().computeSupport());
+					StructuralReduction sr = new StructuralReduction(copy);
+					sr.setProtected(copy.computeSupport());
 					if (examination.startsWith("CTL") || examination.startsWith("LTL")) {
 						if (fr.lip6.move.gal.structural.expr.Simplifier.isSyntacticallyStuttering(prop)) {
 							ReachabilitySolver.applyReductions(sr, ReductionType.SI_LTL, solverPath, true, true);
@@ -579,22 +559,12 @@ public class Application implements IApplication, Ender {
 					} else {
 						ReachabilitySolver.applyReductions(sr, ReductionType.REACHABILITY, solverPath, true, true);
 					}
-					copy.getSPN().readFrom(sr);
+					copy.readFrom(sr);
 					
 					String outform = pwd + "/" + examination + "." + propid + ".sr.xml";
-					boolean usesConstants = PropertiesToPNML.transform(copy.getSPN(), outform, doneProps);
-					if (usesConstants) {
-						// we exported constants to a place with index = current place count
-						// to be consistent now add a trivially constant place with initial marking 1
-						// token
-						System.out.println("Added a place called one to the net.");
-						spn.addPlace("one", 1);
-					}
 					String outsr = pwd + "/model."+ propid +".sr.pnml";
-					StructuralToPNML.transform(copy.getSPN(), outsr);					
+					MCCExporter.exportToMCCFormat(outsr, outform, copy);
 				}
-				
-				
 			}
 			return IApplication.EXIT_OK;
 		}
@@ -1026,17 +996,10 @@ public class Application implements IApplication, Ender {
 
 	private void tryRebuildPNML(String pwd, String examination, boolean rebuildPNML, MccTranslator reader,
 			DoneProperties doneProps) throws IOException {
-		if (rebuildPNML) {
+		if (rebuildPNML) {			
 			String outform = pwd + "/" + examination + ".sr.xml";
-			boolean usesConstants = PropertiesToPNML.transform(reader.getSPN(), outform, doneProps);
-			if (usesConstants) {
-				// we exported constants to a place with index = current place count
-				// to be consistent now add a trivially constant place with initial marking 1
-				// token
-				reader.getSPN().addPlace("one", 1);
-			}
 			String outsr = pwd + "/model.sr.pnml";
-			StructuralToPNML.transform(reader.getSPN(), outsr);
+			MCCExporter.exportToMCCFormat(outsr, outform, reader.getSPN());
 		}
 	}
 
