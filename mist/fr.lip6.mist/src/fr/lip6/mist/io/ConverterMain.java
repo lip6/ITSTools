@@ -8,11 +8,9 @@ import fr.lip6.mist.io.lola.LolaTaskImporter;
 import fr.lip6.mist.io.pnet.PnetImporter;
 import fr.lip6.mist.io.spec.SpecImporter;
 import fr.lip6.mist.io.tpn.TpnImporter;
-import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
-import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
+import fr.lip6.move.gal.mcc.properties.MCCExporter;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.SparsePetriNet;
-import fr.lip6.move.gal.structural.StructuralToPNML;
 
 public class ConverterMain {
 
@@ -26,11 +24,11 @@ public class ConverterMain {
 		// "benchmark/h_fairly_terminates.pnet.terminating" "benchmark/terminating.lola"
 		//String ff="benchmark/h_fairly_terminates.pnet.terminating.task1";
 		// "benchmark/Model.10om__0_____u__.xml.tpn";
-		
-		String ff = null; 
+
+		String ff = null;
 		String folder = ".";
 		boolean doDotOutput=false;
-		for (int i=0; i < args.length ; i++) {			
+		for (int i=0; i < args.length ; i++) {
 			if (CONVERT_FLAG.equals(args[i])) {
 				ff = args[++i];
 			} else if (OUT_FOLDER.equals(args[i])) {
@@ -39,7 +37,7 @@ public class ConverterMain {
 				doDotOutput= true;
 			}
 		}
-		
+
 		// argument validity checks
 		{
 			if (ff == null) {
@@ -54,8 +52,8 @@ public class ConverterMain {
 			}
 		}
 		System.out.println("Transforming source file at : " + ff + " to folder " + folder);
-			
-		
+
+
 		try {
 			SparsePetriNet pn = null;
 			if (ff.endsWith(".spec")) {
@@ -103,7 +101,7 @@ public class ConverterMain {
 
 		return pn;
 	}
-	
+
 	private static SparsePetriNet readPnetFile(String pathff, String folder) throws IOException {
 		File ff = new File(pathff);
 		String path = ff.getCanonicalPath();
@@ -138,25 +136,15 @@ public class ConverterMain {
 	}
 
 	private static void exportPNML(SparsePetriNet pn, String folder) throws IOException {
-		if (! pn.getProperties().isEmpty()) {
+
+		if (!pn.getProperties().isEmpty()) {
 			System.out.println("Final properties :" + pn.getProperties());
-
-			//  currently supposing these are invariants/safety queries
-			String outform = folder + "/" + "ReachabilityCardinality" + ".xml";
-			boolean usesConstants = PropertiesToPNML.transform(pn, outform, new ConcurrentHashDoneProperties());
-			if (usesConstants) {
-				// we exported constants to a place with index = current place count
-				// to be consistent now add a trivially constant place with initial marking 1
-				// token
-				System.out.println("Added a place called one to the net.");
-				pn.addPlace("one", 1);
-			}
 		}
-		
-		String outsr = folder + "/model.pnml";
-		StructuralToPNML.transform(pn, outsr);
 
-		System.out.println("Exported to file :" + outsr);
+		// currently supposing these are invariants/safety queries
+		MCCExporter.exportToMCCFormat(folder + "/model.pnml", folder + "/" + "ReachabilityCardinality" + ".xml", pn);
+
+		System.out.println("Exported to folder :" + folder);
 	}
 
 }
