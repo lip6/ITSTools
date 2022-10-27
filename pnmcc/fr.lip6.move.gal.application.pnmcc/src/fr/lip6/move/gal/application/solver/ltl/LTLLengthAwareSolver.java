@@ -122,12 +122,11 @@ public class LTLLengthAwareSolver {
 
 				// rebuild and reinterpret the reduced net
 				// index of places may have changed, formula might be syntactically simpler
-				// recompute fresh tgba with correctly indexed AP
+				// recompute fresh tgba with correctly indexed AP referring to the *reduced* model
 				List<Expression> atoms = aps.stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
 				List<Expression> atoms2 = spn.readFrom(sr,atoms);
 				// we can maybe simplify some predicates now : apply some basic tests
 				spn.removeConstantPlaces(atoms2);
-
 				for (int i =0,ie=atoms.size(); i<ie; i++) {
 					aps.get(i).setExpression(atoms2.get(i));
 				}
