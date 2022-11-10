@@ -541,6 +541,13 @@ public class SparseIntArray implements Cloneable {
 			}
 		}
 	}
+	public int sumValues() {
+		int sum = 0;
+		for (int i=0, ie=mSize; i<ie ; i++) {
+			sum+=mValues[i];
+		}
+		return sum;
+	}
    
 
 }
