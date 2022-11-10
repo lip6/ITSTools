@@ -2950,10 +2950,26 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 	public static void computeStabilizing (ISparsePetriNet pn, Set<Integer> stablePlaces, Set<Integer> stableTransitions) {
 		IntMatrixCol flow = new IntMatrixCol(pn.getPlaceCount(), 0);
+		// test if the net is overall monotonic decreasing in number of tokens
+		boolean hasPosTrans = false;
+		Set<Integer> negtrans = new HashSet<>();
 		for (int ti=0, tie=pn.getTransitionCount() ; ti < tie ; ti++) {
-			flow.appendColumn(SparseIntArray.sumProd(-1, pn.getFlowPT().getColumn(ti), 1, pn.getFlowTP().getColumn(ti)));
+			SparseIntArray trans = SparseIntArray.sumProd(-1, pn.getFlowPT().getColumn(ti), 1, pn.getFlowTP().getColumn(ti));
+			flow.appendColumn(trans);
+			int sumv = trans.sumValues();
+			if (! hasPosTrans && sumv >0) {
+				hasPosTrans = true;
+			} else if (!hasPosTrans && sumv < 0) {
+				negtrans.add(ti);
+			}
 		}
-			
+		// we can only lose or maintain the number of tokens in the net, never produce any
+		// therefore no SCC that uses a negative transition can be used to have an infinite loop
+		// and transitions that consume tokens will eventually run out of them, they are stabilizing
+		if (!hasPosTrans) {
+			stableTransitions.addAll(negtrans);
+		}
+		
 		IntMatrixCol tflow = flow.transpose();
 		
 		boolean changed = true;
