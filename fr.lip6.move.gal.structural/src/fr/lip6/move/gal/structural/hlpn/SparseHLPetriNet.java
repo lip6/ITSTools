@@ -15,6 +15,7 @@ import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
+import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -137,11 +138,20 @@ public class SparseHLPetriNet extends PetriNet {
 		Logger.getLogger("fr.lip6.move.gal").info("Built PT skeleton of HLPN with "+spn.getPlaceCount()+ " places and " + spn.getTransitionCount() + " transitions " + spn.getArcCount() + " arcs in " + (System.currentTimeMillis()- time) + " ms.");
 		
 		time = System.currentTimeMillis();
+		int removed = 0;
 		// now resolve enabled + cardinality predicates
 		for (Property p : getProperties()) {
+			// also check that we don't have nasty AND combinations of enablings that overlap and are guarded
+			if (p.getType() == PropertyType.CTL || p.getType() == PropertyType.LTL) {
+				if (! hasNoGuardedEnablingCombinations(p)) {
+					removed++;
+					continue;
+				}				
+			}
 			spn.getProperties().add(new Property(bindSkeletonColors(p.getBody()),p.getType(),p.getName()));
 		}
-		Logger.getLogger("fr.lip6.move.gal").info("Skeletonized "+spn.getProperties().size() +" HLPN properties in " + (System.currentTimeMillis()- time) + " ms.");
+		Logger.getLogger("fr.lip6.move.gal").info("Skeletonized "+spn.getProperties().size() +" HLPN properties in " + (System.currentTimeMillis()- time) + " ms." 
+						  + (removed>0 ? (" Removed "+removed+ " properties that had guard overlaps."):""));
 		if (DEBUG >=1)
 			FlowPrinter.drawNet(new StructuralReduction(spn), "Skeleton net", new HashSet<>(), new HashSet<>());
 		return spn;
@@ -638,6 +648,57 @@ public class SparseHLPetriNet extends PetriNet {
 			sb.append(s.getName());
 		}
 		return sb.toString();
+	}
+	
+	private boolean hasNoGuardedEnablingCombinations(Property p) {
+		Set<Integer> targets = new HashSet<>(); 
+		findEnablings(p.getBody(),targets);
+		boolean hasGuards = targets.stream().anyMatch(tid -> getTransitions().get(tid).getGuard().getOp() != Op.BOOLCONST);
+		if (hasGuards) {
+			Set<Integer> guardedPlaces = new HashSet<>();
+			// pick up colored places that are guarded (touch a guarded transition)
+			for (int tid : targets) {
+				HLTrans trans = getTransitions().get(tid);
+				if (trans.getGuard().getOp() != Op.BOOLCONST) {
+					for (HLArc arc : trans.getPre()) {
+						int pid = arc.getPlace();
+						// any overlap is bad
+						if (!guardedPlaces.add(pid)) {
+							return false;
+						}
+					}
+				}
+			}
+			
+			// any overlap of unguarded transition with guarded places is also bad
+			for (int tid : targets) {
+				HLTrans trans = getTransitions().get(tid);
+				if (trans.getGuard().getOp() == Op.BOOLCONST) {
+					for (HLArc arc : trans.getPre()) {
+						int pid = arc.getPlace();
+						// any overlap is bad
+						if (guardedPlaces.contains(pid)) {
+							return false;
+						}
+					}
+				}
+			}						
+		}
+		return true;
+	}
+	
+	private static void findEnablings(Expression e, Set<Integer> targets) {
+		if (e == null || Op.isComparison(e.getOp())) {
+			return ;
+		} else if (e.getOp() == Op.ENABLED) {
+			for (int cid = 0, cide = e.nbChildren() ; cid < cide ; cid++) {
+				targets.add(e.childAt(cid).getValue());
+			}
+		} else {
+			for (int cid = 0, cide = e.nbChildren() ; cid < cide ; cid++) {
+				findEnablings(e.childAt(cid), targets);
+			}
+		}		
 	}
 	
 }
