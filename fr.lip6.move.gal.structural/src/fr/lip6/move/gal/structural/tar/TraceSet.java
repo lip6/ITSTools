@@ -106,4 +106,20 @@ public class TraceSet {
 		org.add(1);
 	}
 
+	public void clear() {
+		initial.clear();
+		indexMap.clear();
+		states.clear();
+		init();
+	}
+
+	public void removeEdges(int edge) {
+		for (AutomataState s : states) {
+			s.removeEdge(edge);
+		}
+	}
+
+	public Set<Integer> getInitial() {
+		return initial;
+	}
 }

@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.structural.tar;
 
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -65,6 +66,17 @@ public class State implements Comparable<State> {
 
 	public Set<Integer> getInterpolant() {
 		return interpolant;
+	}
+
+	private static Random rand = new Random();
+	public void resetEdges(ISparsePetriNet pn) {
+		size = pn.getTransitionCount();
+        edgeCount = 0;
+        offset = rand.nextInt(pn.getTransitionCount());// % (net.numberOfTransitions());
+	}
+
+	public void setInterpolant(Set<Integer> interpolant) {
+		this.interpolant = new TreeSet<>(interpolant);
 	}
 
 }

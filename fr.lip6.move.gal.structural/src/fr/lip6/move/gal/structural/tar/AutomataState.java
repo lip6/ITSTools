@@ -51,6 +51,19 @@ public class AutomataState {
 			return edges.get(index).remove(to);
 		}
 	}
+	
+	public boolean removeEdge(int from) {
+		AutomataEdge edge = new AutomataEdge(from);
+		int index = Collections.binarySearch(edges, edge);
+		if (index < 0) {
+			return false;
+		} else {
+			edges.remove(index);
+			return true;
+		}
+	}
+
+	
 	public List<AutomataEdge> getEdges() {
 		return edges;
 	}
@@ -80,4 +93,5 @@ public class AutomataState {
         return lb;
     }
 
+	
 }
