@@ -52,12 +52,16 @@ public class PlaceRangeVector {
 	}
 	void copy(PlaceRangeVector prv) {
 		ranges = new ArrayList<>();
-		for (PlaceRange pr : ranges) {
+		for (PlaceRange pr : prv.ranges) {
 			if (! pr.getRange().isUnbound()) {
 				ranges.add(pr.copy());
 			}
 		}
 	}
+	public int size() {
+		return ranges.size();
+	}
+	
 	@Override
 	public String toString() {
 		return "{" + ranges + "}";
@@ -124,6 +128,9 @@ public class PlaceRangeVector {
                 return true;
         }
         return false;
+	}
+	public boolean isTrue() {
+		return ranges.isEmpty();
 	}
 
 

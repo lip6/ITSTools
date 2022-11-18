@@ -107,4 +107,8 @@ public class Range {
 			this.included = included;
 		}
 	}
+
+	public void setLower(int lower) {
+		this.lower = lower;
+	}
 }
