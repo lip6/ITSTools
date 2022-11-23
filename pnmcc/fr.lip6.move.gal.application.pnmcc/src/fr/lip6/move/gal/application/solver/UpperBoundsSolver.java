@@ -261,7 +261,7 @@ public class UpperBoundsSolver {
 				
 				if (spn.isSafe() && tocheck.size() == 1 && support.cardinality()==1) {
 					int pid = support.nextSetBit(0);
-					List<Integer> tfeed = new ArrayList<>(sr.getFlowPT().getColumn(pid).size());
+					List<Integer> tfeed = new ArrayList<>();
 					SparseIntArray fpt = sr.getFlowPT().transpose().getColumn(pid);
 					for (int i = fpt.size() - 1 ; i >= 0 ; i--) {
 						tfeed.add(fpt.keyAt(i));
