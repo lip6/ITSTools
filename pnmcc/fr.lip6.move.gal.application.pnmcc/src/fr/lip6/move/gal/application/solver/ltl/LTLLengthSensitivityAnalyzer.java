@@ -3,6 +3,7 @@ package fr.lip6.move.gal.application.solver.ltl;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.concurrent.TimeoutException;
 
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
@@ -16,7 +17,7 @@ import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 /**
  * For each property of the model that is lengthening-insensitive XOR shortening-insensitive, build two versions of the model
  * reduced with LTL and LI_LTL respectively.
- * Also output some CSV stats on the reductions effectiveness.
+ * Also output some CSV stats on the reductions effectiveness and the raw formulas in Spot compatible syntax.
  * @author ythierry
  *
  */
@@ -52,10 +53,18 @@ public class LTLLengthSensitivityAnalyzer {
 			nbP=spn.getPlaceCount();
 			nbT=spn.getTransitionCount();
 
+			try {
+				spot.runLTLSimplifications(spn);
+			} catch (TimeoutException e) {
+				System.err.println("Unable to run basic LTL rewritings. Proceeding with raw formulas.");
+			}
 			// with auto flush, start building the stats file.
 			PrintWriter out = new PrintWriter(new FileOutputStream(pwd+"/"+examination+"stats.csv"),true);
 			out.println("model,examination,property id,init places,init trans,reduced LTL,out places,out trans,reduced short long,red places,red trans,time to red(ms),Stutter Ins,Short Ins,Leng Ins,analysis time(ms)");
 
+			
+			PrintWriter outformff = new PrintWriter(new FileOutputStream(pwd+"/"+examination+".ltl"),true);
+			
 			// for each property in the input
 			for (int propid = 0; propid < spn.getProperties().size() ; propid++) {
 
@@ -64,7 +73,10 @@ public class LTLLengthSensitivityAnalyzer {
 				fr.lip6.move.gal.structural.Property prop = spnProp.getProperties().get(propid);
 				spnProp.getProperties().clear();
 				spnProp.getProperties().add(prop);
-
+				
+				// print property in Spot compatible syntax
+				spot.printLTLPropertyToStream(prop, outformff);
+				
 				// run sensitivity analysis and report the time it took
 				{
 					long time = System.currentTimeMillis();
@@ -136,6 +148,7 @@ public class LTLLengthSensitivityAnalyzer {
 
 			}
 			// force to flush as well.
+			outformff.close();
 			out.close();
 		} catch (IOException e1) {
 			e1.printStackTrace();
