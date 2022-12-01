@@ -108,6 +108,11 @@ public class SpotRunner {
 		return automata;
 	}
 
+	public void printLTLPropertyToStream (Property prop, PrintWriter pw) {
+		AtomicPropManager atoms = new AtomicPropManager();
+		Map<String, Expression> pmap = atoms.loadAtomicProps(Collections.singletonList(prop));
+		pw.println(printLTLProperty(pmap.get(prop.getName())));
+	}
 
 	private TGBA computeTGBA(Property prop, AtomicPropManager atoms, Map<String, Expression> pmap)
 			throws IOException, TimeoutException, InterruptedException {
@@ -186,6 +191,15 @@ public class SpotRunner {
 						
 						if (support.cardinality() < oldsupp.cardinality()) {
 							prop.setBody(res);
+						} else {
+							Property test = new Property(prop.getBody(), PropertyType.LTL, "test");
+							// count AP in resulting formula
+							int nbAPold = countAP(test);
+							test.setBody(res);
+							int nbAPnew = countAP(test);
+							if (nbAPnew <= nbAPold) {
+								prop.setBody(res);
+							}
 						}
 					}
 				}						
@@ -211,6 +225,12 @@ public class SpotRunner {
 		}
 	}
 
+
+	private static int countAP(Property prop) {
+		AtomicPropManager atoms = new AtomicPropManager();
+		Map<String, Expression> pmap = atoms.loadAtomicProps(Collections.singletonList(prop));
+		return atoms.getAtoms().size();
+	}
 
 	public static String printLTLProperty(Expression prop) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
