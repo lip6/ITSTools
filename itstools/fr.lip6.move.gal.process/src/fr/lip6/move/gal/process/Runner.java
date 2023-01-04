@@ -88,6 +88,9 @@ public class Runner {
 	 * @throws InterruptedException if we were interrupted within the critical 100 ms between soft and hard kill.
 	 */
 	private static void killProcess(Process process) throws InterruptedException {
+		process.descendants().forEach((ProcessHandle d) -> {
+		    d.destroy();
+		});
 		process.destroy();
 		if (! process.waitFor(100, TimeUnit.MILLISECONDS)) {
 			process.destroyForcibly();
