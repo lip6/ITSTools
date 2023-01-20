@@ -2,13 +2,17 @@ package fr.lip6.mist.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import fr.lip6.mist.io.lola.LolaImporter;
 import fr.lip6.mist.io.lola.LolaTaskImporter;
 import fr.lip6.mist.io.pnet.PnetImporter;
+import fr.lip6.mist.io.selt.SeltTaskImporter;
 import fr.lip6.mist.io.spec.SpecImporter;
 import fr.lip6.mist.io.tpn.TpnImporter;
 import fr.lip6.move.gal.mcc.properties.MCCExporter;
+import fr.lip6.move.gal.pnml.togal.PnmlToStructuralTransformer;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 
@@ -17,6 +21,7 @@ public class ConverterMain {
 	private static final String CONVERT_FLAG = "-convert";
 	private static final String OUT_FOLDER = "-o";
 	private static final String DOT_OUT = "-dot";
+	private static final String SELT_FLAG = "-selt";
 
 	public static void main(String[] args) {
 		// String ff=args[0]; // "benchmark/x0_BUG_REPORT_q1.spec"
@@ -28,6 +33,7 @@ public class ConverterMain {
 		String ff = null;
 		String folder = ".";
 		boolean doDotOutput=false;
+		int firstSelt = -1;
 		for (int i=0; i < args.length ; i++) {
 			if (CONVERT_FLAG.equals(args[i])) {
 				ff = args[++i];
@@ -35,6 +41,9 @@ public class ConverterMain {
 				folder = args[++i];
 			} else if (DOT_OUT.equals(args[i])) {
 				doDotOutput= true;
+			} else if (SELT_FLAG.equals(args[i])) {
+				firstSelt = i+1;
+				break;
 			}
 		}
 
@@ -50,9 +59,9 @@ public class ConverterMain {
 				System.err.println("Input file "+ff +" does not exist");
 				return ;
 			}
+			
 		}
 		System.out.println("Transforming source file at : " + ff + " to folder " + folder);
-
 
 		try {
 			SparsePetriNet pn = null;
@@ -66,13 +75,41 @@ public class ConverterMain {
 				pn = readLolaFile(ff, folder);
 			} else if (ff.endsWith(".task1")) {
 				pn = readLolaTaskFile(ff, folder);
+			} else if (ff.endsWith(".pnml")) {
+				File fff = new File(ff);
+				PnmlToStructuralTransformer transPN = new PnmlToStructuralTransformer();
+				pn = transPN.transformPT(fff.toURI());
+				if (pn == null) {
+					System.err.println("PNML file at "+ff+ " contains a Colored net. Please ask us if you'd like support for unfolding in such cases.");
+					throw new IOException("Cannot parse colored pnml file "+fff.getAbsolutePath());
+					// hlpn = transPN.transformHLPN(fff.toURI());
+				} 
 			}
+			if (firstSelt > 0) {
+				List<String> selt = new ArrayList<>();
+				for (int i = firstSelt ; i < args.length ; i++) {
+					selt.add(args[i]);
+				}
+				System.out.println("Parsing SELT format properties from :" + selt.toString());
+				readSeltFiles(pn,selt);
+			}
+			
 			exportPNML(pn, folder);
 
 			if (doDotOutput)
 				FlowPrinter.drawNet(pn, ff);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private static void readSeltFiles(SparsePetriNet pn, List<String> selt) throws IOException {
+		for (String pathff : selt) {
+			File ff = new File(pathff);
+			String path = ff.getCanonicalPath();
+			
+			SeltTaskImporter lti = new SeltTaskImporter();
+			lti.loadSeltTask(path, pn);
 		}
 	}
 
