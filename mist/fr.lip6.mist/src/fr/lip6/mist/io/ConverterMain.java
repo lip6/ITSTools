@@ -175,13 +175,14 @@ public class ConverterMain {
 	private static void exportPNML(SparsePetriNet pn, String folder) throws IOException {
 
 		if (!pn.getProperties().isEmpty()) {
-			System.out.println("Final properties :" + pn.getProperties());
+			// This is a bit too verbose for large models.
+			//			System.out.println("Final properties :" + pn.getProperties());
 		}
 
 		// currently supposing these are invariants/safety queries
 		MCCExporter.exportToMCCFormat(folder + "/model.pnml", folder + "/" + "ReachabilityCardinality" + ".xml", pn);
 
-		System.out.println("Exported to folder :" + folder);
+		System.out.println("Exported model and "+pn.getProperties().size() +" properties to folder :" + folder);
 	}
 
 }
