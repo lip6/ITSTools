@@ -55,6 +55,7 @@ WS  : (' ' | '\t' | '\n' | '\r' ) -> skip
 //         | 'PATH' | 'GENERATOR' | 'ANALYSE' | 'PLACE' | 'TRANSITION' | 'MARKING' | 'CONSUME' | 'PRODUCE' | 'FORMULA' | 'EXPATH' | 'ALLPATH' | 'ALWAYS' | 'UNTIL' 
 //         | 'EVENTUALLY' | 'AND' | 'OR' | 'NOT') -> skip;
 
+
 //Identifier representation  
-Name  : (LETTER | DIGIT | '_' | '-' | '\'' | '#' | '.' )+;
+Name  : '{'? 	(LETTER | DIGIT | '_' | '-' | '\'' | '#' | '.' )+ '}'? ;
 

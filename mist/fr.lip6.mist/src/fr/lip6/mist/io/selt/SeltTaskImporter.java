@@ -19,6 +19,7 @@ import fr.lip6.mist.io.selt.SeltParser.ConstantContext;
 import fr.lip6.mist.io.selt.SeltParser.CtlContext;
 import fr.lip6.mist.io.selt.SeltParser.ExprContext;
 import fr.lip6.mist.io.selt.SeltParser.PlacerefContext;
+import fr.lip6.move.gal.pnml.togal.utils.Utils;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -66,7 +67,17 @@ public class SeltTaskImporter {
 		@Override
 		public Expression visitPlaceref(PlacerefContext ctx) {
 			String pname = ctx.name.getText();
-			int pid = pmap.get(pname);
+			if (pname.startsWith("{") && pname.endsWith("}")) {
+				pname = pname.substring(1,pname.length()-1);
+				pname = Utils.normalizeName(pname);
+			}
+			
+			Integer ppid = pmap.get(pname);
+			if (ppid == null) {
+				System.err.println("Could not find a place named :'"+pname+"' in net.");
+				System.err.println("Known place names :" + pmap.keySet());
+			}
+			int pid = ppid;
 			return Expression.var(pid);
 		}
 		
