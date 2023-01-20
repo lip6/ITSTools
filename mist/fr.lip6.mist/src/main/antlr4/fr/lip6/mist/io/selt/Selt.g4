@@ -18,6 +18,7 @@ boolPred :
 comparison : lhs=expr op=('<'|'<='|'='|'!='|'>='|'>') rhs=expr;
 
 expr :
+	l=expr op='*' r=expr |
 	l=expr op='+' r=expr |
 	l=expr op='-' r=expr | 
 	constant | 

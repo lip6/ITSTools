@@ -1,7 +1,9 @@
 package fr.lip6.mist.io.selt;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -115,6 +117,28 @@ public class SeltTaskImporter {
 					op = Op.ADD;
 				} else if ("-".equals(sop)) {
 					op = Op.MINUS;
+				} else if ("*".equals(sop)) {
+					op = Op.MULT;
+					Expression l = ctx.l.accept(this);
+					Expression r = ctx.r.accept(this);
+					int mult = 0;
+					Expression rep = null;
+					if (l.getOp() == Op.CONST) {
+						mult = l.getValue();
+						rep = r;
+					} else if (r.getOp() == Op.CONST) {
+						mult = r.getValue();
+						rep = l;
+					} else {
+						throw new IllegalArgumentException("Only in fine linear constraints supported, one operand of multiplication should be a constant.");						
+					} 
+						
+					List<Expression> toadd = new ArrayList<>();
+					for (int i=0; i < mult ; i++) {
+						toadd.add(rep);
+					}
+					return Expression.nop(Op.ADD, toadd);
+					
 				} else {
 					throw new IllegalArgumentException("The operator should be arithmetic, was :"+sop);
 				}
