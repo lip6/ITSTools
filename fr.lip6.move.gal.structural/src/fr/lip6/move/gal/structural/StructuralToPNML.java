@@ -21,14 +21,17 @@ public class StructuralToPNML {
 		PrintWriter pw = new PrintWriter(new File(path));
 		pw.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 		pw.append("<pnml xmlns=\"http://www.pnml.org/version-2009/grammar/pnml\">\n");
-		pw.append("<net id=\"ITS Tools generated\" type=\"http://www.pnml.org/version-2009/grammar/ptnet\">\n");
+		pw.append("<net id=\""+sr.getName()+"\" type=\"http://www.pnml.org/version-2009/grammar/ptnet\">\n");
 		pw.append("<page id=\"page0\"><name><text>DefaultPage</text></name>\n");
 		
 		int nbplaces=0;
 		for (int p = 0 ; p < sr.getPnames().size() ; p++) {
 			pw.append("<place id=\"p"+p+"\">");
-			pw.append("<name><text>"+sr.getPnames().get(p)+"</text></name>");
-			pw.append("<initialMarking><text>" + sr.getMarks().get(p) + "</text></initialMarking>");
+			pw.append("<name><text>"+sr.getPnames().get(p)+"</text></name>");			
+			Integer mark = sr.getMarks().get(p);
+			if (mark != 0) {
+				pw.append("<initialMarking><text>" + mark + "</text></initialMarking>");
+			}
 			pw.append("</place>\n");
 			nbplaces++;
 		}
@@ -46,7 +49,9 @@ public class StructuralToPNML {
 				int p = pt.keyAt(i);
 				int val = pt.valueAt(i);
 				pw.append("<arc id=\"arc"+(arcid++)+"\" source=\"p"+ p + "\" target=\"t"+ t +"\">");
-				pw.append("<inscription><text>"+val+"</text></inscription>");
+				if (val != 1) {
+					pw.append("<inscription><text>"+val+"</text></inscription>");
+				}
 				pw.append("</arc>\n");
 			}
 		}
