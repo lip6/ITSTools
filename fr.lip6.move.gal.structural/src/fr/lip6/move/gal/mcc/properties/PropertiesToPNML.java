@@ -48,15 +48,15 @@ public class PropertiesToPNML {
 		int exported=0;
 		for (Property prop : spn.getProperties()) {
 			if (! doneProps.containsKey(prop.getName())) {
-				pw.append("  <property>\n" + 
-						"    <id>"+ prop.getName() +"</id>\n" + 
-						"    <description>Automatically generated</description>\n" + 
-						"    <formula>\n");
+				pw.append("<property>\n" + 
+						"<id>"+ prop.getName() +"</id>\n" + 
+						"<description>Automatically generated</description>\n" + 
+						"<formula>\n");
 				if (exportProperty(pw, prop.getBody(), prop.getType(), spn)) {
 					usesConstants = true;
 				}
-				pw.append("    </formula>\n" + 
-						"  </property>\n" + 
+				pw.append("</formula>\n" + 
+						"</property>\n" + 
 						"");
 				exported++;
 			} else {
@@ -82,7 +82,7 @@ public class PropertiesToPNML {
 		if (body == null) {
 			return false;
 		} else if (type == PropertyType.DEADLOCK) {
-			pw.append("      <exists-path><finally><deadlock/></finally></exists-path>\n");
+			pw.append("<exists-path><finally><deadlock/></finally></exists-path>\n");
 			return false;
 		} else if (type == PropertyType.LTL) {
 			pw.append("<all-paths>");
@@ -119,13 +119,13 @@ class PrintVisitor implements ExprVisitor<Void> {
 	@Override
 	public Void visit(VarRef varRef) {
 		if (type == PropertyType.BOUNDS) {
-			pw.append("              <place-bound>\n") 
-			.append("                <place>p"+ varRef.index+"</place>\n") 
-			.append("              </place-bound>\n");		
+			pw.append("<place-bound>") 
+			.append("<place>p"+ varRef.index+"</place>") 
+			.append("</place-bound>\n");		
 		} else {
-			pw.append("              <tokens-count>\n") 
-			.append("                <place>p"+ varRef.index+"</place>\n") 
-			.append("              </tokens-count>\n");
+			pw.append("<tokens-count>") 
+			.append("<place>p"+ varRef.index+"</place>") 
+			.append("</tokens-count>\n");
 		}
 		return null;
 	}
@@ -375,54 +375,54 @@ class PrintVisitor implements ExprVisitor<Void> {
 		case ADD : 
 		{
 			if (type == PropertyType.BOUNDS) {
-				pw.append("              <place-bound>\n");
+				pw.append("<place-bound>");
 			} else {
-				pw.append("              <tokens-count>\n"); 
+				pw.append("<tokens-count>"); 
 			}
 			for (Expression child : naryOp.getChildren()) {
 				if (child.getOp() == Op.PLACEREF) {
-					pw.append("                <place>p"+ child.getValue()+"</place>\n");
+					pw.append("<place>p"+ child.getValue()+"</place>");
 				} else if (child.getOp() == Op.CONST) {
 					for (int i=0; i < child.getValue(); i++) {
-						pw.append("                <place>p"+placeCount+"</place>\n");
+						pw.append("<place>p"+placeCount+"</place>");
 					}
 					usesConstant = true;
 				}
 			}
 			if (type == PropertyType.BOUNDS) {
-				pw.append("              </place-bound>\n"); 
+				pw.append("</place-bound>\n"); 
 			} else {
-				pw.append("              </tokens-count>\n"); 
+				pw.append("</tokens-count>\n"); 
 			}
 			break;
 		}
 		case ENABLED:
 		{
-			pw.append("              <is-fireable>\n"); 
+			pw.append("<is-fireable>"); 
 			for (Expression child : naryOp.getChildren()) {
 				if (child.getOp() == Op.TRANSREF) {
-					pw.append("                <transition>t"+ child.getValue()+"</transition>\n");
+					pw.append("<transition>t"+ child.getValue()+"</transition>");
 				} else {
 					throw new IllegalArgumentException("Unexpected child of enabled should be a transition.");
 				}
 			}
-			pw.append("              </is-fireable>\n"); 
+			pw.append("</is-fireable>\n"); 
 			break;
 		}
 		case CARD:
 		{
-			pw.append("              <tokens-count>\n"); 
+			pw.append("<tokens-count>"); 
 			for (Expression child : naryOp.getChildren()) {
 				if (child.getOp() == Op.PLACEREF) {
-					pw.append("                <place>p"+ child.getValue()+"</place>\n");
+					pw.append("<place>p"+ child.getValue()+"</place>");
 				} else if (child.getOp() == Op.CONST) {
 					for (int i=0; i < child.getValue(); i++) {
-						pw.append("                <place>p"+placeCount+"</place>\n");
+						pw.append("<place>p"+placeCount+"</place>");
 					}
 					usesConstant = true;
 				}
 			}
-			pw.append("              </tokens-count>\n"); 
+			pw.append("</tokens-count>\n"); 
 		}
 		default :
 		{
