@@ -125,6 +125,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	
 	public enum ReductionType { DEADLOCK, REACHABILITY, SI_LTL, LTL, LIVENESS, STATESPACE, LI_LTL, SI_CTL, NONE }
 	public int reduce (ReductionType rt) throws NoDeadlockExists, DeadlockFound {
+		if (rt == ReductionType.NONE) {
+			return 0;
+		}
+		
 		//ruleSeqTrans(trans,places);
 		int initP = pnames.size();
 		int initT = tnames.size();
