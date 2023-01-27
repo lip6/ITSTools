@@ -61,13 +61,16 @@ public class StructuralToPNML {
 				int p = tp.keyAt(i);
 				int val = tp.valueAt(i);
 				pw.append("<arc id=\"arc"+(arcid++)+"\" source=\"t"+ t + "\" target=\"p"+ p +"\">");
-				pw.append("<inscription><text>"+val+"</text></inscription>");
+				if (val != 1) {
+					pw.append("<inscription><text>"+val+"</text></inscription>");
+				}
 				pw.append("</arc>\n");
 			}
 		}
 		pw.append("</page>\n");
 		pw.append("<name><text>"+sr.getName()+"</text></name></net>\n");
 		pw.append("</pnml>\n");
+		pw.flush();
 		pw.close();
 		getLog().info("Export to PNML in file "+path +" of net with "+nbplaces +" places, "+ nbtrans+" transitions and "+ arcid + " arcs took "+ (System.currentTimeMillis()-time) + " ms.");
 	}
