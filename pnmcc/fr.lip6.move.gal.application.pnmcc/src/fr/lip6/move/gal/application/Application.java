@@ -139,7 +139,7 @@ public class Application implements IApplication, Ender {
 	private static final String NOKNOWLEDGE="--no-knowledge";
 	private static final String NOSTUTTERLTL="--no-stutterltl";
 	private static final String REDUCE="--reduce";
-
+	private static final String REDUCESINGLE="--reduce-single";
 
 	private List<IRunner> runners = new ArrayList<>();
 
@@ -228,7 +228,7 @@ public class Application implements IApplication, Ender {
 
 		boolean analyzeSensitivity = false;
 		long timeout = 3600;
-
+		boolean singleReduction = false;
 		ReductionType redForExport = null;
 
 		for (int i = 0; i < args.length; i++) {
@@ -258,7 +258,9 @@ public class Application implements IApplication, Ender {
 				readGAL = args[++i];
 			} else if (TIMEOUT.equals(args[i])) {
 				timeout = Long.parseLong(args[++i]);
-			} else if (REDUCE.equals(args[i])) {
+			} else if (REDUCE.equals(args[i]) || REDUCESINGLE.equals(args[i])) {
+				if (REDUCESINGLE.equals(args[i]))
+					singleReduction = true;
 				String mode = args[++i];
 				try {
 					redForExport = ReductionType.valueOf(mode);
@@ -383,16 +385,17 @@ public class Application implements IApplication, Ender {
 			// SerializationUtil.systemToFile(reader.getSpec(), outpath);
 		}
 
-		if (examination.equals("StableMarking") || examination.equals("OneSafe")
-				|| examination.equals("QuasiLiveness") || examination.equals("Liveness")) {
-			GlobalPropertySolver gps = new GlobalPropertySolver(solverPath);
-			Optional<Boolean> b = gps.solveProperty(examination, reader);
+		if (redForExport == null)
+			if ("StableMarking".equals(examination) || "OneSafe".equals(examination)
+					|| "QuasiLiveness".equals(examination) || "Liveness".equals(examination)) {
+				GlobalPropertySolver gps = new GlobalPropertySolver(solverPath);
+				Optional<Boolean> b = gps.solveProperty(examination, reader);
 
-			if (b.isPresent() ) {
-				return null;
+				if (b.isPresent() ) {
+					return null;
+				}
+
 			}
-
-		}
 
 
 
@@ -410,35 +413,36 @@ public class Application implements IApplication, Ender {
 			doHierarchy = false;
 		}
 
-		if (examination.equals("StateSpace")) {
-			reader.createSPN(false, false);
-			int totaltok = reader.getSPN().removeConstantPlaces();
-			reader.getSPN().removeRedundantTransitions(true);
-			// above step may lead to additional simplifications
-			totaltok += reader.getSPN().removeConstantPlaces();
-			if (totaltok > 0) {
-				reader.setMissingTokens(totaltok);
-			}
-			{
-				SparsePetriNet spn = reader.getSPN();
-				StructuralReduction sr = new StructuralReduction(spn);
-				ReachabilitySolver.applyReductions(sr,ReductionType.STATESPACE,solverPath,true,true);
+		if (redForExport == null)
+			if ("StateSpace".equals(examination)) {
+				reader.createSPN(false, false);
+				int totaltok = reader.getSPN().removeConstantPlaces();
+				reader.getSPN().removeRedundantTransitions(true);
+				// above step may lead to additional simplifications
+				totaltok += reader.getSPN().removeConstantPlaces();
+				if (totaltok > 0) {
+					reader.setMissingTokens(totaltok);
+				}
+				{
+					SparsePetriNet spn = reader.getSPN();
+					StructuralReduction sr = new StructuralReduction(spn);
+					ReachabilitySolver.applyReductions(sr,ReductionType.STATESPACE,solverPath,true,true);
 
-				// Breaks max token per marking metric.
-				int curtok = spn.getMarks().stream().mapToInt(i->i).sum();
-				int newtok = sr.getMarks().stream().mapToInt(i->i).sum();
-				spn.readFrom(sr);
-				reader.setMissingTokens( (curtok-newtok) + reader.countMissingTokens());
-			}
-			System.out.println("Final net has " + reader.getSPN().getPlaceCount() + " places and "
-					+ reader.getSPN().getTransitionCount() + " transitions.");
-			reader.rebuildSpecification(doneProps);
-			// ITS is the only method we will run.
-			reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-					reader, doneProps, useLouvain, timeout, wasKilled, startTime, runners, this);
+					// Breaks max token per marking metric.
+					int curtok = spn.getMarks().stream().mapToInt(i->i).sum();
+					int newtok = sr.getMarks().stream().mapToInt(i->i).sum();
+					spn.readFrom(sr);
+					reader.setMissingTokens( (curtok-newtok) + reader.countMissingTokens());
+				}
+				System.out.println("Final net has " + reader.getSPN().getPlaceCount() + " places and "
+						+ reader.getSPN().getTransitionCount() + " transitions.");
+				reader.rebuildSpecification(doneProps);
+				// ITS is the only method we will run.
+				reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+						reader, doneProps, useLouvain, timeout, wasKilled, startTime, runners, this);
 
-			return 0;
-		}
+				return 0;
+			}
 
 		Specification specnocol = null;
 		// // Abstraction case
@@ -483,7 +487,7 @@ public class Application implements IApplication, Ender {
 			// reduce the model for each property
 			reader.createSPN(false, false);
 			SparsePetriNet spn = reader.getSPN();
-			if (spn.getProperties().isEmpty()) {
+			if (spn.getProperties().isEmpty() || singleReduction) {
 				// only export one model
 				StructuralReduction sr = new StructuralReduction(spn);
 				sr.reduce(redForExport);
@@ -569,7 +573,7 @@ public class Application implements IApplication, Ender {
 		}
 
 		// are we going for CTL ? only ITSRunner answers this.
-		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
+		if ( (examination!=null && examination.startsWith("CTL")) || "UpperBounds".equals(examination)) {
 
 			if (examination.startsWith("CTL")) {
 				LTLPropertySolver logicSolver = new LTLPropertySolver(spotPath, solverPath, pwd, false);
@@ -644,7 +648,7 @@ public class Application implements IApplication, Ender {
 				// TODO: make CTL syntax match the normal predicate syntax in ITS tools
 				// reader.removeAdditionProperties();
 			}
-			if (examination.equals("UpperBounds")) {
+			if ("UpperBounds".equals(examination)) {
 				List<Integer> skelBounds = null;
 				if (reader.getHLPN() != null) {
 					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
@@ -697,8 +701,8 @@ public class Application implements IApplication, Ender {
 
 		System.out.println("Working with output stream " + System.out.getClass());
 		// LTL, Deadlocks are ok for LTSmin and ITS
-		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")
-				|| examination.equals("GlobalProperties")) {
+		if ((examination!=null && examination.startsWith("LTL")) || "ReachabilityDeadlock".equals(examination)
+				|| "GlobalProperties".equals(examination)) {
 
 			if (examination.startsWith("LTL")) {
 
@@ -727,7 +731,7 @@ public class Application implements IApplication, Ender {
 					return null;
 				}
 
-			} else if (examination.equals("ReachabilityDeadlock") || examination.equals("GlobalProperties")) {
+			} else if ("ReachabilityDeadlock".equals(examination) || "GlobalProperties".equals(examination)) {
 				if (! DeadlockSolver.checkStructuralDeadlock(pwd, examination, blisspath, solverPath, reader, doneProps).isEmpty()) {
 					return null;
 				}
@@ -773,7 +777,7 @@ public class Application implements IApplication, Ender {
 		}
 
 		// ReachabilityCard and ReachFire are ok for everybody
-		if (examination.equals("ReachabilityFireability") || examination.equals("ReachabilityCardinality")) {
+		if ("ReachabilityFireability".equals(examination) || "ReachabilityCardinality".equals(examination)) {
 
 			if (true) {
 				if (reader.getHLPN() != null) {
