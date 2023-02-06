@@ -17,6 +17,7 @@ public class WalkUtils {
 	private ISparsePetriNet net;
 	private IntMatrixCol tFlowPT;
 	private int emptyEffect = -1;
+	private int[] initialEnabling;
 
 	public WalkUtils(ISparsePetriNet sr) {
 		this.net = sr;
@@ -209,6 +210,13 @@ public class WalkUtils {
 	
 	public ISparsePetriNet getNet() {
 		return net;
+	}
+
+	public int[] getInitialEnabling() {
+		if (initialEnabling == null) {
+			initialEnabling = computeEnabled(getInitial());
+		}
+		return initialEnabling;
 	}
 
 }
