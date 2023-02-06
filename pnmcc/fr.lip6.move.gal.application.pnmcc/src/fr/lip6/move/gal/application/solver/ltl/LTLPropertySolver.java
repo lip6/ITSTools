@@ -917,7 +917,7 @@ public class LTLPropertySolver {
 		// run a 1 step test
 		WalkUtils wu = new WalkUtils(spn);
 		SparseIntArray init = wu.getInitial();
-		int[] enabled = wu.computeEnabled(init);
+		int[] enabled = wu.getInitialEnabling().clone();
 		
 		// we are starting from a deadlock ?
 		if (enabled[0]==0) {
