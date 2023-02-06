@@ -80,7 +80,7 @@ public class PnmlToStructuralTransformer {
 					});
 				}
 			}
-			getLog().info("Parsed PT model containing " + spn.getPlaceCount() + " places and " + spn.getTransitionCount() + " transitions in " + (System.currentTimeMillis() - time) + " ms.");
+			getLog().info("Parsed PT model containing " + spn.getPlaceCount() + " places and " + spn.getTransitionCount() + " transitions and " + spn.getArcCount() + " arcs in " + (System.currentTimeMillis() - time) + " ms.");
 			return spn;
 		} catch (ArithmeticException e) {
 			throw new OverlargeMarkingException();
