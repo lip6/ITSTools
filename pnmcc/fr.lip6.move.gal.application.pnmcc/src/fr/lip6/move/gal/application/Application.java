@@ -493,7 +493,12 @@ public class Application implements IApplication, Ender {
 				sr.reduce(redForExport);
 				spn.readFrom(sr);
 				String outsr = pwd + "/model."+redForExport+".pnml";
-				StructuralToPNML.transform(spn, outsr);
+				if (spn.getProperties().isEmpty()) {
+					StructuralToPNML.transform(spn, outsr);	
+				} else {
+					String outform = pwd + "/" + examination + "." + redForExport+".xml";				
+					MCCExporter.exportToMCCFormat(outsr, outform, spn);
+				}
 			} else {
 				// export one model per property, reduced specifically for that properties alphabet.
 				List<fr.lip6.move.gal.structural.Property> props = new ArrayList<>(spn.getProperties());
