@@ -90,6 +90,13 @@ public class PropertiesToPNML {
 			body.accept(v);
 			pw.append("</all-paths>");
 			return v.getUsesConstant();
+		} else if (type == PropertyType.BOUNDS && body.getOp() == Op.CONST) {
+			pw.append("<place-bound>");
+			for (int i=0; i < body.getValue(); i++) {
+				pw.append("<place>p"+spn.getPlaceCount()+"</place>");
+			}
+			pw.append("</place-bound>\n");			
+			return true;			
 		} else {
 			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount());
 			body.accept(v);
