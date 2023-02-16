@@ -72,7 +72,7 @@ public class PropertiesToPNML {
 //				}
 			}
 		}
-		pw.append("</property-set>\n\n");
+		pw.append("</property-set>\n");
 		pw.close();
 		getLog().info("Export to MCC of "+ exported +" properties in file "+path +" took "+ (System.currentTimeMillis()-time) + " ms.");
 		return usesConstants;
