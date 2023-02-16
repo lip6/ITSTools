@@ -313,19 +313,27 @@ class PrintVisitor implements ExprVisitor<Void> {
 		}
 		case LT :
 		{
-			// a < b => a <= b && ! b <= a
-			pw.append("<conjunction>\n");
-			pw.append("<integer-le>\n");			
-			binOp.left.accept(this);
-			binOp.right.accept(this);
-			pw.append("</integer-le>\n");
-			pw.append("<negation>");
-			pw.append("<integer-le>\n");			
-			binOp.right.accept(this);
-			binOp.left.accept(this);
-			pw.append("</integer-le>\n");
-			pw.append("</negation>\n");
-			pw.append("</conjunction>\n");
+			if (binOp.right.getOp() == Op.CONST) {
+				// x < K  =>  x <= K-1
+				pw.append("<integer-le>\n");			
+				binOp.left.accept(this);
+				pw.append("<integer-constant>"+(binOp.right.getValue()-1)+"</integer-constant>\n");				
+				pw.append("</integer-le>\n");				
+			} else {
+				// a < b => a <= b && ! b <= a
+				pw.append("<conjunction>\n");
+				pw.append("<integer-le>\n");			
+				binOp.left.accept(this);
+				binOp.right.accept(this);
+				pw.append("</integer-le>\n");
+				pw.append("<negation>");
+				pw.append("<integer-le>\n");			
+				binOp.right.accept(this);
+				binOp.left.accept(this);
+				pw.append("</integer-le>\n");
+				pw.append("</negation>\n");
+				pw.append("</conjunction>\n");
+			}
 			break;			
 		}
 		default :
