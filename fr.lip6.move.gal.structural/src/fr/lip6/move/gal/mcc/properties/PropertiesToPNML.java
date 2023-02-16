@@ -97,6 +97,15 @@ public class PropertiesToPNML {
 			}
 			pw.append("</place-bound>\n");			
 			return true;			
+		} else if (type == PropertyType.INVARIANT && body.getOp() == Op.BOOLCONST) {
+			if (body.getValue() == 1) {
+				// simplest true formula we can think of, true directly in initial state in particular
+				pw.append("<exists-path><finally><integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le></finally></exists-path>");
+			} else {
+				// simplest false formula we can think of, false directly in initial state in particular
+				pw.append("<all-paths><globally><integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le></globally></all-paths> ");				
+			}
+			return false;			
 		} else {
 			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount());
 			body.accept(v);
