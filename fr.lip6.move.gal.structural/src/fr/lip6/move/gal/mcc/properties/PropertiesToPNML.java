@@ -3,6 +3,7 @@ package fr.lip6.move.gal.mcc.properties;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.logging.Logger;
 
 import fr.lip6.move.gal.structural.ISparsePetriNet;
@@ -375,25 +376,34 @@ class PrintVisitor implements ExprVisitor<Void> {
 		return null;
 	}
 
+	public void combine (String operator, List<Expression> operands) {
+		// go for a log expansion to binary constructions.
+		int sz = operands.size();
+		if (sz == 0) {
+			// throw maybe ?
+			return;
+		} else if (sz == 1) {
+			operands.get(0).accept(this);
+		} else {
+			int mid = sz / 2;
+			pw.append("<"+ operator+">\n");			
+			combine(operator,operands.subList(0, mid));
+			combine(operator,operands.subList(mid, sz));
+			pw.append("</"+operator +">\n");
+		}
+	}
+	
 	@Override
 	public Void visit(NaryOp naryOp) {
 		switch (naryOp.getOp()) {
 		case AND :
 		{
-			pw.append("<conjunction>\n");
-			for (Expression child : naryOp.getChildren()) {
-				child.accept(this);
-			}
-			pw.append("</conjunction>\n");
+			combine("conjunction", naryOp.getChildren());
 			break;
 		}
 		case OR :
 		{
-			pw.append("<disjunction>\n");
-			for (Expression child : naryOp.getChildren()) {
-				child.accept(this);
-			}
-			pw.append("</disjunction>\n");
+			combine("disjunction", naryOp.getChildren());
 			break;
 		}
 		case ADD : 
