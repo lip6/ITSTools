@@ -16,7 +16,8 @@ import fr.lip6.move.gal.structural.expr.ParamRef;
 
 public class SymmetricUnfolder {
 	private static final int DEBUG=1;
-	private static final boolean THAT_ONE_GUY=false;
+	private enum Strategy { CONSERVATIVE, THAT_ONE_GUY, FORKJOIN };
+	private static final Strategy strategy = Strategy.CONSERVATIVE;
 
 	private static Void computeParams(Expression e,  List<Param> params) {
 		if (e == null) {
@@ -148,11 +149,16 @@ public class SymmetricUnfolder {
 									} else if (seenplace != arc.getPlace()) {
 										if (DEBUG >=1)
 											System.out.println("Transition "+trans.getName()+ " forces synchronizations/join behavior on parameter "+ param.getName() + " of sort "+ sort.getName());
-										if (THAT_ONE_GUY) {
+										if (strategy == Strategy.THAT_ONE_GUY) {
 											// "that one guy" strategy
 											// this is more refined but still an over approx
 											Partition p2 = new Partition(sort.size(),Collections.singletonList(0));
 											partition = Partition.refine(partition, p2);
+										} else if (strategy == Strategy.FORKJOIN) {
+											// look for the origin of tokens being joined
+											
+											
+											
 										} else {
 											// conservative strategy
 											isSym = false;
@@ -356,7 +362,7 @@ public class SymmetricUnfolder {
 					System.out.println("Symmetric sort wr.t. initial and guards detected :" + sort.getName());
 			} else {
 				if (DEBUG >=1)
-					System.out.println("Sort wr.t. initial and guards " + sort.getName()+ " has partition " + partition);
+					System.out.println("Sort wr.t. initial and guards " + sort.getName()+ " has partition " + partition.getNbSubs());
 			}
 
 
