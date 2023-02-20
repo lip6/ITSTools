@@ -3,6 +3,7 @@ package fr.lip6.move.gal.mcc.properties;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -36,16 +37,16 @@ public class PropertiesToPNML {
 	 * @param spn
 	 * @param path
 	 * @param doneProps
-	 * @return true if we had to introduce a special "one" place to represent constants.
+	 * @return a list of places to add, with their initial marking to represent constants
 	 * @throws IOException
 	 */
-	public static boolean transform(SparsePetriNet spn, String path, DoneProperties doneProps) throws IOException {
+	public static List<Integer> transform(SparsePetriNet spn, String path, DoneProperties doneProps) throws IOException {
 		long time = System.currentTimeMillis();
 		PrintWriter pw = new PrintWriter(new File(path));
 		pw.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 		
 		pw.append("<property-set xmlns=\"http://mcc.lip6.fr/\">\n");
-		boolean usesConstants = false;
+		List<Integer> usedConstants = new ArrayList<>();
 		int exported=0;
 		for (Property prop : spn.getProperties()) {
 			if (! doneProps.containsKey(prop.getName())) {
@@ -53,9 +54,7 @@ public class PropertiesToPNML {
 						"<id>"+ prop.getName() +"</id>\n" + 
 						"<description>Automatically generated</description>\n" + 
 						"<formula>\n");
-				if (exportProperty(pw, prop.getBody(), prop.getType(), spn)) {
-					usesConstants = true;
-				}
+				exportProperty(pw, prop.getBody(), prop.getType(), spn, usedConstants);
 				pw.append("</formula>\n" + 
 						"</property>\n" + 
 						"");
@@ -75,29 +74,29 @@ public class PropertiesToPNML {
 		pw.append("</property-set>\n");
 		pw.close();
 		getLog().info("Export to MCC of "+ exported +" properties in file "+path +" took "+ (System.currentTimeMillis()-time) + " ms.");
-		return usesConstants;
+		return usedConstants;
 	}
 
 
-	private static boolean exportProperty(PrintWriter pw, Expression body, PropertyType type, ISparsePetriNet spn) {
+	private static void exportProperty(PrintWriter pw, Expression body, PropertyType type, ISparsePetriNet spn, List<Integer> usedConstants) {
 		if (body == null) {
-			return false;
+			return ;
 		} else if (type == PropertyType.DEADLOCK) {
 			pw.append("<exists-path><finally><deadlock/></finally></exists-path>\n");
-			return false;
+			return ;
 		} else if (type == PropertyType.LTL) {
 			pw.append("<all-paths>");
-			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount());
+			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount(),usedConstants);
 			body.accept(v);
 			pw.append("</all-paths>");
-			return v.getUsesConstant();
+			return ;
 		} else if (type == PropertyType.BOUNDS && body.getOp() == Op.CONST) {
 			pw.append("<place-bound>");
 			for (int i=0; i < body.getValue(); i++) {
 				pw.append("<place>p"+spn.getPlaceCount()+"</place>");
 			}
 			pw.append("</place-bound>\n");			
-			return true;			
+			return ;			
 		} else if (type == PropertyType.INVARIANT && body.getOp() == Op.BOOLCONST) {
 			if (body.getValue() == 1) {
 				// simplest true formula we can think of, true directly in initial state in particular
@@ -106,11 +105,11 @@ public class PropertiesToPNML {
 				// simplest false formula we can think of, false directly in initial state in particular
 				pw.append("<all-paths><globally><integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le></globally></all-paths> ");				
 			}
-			return false;			
+			return ;			
 		} else {
-			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount());
+			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount(),usedConstants);
 			body.accept(v);
-			return v.getUsesConstant();
+			return ;
 		}
 	}
 		
@@ -119,20 +118,17 @@ public class PropertiesToPNML {
 class PrintVisitor implements ExprVisitor<Void> {
 
 	private PrintWriter pw;
-	private boolean usesConstant=false;
 	private PropertyType type;
 	private int placeCount;
+	private List<Integer> usedConstants;
 
-	public PrintVisitor(PrintWriter pw, PropertyType type, int placeCount) {
+	public PrintVisitor(PrintWriter pw, PropertyType type, int placeCount, List<Integer> usedConstants) {
 		this.pw = pw;
 		this.type = type;
 		this.placeCount = placeCount;
+		this.usedConstants = usedConstants;
 	}
 
-	public boolean getUsesConstant() {
-		return usesConstant;
-	}
-	
 	@Override
 	public Void visit(VarRef varRef) {
 		if (type == PropertyType.BOUNDS) {
@@ -417,10 +413,14 @@ class PrintVisitor implements ExprVisitor<Void> {
 				if (child.getOp() == Op.PLACEREF) {
 					pw.append("<place>p"+ child.getValue()+"</place>");
 				} else if (child.getOp() == Op.CONST) {
-					for (int i=0; i < child.getValue(); i++) {
-						pw.append("<place>p"+placeCount+"</place>");
+					// do we already have such a place ?
+					int val = child.getValue();
+					int ind = usedConstants.indexOf(val);
+					if (ind == -1) {
+						ind = usedConstants.size();
+						usedConstants.add(val);
 					}
-					usesConstant = true;
+					pw.append("<place>p"+(placeCount+ind)+"</place>");					
 				}
 			}
 			if (type == PropertyType.BOUNDS) {
@@ -450,10 +450,14 @@ class PrintVisitor implements ExprVisitor<Void> {
 				if (child.getOp() == Op.PLACEREF) {
 					pw.append("<place>p"+ child.getValue()+"</place>");
 				} else if (child.getOp() == Op.CONST) {
-					for (int i=0; i < child.getValue(); i++) {
-						pw.append("<place>p"+placeCount+"</place>");
+					// do we already have such a place ?
+					int val = child.getValue();
+					int ind = usedConstants.indexOf(val);
+					if (ind == -1) {
+						ind = usedConstants.size();
+						usedConstants.add(val);
 					}
-					usesConstant = true;
+					pw.append("<place>p"+(placeCount+ind)+"</place>");
 				}
 			}
 			pw.append("</tokens-count>\n"); 
