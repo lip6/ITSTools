@@ -54,6 +54,17 @@ public class ReachabilitySolver {
 			boolean doneAtoms = false;
 			boolean doneSums = false;
 			boolean doneAtomsSR = false;
+			Thread t = null;
+			
+			if (reader.isDoITS() || reader.isDoLTSMin()) {
+				MccTranslator rc = reader.copy();
+				t = new Thread( () ->
+				{
+					GlobalPropertySolver.verifyWithSDD(rc, doneProps, "ReachabilityCardinality" , solverPath, timeout / 2);
+				});						
+				t.start();
+			}
+			try {
 			do {
 				iter =0;
 				SparsePetriNet spn = reader.getSPN();
@@ -292,6 +303,20 @@ public class ReachabilitySolver {
 				reader.setSpn(spnOri, false);
 				checkInInitial(spnOri, doneProps);
 			}
+			
+			
+	} finally {
+		if (t != null) {
+		if (t.isAlive()) {
+			t.interrupt();
+		}
+		try {
+			t.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		}
+	}
 		}
 
 	public static void computeToCheck(SparsePetriNet spn, List<Integer> tocheckIndexes, List<Expression> tocheck) {
@@ -418,7 +443,7 @@ public class ReachabilitySolver {
 		int initp = sr.getPnames().size();
 		int initt = sr.getTnames().size();
 		int total = 0;
-		
+		long start = System.currentTimeMillis();
 		int lastReduction = -1;
 		do {
 			System.out.println("Starting structural reductions in "+ rt +" mode, iteration "+ it + " : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
@@ -477,7 +502,7 @@ public class ReachabilitySolver {
 			}
 			it++;
 		} while (cont);
-		System.out.println("Finished structural reductions, in "+ it + " iterations. Remains : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
+		System.out.println("Finished structural reductions in "+ rt +" mode , in "+ it + " iterations and "+ (System.currentTimeMillis()-start) + " ms. Remains : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
 		return total > 0;
 	}
 
