@@ -327,7 +327,9 @@ public class Application implements IApplication, Ender {
 
 		// setup a "reader" that parses input property files correctly and efficiently
 		MccTranslator reader = new MccTranslator(pwd, useLouvain);
-
+		reader.setITS(doITS);
+		reader.setLTSMin(doLTSmin);
+		
 		try {
 			if (readGAL == null) {
 				// parse the model from PNML to GAL using PNMLFW for COL or fast SAX for PT

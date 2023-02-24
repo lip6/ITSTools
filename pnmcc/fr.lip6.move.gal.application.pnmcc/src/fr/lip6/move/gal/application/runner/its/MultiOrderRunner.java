@@ -79,7 +79,12 @@ public class MultiOrderRunner {
 	public static  MccTranslator runMultiITS(String pwd, String examination, String gspnpath, String orderHeur, boolean doITS,
 				boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, DoneProperties doneProps,
 				boolean useLouvain, long timeout, AtomicBoolean wasKilled, long startTime, List<IRunner> runners, Ender e) throws IOException, InterruptedException {
-			MccTranslator reader2 = null;
+			
+		if (!doITS && !onlyGal) {
+			return reader;
+		}
+		
+		MccTranslator reader2 = null;
 			long elapsed = (startTime - System.currentTimeMillis()) / 1000;
 			timeout -= elapsed;
 			if (useManyOrder) {

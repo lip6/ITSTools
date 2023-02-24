@@ -115,6 +115,8 @@ public class GlobalPropertySolver {
 			}
 		}
 
+		List<Expression> gtone = new ArrayList<>();
+		boolean singleProp = false;
 		for (int pid = 0; pid < pn.getPlaceCount(); pid++) {
 
 			// in case colored models
@@ -126,13 +128,22 @@ public class GlobalPropertySolver {
 			if (!osPlaces.contains(pid)) {
 				Expression pInfOne = Expression.op(Op.LEQ,
 						Expression.nop(Op.CARD, Collections.singletonList(Expression.var(pid))), Expression.constant(1));
-				// unary op ignore right
-				Expression ag = Expression.op(Op.AG, pInfOne, null);
-				Property oneSafeProperty = new Property(ag, PropertyType.INVARIANT, "osplace_" + pid);
-				pn.getProperties().add(oneSafeProperty);
+				if (singleProp) {
+					gtone.add(Expression.not(pInfOne));
+				} else {
+					// unary op ignore right
+					Expression ag = Expression.op(Op.AG, pInfOne, null);
+					Property oneSafeProperty = new Property(ag, PropertyType.INVARIANT, "osplace_" + pid);
+					pn.getProperties().add(oneSafeProperty);
+				}
 			}
 		}
-
+		if (singleProp) {
+			Property oneUnsafe = new Property(Expression.op(Op.AG, Expression.not(Expression.nop(Op.OR,gtone)), null), PropertyType.INVARIANT, "allosplace");
+			pn.getProperties().add(oneUnsafe);
+		}
+				
+		
 	}
 
 	void buildStableMarkingProperty(PetriNet spn, DoneProperties doneProps) {
@@ -639,6 +650,8 @@ public class GlobalPropertySolver {
 
 	public static void verifyWithSDD(MccTranslator reader, DoneProperties doneProps, String examinationForITS,
 			String solverPath, int timeout) {
+		boolean wasInterrupted = false;
+		if (reader.isDoITS())
 		try {
 			for (int i=0; i < 2 ; i++) {
 				reader.rebuildSpecification(doneProps);
@@ -667,6 +680,7 @@ public class GlobalPropertySolver {
 				} catch (IOException | InterruptedException e) {
 					System.out.println("ITS runner failed with exception " + e.getMessage());
 					e.printStackTrace();
+					wasInterrupted = true;
 				}
 				reader.getSPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
 				if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished()) {
@@ -678,10 +692,11 @@ public class GlobalPropertySolver {
 			System.out.println("ITSRunner failed with out of memory error.");
 		}
 		
-		if (doneProps.isFinished()) {
+		if (doneProps.isFinished() || wasInterrupted) {
 			return;
 		}
 		//CTL is not for LTSmin
+		if (reader.isDoLTSMin())
 		if (! reader.getSPN().getProperties().isEmpty() && !examinationForITS.startsWith("CTL")) {
 			LTSminRunner ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, false, false, timeout,
 					reader.getSPN().isSafe());
@@ -700,9 +715,10 @@ public class GlobalPropertySolver {
 				ltsminRunner.join();
 			} catch (IOException | InterruptedException e) {
 				System.out.println("LTSmin runner failed with exception " + e.getMessage());
-				e.printStackTrace();
+				wasInterrupted = true;
+				e.printStackTrace();				
 			}
-		}
+		}		
 		reader.getSPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
 	}
 

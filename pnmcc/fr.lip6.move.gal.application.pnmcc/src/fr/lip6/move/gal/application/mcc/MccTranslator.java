@@ -446,6 +446,9 @@ public class MccTranslator {
 
 
 	private	int missingTokens =0;
+	private boolean doITS=false;
+	private boolean doLTSMin=false;
+	
 	public void setMissingTokens(int val) {
 		this.missingTokens = val;
 	}
@@ -513,6 +516,8 @@ public class MccTranslator {
 			copy.spn = new SparsePetriNet(spn);
 		copy.hlpn = this.hlpn;
 		copy.missingTokens = this.missingTokens;
+		copy.doITS = doITS;
+		copy.doLTSMin = doLTSMin;
 		return copy ;
 	}
 
@@ -1000,5 +1005,20 @@ public class MccTranslator {
 
 	public void setHLPN(SparseHLPetriNet hlpn) {
 		this.hlpn = hlpn;
+	}
+
+	public void setITS(boolean doITS) {
+		this.doITS = doITS;
+	}
+
+	public void setLTSMin(boolean doLTSmin) {
+		this.doLTSMin = doLTSmin;
+	}
+	
+	public boolean isDoITS() {
+		return doITS;
+	}
+	public boolean isDoLTSMin() {
+		return doLTSMin;
 	}
 }
