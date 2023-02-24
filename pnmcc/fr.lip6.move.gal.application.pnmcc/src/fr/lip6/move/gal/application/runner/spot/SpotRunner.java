@@ -53,7 +53,7 @@ public class SpotRunner {
 		ALL
 	}
 	
-	private static final int DEBUG = 0;
+	private static final int DEBUG = 1;
 	private String pathToltlfilt;
 	private String pathToltl2tgba;
 	private String pathToautfilt;
