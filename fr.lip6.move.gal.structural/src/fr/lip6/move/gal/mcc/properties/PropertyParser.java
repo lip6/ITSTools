@@ -24,7 +24,7 @@ public class PropertyParser {
 						new fr.lip6.move.gal.structural.Property(Expression.op(Op.EF,Expression.op(Op.DEAD, null, null),null), propertyType ,"ReachabilityDeadlock");
 				ptnet.getProperties().add(deadlockProp);
 			} else {
-				System.out.println("DO_NOT_COMPETE");
+				System.out.println("No "+path+" examination file found. Proceeding without properties.");
 			}
 		}
 		return ptnet.getProperties().size();
