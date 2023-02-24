@@ -227,7 +227,7 @@ public class Application implements IApplication, Ender {
 		boolean noSLCLtest = false;
 
 		boolean analyzeSensitivity = false;
-		long timeout = 3600;
+		int timeout = 3600;
 		boolean singleReduction = false;
 		ReductionType redForExport = null;
 
@@ -257,7 +257,7 @@ public class Application implements IApplication, Ender {
 			} else if (READ_GAL.equals(args[i])) {
 				readGAL = args[++i];
 			} else if (TIMEOUT.equals(args[i])) {
-				timeout = Long.parseLong(args[++i]);
+				timeout = Integer.parseInt(args[++i]);
 			} else if (REDUCE.equals(args[i]) || REDUCESINGLE.equals(args[i])) {
 				if (REDUCESINGLE.equals(args[i]))
 					singleReduction = true;
@@ -485,6 +485,46 @@ public class Application implements IApplication, Ender {
 		// Now load properties from examination
 		reader.loadProperties(examination);
 
+//		if (redForExamination != null) {
+//			if ("StateSpace".equals(examination) || "Liveness".equals(examination) || "QuasiLiveness".equals(examination) || "StableMarking".equals(examination))
+//				reader.createSPN(false, false);
+//			else
+//				reader.createSPN();					
+//			
+//			// basic : test initial conditions
+//			SparsePetriNet spn = reader.getSPN();
+//			
+//			ReachabilitySolver.checkInInitial(spn, doneProps);
+//			
+//			// apply some further simplifications
+//			GALSolver.runGALReductions(reader, doneProps);
+//			
+//			// apply the appropriate reductions
+//			StructuralReduction sr = new StructuralReduction(spn);
+//			if (examination.startsWith("CTL") || examination.startsWith("LTL")) {
+////				if (fr.lip6.move.gal.structural.expr.Simplifier.isSyntacticallyStuttering(prop)) {
+////					ReachabilitySolver.applyReductions(sr, ReductionType.SI_LTL, solverPath, true, true);
+////				} else {
+//					ReachabilitySolver.applyReductions(sr, ReductionType.LTL, solverPath, true, true);
+////				}
+//			} else if (examination.contains("Liveness")) {
+//				ReachabilitySolver.applyReductions(sr, ReductionType.REACHABILITY, solverPath, true, true);
+//			}
+//
+//			
+//			// attempt to disprove with SMT
+//			
+//			// evaluate and simplify
+//			
+//			// last round of reductions, including some SMT
+//			
+//			// walk a bit more
+//						
+//			// export remaining properties
+//			
+//			return null;
+//		}
+		
 		if (redForExport != null) {
 			// reduce the model for each property
 			reader.createSPN(false, false);
@@ -858,7 +898,7 @@ public class Application implements IApplication, Ender {
 
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				if (!reader.getSPN().getProperties().isEmpty())
-					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, -1);
+					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, timeout);
 
 //				if (!reader.getSPN().getProperties().isEmpty()) {
 //					List<fr.lip6.move.gal.structural.Property> props = new ArrayList<>(reader.getSPN().getProperties());
@@ -913,7 +953,7 @@ public class Application implements IApplication, Ender {
 				}
 
 				if (!reader.getSpec().getProperties().isEmpty())
-					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, -1);
+					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, timeout);
 
 				// Per property approach = WIP
 //				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
