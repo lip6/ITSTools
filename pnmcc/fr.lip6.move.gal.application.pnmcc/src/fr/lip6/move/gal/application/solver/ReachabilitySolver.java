@@ -60,7 +60,7 @@ public class ReachabilitySolver {
 			MccTranslator rc = reader.copy();
 			t = new Thread( () ->
 			{
-				GlobalPropertySolver.verifyWithSDD(rc, doneProps, "ReachabilityCardinality" , solverPath, timeout / 2);
+				GlobalPropertySolver.verifyWithSDD(rc, doneProps, "ReachabilityCardinality" , solverPath, timeout > 0 ? timeout / 2 : 600);
 			});
 			t.start();
 		}
