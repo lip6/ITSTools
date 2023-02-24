@@ -339,6 +339,7 @@ public class Application implements IApplication, Ender {
 				} catch (OverlargeMarkingException e) {
 					if ("OneSafe".equals(examination)) {
 						System.out.println("FORMULA OneSafe FALSE TECHNIQUES STRUCTURAL INITIAL_STATE");
+						allSolved(pwd,examination);
 						return null;
 					} else {
 						throw e;
@@ -394,6 +395,7 @@ public class Application implements IApplication, Ender {
 				Optional<Boolean> b = gps.solveProperty(examination, reader);
 
 				if (b.isPresent() ) {
+					allSolved(pwd,examination);
 					return null;
 				}
 
@@ -418,6 +420,12 @@ public class Application implements IApplication, Ender {
 		if (redForExport == null)
 			if ("StateSpace".equals(examination)) {
 				reader.createSPN(false, false);
+				
+				if (rebuildPNML) {
+					tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
+					return 0;
+				}
+				
 				int totaltok = reader.getSPN().removeConstantPlaces();
 				reader.getSPN().removeRedundantTransitions(true);
 				// above step may lead to additional simplifications
@@ -689,6 +697,7 @@ public class Application implements IApplication, Ender {
 
 
 				if (reader.getSPN().getProperties().isEmpty()) {
+					allSolved(pwd, examination);
 					return null;
 				}
 				// due to + being OR in the CTL syntax, we don't support this type of props
@@ -718,6 +727,7 @@ public class Application implements IApplication, Ender {
 
 				if (doneProps.keySet().containsAll(
 						reader.getSPN().getProperties().stream().map(p -> p.getName()).collect(Collectors.toList()))) {
+					allSolved(pwd,examination);
 					System.out.println("All properties solved without resorting to model-checking.");
 					return null;
 				} else {
@@ -738,11 +748,14 @@ public class Application implements IApplication, Ender {
 				reader.rebuildSpecification(doneProps);
 
 			}
-
-			tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
-
-			reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+			
+			if (reader.getSPN().getProperties().isEmpty()) {
+				allSolved(pwd, examination);				
+			} else {
+				tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
+				reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
 					reader, doneProps, useLouvain, timeout, wasKilled, startTime, runners, this);
+			}
 			return 0;
 		}
 
@@ -770,6 +783,7 @@ public class Application implements IApplication, Ender {
 
 				if (reader.getSPN().getProperties().isEmpty()) {
 					System.out.println("All properties solved by simple procedures.");
+					allSolved(pwd, examination);
 					return null;
 				}
 
@@ -780,11 +794,13 @@ public class Application implements IApplication, Ender {
 
 			} else if ("ReachabilityDeadlock".equals(examination) || "GlobalProperties".equals(examination)) {
 				if (! DeadlockSolver.checkStructuralDeadlock(pwd, examination, blisspath, solverPath, reader, doneProps).isEmpty()) {
+					allSolved(pwd, examination);
 					return null;
 				}
 			}
 			if (doneProps.keySet().containsAll(
 					reader.getSPN().getProperties().stream().map(p -> p.getName()).collect(Collectors.toList()))) {
+				allSolved(pwd, examination);
 				System.out.println("All properties solved without resorting to exhaustive model-checking.");
 				return null;
 			} else
@@ -1042,6 +1058,14 @@ public class Application implements IApplication, Ender {
 			}
 		}
 		return IApplication.EXIT_OK;
+	}
+
+	private void allSolved(String pwd, String examination2) {
+		try {
+			new File(pwd+"/"+examination2+".solved").createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
 	}
 
 	private void tryRebuildPNML(String pwd, String examination, boolean rebuildPNML, MccTranslator reader,
