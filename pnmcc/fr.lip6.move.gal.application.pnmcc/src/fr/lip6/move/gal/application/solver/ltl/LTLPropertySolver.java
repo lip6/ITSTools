@@ -20,9 +20,12 @@ import fr.lip6.ltl.tgba.EmptyProductException;
 import fr.lip6.ltl.tgba.LTLException;
 import fr.lip6.ltl.tgba.RandomProductWalker;
 import fr.lip6.ltl.tgba.TGBA;
+import fr.lip6.ltl.tgba.TGBA.ExportMode;
 import fr.lip6.ltl.tgba.TGBAEdge;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.application.runner.Ender;
+import fr.lip6.move.gal.application.runner.ltsmin.ILTSminRunner;
+import fr.lip6.move.gal.application.runner.ltsmin.LTSminPNMLRunner;
 import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
 import fr.lip6.move.gal.application.solver.GALSolver;
@@ -371,14 +374,21 @@ public class LTLPropertySolver {
 	}
 	
 	private void verifyWithLTSmin (SparsePetriNet spn, TGBA negProp, DoneProperties doneProps, int timeout, SpotRunner spot) {
-		LTSminRunner ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, negProp.isStutterInvariant(), false, timeout, spn.isSafe());
+		ExportMode mode = ExportMode.LTSMINAP;
+		
+		ILTSminRunner ltsminRunner ;
+		if (mode == ExportMode.LTSMINAP) {
+			ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, negProp.isStutterInvariant(), false, timeout, spn.isSafe());
+		} else {
+			ltsminRunner = new LTSminPNMLRunner(negProp.isStutterInvariant(), timeout, spn.isSafe());
+		}
 		
 		try {
 			ltsminRunner.configure(null, doneProps);
 			ltsminRunner.setNet(spn);
 			
 			// force state based acceptance
-			String stateBasedHOA = spot.toBuchi(negProp,true);
+			String stateBasedHOA = spot.toBuchi(negProp,mode);
 			
 			ltsminRunner.setTGBA(negProp, stateBasedHOA);
 
@@ -443,8 +453,8 @@ public class LTLPropertySolver {
 					
 					pw = new RandomProductWalker(spnForPropWithK, sr, tgbappor, atomsred);
 					
-					pw.runProduct(NBSTEPS, 10, false);
-					pw.runProduct(NBSTEPS, 10, true);
+		//			pw.runProduct(NBSTEPS, 10, false);
+		//			pw.runProduct(NBSTEPS, 10, true);
 					
 					// restore AP to original state
 					pw.setAPinterpretation(tgbappor.getInitial());

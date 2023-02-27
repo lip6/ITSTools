@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.mcc.properties.PropertyPrinter;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;

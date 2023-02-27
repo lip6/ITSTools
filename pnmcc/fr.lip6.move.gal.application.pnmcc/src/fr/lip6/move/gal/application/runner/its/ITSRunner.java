@@ -18,6 +18,7 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.ltl.tgba.TGBA;
+import fr.lip6.ltl.tgba.TGBA.ExportMode;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Property;
@@ -103,7 +104,7 @@ public class ITSRunner extends AbstractRunner {
 					File curAut = Files.createTempFile("aut", ".hoa").toFile();
 					if (DEBUG == 0) curAut.deleteOnExit();
 					PrintWriter pw = new PrintWriter(curAut);
-					tgba.exportAsHOA(pw, false);
+					tgba.exportAsHOA(pw, ExportMode.SPOTAP);
 					pw.close();
 					
 					cl.addArg("-hoa");

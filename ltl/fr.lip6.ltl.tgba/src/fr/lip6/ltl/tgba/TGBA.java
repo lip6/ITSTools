@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.util.SparseBoolArray;
+import fr.lip6.move.gal.mcc.properties.LTSMinPropertyPrinter;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.AtomicPropManager;
 import fr.lip6.move.gal.structural.expr.AtomicPropRef;
@@ -124,8 +125,15 @@ public class TGBA {
 				+ ", properties=" + properties + ", stateDesc=" + stateDesc + Arrays.toString(stutter) +"]";
 	}
 	
-	
-	public void exportAsHOA (PrintWriter pw, boolean forLTSmin) {
+	public enum ExportMode { 
+			// just the names of the AP for Spot interaction
+			SPOTAP, 
+			// just using the names of the AP for LTSmin + gal.so mode
+			LTSMINAP,
+			// with the full expansion of AP, for pnml2lts-* modes
+			LTSMINALL
+	};
+	public void exportAsHOA (PrintWriter pw, ExportMode mode) {
 
 		//example target
 //		HOA: v1
@@ -142,19 +150,26 @@ public class TGBA {
 		pw.println("States: "+mat.size());
 		pw.println("Start: "+initial);
 		
-
-		
 		Map<String, Integer> atomMap = collectAtoms();
 		
-		
 		pw.print("AP: "+atoms.size());
-		if (forLTSmin) {
+		switch (mode) {
+		case SPOTAP :
+			for (AtomicProp ap : atoms) {
+				pw.print(" \"" + ap.getName() + "\"");
+			}
+			break;
+		case LTSMINAP :
 			for (AtomicProp ap : atoms) {
 				pw.print(" \"(LTLAP" + ap.getName() + "==true)\""); 
 			}
-		} else {
+			break;
+		case LTSMINALL :
+			LTSMinPropertyPrinter pp = new LTSMinPropertyPrinter(pw);
 			for (AtomicProp ap : atoms) {
-				pw.print(" \"" + ap.getName() + "\"");
+				pw.print(" \"(");
+				ap.getExpression().accept(pp);
+				pw.print(")\""); 
 			}
 		}
 		

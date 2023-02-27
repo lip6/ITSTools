@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.pn2pins;
+package fr.lip6.move.gal.mcc.properties;
 
 import java.io.PrintWriter;
 import java.util.List;

@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.application.runner.ltsmin;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -22,32 +23,31 @@ import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.ltsmin.BinaryToolsPlugin;
 import fr.lip6.move.gal.ltsmin.BinaryToolsPlugin.Tool;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
+import fr.lip6.move.gal.mcc.properties.MCCExporter;
+import fr.lip6.move.gal.mcc.properties.PropertyPrinter;
 import fr.lip6.move.gal.pn2pins.PetriNet2PinsTransformer;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.StructuralToPNML;
+import fr.lip6.move.gal.structural.expr.CExpressionPrinter;
 import fr.lip6.move.gal.structural.expr.Op;
 
-public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
+public class LTSminPNMLRunner extends AbstractRunner implements ILTSminRunner {
 
 	private static final int DEBUG = 0;
-	private String solverPath;
 	private boolean doPOR;
-	private boolean onlyGal;
 	private File workFolder;
-	private Solver solver;
 	private long timeout;
 	private boolean isSafe;
 	private SparsePetriNet spn;
 	private TGBA tgba;
 	private String stateBasedHOA;
+	private String pnmlPath;
 
-	public LTSminRunner(String solverPath, Solver solver, boolean doPOR, boolean onlyGal, long timeout, boolean isSafe) {
-		this.solverPath = solverPath;
-		this.solver = solver;
+	public LTSminPNMLRunner(boolean doPOR, long timeout, boolean isSafe) {
 		this.doPOR = doPOR;
-		this.onlyGal = onlyGal;
 		try {
 			this.workFolder = Files.createTempDirectory("ltsmin").toFile();
 			workFolder.deleteOnExit();
@@ -66,41 +66,28 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 			@Override
 			public void run() {
 				try {
-					System.out.println("Built C files in : \n" + new File(workFolder + "/"));
+					System.out.println("Building PNML and property files in : \n" + new File(workFolder + "/"));
 					
-					Gal2PinsTransformerNext g2p = null;
-					PetriNet2PinsTransformer p2p = null;
-					if (spn == null) {
-						g2p = new Gal2PinsTransformerNext();
-
-						final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
-						g2p.setSmtConfig(gsf);
-						g2p.initSolver();
-						g2p.transform(spec, workFolder.getCanonicalPath(), doPOR, isSafe);
-
+					// step 1 : build PNML
+					File pnmlpathff = Files.createTempFile("model", ".pnml").toFile();
+					pnmlpathff.deleteOnExit();
+					pnmlPath = pnmlpathff.getCanonicalPath();
+					StructuralToPNML.transform(spn, pnmlPath);
+					
+					// step 2 : export properties
+					if (tgba != null) {
+											
 					} else {
-						p2p = new PetriNet2PinsTransformer();
-						if (tgba != null) {
-							p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false, tgba.getAPs());
-						} else {
-							p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false, null);
-						}
 						
 					}
-					try {
-						compilePINS((int)Math.max(2, timeout/5));
-						linkPINS(Math.max(1, timeout/5));
-					} catch (TimeoutException to) {
-						throw new RuntimeException("Compilation or link of executable timed out." + to);
+					
+					if (tgba == null) {
+						checkProperties(timeout,doneProps);
+					} else {
+						checkProperty(tgba.getName(), stateBasedHOA, timeout, false, PropertyType.LTL);
 					}
-
-					if (onlyGal) {
-						System.out.println("Successfully built gal.so in :" + workFolder);
-						//							System.out.println("It has labels for :" + (spec.getProperties().stream()
-						//									.map(p -> p.getName().replaceAll("-", "")).collect(Collectors.toList())));
-						return;
-					}
-
+					
+					/*
 					List<String> todo;
 					if (spn == null) {
 						todo = spec.getProperties().stream().map(p -> p.getName())
@@ -124,7 +111,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 					todo.removeAll(doneProps.keySet());
 					if ( todo.isEmpty()) {
 						ender.killAll();
-					}
+					}*/
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (InterruptedException e) {
@@ -135,49 +122,36 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 				}
 			}
 
-			public void checkProperties(Gal2PinsTransformerNext g2p, PetriNet2PinsTransformer p2p, long time, DoneProperties doneProps)
+			public void checkProperties(long time, DoneProperties doneProps)
 					throws IOException, InterruptedException {
 				boolean negateResult;
-				if (spn == null) {
-					for (Property prop : spec.getProperties()) {
-						if (prop.getBody() instanceof ReachableProp) {
-							negateResult = true;
-						} else  {
-							negateResult = false;
+
+				for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(spn.getProperties())) {
+					if (doneProps.containsKey(prop.getName())) {
+						continue;
+					}
+					String pbody = null;
+					if (prop.getType() == PropertyType.LTL) {
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						PrintWriter pw = new PrintWriter(baos);
+						{
+							CExpressionPrinter printer = new CExpressionPrinter(new PrintWriter(baos), "src");
+							prop.getBody().accept(printer);
+							printer.close();
 						}
-						String pbody = null;
-						PropertyType ptype;
-						if (prop.getBody() instanceof LTLProp) {
-							pbody = g2p.printLTLProperty((LTLProp) prop.getBody());
-							ptype = PropertyType.LTL;
-						} else if (prop.getName().contains("Deadlock")) {
-							ptype = PropertyType.DEADLOCK;
-						} else {
-							ptype = PropertyType.INVARIANT;
-						}
-						
-						checkProperty(prop.getName(),pbody,time,negateResult, ptype);
+						pbody = baos.toString();
 					}
 
-				} else {							
-					for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(spn.getProperties())) {
-						if (doneProps.containsKey(prop.getName())) {
-							continue;
-						}
-						String pbody = null;
-						if (prop.getType() == PropertyType.LTL)
-							pbody = p2p.printLTLProperty(prop);
-						
-						if (prop.getBody().getOp() == Op.EF) {
-							negateResult = true;
-						} else {
-							negateResult = false;
-						}
-						
-						checkProperty(prop.getName(),pbody,time,negateResult, prop.getType());
+					if (prop.getBody().getOp() == Op.EF) {
+						negateResult = true;
+					} else {
+						negateResult = false;
 					}
+
+					checkProperty(prop.getName(),pbody,time,negateResult, prop.getType());
 				}
 			}
+
 
 
 
@@ -191,15 +165,13 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 		}
 		CommandLine ltsmin = new CommandLine();
 		ltsmin.setWorkingDir(workFolder);
-		ltsmin.addArg(BinaryToolsPlugin.getProgramURI(Tool.mc).getPath().toString());
-		ltsmin.addArg("./gal.so");
+		ltsmin.addArg(BinaryToolsPlugin.getProgramURI(Tool.pnmlmc).getPath().toString());
+		ltsmin.addArg(pnmlPath);
 
-		ltsmin.addArg("--threads=8");
+		ltsmin.addArg("--procs=8");
 		boolean withPOR = false;
 		if (doPOR && isStutterInvariant(pbody)) {
 			ltsmin.addArg("-p");
-			ltsmin.addArg("--pins-guards");
-			//ltsmin.addArg("--no-V");
 			withPOR = true;
 		}
 		ltsmin.addArg("--when");
@@ -224,8 +196,10 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 			isLTL = true;
 		} else { // INVARIANT			
 			ltsmin.addArg("-i");
-			ltsmin.addArg(pname.replaceAll("-", "") + "==true");
+			ltsmin.addArg(pbody);
+//			ltsmin.addArg(pname.replaceAll("-", "") + "==true");
 		}
+		System.out.println(ltsmin);
 		
 		try {
 			File outputff = Files.createTempFile("ltsrun", ".out").toFile();
@@ -345,13 +319,11 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 		System.out.flush();
 	}
 
-	@Override
 	public void setNet(SparsePetriNet spn) {
 		this.spn = spn;
 	}
 
 
-	@Override
 	public void setTGBA(TGBA negProp, String stateBasedHOA) {
 		this.tgba = negProp;
 		this.stateBasedHOA = stateBasedHOA;
