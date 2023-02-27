@@ -43,17 +43,15 @@ public class SpotRunner {
 
 
 	public static enum GivenStrategy {
-		/**restrict edge labels to their useful subset*/
-		RESTRICT,
-		/**relax labels using impossible assignments if that reduce their support */
-		RELAX,
+		/**restrict/relax edge labels to their useful subset*/
+		MINATO,
 		/** A variant of relax designed to make the language SI */
 		STUTTER,
 		/** do both [the default] */
 		ALL
 	}
 	
-	private static final int DEBUG = 1;
+	private static final int DEBUG = 0;
 	private String pathToltlfilt;
 	private String pathToltl2tgba;
 	private String pathToautfilt;
@@ -751,7 +749,7 @@ public class SpotRunner {
 		return TGBAparserHOAF.parseFrom(f2.getCanonicalPath(), apm);
 	}
 
-	public TGBA givenThat(TGBA tgba, Expression factoid, GivenStrategy constrain) {
+	public TGBA givenThat(TGBA tgba, List<Expression> factoids, GivenStrategy constrain) {
 		TGBA tgbaout = tgba;
 
 		try {
@@ -763,7 +761,8 @@ public class SpotRunner {
 			cl.addArg("--hoaf=tv"); // prefix notation for output
 		
 			cl.addArg("--small");
-			cl.addArg("--given-formula="+printLTLProperty(factoid));
+			for (Expression factoid : factoids)
+				cl.addArg("--given-formula="+printLTLProperty(factoid));
 
 			File curAut = Files.createTempFile("b4k", ".hoa").toFile();
 			if (DEBUG == 0) curAut.deleteOnExit();

@@ -731,14 +731,14 @@ public class LTLPropertySolver {
 		int oriAlphabetSize = tgba.getAPs().size();
 		int oriNbStates = tgba.getEdges().size();
 		int oriNbEdge = tgba.getEdges().stream().mapToInt(List::size).sum();
-		TGBA tgbaOri = tgba;
+		boolean wasStutter = tgba.isStutterInvariant();
 		
 		tgba = knowledgeLoop(tgba, knowledge, falseKnowledge, spot);
 				
 		System.out.println("Knowledge based reduction with " + knowledge.size() + " factoid took "
 				+ (System.currentTimeMillis() - time) + " ms. Reduced automaton from " + oriNbStates + " states, "
-				+ oriNbEdge + " edges and " + oriAlphabetSize + " AP to " + tgba.getEdges().size() + " states, "
-				+ tgba.getEdges().stream().mapToInt(List::size).sum() + " edges and " + tgba.getAPs().size() + " AP.");		
+				+ oriNbEdge + " edges and " + oriAlphabetSize + " AP (stutter "+ (wasStutter?"insensitive":"sensitive") +") to " + tgba.getEdges().size() + " states, "
+				+ tgba.getEdges().stream().mapToInt(List::size).sum() + " edges and " + tgba.getAPs().size() + " AP (stutter " + (tgba.isStutterInvariant()?"insensitive":"sensitive")+").");		
 
 		if (tgba.isEmptyLanguage()) {
 			throw new EmptyProductException("KNOWLEDGE");
@@ -754,6 +754,33 @@ public class LTLPropertySolver {
 
 	public TGBA knowledgeLoop(TGBA tgba, List<Expression> knowledge, List<Expression> falseKnowledge, SpotRunner spot) {
 		
+		TGBA tgbarelax = tgba;
+		tgbarelax = spot.givenThat(tgba, knowledge, SpotRunner.GivenStrategy.MINATO);
+		
+		if (tgbarelax.isEmptyLanguage()) {
+			System.out.println("Property proved to be true thanks to knowledge (Minato strategy)");
+			return tgbarelax;
+		} else if (tgbarelax.isUniversalLanguage()) {
+			System.out.println("Property proved to be false thanks to knowledge (Minato strategy)");
+			return tgbarelax;
+		}
+		
+		// test inclusion
+		// autfilt --included-in=AnotPhi.hoa Kmoins.hoa
+		for (Expression factoid : falseKnowledge) {
+			if (spot.isIncludedIn(factoid,tgbarelax)) {
+				System.out.println("Property proved to be false thanks to negative knowledge :" + factoid);
+				return TGBA.makeTrue();				
+			}
+		}
+		
+		// 
+		tgbarelax = spot.givenThat(tgbarelax, knowledge, SpotRunner.GivenStrategy.ALL);
+		
+		return tgbarelax;
+		
+		/*
+		 // OLD STYLE : manual knowledge loop
 		// counter-examples ?
 		{
 			TGBA tgbarelax = tgba;
@@ -804,7 +831,7 @@ public class LTLPropertySolver {
 				return tgba;
 			}
 		}
-		return tgba;
+		*/
 	}
 
 	public TGBA manuallyIntegrateKnowledge(SparsePetriNet spn, TGBA tgba, List<Expression> knowledge, Property propPN,
