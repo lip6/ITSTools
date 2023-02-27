@@ -287,11 +287,13 @@ public class LTLPropertySolver {
 			if (true) {
 				// using HOA
 				tgbak.setName(propPN.getName());
-				verifyWithLTSmin(spnForPropWithK, tgbak, doneProps, 15, spot);
+				if (reader.isDoLTSMin())
+					verifyWithLTSmin(spnForPropWithK, tgbak, doneProps, 15, spot);
 				if (doneProps.containsKey(propPN.getName())) 
 					return;
 				SparsePetriNet spnHOA = reduceForProperty(spnForPropWithK, tgbak, null);
-				verifyWithLTSmin(spnHOA, tgbak, doneProps, 15, spot);
+				if (reader.isDoLTSMin())
+					verifyWithLTSmin(spnHOA, tgbak, doneProps, 15, spot);
 				if (doneProps.containsKey(propPN.getName())) 
 					return;
 				
@@ -301,6 +303,8 @@ public class LTLPropertySolver {
 				GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", solverPath, 15);
 			}
 			
+			if (doneProps.containsKey(propPN.getName())) 
+				return;
 			// Last step, try exhaustive methods
 			
 			MccTranslator reader2 = reader.copy();
@@ -327,6 +331,9 @@ public class LTLPropertySolver {
 			} else {
 				reader2.setSpn(spnForPropWithK, true);
 			}
+			if (doneProps.containsKey(propPN.getName())) 
+				return;
+			
 			// 15 seconds timeout, just treat the fast ones.
 			GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", solverPath, 15);
 			
