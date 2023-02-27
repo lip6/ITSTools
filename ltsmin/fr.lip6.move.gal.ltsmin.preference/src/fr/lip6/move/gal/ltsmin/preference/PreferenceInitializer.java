@@ -23,9 +23,9 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		IPreferenceStore store = LTSminPreferencesActivator.getDefault().getPreferenceStore();
 		
 		try {
-			store.setDefault(PreferenceConstants.LTSMINSEQ_EXE, BinaryToolsPlugin.getProgramURI(Tool.seq).getPath().toString() );
+			store.setDefault(PreferenceConstants.PNML2LTSMC_EXE, BinaryToolsPlugin.getProgramURI(Tool.pnmlmc).getPath().toString() );
 		} catch (IOException e) {
-			store.setDefault(PreferenceConstants.LTSMINSEQ_EXE, "Your platform seems to be unsupported." );
+			store.setDefault(PreferenceConstants.PNML2LTSMC_EXE, "Your platform seems to be unsupported." );
 		}
 		try {
 			store.setDefault(PreferenceConstants.LTSMINMC_EXE, BinaryToolsPlugin.getProgramURI(Tool.mc).getPath().toString() );

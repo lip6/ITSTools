@@ -42,14 +42,14 @@ public class ModelSelectionTab extends AbstractLaunchConfigurationTab implements
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(PreferenceConstants.LTSMINSEQ_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSEQ_EXE));
+		configuration.setAttribute(PreferenceConstants.PNML2LTSMC_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.PNML2LTSMC_EXE));
 	}
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
-			modeltf.setText(configuration.getAttribute(PreferenceConstants.LTSMINSEQ_EXE, 
-					LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSEQ_EXE)));
+			modeltf.setText(configuration.getAttribute(PreferenceConstants.PNML2LTSMC_EXE, 
+					LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.PNML2LTSMC_EXE)));
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
@@ -57,7 +57,7 @@ public class ModelSelectionTab extends AbstractLaunchConfigurationTab implements
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(PreferenceConstants.LTSMINSEQ_EXE, modeltf.getText());
+		configuration.setAttribute(PreferenceConstants.PNML2LTSMC_EXE, modeltf.getText());
 	}
 
 	@Override

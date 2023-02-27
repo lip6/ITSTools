@@ -38,9 +38,9 @@ public class LTSminPathPreference
 	 */
 	public void createFieldEditors() {	
 				
-		FileFieldEditor itsreach = new FileFieldEditor(PreferenceConstants.LTSMINSEQ_EXE, PreferenceConstants.LTSMINSEQ_EXE, true, getFieldEditorParent());
+		FileFieldEditor itsreach = new FileFieldEditor(PreferenceConstants.PNML2LTSMC_EXE, PreferenceConstants.PNML2LTSMC_EXE, true, getFieldEditorParent());
 		itsreach.setEmptyStringAllowed(false);
-		itsreach.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the version of pins2lts-seq you would like to use. Default settings points to embedded distribution of ltsmin.");
+		itsreach.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the version of pnml2lts-mc you would like to use. Default settings points to embedded distribution of ltsmin.");
 		addField(itsreach);
 		
 		

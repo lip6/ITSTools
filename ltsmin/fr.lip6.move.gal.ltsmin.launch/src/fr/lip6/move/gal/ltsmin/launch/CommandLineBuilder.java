@@ -74,7 +74,7 @@ public class CommandLineBuilder {
 		String tool = configuration.getAttribute(LaunchConstants.TOOL, "pins2lts-seq");
 
 		if ("pins2lts-seq".equals(tool)) {
-			ltsminExePath = configuration.getAttribute(PreferenceConstants.LTSMINSEQ_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSEQ_EXE));	
+			ltsminExePath = configuration.getAttribute(PreferenceConstants.PNML2LTSMC_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.PNML2LTSMC_EXE));	
 		} else if ("pins2lts-mc".equals(tool)) { 
 			ltsminExePath = configuration.getAttribute(PreferenceConstants.LTSMINMC_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINMC_EXE));			
 //		} else {
