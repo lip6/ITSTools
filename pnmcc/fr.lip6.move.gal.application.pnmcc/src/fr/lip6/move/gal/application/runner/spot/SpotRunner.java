@@ -553,9 +553,10 @@ public class SpotRunner {
 	}
 
 	public boolean buildComplement (TGBA tgba, File compPath)  {
+		CommandLine cl = new CommandLine();
 		try {
 			long time = System.currentTimeMillis();
-			CommandLine cl = new CommandLine();
+			
 			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 
@@ -584,6 +585,7 @@ public class SpotRunner {
 				}
 			}
 		} catch (IOException|TimeoutException|InterruptedException e) {
+			System.err.println("Error while executing :"+ cl);
 			e.printStackTrace();
 		}
 		return false;
@@ -593,7 +595,7 @@ public class SpotRunner {
 	
 	
 	public boolean complementProductAndTestEmpty(TGBA tgba, Expression factoid) {
-		
+		CommandLine cl = new CommandLine();
 		try {
 			File comp = Files.createTempFile("comp", ".hoa").toFile();
 			if (DEBUG == 0) comp.deleteOnExit();
@@ -605,7 +607,7 @@ public class SpotRunner {
 			buildAutomaton(ltl, fact);
 
 			long time = System.currentTimeMillis();
-			CommandLine cl = new CommandLine();
+			
 			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 
@@ -636,15 +638,17 @@ public class SpotRunner {
 			}
 
 		} catch (IOException|TimeoutException|InterruptedException e) {
+			System.err.println("Error while executing :"+ cl);
 			e.printStackTrace();
 		}
 		return false;
 	}
 
 	public boolean isProductEmpty(File a1path, String ltl) {
+		CommandLine cl = new CommandLine();
 		try {
 			long time = System.currentTimeMillis();		
-			CommandLine cl = new CommandLine();
+			
 			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 			cl.addArg("--hoaf=tv");
@@ -674,6 +678,7 @@ public class SpotRunner {
 				}
 			}
 		} catch (IOException|TimeoutException|InterruptedException e) {
+			System.err.println("Error while executing :"+ cl);
 			e.printStackTrace();
 		}
 		return false;
@@ -751,10 +756,10 @@ public class SpotRunner {
 
 	public TGBA givenThat(TGBA tgba, List<Expression> factoids, GivenStrategy constrain) {
 		TGBA tgbaout = tgba;
-
+		CommandLine cl = new CommandLine();
 		try {
 			long time = System.currentTimeMillis();
-			CommandLine cl = new CommandLine();
+			
 			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 			cl.addArg("--check=stutter");
@@ -790,15 +795,17 @@ public class SpotRunner {
 				}
 			}
 		} catch (IOException | TimeoutException | InterruptedException e) {
+			System.err.println("Error while executing :"+ cl);
 			e.printStackTrace();
 		}
 		return tgbaout;
 	}
 	
 	public String toBuchi(TGBA tgba, boolean forLTSMin) {
+		CommandLine cl = new CommandLine();
 		try {
 			long time = System.currentTimeMillis();
-			CommandLine cl = new CommandLine();
+			
 			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 			
@@ -835,6 +842,7 @@ public class SpotRunner {
 				}
 			}
 		} catch (IOException | TimeoutException | InterruptedException e) {
+			System.err.println("Error while executing :"+ cl);
 			e.printStackTrace();
 		}				
 		return null;
@@ -842,9 +850,10 @@ public class SpotRunner {
 
 	
 	public boolean isIncludedIn(Expression falseFact, TGBA tgba) {
+		CommandLine cl = new CommandLine();
 		try {
 			long time = System.currentTimeMillis();
-			CommandLine cl = new CommandLine();
+			
 			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 			
@@ -887,6 +896,7 @@ public class SpotRunner {
 				}
 			}
 		} catch (IOException | TimeoutException | InterruptedException e) {
+			System.err.println("Error while executing :"+ cl);
 			e.printStackTrace();
 		}				
 		return false;
@@ -894,9 +904,10 @@ public class SpotRunner {
 
 
 	public boolean isImpliedBy(Expression main, Expression implicant) {
+		CommandLine cl = new CommandLine();
 		try {
 			long time = System.currentTimeMillis();
-			CommandLine cl = new CommandLine();
+			
 			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToltlfilt);
 			
@@ -924,8 +935,9 @@ public class SpotRunner {
 				}
 			}
 		} catch (IOException | TimeoutException | InterruptedException e) {
+			System.err.println("Error while executing :"+ cl);
 			e.printStackTrace();
-		}				
+		}
 		return false;
 	}
 
