@@ -71,7 +71,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 					System.out.println("Built C files in : \n" + new File(workFolder + "/"));
 					final Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
 
-					final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
+					final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solver, timeout);
 					g2p.setSmtConfig(gsf);
 				//	g2p.initSolver();
 					g2p.transform(spec, workFolder, doPOR, false);

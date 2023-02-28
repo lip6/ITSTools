@@ -31,8 +31,8 @@ public abstract class DeadlockSolver {
 	private static final String REACHABILITY_DEADLOCK = "ReachabilityDeadlock";
 	private static final int DEBUG = 0;
 
-	public static Optional<Boolean> checkStructuralDeadlock(String pwd, String examination, String blisspath, String solverPath,
-			MccTranslator reader, DoneProperties doneProps) {
+	public static Optional<Boolean> checkStructuralDeadlock(String pwd, String examination, String blisspath, MccTranslator reader,
+			DoneProperties doneProps) {
 		{					
 
 
@@ -103,8 +103,8 @@ public abstract class DeadlockSolver {
 					br.computeMatrixForm(generators);
 				}
 				try {
-					if (! ReachabilitySolver.applyReductions(sr, ReductionType.DEADLOCK, solverPath, false,true)) 
-						ReachabilitySolver.applyReductions(sr, ReductionType.DEADLOCK, solverPath, true,false);					
+					if (! ReachabilitySolver.applyReductions(sr, ReductionType.DEADLOCK, false, true)) 
+						ReachabilitySolver.applyReductions(sr, ReductionType.DEADLOCK, true, false);					
 				} catch (DeadlockFound d) {
 					doneProps.put(REACHABILITY_DEADLOCK, true, "TOPOLOGICAL STRUCTURAL_REDUCTION");
 					return Optional.of(true);
@@ -121,7 +121,7 @@ public abstract class DeadlockSolver {
 
 
 				if (blisspath != null) {
-					boolean hasConcluded = runBlissSymmetryAnalysis(reader, sr, sr.isSafe(), blisspath, pwd, solverPath);
+					boolean hasConcluded = runBlissSymmetryAnalysis(reader, sr, sr.isSafe(), blisspath, pwd);
 					if (hasConcluded) {
 						// ??? this code never invoked
 						return Optional.of(true);
@@ -131,7 +131,7 @@ public abstract class DeadlockSolver {
 				for (int iter=0 ; iter<2 ; iter++) {
 
 					if (iter == 1) {
-						ReachabilitySolver.applyReductions(sr, ReductionType.DEADLOCK, solverPath, true,false);
+						ReachabilitySolver.applyReductions(sr, ReductionType.DEADLOCK, true, false);
 					}
 					RandomExplorer re = new RandomExplorer(sr);
 					long time = System.currentTimeMillis();					
@@ -143,11 +143,10 @@ public abstract class DeadlockSolver {
 						re.runDeadlockDetection(steps,false,30);
 					}
 
-					if (solverPath != null) {
 						try {
 							List<Integer> repr = new ArrayList<>();
 							SparseIntArray por = new SparseIntArray();
-							SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr,solverPath, repr,por);
+							SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr,repr, por);
 							if (parikh == null) {
 								doneProps.put(REACHABILITY_DEADLOCK, false, "TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
 								return Optional.of(false);
@@ -177,7 +176,6 @@ public abstract class DeadlockSolver {
 							System.out.println("Failed to apply SMT based deadlock test, skipping this step." );
 							e.printStackTrace();
 						}
-					}
 
 					time = System.currentTimeMillis();
 					// 75 k steps in 3 traces
@@ -208,7 +206,7 @@ public abstract class DeadlockSolver {
 	}
 
 	private static boolean runBlissSymmetryAnalysis(MccTranslator reader, StructuralReduction sr, boolean isSafe,
-			String blisspath, String pwd, String solverPath) throws TimeoutException {
+			String blisspath, String pwd) throws TimeoutException {
 		boolean hasConcluded = false;
 		List<List<List<Integer>>> generators = null;
 		BlissRunner br = new BlissRunner(blisspath,pwd,100);						
@@ -240,7 +238,7 @@ public abstract class DeadlockSolver {
 			}
 			if (conti) {
 				List<Integer> repr = new ArrayList<>();
-				SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr2,solverPath, repr,new SparseIntArray());
+				SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr2,repr, new SparseIntArray());
 				if (parikh == null) {								
 					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION SYMMETRIES");
 					hasConcluded = true;

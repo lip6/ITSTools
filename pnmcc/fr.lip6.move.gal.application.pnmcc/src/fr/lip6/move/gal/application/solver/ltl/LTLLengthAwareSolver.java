@@ -34,18 +34,15 @@ import fr.lip6.move.gal.structural.expr.Expression;
 public class LTLLengthAwareSolver {
 
 	private static final int DEBUG = 0;
-	private String solverPath;
 	private LTLPropertySolver ltlsolve;
 
 	/**
 	 * Provide the context, and the LTLSolver instance used to try to solve properties on the reduced model.
-	 * @param spotPath to create a SpotRunner
-	 * @param solverPath for Z3
-	 * @param workDir where we are working
 	 * @param ltlsolve the solver we delegate the reduced model solution to.
+	 * @param spotPath to create a SpotRunner
+	 * @param workDir where we are working
 	 */
-	public LTLLengthAwareSolver(String solverPath, LTLPropertySolver ltlsolve) {
-		this.solverPath = solverPath;
+	public LTLLengthAwareSolver(LTLPropertySolver ltlsolve) {
 		this.ltlsolve = ltlsolve;
 	}
 
@@ -110,7 +107,7 @@ public class LTLLengthAwareSolver {
 				sr.setProtected(support);
 				try {
 					ReductionType rt = ReductionType.LI_LTL ;
-					ReachabilitySolver.applyReductions(sr, rt, solverPath, true, true);
+					ReachabilitySolver.applyReductions(sr, rt, true, true);
 				} catch (GlobalPropertySolvedException gse) {
 					System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
 					gse.printStackTrace();

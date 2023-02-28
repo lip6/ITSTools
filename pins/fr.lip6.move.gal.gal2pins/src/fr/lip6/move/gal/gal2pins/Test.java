@@ -18,7 +18,7 @@ public class Test {
 		//Specification spec = SerializationUtil.fileToGalSystem("tests/elevator.3.flat.gal");
 		Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
 		
-		Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd("/data2/ythierry/download/z3/z3-4.3.2.5e72cf0123f6-x64-ubuntu-12.04/bin/z3", Solver.Z3, 300000);
+		Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(Solver.Z3, 300000);
 		g2p.setSmtConfig(gsf);
 		g2p.transform(spec, "tests/", true, false);
 	}

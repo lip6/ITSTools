@@ -36,7 +36,7 @@ public class UpperBoundsSolver {
 		}
 	}
 	
-	public static List<Integer> treatSkeleton(MccTranslator reader, DoneProperties doneProps, String solverPath) {
+	public static List<Integer> treatSkeleton(MccTranslator reader, DoneProperties doneProps) {
 		SparsePetriNet spn = reader.getHLPN().skeleton();
 		spn.simplifyLogic();
 		spn.toPredicates();			
@@ -82,15 +82,13 @@ public class UpperBoundsSolver {
 			treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths , maxSeen, maxStruct, orders);
 		}
 		
-		if (solverPath != null) {
 			List<Integer> repr = new ArrayList<>();
-			List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, repr, new ArrayList<>(), 5,true);
+			List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, repr, new ArrayList<>(), 5, true);
 			
 			//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
 			System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct);
 
 			checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL SAT_SMT CPN_APPROX INITIAL_STATE");
-		}
 		return maxStruct;
 	}
 
@@ -109,7 +107,7 @@ public class UpperBoundsSolver {
 	}
 	
 
-	public static void applyReductions(SparsePetriNet spn, DoneProperties doneProps, String solverPath, List<Integer> initMaxStruct) {
+	public static void applyReductions(SparsePetriNet spn, DoneProperties doneProps, List<Integer> initMaxStruct) {
 			int iter;
 			int iterations =0;
 
@@ -183,10 +181,9 @@ public class UpperBoundsSolver {
 				if (spn.getProperties().isEmpty())
 					break;
 				
-				if (solverPath != null) {
 					List<Integer> repr = new ArrayList<>();
 					List<SparseIntArray> orders=new ArrayList<>();
-					List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, repr, orders, iterations==0 ? 5:45,true);
+					List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, repr, orders, iterations==0 ? 5:45, true);
 					
 					//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
 					System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct+ " Max seen :" + maxSeen);
@@ -246,7 +243,6 @@ public class UpperBoundsSolver {
 					if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 						iter++;
 					
-				}
 				
 				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
@@ -271,9 +267,9 @@ public class UpperBoundsSolver {
 				}
 				
 				try {
-					if (ReachabilitySolver.applyReductions(sr, ReductionType.REACHABILITY, solverPath, false,iterations==0)) {
+					if (ReachabilitySolver.applyReductions(sr, ReductionType.REACHABILITY, false, iterations==0)) {
 						iter++;					
-					} else if (iterations>0 && iter==0  /*&& doneSums*/ && ReachabilitySolver.applyReductions(sr, ReductionType.REACHABILITY, solverPath, true,false)) {
+					} else if (iterations>0 && iter==0  /*&& doneSums*/ && ReachabilitySolver.applyReductions(sr, ReductionType.REACHABILITY, true, false)) {
 						iter++;
 					}
 				} catch (GlobalPropertySolvedException e) {

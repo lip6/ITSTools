@@ -97,7 +97,7 @@ public class LTLLengthSensitivityAnalyzer {
 					StructuralReduction sr = new StructuralReduction (spnProp);
 					try {
 						// only apply LTL reduction rules, so no agglomerations and no prefix/suffix slicing in particular.
-						reducedLTL = ReachabilitySolver.applyReductions(sr, ReductionType.LTL, solverPath, true, true);
+						reducedLTL = ReachabilitySolver.applyReductions(sr, ReductionType.LTL, true, true);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -122,7 +122,7 @@ public class LTLLengthSensitivityAnalyzer {
 					long time = System.currentTimeMillis();
 					StructuralReduction sr = new StructuralReduction (spnProp);
 					try {
-						reducedSLCL = ReachabilitySolver.applyReductions(sr, ReductionType.LI_LTL, solverPath, true, false);
+						reducedSLCL = ReachabilitySolver.applyReductions(sr, ReductionType.LI_LTL, true, false);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

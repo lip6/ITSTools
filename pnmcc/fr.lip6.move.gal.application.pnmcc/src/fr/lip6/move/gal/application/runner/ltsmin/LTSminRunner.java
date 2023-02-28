@@ -32,7 +32,6 @@ import fr.lip6.move.gal.structural.expr.Op;
 public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 
 	private static final int DEBUG = 0;
-	private String solverPath;
 	private boolean doPOR;
 	private boolean onlyGal;
 	private File workFolder;
@@ -43,8 +42,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 	private TGBA tgba;
 	private String stateBasedHOA;
 
-	public LTSminRunner(String solverPath, Solver solver, boolean doPOR, boolean onlyGal, long timeout, boolean isSafe) {
-		this.solverPath = solverPath;
+	public LTSminRunner(Solver solver, boolean doPOR, boolean onlyGal, long timeout, boolean isSafe) {
 		this.solver = solver;
 		this.doPOR = doPOR;
 		this.onlyGal = onlyGal;
@@ -73,7 +71,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 					if (spn == null) {
 						g2p = new Gal2PinsTransformerNext();
 
-						final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
+						final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solver, timeout);
 						g2p.setSmtConfig(gsf);
 						g2p.initSolver();
 						g2p.transform(spec, workFolder.getCanonicalPath(), doPOR, isSafe);

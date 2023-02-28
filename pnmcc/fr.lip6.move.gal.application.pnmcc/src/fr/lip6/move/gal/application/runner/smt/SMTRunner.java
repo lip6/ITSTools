@@ -17,14 +17,12 @@ import fr.lip6.move.gal.mcc.properties.DoneProperties;
 public class SMTRunner extends AbstractRunner implements IRunner {
 	
 	private String pwd;
-	private String solverPath;
 	private Solver solver;
 	private long timeout;
 	private boolean isSafe;
 
-	public SMTRunner(String pwd, String solverPath, Solver solver, long timeout, boolean isSafe) {
+	public SMTRunner(String pwd, Solver solver, long timeout, boolean isSafe) {
 		this.pwd = pwd;
-		this.solverPath = solverPath;
 		this.solver = solver;
 		this.timeout = timeout * 1000;
 		this.isSafe = isSafe ;
@@ -42,7 +40,7 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 
 			@Override
 			public void run() {
-				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
+				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solver, timeout);
 
 				gsf.addObserver(new ISMTObserver() {
 					@Override
@@ -86,7 +84,7 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 
 			@Override
 			public void run() {
-				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
+				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solver, timeout);
 
 				gsf.addObserver(new ISMTObserver() {
 					@Override

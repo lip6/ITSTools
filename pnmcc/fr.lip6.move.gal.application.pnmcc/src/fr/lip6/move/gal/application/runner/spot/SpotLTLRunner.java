@@ -26,7 +26,6 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class SpotLTLRunner extends AbstractRunner implements IRunner {
 
-	private String solverPath;
 	private String workFolder;
 	private long timeout;
 	private boolean isSafe;
@@ -34,12 +33,10 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 	private Solver solver;
 	private String spotmcpath;
 
-	public SpotLTLRunner(String solverPath, Solver solver, String workFolder, long timeout, boolean isSafe, String spotmcpath) {
-		this.solverPath = solverPath;
+	public SpotLTLRunner(Solver solver, String workFolder, long timeout, boolean isSafe, String spotmcpath) {
 		this.workFolder = workFolder;
 		this.timeout = timeout;
 		this.isSafe = isSafe;
-		this.solverPath = solverPath;
 		this.solver = solver;
 		this.spotmcpath = spotmcpath;
 	}
@@ -59,7 +56,7 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 					if (spn == null) {
 						g2p = new Gal2PinsTransformerNext();
 
-						final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
+						final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solver, timeout);
 						g2p.setSmtConfig(gsf);
 						g2p.initSolver();
 						g2p.transform(spec, workFolder, false, isSafe);

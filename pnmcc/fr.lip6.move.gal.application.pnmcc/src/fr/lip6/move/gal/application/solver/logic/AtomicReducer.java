@@ -150,7 +150,7 @@ public class AtomicReducer {
 			int nsolved = 0;
 			int nsimpl = 0;
 			List<Integer> repr = new ArrayList<>();
-			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, repr,20,false);
+			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, repr, 20,false);
 
 			Iterator<Entry<String, List<BooleanExpression>>> it = atoms.entrySet().iterator();
 			int vi=0;
@@ -228,7 +228,7 @@ public class AtomicReducer {
 				int nsimpl = 0;
 				List<Integer> repr = new ArrayList<>();
 				Set<String> treated = new HashSet<>();
-				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheckBounds, sr, solverPath, repr,20,false);
+				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheckBounds, sr, repr, 20,false);
 				if (DEBUG  >=1) {
 					for (int i=0; i < paths.size(); i++) {
 						if (paths.get(i)==null) {

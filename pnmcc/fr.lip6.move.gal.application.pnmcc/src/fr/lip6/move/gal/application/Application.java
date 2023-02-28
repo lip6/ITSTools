@@ -312,12 +312,7 @@ public class Application implements IApplication, Ender {
 
 		// use Z3 in preference to Yices if both are available
 		Solver solver = Solver.Z3;
-		String solverPath = z3path;
-		if (z3path == null && yices2path != null) {
-			solver = Solver.YICES2;
-			solverPath = yices2path;
-		}
-
+		
 		// EMF registration
 		SerializationUtil.setStandalone(true);
 
@@ -356,7 +351,7 @@ public class Application implements IApplication, Ender {
 
 		if (analyzeSensitivity) {
 			SpotRunner spot = new SpotRunner(10);
-			LTLLengthSensitivityAnalyzer.doSensitivityAnalysis(reader,spot,pwd,examination,solverPath);
+			LTLLengthSensitivityAnalyzer.doSensitivityAnalysis(reader,spot,pwd,examination,"");
 			return IApplication.EXIT_OK;
 		}
 
@@ -387,7 +382,7 @@ public class Application implements IApplication, Ender {
 		if (redForExport == null)
 			if ("StableMarking".equals(examination) || "OneSafe".equals(examination)
 					|| "QuasiLiveness".equals(examination) || "Liveness".equals(examination)) {
-				GlobalPropertySolver gps = new GlobalPropertySolver(solverPath);
+				GlobalPropertySolver gps = new GlobalPropertySolver();
 				Optional<Boolean> b = gps.solveProperty(examination, reader);
 
 				if (b.isPresent() ) {
@@ -432,7 +427,7 @@ public class Application implements IApplication, Ender {
 				{
 					SparsePetriNet spn = reader.getSPN();
 					StructuralReduction sr = new StructuralReduction(spn);
-					ReachabilitySolver.applyReductions(sr,ReductionType.STATESPACE,solverPath,true,true);
+					ReachabilitySolver.applyReductions(sr,ReductionType.STATESPACE,true,true);
 
 					// Breaks max token per marking metric.
 					int curtok = spn.getMarks().stream().mapToInt(i->i).sum();
@@ -606,12 +601,12 @@ public class Application implements IApplication, Ender {
 					sr.setProtected(copy.computeSupport());
 					if (examination.startsWith("CTL") || examination.startsWith("LTL")) {
 						if (fr.lip6.move.gal.structural.expr.Simplifier.isSyntacticallyStuttering(prop)) {
-							ReachabilitySolver.applyReductions(sr, ReductionType.SI_LTL, solverPath, true, true);
+							ReachabilitySolver.applyReductions(sr, ReductionType.SI_LTL, true, true);
 						} else {
-							ReachabilitySolver.applyReductions(sr, ReductionType.LTL, solverPath, true, true);
+							ReachabilitySolver.applyReductions(sr, ReductionType.LTL, true, true);
 						}
 					} else {
-						ReachabilitySolver.applyReductions(sr, ReductionType.REACHABILITY, solverPath, true, true);
+						ReachabilitySolver.applyReductions(sr, ReductionType.REACHABILITY, true, true);
 					}
 					copy.readFrom(sr);
 
@@ -627,7 +622,7 @@ public class Application implements IApplication, Ender {
 		if ( (examination!=null && examination.startsWith("CTL")) || "UpperBounds".equals(examination)) {
 
 			if (examination.startsWith("CTL")) {
-				LTLPropertySolver logicSolver = new LTLPropertySolver(solverPath, pwd, false);
+				LTLPropertySolver logicSolver = new LTLPropertySolver(pwd, false);
 				int solved = logicSolver.preSolveForLogic(reader, doneProps, false);
 				if (solved > 0) {
 					if (reader.getSPN().getProperties().isEmpty()) {
@@ -651,7 +646,7 @@ public class Application implements IApplication, Ender {
 					if (fr.lip6.move.gal.structural.expr.Simplifier.isSyntacticallyStuttering(prop)) {
 						rt = ReductionType.SI_CTL;
 					}
-					ReachabilitySolver.applyReductions(sr, rt, solverPath, doSMT, true);
+					ReachabilitySolver.applyReductions(sr, rt, doSMT, true);
 					spnProp.readFrom(sr);
 					spnProp.simplifyLogic();
 					ReachabilitySolver.checkInInitial(spnProp, doneProps);
@@ -671,7 +666,7 @@ public class Application implements IApplication, Ender {
 						// requalify
 						propRed.setType(PropertyType.INVARIANT);
 						// solve with reachability
-						ReachabilitySolver.applyReductions(reader2, doneProps, solverPath, -1);
+						ReachabilitySolver.applyReductions(reader2, doneProps, -1);
 
 						if (reader2.getSPN().getProperties().isEmpty()) {
 							continue;
@@ -682,7 +677,7 @@ public class Application implements IApplication, Ender {
 //
 //					}
 
-					GlobalPropertySolver.verifyWithSDD(reader2, doneProps, examination, solverPath, 30);
+					GlobalPropertySolver.verifyWithSDD(reader2, doneProps, examination, 30);
 				}
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				reader.rebuildSpecification(doneProps);
@@ -704,7 +699,7 @@ public class Application implements IApplication, Ender {
 				List<Integer> skelBounds = null;
 				if (reader.getHLPN() != null) {
 					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
-					skelBounds = UpperBoundsSolver.treatSkeleton(reader, doneProps, solverPath);
+					skelBounds = UpperBoundsSolver.treatSkeleton(reader, doneProps);
 
 					reader.getHLPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				}
@@ -716,7 +711,7 @@ public class Application implements IApplication, Ender {
 
 				UpperBoundsSolver.checkInInitial(reader.getSPN(), doneProps);
 
-				UpperBoundsSolver.applyReductions(reader.getSPN(), doneProps, solverPath, skelBounds);
+				UpperBoundsSolver.applyReductions(reader.getSPN(), doneProps, skelBounds);
 
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				// checkInInitial(reader.getSpec(), doneProps, isSafe);
@@ -735,7 +730,7 @@ public class Application implements IApplication, Ender {
 						r2.getSPN().getProperties().clear();
 						r2.getSPN().getProperties().add(p);
 						UpperBoundsSolver.checkInInitial(r2.getSPN(), doneProps);
-						UpperBoundsSolver.applyReductions(r2.getSPN(), doneProps, solverPath, null);
+						UpperBoundsSolver.applyReductions(r2.getSPN(), doneProps, null);
 						System.out.println("Ending property specific reduction for " + p.getName() + " in "
 								+ (System.currentTimeMillis() - time) + " ms.");
 					}
@@ -762,11 +757,11 @@ public class Application implements IApplication, Ender {
 
 			if (examination.startsWith("LTL")) {
 
-				LTLPropertySolver ltlsolve = new LTLPropertySolver(solverPath, pwd, exportLTL);
+				LTLPropertySolver ltlsolve = new LTLPropertySolver(pwd, exportLTL);
 				
 				ltlsolve.runStructuralLTLCheck(reader, doneProps);
 				if (! noSLCLtest) {
-					new LTLLengthAwareSolver(solverPath, ltlsolve).runSLCLLTLTest(reader, doneProps);
+					new LTLLengthAwareSolver(ltlsolve).runSLCLLTLTest(reader, doneProps);
 				}
 
 				if (! reader.getSPN().getProperties().isEmpty()) {
@@ -785,7 +780,7 @@ public class Application implements IApplication, Ender {
 				}
 
 			} else if ("ReachabilityDeadlock".equals(examination) || "GlobalProperties".equals(examination)) {
-				if (! DeadlockSolver.checkStructuralDeadlock(pwd, examination, blisspath, solverPath, reader, doneProps).isEmpty()) {
+				if (! DeadlockSolver.checkStructuralDeadlock(pwd, examination, blisspath, reader, doneProps).isEmpty()) {
 					allSolved(pwd, examination);
 					return null;
 				}
@@ -801,8 +796,7 @@ public class Application implements IApplication, Ender {
 				// || examination.startsWith("CTL")
 				if (!reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver " + solver + " to compute partial order matrices.");
-					LTSminRunner ltsRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, timeout / reader.getSpec().getProperties().size(),
-							reader.getSPN().isSafe());
+					LTSminRunner ltsRunner = new LTSminRunner(solver, doPOR, onlyGal, timeout / reader.getSpec().getProperties().size(), reader.getSPN().isSafe());
 					ltsRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					ltsRunner.setNet(reader.getSPN());
 					runners.add(ltsRunner);
@@ -810,8 +804,7 @@ public class Application implements IApplication, Ender {
 				}
 			}
 			if (spotmcPath != null) {
-				SpotLTLRunner spotRun = new SpotLTLRunner(solverPath, solver, reader.getFolder(), timeout, reader.getSPN().isSafe(),
-						spotmcPath);
+				SpotLTLRunner spotRun = new SpotLTLRunner(solver, reader.getFolder(), timeout, reader.getSPN().isSafe(), spotmcPath);
 				spotRun.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 				spotRun.setNet(reader.getSPN());
 				runners.add(spotRun);
@@ -878,7 +871,7 @@ public class Application implements IApplication, Ender {
 						reader.getHLPN().getProperties().removeAll(todel);
 
 						if (! skel.getProperties().isEmpty()) {
-							new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), skelProps, null, true);
+							new AtomicReducerSR().strongReductions(reader.getSPN(), skelProps, null, true);
 							reader.getSPN().simplifyLogic();
 							ReachabilitySolver.checkInInitial(reader.getSPN(), skelProps);
 							reader.rebuildSpecification(skelProps);
@@ -906,7 +899,7 @@ public class Application implements IApplication, Ender {
 
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				if (!reader.getSPN().getProperties().isEmpty())
-					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, timeout);
+					ReachabilitySolver.applyReductions(reader, doneProps, timeout);
 
 //				if (!reader.getSPN().getProperties().isEmpty()) {
 //					List<fr.lip6.move.gal.structural.Property> props = new ArrayList<>(reader.getSPN().getProperties());
@@ -935,10 +928,9 @@ public class Application implements IApplication, Ender {
 					// need to protect some variables
 					List<Property> l = reader.getSpec().getProperties();
 					List<Expression> tocheck = translateProperties(l, idnb);
-					if (solverPath != null) {
 						List<Integer> repr = new ArrayList<>();
-						List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath,
-								 repr, 100, true);
+						List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, repr,
+								 100, true);
 						int iter = 0;
 						for (int v = paths.size() - 1; v >= 0; v--) {
 							SparseIntArray parikh = paths.get(v);
@@ -957,11 +949,10 @@ public class Application implements IApplication, Ender {
 						if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()))) {
 							System.out.println("Colored abstraction solved " + iter + " properties.");
 						}
-					}
 				}
 
 				if (!reader.getSpec().getProperties().isEmpty())
-					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, timeout);
+					ReachabilitySolver.applyReductions(reader, doneProps, timeout);
 
 				// Per property approach = WIP
 //				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
@@ -989,7 +980,7 @@ public class Application implements IApplication, Ender {
 			}
 
 			if (rebuildPNML && false)
-				regeneratePNML(reader, doneProps, solverPath);
+				regeneratePNML(reader, doneProps);
 
 			if (doneProps.keySet().containsAll(
 					reader.getSPN().getProperties().stream().map(p -> p.getName()).collect(Collectors.toList()))) {
@@ -1012,7 +1003,7 @@ public class Application implements IApplication, Ender {
 				Specification z3Spec = EcoreUtil.copy(reader.getSpec());
 				// run on a fresh copy to avoid any interference with other threads. (1 hour
 				// timeout)
-				IRunner z3Runner = new SMTRunner(pwd, solverPath, solver, timeout, reader.getSPN().isSafe());
+				IRunner z3Runner = new SMTRunner(pwd, solver, timeout, reader.getSPN().isSafe());
 				z3Runner.configure(z3Spec, doneProps);
 				runners.add(z3Runner);
 				z3Runner.solve(this);
@@ -1030,8 +1021,7 @@ public class Application implements IApplication, Ender {
 			if (onlyGal || doLTSmin) {
 				if (!reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver " + solver + " to compute partial order matrices.");
-					LTSminRunner ltsminRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, timeout / reader.getSpec().getProperties().size(),
-							reader.getSPN().isSafe());
+					LTSminRunner ltsminRunner = new LTSminRunner(solver, doPOR, onlyGal, timeout / reader.getSpec().getProperties().size(), reader.getSPN().isSafe());
 					ltsminRunner.configure(null, doneProps);
 					ltsminRunner.setNet(reader.getSPN());
 					runners.add(ltsminRunner);
@@ -1088,7 +1078,7 @@ public class Application implements IApplication, Ender {
 		return done;
 	}
 
-	private void regeneratePNML(MccTranslator reader, DoneProperties doneProps, String solverPath) {
+	private void regeneratePNML(MccTranslator reader, DoneProperties doneProps) {
 		reader.flattenSpec(false);
 		System.out.println(
 				"Initial size " + ((GALTypeDeclaration) reader.getSpec().getTypes().get(0)).getVariables().size());
@@ -1104,7 +1094,7 @@ public class Application implements IApplication, Ender {
 				} else {
 					MccTranslator copy = reader.copy();
 					copy.getSpec().getProperties().removeIf(p -> !p.getName().equals(prop.getName()));
-					ReachabilitySolver.applyReductions(copy, doneProps, solverPath, -1);
+					ReachabilitySolver.applyReductions(copy, doneProps, -1);
 					System.out.println("For property " + prop.getName() + " final size "
 							+ ((GALTypeDeclaration) copy.getSpec().getTypes().get(0)).getVariables().size());
 				}

@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.gal2smt;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +29,7 @@ import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
+import fr.lip6.smt.z3.binaries.BinaryToolsPlugin;
 
 public class Gal2SMTFrontEnd {
 
@@ -38,17 +40,21 @@ public class Gal2SMTFrontEnd {
 	private long timeout;
 	private SMT smt;
 
-	public Gal2SMTFrontEnd(String solverPath, Solver engine, long timeout) {
+	public Gal2SMTFrontEnd(Solver engine, long timeout) {
 		smt = new SMT();
-		smt.smtConfig.executable = solverPath;
+		try {
+			smt.smtConfig.executable = BinaryToolsPlugin.getProgramURI().getPath();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		//smt.smtConfig.logicPath = "/data/ythierry/workspaces/neon/lip6.smtlib.SMT/logics";
 		this.engine = engine;
 		this.timeout = timeout;
 	}
 	
-	public Gal2SMTFrontEnd(String solverPath, Solver engine) {
+	public Gal2SMTFrontEnd(Solver engine) {
 		// 5 minute = 300 seconds
-		this(solverPath,engine,300000);
+		this(engine,300000);
 	}
 	
 	public void addObserver (ISMTObserver callback) {

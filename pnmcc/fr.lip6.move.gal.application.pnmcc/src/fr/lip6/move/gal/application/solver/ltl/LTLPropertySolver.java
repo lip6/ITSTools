@@ -56,14 +56,12 @@ public class LTLPropertySolver {
 
 	private static final int NBSTEPS = 100000;
 	private static final int DEBUG = 0;
-	private String solverPath;
 	private String workDir;
 	private boolean exportLTL;
 	public static boolean noKnowledgetest=false;
 	public static boolean noStutterTest=false;
 
-	public LTLPropertySolver(String solverPath, String workDir, boolean exportLTL) {
-		this.solverPath = solverPath;
+	public LTLPropertySolver(String workDir, boolean exportLTL) {
 		this.workDir = workDir;
 		this.exportLTL = exportLTL;
 	}
@@ -113,7 +111,7 @@ public class LTLPropertySolver {
 					if (testAFDead(skel) && skel.testInDeadlock()>0) {
 						solved +=ReachabilitySolver.checkInInitial(skel, doneProps);
 					}
-					new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(10), true);
+					new AtomicReducerSR().strongReductions(reader.getSPN(), doneProps, new SpotRunner(10), true);
 					reader.getSPN().simplifyLogic();
 					solved +=ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 					reader.rebuildSpecification(doneProps);
@@ -162,7 +160,7 @@ public class LTLPropertySolver {
 			System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 			sr.setProtected(support);
 			try {
-				ReachabilitySolver.applyReductions(sr, ReductionType.LTL, solverPath, true, true);				
+				ReachabilitySolver.applyReductions(sr, ReductionType.LTL, true, true);				
 				reader.getSPN().readFrom(sr);
 				reader.getSPN().removeConstantPlaces();
 			} catch (GlobalPropertySolvedException gse) {
@@ -175,7 +173,7 @@ public class LTLPropertySolver {
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 		solved += GALSolver.runGALReductions(reader, doneProps);
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);					
-		solved += new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(10), false);
+		solved += new AtomicReducerSR().strongReductions(reader.getSPN(), doneProps, new SpotRunner(10), false);
 		reader.getSPN().simplifyLogic();
 		solved += reader.getSPN().testInInitial();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
@@ -301,7 +299,7 @@ public class LTLPropertySolver {
 				MccTranslator reader2 = reader.copy();
 				reader2.setSpn(spnHOA, false);
 				reader2.setTgba(tgbak);
-				GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", solverPath, 15);
+				GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", 15);
 			}
 			
 			if (doneProps.containsKey(propPN.getName())) 
@@ -322,7 +320,7 @@ public class LTLPropertySolver {
 					// Danger here if TGBA became stutter inv, but property was not.
 					// rt = ReductionType.LTL;
 					
-					ReachabilitySolver.applyReductions(sr, rt, solverPath, true, true);			
+					ReachabilitySolver.applyReductions(sr, rt, true, true);			
 				} catch (GlobalPropertySolvedException gse) {
 					System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
 					gse.printStackTrace();
@@ -336,7 +334,7 @@ public class LTLPropertySolver {
 				return;
 			
 			// 15 seconds timeout, just treat the fast ones.
-			GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", solverPath, 15);
+			GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", 15);
 			
 		} catch (AcceptedRunFoundException a) {
 			doneProps.put(propPN.getName(), false, a.getTechniques());
@@ -348,7 +346,7 @@ public class LTLPropertySolver {
 	}
 	
 	private void verifyWithLTSmin (SparsePetriNet spn, DoneProperties doneProps, int timeout) {
-		LTSminRunner ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, false, false, timeout, spn.isSafe());
+		LTSminRunner ltsminRunner = new LTSminRunner(Solver.Z3, false, false, timeout, spn.isSafe());
 		
 		try {
 			ltsminRunner.configure(null, doneProps);
@@ -376,7 +374,7 @@ public class LTLPropertySolver {
 		
 		ILTSminRunner ltsminRunner ;
 		if (mode == ExportMode.LTSMINAP) {
-			ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, negProp.isStutterInvariant(), false, timeout, spn.isSafe());
+			ltsminRunner = new LTSminRunner(Solver.Z3, negProp.isStutterInvariant(), false, timeout, spn.isSafe());
 		} else {
 			ltsminRunner = new LTSminPNMLRunner(negProp.isStutterInvariant(), timeout, spn.isSafe());
 		}
@@ -446,7 +444,7 @@ public class LTLPropertySolver {
 						for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
 							hl.add(i);
 						}
-						FlowPrinter.drawNet(sr, solverPath, hl, new HashSet<>());
+						FlowPrinter.drawNet(sr, "PPOR", hl, new HashSet<>());
 					}
 					
 					pw = new RandomProductWalker(spnForPropWithK, sr, tgbappor, atomsred);
@@ -529,7 +527,7 @@ public class LTLPropertySolver {
 		sr.setProtected(support);
 		try {
 			ReductionType rt = isStutterInv ? ReductionType.SI_LTL : ReductionType.LTL ; 
-			ReachabilitySolver.applyReductions(sr, rt, solverPath, true, true);			
+			ReachabilitySolver.applyReductions(sr, rt, true, true);			
 		} catch (GlobalPropertySolvedException gse) {
 			System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
 			gse.printStackTrace();
@@ -602,7 +600,7 @@ public class LTLPropertySolver {
 					Expression ap2 = ap.childAt(i);
 					// make sure this term is initially true
 					if (ap2.eval(init)!=0) {
-						if (DeadlockTester.testEGap(ap2,spn, solverPath, 15)) {
+						if (DeadlockTester.testEGap(ap2,spn, 15)) {
 							System.out.println("Proved EG "+ap2);
 							falseKnowledge.add(Expression.nop(Op.G,ap2));
 						} else {
@@ -611,7 +609,7 @@ public class LTLPropertySolver {
 					}
 				}
 			} else {
-				if (DeadlockTester.testEGap(ap,spn, solverPath, 15)) {
+				if (DeadlockTester.testEGap(ap,spn, 15)) {
 					System.out.println("Proved EG "+ap);
 					falseKnowledge.add(Expression.nop(Op.G,ap));
 				} else {
@@ -698,7 +696,7 @@ public class LTLPropertySolver {
 		
 		DoneProperties todoProps = new ConcurrentHashDoneProperties();
 		try {
-			ReachabilitySolver.applyReductions(reader, todoProps , solverPath, 100);
+			ReachabilitySolver.applyReductions(reader, todoProps , 100);
 		} catch (GlobalPropertySolvedException e) {
 			e.printStackTrace();
 		}
@@ -1084,7 +1082,7 @@ public class LTLPropertySolver {
 		if (allPathsAreDead) {
 			System.out.println("Detected that all paths lead to deadlock. Applying this knowledge to assert that all AP eventually converge : F ( (Ga|G!a) & (Gb|G!b)...)");
 
-			boolean [] results = DeadlockTester.testAPInDeadlocksWithSMT(spn, tgba.getAPs(), solverPath);						
+			boolean [] results = DeadlockTester.testAPInDeadlocksWithSMT(spn, tgba.getAPs());						
 
 			// build expressions :  G p | G !p 
 			// for each ap "p", but remove bad values eliminated through SMT

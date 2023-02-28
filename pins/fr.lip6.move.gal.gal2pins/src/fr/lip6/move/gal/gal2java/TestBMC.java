@@ -27,7 +27,7 @@ public class TestBMC {
 		 // z3 4.3
 		//Gal2SMTFrontEnd smt = new Gal2SMTFrontEnd("/data2/ythierry/download/z3/z3-4.3.2.5e72cf0123f6-x64-ubuntu-12.04/bin/z3", Solver.Z3);
 		// z3 4.4
-		Gal2SMTFrontEnd smt = new Gal2SMTFrontEnd("/data/ythierry/workspaces/neon/fr.lip6.move.gal.benchmark/z3/bin/z3", Solver.Z3);
+		Gal2SMTFrontEnd smt = new Gal2SMTFrontEnd(Solver.Z3);
 		// yices
 		// Gal2SMTFrontEnd smt = new Gal2SMTFrontEnd("/data/ythierry/workspaces/neon/fr.lip6.move.gal.benchmark/yices/bin/yices-smt2", Solver.YICES2);
 		

@@ -58,10 +58,7 @@ public class GlobalPropertySolver {
 
 	private static final int DEBUG = 0;
 
-	private final String solverPath;
-
-	public GlobalPropertySolver(String solverPath) {
-		this.solverPath = solverPath;
+	public GlobalPropertySolver() {
 	}
 
 	// **** solving global properties ****
@@ -382,8 +379,7 @@ public class GlobalPropertySolver {
 				// test for deadlocks
 
 				Optional<Boolean> deadlock = DeadlockSolver.checkStructuralDeadlock(reader.getFolder(),
-						REACHABILITY_DEADLOCK, null, solverPath, reader.copy(),
-						new GlobalDonePropertyPrinter(REACHABILITY_DEADLOCK, false));
+						REACHABILITY_DEADLOCK, null, reader.copy(), new GlobalDonePropertyPrinter(REACHABILITY_DEADLOCK, false));
 				if (deadlock.isPresent() && deadlock.get()) {
 					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL DEADLOCK_TEST");
 					return Optional.of(false);
@@ -523,7 +519,7 @@ public class GlobalPropertySolver {
 				if (examination.equals(LIVENESS) || examination.equals(QUASI_LIVENESS)) {
 					StructuralReduction sr = new StructuralReduction(reader.getSPN());
 					try {
-						ReachabilitySolver.applyReductions(sr, ReductionType.LIVENESS, solverPath, true, true);
+						ReachabilitySolver.applyReductions(sr, ReductionType.LIVENESS, true, true);
 						// sr.reduce(ReductionType.LIVENESS);
 					} catch (DeadlockFound e) {
 						doneProps.put(examination, false, "STRUCTURAL_REDUCTION");
@@ -566,9 +562,9 @@ public class GlobalPropertySolver {
 			if (!spn.getProperties().isEmpty() && !doneProps.isFinished()) {
 				for (int i=1; i<=1000; i*=10) {
 					if (LIVENESS.equals(examination)) {
-						verifyWithSDD(reader, doneProps, "CTLFireability", solverPath, 3*i);						
+						verifyWithSDD(reader, doneProps, "CTLFireability", 3*i);						
 					} else {
-						verifyWithSDD(reader, doneProps, "ReachabilityFireability", solverPath, 3*i);
+						verifyWithSDD(reader, doneProps, "ReachabilityFireability", 3*i);
 					}
 					if (doneProps.isFinished()) {
 						return Optional.of(doneProps.getValue(examination));
@@ -643,13 +639,13 @@ public class GlobalPropertySolver {
 				.info("Rough structural analysis with invariants proved " + d + " places are one safe in "
 						+ (System.currentTimeMillis() - time) + " ms (including invariant computation).");
 
-		DeadlockTester.testOneSafeWithSMT(toCheck, spn, invar, doneProps, solverPath, 10);
+		DeadlockTester.testOneSafeWithSMT(toCheck, spn, invar, doneProps, 10);
 
 		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 	}
 
 	public static void verifyWithSDD(MccTranslator reader, DoneProperties doneProps, String examinationForITS,
-			String solverPath, int timeout) {
+			int timeout) {
 		boolean wasInterrupted = false;
 		if (reader.isDoITS())
 		try {
@@ -698,8 +694,7 @@ public class GlobalPropertySolver {
 		//CTL is not for LTSmin
 		if (reader.isDoLTSMin())
 		if (! reader.getSPN().getProperties().isEmpty() && !examinationForITS.startsWith("CTL")) {
-			LTSminRunner ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, false, false, timeout,
-					reader.getSPN().isSafe());
+			LTSminRunner ltsminRunner = new LTSminRunner(Solver.Z3, false, false, timeout, reader.getSPN().isSafe());
 			try {
 				ltsminRunner.configure(null, doneProps);
 				ltsminRunner.setNet(reader.getSPN());
@@ -726,7 +721,7 @@ public class GlobalPropertySolver {
 		if (!reader.getSPN().getProperties().isEmpty()) {
 			try {
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-				ReachabilitySolver.applyReductions(reader, doneProps, solverPath, -1);
+				ReachabilitySolver.applyReductions(reader, doneProps, -1);
 			} catch (GlobalPropertySolvedException e) {
 				e.printStackTrace();
 			}

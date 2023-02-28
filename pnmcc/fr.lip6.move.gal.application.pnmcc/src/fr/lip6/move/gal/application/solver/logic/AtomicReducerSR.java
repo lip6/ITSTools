@@ -39,11 +39,11 @@ import fr.lip6.move.gal.structural.smt.DeadlockTester;
 public class AtomicReducerSR {
 	private static final int DEBUG = 0;
 
-	public int strongReductions(String solverPath, SparsePetriNet spn, DoneProperties doneProps, SpotRunner spot, boolean isOverApprox) {
+	public int strongReductions(SparsePetriNet spn, DoneProperties doneProps, SpotRunner spot, boolean isOverApprox) {
 		if (spn.getProperties().stream().anyMatch(p -> p.getType() == PropertyType.LTL || p.getType() == PropertyType.CTL)) {
-			return checkAtomicPropositionsLogic(spn, doneProps, solverPath, spot, isOverApprox);
+			return checkAtomicPropositionsLogic(spn, doneProps, spot, isOverApprox);
 		} else {
-			int solved = checkAtomicPropositions(spn, doneProps, solverPath, false);
+			int solved = checkAtomicPropositions(spn, doneProps, false);
 			spn.simplifyLogic();
 			return solved;
 		}
@@ -53,17 +53,12 @@ public class AtomicReducerSR {
 	 * Extract Atomic Propositions, unify them, for each of them test initial state, then try to assert it will not vary => simplifiable.
 	 * @param spn
 	 * @param doneProps
-	 * @param isSafe
-	 * @param solverPath 
 	 * @param spot 
 	 * @param isOverApprox 
+	 * @param isSafe
 	 * @param comparisonAtoms if true look only at comparisons only as atoms (single predicate), otherwise sub boolean formulas are considered atoms (CTL, LTL) 
 	 */
-	private int checkAtomicPropositionsLogic (SparsePetriNet spn, DoneProperties doneProps, String solverPath, SpotRunner spot, boolean isOverApprox) {
-
-		if (solverPath == null) {
-			return 0;
-		}
+	private int checkAtomicPropositionsLogic (SparsePetriNet spn, DoneProperties doneProps, SpotRunner spot, boolean isOverApprox) {
 
 		// order is not really important, but reproducibility of iteration order we depend upon
 		AtomicPropManager apm = new AtomicPropManager();
@@ -107,7 +102,7 @@ public class AtomicReducerSR {
 		
 		DoneProperties todoProps = new ConcurrentHashDoneProperties();
 		try {
-			ReachabilitySolver.applyReductions(reader, todoProps , solverPath, 100);
+			ReachabilitySolver.applyReductions(reader, todoProps , 100);
 		} catch (GlobalPropertySolvedException e) {
 			e.printStackTrace();
 		}
@@ -202,15 +197,10 @@ public class AtomicReducerSR {
 	 * Extract Atomic Propositions, unify them, for each of them test initial state, then try to assert it will not vary => simplifiable.
 	 * @param spn
 	 * @param doneProps
-	 * @param solverPath 
 	 * @param withSR 
 	 * @param isSafe
 	 */
-	public int checkAtomicPropositions(SparsePetriNet spn, DoneProperties doneProps, String solverPath, boolean withSR) {
-
-		if (solverPath == null) {
-			return 0;
-		}
+	public int checkAtomicPropositions(SparsePetriNet spn, DoneProperties doneProps, boolean withSR) {
 
 		// order is not really important, but reproducibility of iteration order we depend upon
 		Map<String,List<Expression>> atoms = new LinkedHashMap<>();				
@@ -224,6 +214,9 @@ public class AtomicReducerSR {
 		
 		// make sure we don't just go crazy
 		if (spn.getProperties().size()*3 < atoms.size()) {
+			// alternative version
+			//		if (spn.getProperties().size() > 1 &&  atoms.size() > spn.getProperties().size()*5) {
+			
 			// just too many to deal with
 			return 0;
 		}
@@ -271,7 +264,7 @@ public class AtomicReducerSR {
 		try {
 			int nsimpl = 0;
 			List<Integer> repr = new ArrayList<>();
-			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, spn, solverPath, repr,20,false);
+			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, spn, repr, 20,false);
 
 			IdentityHashMap<Expression,Expression> mapTo = new IdentityHashMap<>();
 			Iterator<Entry<String, List<Expression>>> it = atoms.entrySet().iterator();
@@ -369,7 +362,7 @@ public class AtomicReducerSR {
 				
 				DoneProperties todoProps = new ConcurrentHashDoneProperties();
 				try {
-					ReachabilitySolver.applyReductions(reader, todoProps , solverPath, 100);
+					ReachabilitySolver.applyReductions(reader, todoProps , 100);
 				} catch (GlobalPropertySolvedException e) {
 					e.printStackTrace();
 				}
@@ -443,7 +436,7 @@ public class AtomicReducerSR {
 				int nsimpl = 0;
 				List<Integer> repr = new ArrayList<>();
 				Set<String> treated = new HashSet<>();
-				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheckBounds, sr, solverPath, repr,20,false);
+				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheckBounds, sr, repr, 20,false);
 				if (DEBUG  >=1) {
 					for (int i=0; i < paths.size(); i++) {
 						if (paths.get(i)==null) {

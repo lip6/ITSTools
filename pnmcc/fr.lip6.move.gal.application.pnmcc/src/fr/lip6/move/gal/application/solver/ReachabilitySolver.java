@@ -46,7 +46,7 @@ public class ReachabilitySolver {
 		return done;
 	}
 
-	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, String solverPath, int timeout)
+	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, int timeout)
 			throws GlobalPropertySolvedException {
 		int iter;
 		int iterations =0;
@@ -60,7 +60,7 @@ public class ReachabilitySolver {
 			MccTranslator rc = reader.copy();
 			t = new Thread( () ->
 			{
-				GlobalPropertySolver.verifyWithSDD(rc, doneProps, "ReachabilityCardinality" , solverPath, timeout > 0 ? timeout / 2 : 600);
+				GlobalPropertySolver.verifyWithSDD(rc, doneProps, "ReachabilityCardinality" , timeout > 0 ? timeout / 2 : 600);
 			});
 			t.start();
 		}
@@ -86,14 +86,13 @@ public class ReachabilitySolver {
 				if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished())
 					break;
 
-				if (solverPath != null) {
 					List<Integer> repr = new ArrayList<>();
 					List<SparseIntArray> orders = new ArrayList<>();
 					int smttime = iterations==0 ? 5:45;
 					if (timeout != -1) {
 						smttime = 5;
 					}
-					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, repr, smttime,true,orders);
+					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, repr, smttime, true,orders);
 
 					iter += treatSMTVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths);
 					long time = System.currentTimeMillis();
@@ -180,7 +179,7 @@ public class ReachabilitySolver {
 
 					int afterParikh = spn.getProperties().size();
 					System.out.println("Parikh walk visited "+(beforeParikh - afterParikh)+ " properties in "+ (System.currentTimeMillis() - timeParikh) + " ms.");
-				}
+				
 				ReachabilitySolver.checkInInitial(spn, doneProps);
 				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
@@ -194,9 +193,9 @@ public class ReachabilitySolver {
 				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 
 				sr.setProtected(support);
-				if (applyReductions(sr, ReductionType.REACHABILITY, solverPath, false,iterations==0)) {
+				if (applyReductions(sr, ReductionType.REACHABILITY, false, iterations==0)) {
 					iter++;
-				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, ReductionType.REACHABILITY, solverPath, true,false)) {
+				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, ReductionType.REACHABILITY, true, false)) {
 					iter++;
 				}
 				// FlowPrinter.drawNet(sr, "Final Model", 1000);
@@ -223,7 +222,7 @@ public class ReachabilitySolver {
 
 				if (iter == 0 && !doneAtoms && timeout == -1) {
 					//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
-					new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, null, false);
+					new AtomicReducerSR().strongReductions(reader.getSPN(), doneProps, null, false);
 					checkInInitial(reader.getSPN(), doneProps);
 					iter++;
 
@@ -251,7 +250,7 @@ public class ReachabilitySolver {
 					return;
 
 				if (iterations > 1 && iter==0 && !doneAtomsSR && timeout==-1) {
-					int n = new AtomicReducerSR().checkAtomicPropositions(reader.getSPN(), doneProps, solverPath, true);
+					int n = new AtomicReducerSR().checkAtomicPropositions(reader.getSPN(), doneProps, true);
 					n += checkInInitial(reader.getSPN(), doneProps);
 					iter +=n;
 					doneAtomsSR = true;
@@ -271,11 +270,9 @@ public class ReachabilitySolver {
 				computeToCheck(spn, tocheckIndexes, tocheck);
 
 				List<Integer> repr = new ArrayList<>();
-				if (solverPath != null) {
-					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, repr, iterations==0 ? 5:45,true);
+				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, repr, iterations==0 ? 5:45, true);
 
-					iter += treatSMTVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
-				}
+				iter += treatSMTVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
 
 				// give an exhaustive method a try
 				SparsePetriNet spnOri = reader.getSPN();
@@ -283,7 +280,7 @@ public class ReachabilitySolver {
 				DoneProperties todoProps = new ConcurrentHashDoneProperties();
 				if (reader.getSPN().getTransitionCount() <= 2000) {
 					// a bit of exhaustive for relatively small systems
-					GlobalPropertySolver.verifyWithSDD(reader, todoProps , "ReachabilityCardinality", solverPath, 15);
+					GlobalPropertySolver.verifyWithSDD(reader, todoProps , "ReachabilityCardinality", 15);
 
 					for (Entry<String, Boolean> prop : todoProps.entrySet()) {
 						for (Property p : spnOri.getProperties()) {
@@ -434,7 +431,7 @@ public class ReachabilitySolver {
 		return seen;
 	}
 
-	public static boolean applyReductions(StructuralReduction sr, ReductionType rt, String solverPath, boolean withSMT, boolean isFirstTime)
+	public static boolean applyReductions(StructuralReduction sr, ReductionType rt, boolean withSMT, boolean isFirstTime)
 			throws GlobalPropertySolvedException {
 		boolean cont = false;
 		int it =0;
@@ -472,7 +469,7 @@ public class ReachabilitySolver {
 			if (lastReduction == 1) {
 				break;
 			} else if (isFirstTime && it==0) {
-				boolean hasReduced = arcValuesTriggerSMTDeadTransitions(sr, solverPath, rt);
+				boolean hasReduced = arcValuesTriggerSMTDeadTransitions(sr, rt);
 				if (hasReduced) {
 					cont=true;
 					total++;
@@ -482,8 +479,8 @@ public class ReachabilitySolver {
 
 			// implicit and dead transitions test using SMT
 			// We pass iteration counter and reduced counter to delay more costly versions with state equation.
-			if (withSMT && solverPath != null) {
-				int hasReduced = applySMTBasedReductionRules(sr, rt, it, solverPath, reduced, lastReduction);
+			if (withSMT) {
+				int hasReduced = applySMTBasedReductionRules(sr, rt, it, reduced, lastReduction);
 				if (hasReduced != -1) {
 					lastReduction=hasReduced;
 					cont = true;
@@ -505,7 +502,7 @@ public class ReachabilitySolver {
 	}
 
 	private static int applySMTBasedReductionRules(StructuralReduction sr, ReductionType rt, int iteration,
-			String solverPath, int reduced, int lastReduction) throws GlobalPropertySolvedException {
+			int reduced, int lastReduction) throws GlobalPropertySolvedException {
 		boolean hasReduced = false;
 		boolean useStateEq = false;
 		// we'd love to do this but it messes up some metrics on token counts.
@@ -515,7 +512,7 @@ public class ReachabilitySolver {
 				long t = System.currentTimeMillis();
 				// 	go for more reductions ?
 
-				List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, false);
+				List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, false);
 				if (!implicitPlaces.isEmpty()) {
 					sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (invariants only)");
 					sr.ruleReduceTrans(rt);
@@ -525,7 +522,7 @@ public class ReachabilitySolver {
 					// limit to 20 k variables for SMT solver with parikh constraints
 					useStateEq = true;
 					// with state equation can we solve more ?
-					implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, true);
+					implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, true);
 					if (!implicitPlaces.isEmpty()) {
 						sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (with state equation)");
 						sr.ruleReduceTrans(rt);
@@ -544,7 +541,7 @@ public class ReachabilitySolver {
 			return lastReduction;
 		if (lastReduction != 3) {
 			if (rt != ReductionType.LIVENESS && rt != ReductionType.LTL && rt != ReductionType.LI_LTL &&(reduced == 0 || iteration==0)) {
-				List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
+				List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr);
 				if (! tokill.isEmpty()) {
 					System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
 				}
@@ -560,7 +557,7 @@ public class ReachabilitySolver {
 		}
 		if (lastReduction != 4) {
 			if (lastReduction != 1 && (reduced == 0 || iteration==0)) {
-				List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath);
+				List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr);
 				if (! tokill.isEmpty()) {
 					System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
 					if (rt == ReductionType.LIVENESS) {
@@ -580,7 +577,7 @@ public class ReachabilitySolver {
 		return lastReduction;
 	}
 
-	private static boolean arcValuesTriggerSMTDeadTransitions(StructuralReduction sr, String solverPath, ReductionType rt) throws DeadlockFound {
+	private static boolean arcValuesTriggerSMTDeadTransitions(StructuralReduction sr, ReductionType rt) throws DeadlockFound {
 		boolean hasGT1ArcValues = false;
 		for (int t=0,te=sr.getTnames().size() ; t < te && !hasGT1ArcValues; t++) {
 			SparseIntArray col = sr.getFlowPT().getColumn(t);
@@ -593,7 +590,7 @@ public class ReachabilitySolver {
 		}
 
 		if (hasGT1ArcValues) {
-			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath);
+			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr);
 			if (! tokill.isEmpty()) {
 				System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
 			}
