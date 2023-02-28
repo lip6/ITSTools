@@ -56,15 +56,13 @@ public class LTLPropertySolver {
 
 	private static final int NBSTEPS = 100000;
 	private static final int DEBUG = 0;
-	private String spotPath;
 	private String solverPath;
 	private String workDir;
 	private boolean exportLTL;
 	public static boolean noKnowledgetest=false;
 	public static boolean noStutterTest=false;
 
-	public LTLPropertySolver(String spotPath, String solverPath, String workDir, boolean exportLTL) {
-		this.spotPath = spotPath;
+	public LTLPropertySolver(String solverPath, String workDir, boolean exportLTL) {
 		this.solverPath = solverPath;
 		this.workDir = workDir;
 		this.exportLTL = exportLTL;
@@ -92,7 +90,7 @@ public class LTLPropertySolver {
 			}
 			solved += ReachabilitySolver.checkInInitial(reader.getHLPN(),doneProps);
 			if (isLTL) {
-				SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
+				SpotRunner sr = new SpotRunner(10);
 				sr.runLTLSimplifications(reader.getHLPN());
 			}
 			if (isLTL && exportLTL) {					
@@ -115,7 +113,7 @@ public class LTLPropertySolver {
 					if (testAFDead(skel) && skel.testInDeadlock()>0) {
 						solved +=ReachabilitySolver.checkInInitial(skel, doneProps);
 					}
-					new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(spotPath, workDir, 10), true);
+					new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(10), true);
 					reader.getSPN().simplifyLogic();
 					solved +=ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 					reader.rebuildSpecification(doneProps);
@@ -142,8 +140,8 @@ public class LTLPropertySolver {
 			SpotRunner.exportLTLProperties(reader.getSPN(),"raw",workDir);
 		}
 
-		if (spotPath != null && isLTL) {
-			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
+		if (isLTL) {
+			SpotRunner sr = new SpotRunner(10);
 			sr.runLTLSimplifications(reader.getSPN());
 		}
 
@@ -177,7 +175,7 @@ public class LTLPropertySolver {
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 		solved += GALSolver.runGALReductions(reader, doneProps);
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);					
-		solved += new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(spotPath, workDir, 10), false);
+		solved += new AtomicReducerSR().strongReductions(solverPath, reader.getSPN(), doneProps, new SpotRunner(10), false);
 		reader.getSPN().simplifyLogic();
 		solved += reader.getSPN().testInInitial();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
@@ -195,8 +193,8 @@ public class LTLPropertySolver {
 		}
 		
 		
-		if (isLTL && spotPath != null) {
-			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
+		if (isLTL) {
+			SpotRunner sr = new SpotRunner(10);
 			sr.runLTLSimplifications(reader.getSPN());
 		}
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
@@ -208,7 +206,7 @@ public class LTLPropertySolver {
 			throws TimeoutException, LTLException {
 		
 		
-		SpotRunner spot = new SpotRunner(spotPath, workDir, 10);
+		SpotRunner spot = new SpotRunner(10);
 
 
 

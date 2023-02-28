@@ -34,9 +34,7 @@ import fr.lip6.move.gal.structural.expr.Expression;
 public class LTLLengthAwareSolver {
 
 	private static final int DEBUG = 0;
-	private String spotPath;
 	private String solverPath;
-	private String workDir;
 	private LTLPropertySolver ltlsolve;
 
 	/**
@@ -46,10 +44,8 @@ public class LTLLengthAwareSolver {
 	 * @param workDir where we are working
 	 * @param ltlsolve the solver we delegate the reduced model solution to.
 	 */
-	public LTLLengthAwareSolver(String spotPath, String solverPath, String workDir, LTLPropertySolver ltlsolve) {
-		this.spotPath = spotPath;
+	public LTLLengthAwareSolver(String solverPath, LTLPropertySolver ltlsolve) {
 		this.solverPath = solverPath;
-		this.workDir = workDir;
 		this.ltlsolve = ltlsolve;
 	}
 
@@ -63,7 +59,7 @@ public class LTLLengthAwareSolver {
 	 */
 	public int runSLCLLTLTest(MccTranslator reader, DoneProperties doneProps)
 			throws TimeoutException, LTLException {
-		SpotRunner spot = new SpotRunner(spotPath, workDir, 10);
+		SpotRunner spot = new SpotRunner(10);
 
 		int solved =0;
 
