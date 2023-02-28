@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+	  <groupId>fr.lip6.move.gal</groupId>
+	  <artifactId>fr.lip6.move.gal.parent</artifactId>
+	  <version>1.0.0-SNAPSHOT</version>
+	  <relativePath>../../fr.lip6.move.gal.parent/pom.xml</relativePath>
+  </parent>
+
+    <artifactId>fr.lip6.smt.z3.binaries</artifactId>
+    <packaging>eclipse-plugin</packaging>
+    <name>Z3 binaries</name>
+    <description>Z3 binary packaging.</description>
+
+    <build>
+        <plugins>
+            <!-- Fetch the binaries from our integration platform -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <configuration>
+                            <target>
+                                <echo message="Get Z3 binaries"/>
+                                <mkdir dir="bin"/>                                
+                                <get src="https://github.com/Z3Prover/z3/releases/download/z3-4.11.2/z3-4.11.2-x64-glibc-2.31.zip" dest="bin/z3.zip"/>
+								<unzip src="bin/z3.zip" dest="bin/">
+									<patternset>
+										<include name="**/bin/z3" />
+									</patternset>
+									<mapper type="flatten" />
+								</unzip>
+								<delete includeemptydirs="true">
+   									<fileset file="bin/z3.zip" />
+  								</delete>
+  								<rename src="bin/z3" dest="bin/z3-linux64"/>
+  								<chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
+                           </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions> 
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
