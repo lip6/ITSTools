@@ -6,7 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Require-Bundle: fr.lip6.move.gal,
  lip6.smtlib.SMT,
  fr.lip6.move.gal.structural,
- fr.lip6.move.gal.struct2gal
+ fr.lip6.move.gal.struct2gal,
+ fr.lip6.smt.z3.binaries
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: fr.lip6.move.gal.gal2smt,
  fr.lip6.move.gal.gal2smt.bmc,
