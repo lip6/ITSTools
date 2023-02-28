@@ -44,6 +44,10 @@ public class SpotRunner {
 
 
 	public static enum GivenStrategy {
+		/** restrict labels */
+		RESTRICT,
+		/** relax labels */
+		RELAX,
 		/**restrict/relax edge labels to their useful subset*/
 		MINATO,
 		/** A variant of relax designed to make the language SI */
@@ -755,6 +759,10 @@ public class SpotRunner {
 		return TGBAparserHOAF.parseFrom(f2.getCanonicalPath(), apm);
 	}
 
+	public TGBA givenThat(TGBA tgba, Expression factoid, GivenStrategy constrain) {
+		return givenThat(tgba, Collections.singletonList(factoid), constrain);
+	}
+	
 	public TGBA givenThat(TGBA tgba, List<Expression> factoids, GivenStrategy constrain) {
 		TGBA tgbaout = tgba;
 		CommandLine cl = new CommandLine();

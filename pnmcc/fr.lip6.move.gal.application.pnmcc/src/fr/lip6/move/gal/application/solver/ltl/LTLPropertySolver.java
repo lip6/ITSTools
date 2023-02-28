@@ -771,46 +771,22 @@ public class LTLPropertySolver {
 
 	public TGBA knowledgeLoop(TGBA tgba, List<Expression> knowledge, List<Expression> falseKnowledge, SpotRunner spot) {
 		
-		TGBA tgbarelax = tgba;
-		tgbarelax = spot.givenThat(tgba, knowledge, SpotRunner.GivenStrategy.MINATO);
 		
-		if (tgbarelax.isEmptyLanguage()) {
-			System.out.println("Property proved to be true thanks to knowledge (Minato strategy)");
-			return tgbarelax;
-		} else if (tgbarelax.isUniversalLanguage()) {
-			System.out.println("Property proved to be false thanks to knowledge (Minato strategy)");
-			return tgbarelax;
-		}
 		
-		// test inclusion
-		// autfilt --included-in=AnotPhi.hoa Kmoins.hoa
-		for (Expression factoid : falseKnowledge) {
-			if (spot.isIncludedIn(factoid,tgbarelax)) {
-				System.out.println("Property proved to be false thanks to negative knowledge :" + factoid);
-				return TGBA.makeTrue();				
-			}
-		}
 		
-		// 
-		tgbarelax = spot.givenThat(tgbarelax, knowledge, SpotRunner.GivenStrategy.ALL);
-		
-		return tgbarelax;
-		
-		/*
-		 // OLD STYLE : manual knowledge loop
-		// counter-examples ?
-		{
+		if (false) {
+			// Spot 2.11+
 			TGBA tgbarelax = tgba;
-			for (Expression factoid : knowledge) {
-				tgbarelax = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RELAX);
-				if (tgba.isEmptyLanguage()) {
-					System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-					return tgbarelax;
-				} else if (tgba.isUniversalLanguage()) {
-					System.out.println("Property proved to be false thanks to knowledge :" + factoid);
-					return tgbarelax;
-				}
+			tgbarelax = spot.givenThat(tgba, knowledge, SpotRunner.GivenStrategy.MINATO);
+
+			if (tgbarelax.isEmptyLanguage()) {
+				System.out.println("Property proved to be true thanks to knowledge (Minato strategy)");
+				return tgbarelax;
+			} else if (tgbarelax.isUniversalLanguage()) {
+				System.out.println("Property proved to be false thanks to knowledge (Minato strategy)");
+				return tgbarelax;
 			}
+
 			// test inclusion
 			// autfilt --included-in=AnotPhi.hoa Kmoins.hoa
 			for (Expression factoid : falseKnowledge) {
@@ -819,36 +795,66 @@ public class LTLPropertySolver {
 					return TGBA.makeTrue();				
 				}
 			}
-		}
-		
-		
-		for (Expression factoid : knowledge) {
-			tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RESTRICT);
-			if (tgba.isEmptyLanguage()) {
-				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-				return tgba;
-			}
-		}
 
-		if (!tgba.isStutterInvariant()) {
-			Expression allFacts = Expression.nop(Op.AND, knowledge);
-			tgba = spot.givenThat(tgba, allFacts, SpotRunner.GivenStrategy.STUTTER);
-			if (tgba.isStutterInvariant()) {
-				System.out.println("Knowledge sufficient to adopt a stutter insensitive property.");
-			}
-		}
+			// 
+			tgbarelax = spot.givenThat(tgbarelax, knowledge, SpotRunner.GivenStrategy.ALL);
+
+			return tgbarelax;
+		} else {
 		
-		for (Expression factoid : knowledge) {
-			tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RELAX);
-			if (tgba.isEmptyLanguage()) {
-				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-				return tgba;
-			} else if (tgba.isUniversalLanguage()) {
-				System.out.println("Property proved to be false thanks to knowledge :" + factoid);
-				return tgba;
+			// OLD STYLE : Spot 2.10.4.dev "manual" knowledge loop
+			// counter-examples ?
+			{
+				TGBA tgbarelax = tgba;
+				for (Expression factoid : knowledge) {
+					tgbarelax = spot.givenThat(tgbarelax, factoid, SpotRunner.GivenStrategy.RELAX);
+					if (tgba.isEmptyLanguage()) {
+						System.out.println("Property proved to be true thanks to knowledge :" + factoid);
+						return tgbarelax;
+					} else if (tgba.isUniversalLanguage()) {
+						System.out.println("Property proved to be false thanks to knowledge :" + factoid);
+						return tgbarelax;
+					}
+				}
+				// test inclusion
+				// autfilt --included-in=AnotPhi.hoa Kmoins.hoa
+				for (Expression factoid : falseKnowledge) {
+					if (spot.isIncludedIn(factoid,tgbarelax)) {
+						System.out.println("Property proved to be false thanks to negative knowledge :" + factoid);
+						return TGBA.makeTrue();				
+					}
+				}
+			}
+
+
+			for (Expression factoid : knowledge) {
+				tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RESTRICT);
+				if (tgba.isEmptyLanguage()) {
+					System.out.println("Property proved to be true thanks to knowledge :" + factoid);
+					return tgba;
+				}
+			}
+
+			if (!tgba.isStutterInvariant()) {
+				Expression allFacts = Expression.nop(Op.AND, knowledge);
+				tgba = spot.givenThat(tgba, allFacts, SpotRunner.GivenStrategy.STUTTER);
+				if (tgba.isStutterInvariant()) {
+					System.out.println("Knowledge sufficient to adopt a stutter insensitive property.");
+				}
+			}
+
+			for (Expression factoid : knowledge) {
+				tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RELAX);
+				if (tgba.isEmptyLanguage()) {
+					System.out.println("Property proved to be true thanks to knowledge :" + factoid);
+					return tgba;
+				} else if (tgba.isUniversalLanguage()) {
+					System.out.println("Property proved to be false thanks to knowledge :" + factoid);
+					return tgba;
+				}
 			}
 		}
-		*/
+		return tgba;
 	}
 
 	public TGBA manuallyIntegrateKnowledge(SparsePetriNet spn, TGBA tgba, List<Expression> knowledge, Property propPN,
