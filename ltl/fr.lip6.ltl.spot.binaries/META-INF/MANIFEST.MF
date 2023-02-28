@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Spot packaging for binary tools
+Bundle-SymbolicName: fr.lip6.ltl.spot.binaries;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: fr.lip6.ltl.spot.binaries.BinaryToolsPlugin
+Eclipse-BundleShape: dir
+Require-Bundle: org.eclipse.core.runtime
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-ClassPath: .
+Bundle-Vendor: LIP6
+Export-Package: fr.lip6.ltl.spot.binaries
