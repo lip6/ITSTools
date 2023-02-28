@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.structural.smt;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,7 @@ import android.util.SparseIntArray;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.util.IntMatrixCol;
+import fr.lip6.smt.z3.binaries.BinaryToolsPlugin;
 
 public class SMTUtils {
 	
@@ -66,27 +68,34 @@ public class SMTUtils {
 
 	/**
 	 * Start an instance of a Z3 solver, with timeout at provided, logic QF_LIA/LRA, with produce models.
-	 * @param solverPath path to Z3 exe
 	 * @param smt the smt instance to configure/setup
 	 * @param solveWithReals 
 	 * @return a started solver or throws a RuntimeEx
 	 */
-	public static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
+	public static ISolver initSolver(org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
 		if (useAbstractDataType == POType.Forall) {
-			return  initSolver(solverPath, smt, "AUFLIRA", timeoutQ, timeoutT);
+			return  initSolver(smt, "AUFLIRA", timeoutQ, timeoutT);
 		} else if (useAbstractDataType == POType.Plunge) {
 			if (solveWithReals) {
-				return initSolver(solverPath, smt, "QF_LRA", timeoutQ, timeoutT);
+				return initSolver(smt, "QF_LRA", timeoutQ, timeoutT);
 			} else {
-				return initSolver(solverPath, smt, "QF_LIA", timeoutQ, timeoutT);
+				return initSolver(smt, "QF_LIA", timeoutQ, timeoutT);
 			}
 		} else {
-			return initSolver(solverPath, smt, null, timeoutQ, timeoutT);
+			return initSolver(smt, null, timeoutQ, timeoutT);
 		}
 	}
 
-	public static ISolver initSolver(String solverPath, org.smtlib.SMT smt, String logic, int timeoutQ, int timeoutT) {
-		smt.smtConfig.executable = solverPath;
+	public static ISolver initSolver(org.smtlib.SMT smt, String logic, int timeoutQ, int timeoutT) {
+		smt.smtConfig.executable = "";
+		
+		try {
+			smt.smtConfig.executable = BinaryToolsPlugin.getProgramURI().getPath();
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+
 		smt.smtConfig.timeout = timeoutQ;
 		smt.smtConfig.timeoutTotal = timeoutT;
 		Solver engine = Solver.Z3;
@@ -94,7 +103,7 @@ public class SMTUtils {
 		// start the solver
 		IResponse err = solver.start();
 		if (err.isError()) {
-			throw new RuntimeException("Could not start solver "+ engine+" from path "+ solverPath + " raised error :"+err);
+			throw new RuntimeException("Could not start solver "+ engine+" from path "+ smt.smtConfig.executable + " raised error :"+err);
 		}
 		err = solver.set_option(smt.smtConfig.exprFactory.keyword(Utils.PRODUCE_MODELS), smt.smtConfig.exprFactory.symbol("true"));
 		if (err.isError()) {
