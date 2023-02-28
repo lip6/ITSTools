@@ -122,7 +122,6 @@ public class Application implements IApplication, Ender {
 	private static final String ORDER_FLAG = "-order";
 	private static final String GSPN_PATH = "-greatspnpath";
 	private static final String BLISS_PATH = "-blisspath";
-	private static final String SPOT_PATH = "-spotpath";
 	private static final String SPOTMC_PATH = "-spotmcpath";
 	private static final String TIMEOUT = "-timeout";
 	private static final String REBUILDPNML = "-rebuildPNML";
@@ -200,7 +199,6 @@ public class Application implements IApplication, Ender {
 		String readGAL = null;
 		String gspnpath = null;
 		String blisspath = null;
-		String spotPath = null;
 		String spotmcPath = null;
 		String orderHeur = null;
 
@@ -240,8 +238,6 @@ public class Application implements IApplication, Ender {
 				z3path = args[++i];
 			} else if (YICES2PATH.equals(args[i])) {
 				yices2path = args[++i];
-			} else if (SPOT_PATH.equals(args[i])) {
-				spotPath = args[++i];
 			} else if (SPOTMC_PATH.equals(args[i])) {
 				spotmcPath = args[++i];
 			} else if (GSPN_PATH.equals(args[i])) {
@@ -359,7 +355,7 @@ public class Application implements IApplication, Ender {
 		}
 
 		if (analyzeSensitivity) {
-			SpotRunner spot = new SpotRunner(spotPath, pwd, 10);
+			SpotRunner spot = new SpotRunner(10);
 			LTLLengthSensitivityAnalyzer.doSensitivityAnalysis(reader,spot,pwd,examination,solverPath);
 			return IApplication.EXIT_OK;
 		}
@@ -631,7 +627,7 @@ public class Application implements IApplication, Ender {
 		if ( (examination!=null && examination.startsWith("CTL")) || "UpperBounds".equals(examination)) {
 
 			if (examination.startsWith("CTL")) {
-				LTLPropertySolver logicSolver = new LTLPropertySolver(spotPath, solverPath, pwd, false);
+				LTLPropertySolver logicSolver = new LTLPropertySolver(solverPath, pwd, false);
 				int solved = logicSolver.preSolveForLogic(reader, doneProps, false);
 				if (solved > 0) {
 					if (reader.getSPN().getProperties().isEmpty()) {
@@ -766,19 +762,15 @@ public class Application implements IApplication, Ender {
 
 			if (examination.startsWith("LTL")) {
 
-				if (spotPath == null) {
-					System.out.println("Warning : spot flags not provided. Please use flag : -spotpath $BINDIR/ltlfilt ");
-				} else {
-					LTLPropertySolver ltlsolve = new LTLPropertySolver(spotPath, solverPath, pwd, exportLTL);
+				LTLPropertySolver ltlsolve = new LTLPropertySolver(solverPath, pwd, exportLTL);
+				
+				ltlsolve.runStructuralLTLCheck(reader, doneProps);
+				if (! noSLCLtest) {
+					new LTLLengthAwareSolver(solverPath, ltlsolve).runSLCLLTLTest(reader, doneProps);
+				}
 
-					ltlsolve.runStructuralLTLCheck(reader, doneProps);
-					if (! noSLCLtest) {
-						new LTLLengthAwareSolver(spotPath, solverPath, pwd, ltlsolve).runSLCLLTLTest(reader, doneProps);
-					}
-
-					if (! reader.getSPN().getProperties().isEmpty()) {
-						reader.rebuildSpecification(doneProps);
-					}
+				if (! reader.getSPN().getProperties().isEmpty()) {
+					reader.rebuildSpecification(doneProps);
 				}
 
 				if (reader.getSPN().getProperties().isEmpty()) {
