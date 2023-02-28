@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
+import fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.Tool;
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.ltl.tgba.TGBA.ExportMode;
 import fr.lip6.ltl.tgba.TGBAEdge;
@@ -64,13 +65,17 @@ public class SpotRunner {
 	private String pathToautstates;
 	private String pathToSenseCLSL;
 
-	public SpotRunner(String pathToExe, String workFolder, long timeout) {
+	public SpotRunner(long timeout) {
 		super();
-		this.pathToltlfilt = pathToExe;
-		this.pathToltl2tgba = pathToExe.replace("ltlfilt", "ltl2tgba");
-		this.pathToautfilt = pathToExe.replace("ltlfilt", "autfilt");
-		this.pathToautstates = pathToExe.replace("ltlfilt", "autstates.py");
-		this.pathToSenseCLSL = pathToExe.replace("ltlfilt", "senseclsl.py");
+		try {
+			this.pathToltlfilt = fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.getProgramURI(Tool.ltlfilt).getPath();
+			this.pathToltl2tgba = fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.getProgramURI(Tool.ltl2tgba).getPath();
+			this.pathToautfilt = fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.getProgramURI(Tool.autfilt).getPath();
+			this.pathToautstates = fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.getProgramURI(Tool.autstates).getPath();
+			this.pathToSenseCLSL = fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.getProgramURI(Tool.senseclsl).getPath();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		this.timeout = timeout;
 	}
 
