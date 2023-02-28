@@ -60,7 +60,6 @@ public class SpotRunner {
 	private String pathToltlfilt;
 	private String pathToltl2tgba;
 	private String pathToautfilt;
-	private String workFolder;
 	private long timeout;
 	private String pathToautstates;
 	private String pathToSenseCLSL;
@@ -72,7 +71,6 @@ public class SpotRunner {
 		this.pathToautfilt = pathToExe.replace("ltlfilt", "autfilt");
 		this.pathToautstates = pathToExe.replace("ltlfilt", "autstates.py");
 		this.pathToSenseCLSL = pathToExe.replace("ltlfilt", "senseclsl.py");
-		this.workFolder = workFolder;
 		this.timeout = timeout;
 	}
 
@@ -122,7 +120,6 @@ public class SpotRunner {
 		TGBA tgba = null;
 		long time = System.currentTimeMillis();
 		CommandLine cl = new CommandLine();
-		cl.setWorkingDir(new File(workFolder));
 		cl.addArg(pathToltl2tgba);
 		
 		cl.addArg("--check=stutter");
@@ -157,7 +154,6 @@ public class SpotRunner {
 		try {
 			long time = System.currentTimeMillis();
 			CommandLine cl = new CommandLine();
-			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToltlfilt);
 			cl.addArg("--lbt"); // prefix notation for output
 			cl.addArg("-r"); // reduce the formulas
@@ -343,7 +339,6 @@ public class SpotRunner {
 	public TGBA computeForwardClosedSI(TGBA tgba) throws IOException {
 		long time = System.currentTimeMillis();
 		CommandLine cl = new CommandLine();
-		cl.setWorkingDir(new File(workFolder));
 		cl.addArg(pathToautstates);
 		File curAut = Files.createTempFile("curaut", ".hoa").toFile();
 		if (DEBUG == 0) curAut.deleteOnExit();
@@ -469,7 +464,6 @@ public class SpotRunner {
 	private TGBA makeProduct(File autPath, File stutterAut, AtomicPropManager apm) throws TimeoutException, IOException, InterruptedException {
 		long time = System.currentTimeMillis();
 		CommandLine cl = new CommandLine();
-		cl.setWorkingDir(new File(workFolder));
 		cl.addArg(pathToautfilt);
 		cl.addArg("--hoaf=tv"); // prefix notation for output
 		// bigger is better, and spot likes it big !
@@ -502,7 +496,6 @@ public class SpotRunner {
 	private boolean buildAutomaton(String ltl, File stdOutput) throws TimeoutException, IOException, InterruptedException {
 		long time = System.currentTimeMillis();
 		CommandLine cl = new CommandLine();
-		cl.setWorkingDir(new File(workFolder));
 		cl.addArg(pathToltl2tgba);
 		cl.addArg("--hoaf=tv"); // prefix notation for output
 		cl.addArg("-f"); // formula in next argument
@@ -527,7 +520,6 @@ public class SpotRunner {
 
 		long time = System.currentTimeMillis();
 		CommandLine cl = new CommandLine();
-		cl.setWorkingDir(new File(workFolder));
 		cl.addArg(pathToautfilt);
 		cl.addArg("--hoaf=tv"); // prefix notation for output
 		cl.addArg("--small");
@@ -562,7 +554,6 @@ public class SpotRunner {
 		try {
 			long time = System.currentTimeMillis();
 			
-			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 
 			cl.addArg("--hoaf=tv"); // force TGBA
@@ -613,7 +604,6 @@ public class SpotRunner {
 
 			long time = System.currentTimeMillis();
 			
-			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 
 			cl.addArg("--hoaf=tv"); // force TGBA
@@ -654,7 +644,6 @@ public class SpotRunner {
 		try {
 			long time = System.currentTimeMillis();		
 			
-			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 			cl.addArg("--hoaf=tv");
 			
@@ -692,7 +681,6 @@ public class SpotRunner {
 	public void analyzeCLSL(TGBA tgba) throws IOException {
 		long time = System.currentTimeMillis();
 		CommandLine cl = new CommandLine();
-		cl.setWorkingDir(new File(workFolder));
 		cl.addArg(pathToSenseCLSL);
 		File curAut = Files.createTempFile("curaut", ".hoa").toFile();
 		if (DEBUG == 0) curAut.deleteOnExit();
@@ -769,7 +757,6 @@ public class SpotRunner {
 		try {
 			long time = System.currentTimeMillis();
 			
-			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 			cl.addArg("--check=stutter");
 			cl.addArg("--hoaf=tv"); // prefix notation for output
@@ -815,7 +802,6 @@ public class SpotRunner {
 		try {
 			long time = System.currentTimeMillis();
 			
-			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 			
 			// build automaton for tgba
@@ -863,7 +849,6 @@ public class SpotRunner {
 		try {
 			long time = System.currentTimeMillis();
 			
-			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToautfilt);
 			
 			// build automaton for tgba
@@ -917,7 +902,6 @@ public class SpotRunner {
 		try {
 			long time = System.currentTimeMillis();
 			
-			cl.setWorkingDir(new File(workFolder));
 			cl.addArg(pathToltlfilt);
 			
 			cl.addArg("--implied-by="+printLTLProperty(implicant));
