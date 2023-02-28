@@ -78,6 +78,8 @@
 		<!-- SMT support and conversion -->
 		<module>../smt/lip6.smtlib.SMT</module>
 		<module>../smt/lip6.smtlib.plugin.SMTPlugin</module>
+		<!--  Z3 embedded version -->
+		<module>../smt/fr.lip6.smt.z3.binaries</module>		
 		<module>../smt/fr.lip6.move.gal.gal2smt</module>
 		<!-- currently deactivated -->
 		<!-- <module>../smt/fr.lip6.move.gal.gal2smt.ui</module> -->
@@ -111,6 +113,7 @@
 		<module>../mist/fr.lip6.mist</module>
 
 		<module>../fr.lip6.move.gal.updatesite</module>
+
 		<!-- Application plugin -->
 		<module>../ITS-commandline/fr.lip6.move.gal.itscl.application</module>
 		<!-- feature plugin -->
