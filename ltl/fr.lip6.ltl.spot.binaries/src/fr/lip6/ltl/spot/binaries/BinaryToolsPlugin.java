@@ -40,8 +40,8 @@ public class BinaryToolsPlugin extends Plugin {
 	private static BinaryToolsPlugin plugin;
 
 	// variants of the tool : multicore, sequential, symbolic...
-	public enum Tool {autfilt, ltlfilt, ltl2tgba};
-	private static URI toolUri [] = new URI [3];
+	public enum Tool {autfilt, ltlfilt, ltl2tgba, autstates, senseclsl};
+	private static URI toolUri [] = new URI [Tool.values().length];
 	
 	/**
 	 * The constructor
@@ -75,7 +75,23 @@ public class BinaryToolsPlugin extends Plugin {
 	
 	public static URI getProgramURI(Tool tool) throws IOException {
 		if (toolUri[tool.ordinal()] == null) {
-			String relativePath= "bin/"+ tool.toString() + "-" + getArchOS();
+			String relativePath = null;
+			switch (tool) {
+			case autfilt:
+			case ltlfilt:
+			case ltl2tgba: {
+				// compiled binaries
+				relativePath = "bin/" + tool.toString() + "-" + getArchOS();
+				break;
+			}
+			case autstates:
+			case senseclsl: {
+				// python scripts
+				relativePath = "bin/" + tool.toString() + ".py";
+				break;
+			}
+			}
+				
 			
 			URI uri = findRelativeURI(tool.toString(), relativePath);
 			toolUri[tool.ordinal()] = uri;
