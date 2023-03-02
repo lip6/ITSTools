@@ -215,8 +215,8 @@ public class LTLPropertySolver {
 			if (DEBUG >= 1) System.out.println("Starting run for "+propPN.getName()+" :" + SpotRunner.printLTLProperty(propPN.getBody()));
 			TGBA tgba = spot.transformToTGBA(propPN);
 
-
-			SparsePetriNet spnForProp = reduceForProperty(reader.getSPN(), tgba, propPN);
+			ReductionType rt = tgba.isStutterInvariant() ? ReductionType.SI_LTL : ReductionType.LTL;
+			SparsePetriNet spnForProp = reduceForProperty(reader.getSPN(), tgba, rt,propPN);
 
 			// annotate it with Infinite Stutter Accepted Formulas
 			spot.computeInfStutter(tgba);
@@ -252,7 +252,9 @@ public class LTLPropertySolver {
 			
 			SparsePetriNet spnForPropWithK;
 			if (tgbak != tgba) {
-				spnForPropWithK = reduceForProperty(spnForProp, tgbak,
+				ReductionType rt = tgbak.isStutterInvariant() ? ReductionType.SI_LTL : ReductionType.LTL;
+
+				spnForPropWithK = reduceForProperty(spnForProp, tgbak, rt,
 						spnForProp.getProperties().isEmpty() ? propPN : spnForProp.getProperties().get(0));
 				
 				// try again on this reduced system
@@ -290,7 +292,9 @@ public class LTLPropertySolver {
 					verifyWithLTSmin(spnForPropWithK, tgbak, doneProps, 15, spot);
 				if (doneProps.containsKey(propPN.getName())) 
 					return;
-				SparsePetriNet spnHOA = reduceForProperty(spnForPropWithK, tgbak, null);
+				
+				ReductionType rt = tgbak.isStutterInvariant() ? ReductionType.SI_LTL : ReductionType.LTL;
+				SparsePetriNet spnHOA = reduceForProperty(spnForPropWithK, tgbak, rt, null);
 				if (reader.isDoLTSMin())
 					verifyWithLTSmin(spnHOA, tgbak, doneProps, 15, spot);
 				if (doneProps.containsKey(propPN.getName())) 
@@ -429,7 +433,7 @@ public class LTLPropertySolver {
 				spnredSI.getProperties().clear();
 
 				{
-					StructuralReduction sr = buildReduced(spnredSI, true, tgbappor.getAPs(),true);
+					StructuralReduction sr = buildReduced(spnredSI, ReductionType.SI_LTL, tgbappor.getAPs(),true);
 					
 					// rebuild and reinterpret the reduced net
 					// index of places may have changed, formula might be syntactically simpler 
@@ -472,10 +476,9 @@ public class LTLPropertySolver {
 		return false;
 	}
 
-	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba, Property propPN) {
+	SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba, ReductionType rt, Property propPN) {
 		// build a new copy of the model, with only this property				
 		List<AtomicProp> aps = tgba.getAPs();
-		boolean isStutterInv = tgba.isStutterInvariant();
 		
 		SparsePetriNet spn = new SparsePetriNet(orispn);
 		spn.getProperties().clear();
@@ -483,7 +486,7 @@ public class LTLPropertySolver {
 			spn.getProperties().add(propPN.copy());
 
 		{
-			StructuralReduction sr = buildReduced(spn, isStutterInv, aps, false);
+			StructuralReduction sr = buildReduced(spn, rt, aps, false);
 			
 			// rebuild and reinterpret the reduced net
 			// index of places may have changed, formula might be syntactically simpler 
@@ -501,7 +504,7 @@ public class LTLPropertySolver {
 		return spn;
 	}
 
-	private StructuralReduction buildReduced(SparsePetriNet spn, boolean isStutterInv, List<AtomicProp> aps, boolean keepImage) {
+	private StructuralReduction buildReduced(SparsePetriNet spn, ReductionType rt, List<AtomicProp> aps, boolean keepImage) {
 		// ok let's reduce the system for this property 
 		StructuralReduction sr = new StructuralReduction(spn);
 		// whether we want to build and store the image function, for dynamic product approaches
@@ -525,8 +528,7 @@ public class LTLPropertySolver {
 			}			
 		}
 		sr.setProtected(support);
-		try {
-			ReductionType rt = isStutterInv ? ReductionType.SI_LTL : ReductionType.LTL ; 
+		try {			 
 			ReachabilitySolver.applyReductions(sr, rt, true, true);			
 		} catch (GlobalPropertySolvedException gse) {
 			System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
