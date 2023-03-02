@@ -83,46 +83,12 @@ public class LTLLengthAwareSolver {
 
 				System.out.println("Found a " + (tgba.isSLInvariant() ? "Lengthening":"Shortening") + " insensitive property : " + propPN.getName());
 
+				
 				// annotate it with Infinite Stutter Accepted Formulas
 				spot.computeInfStutter(tgba);
 
 				// build a new copy of the model
-				SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
-
-				// get rid of other properties
-				spn.getProperties().clear();
-				spn.getProperties().add(propPN.copy());
-
-				// compute supporting variables of the AP in the TGBA
-				BitSet support = new BitSet();
-				List<AtomicProp> aps = tgba.getAPs();
-				for (AtomicProp ap : aps) {
-					PetriNet.addSupport(ap.getExpression(),support);
-				}
-
-				System.out.println("Support contains "+support.cardinality() + " out of " + spn.getPnames().size() + " places. Attempting structural reductions.");
-
-				// run reduction rules in LengthInsensitive mode
-				StructuralReduction sr = new StructuralReduction(spn);
-				sr.setProtected(support);
-				try {
-					ReductionType rt = ReductionType.LI_LTL ;
-					ReachabilitySolver.applyReductions(sr, rt, true, true);
-				} catch (GlobalPropertySolvedException gse) {
-					System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
-					gse.printStackTrace();
-				}
-
-				// rebuild and reinterpret the reduced net
-				// index of places may have changed, formula might be syntactically simpler
-				// recompute fresh tgba with correctly indexed AP referring to the *reduced* model
-				List<Expression> atoms = aps.stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
-				List<Expression> atoms2 = spn.readFrom(sr,atoms);
-				// we can maybe simplify some predicates now : apply some basic tests
-				spn.removeConstantPlaces(atoms2);
-				for (int i =0,ie=atoms.size(); i<ie; i++) {
-					aps.get(i).setExpression(atoms2.get(i));
-				}
+				SparsePetriNet spn = ltlsolve.reduceForProperty(reader.getSPN(), tgba, ReductionType.LI_LTL, propPN);
 
 				// we might have solved the property syntactically thanks to reductions.
 				if (doneProps.containsKey(propPN.getName()))
