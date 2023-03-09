@@ -772,10 +772,10 @@ public class LTLPropertySolver {
 		
 		
 		
-		if (false) {
+		if (true) {
 			// Spot 2.11+
 			TGBA tgbarelax = tgba;
-			tgbarelax = spot.givenThat(tgba, knowledge, SpotRunner.GivenStrategy.MINATO);
+			tgbarelax = spot.givenThat(tgba, knowledge, SpotRunner.GivenStrategy.ALL);
 
 			if (tgbarelax.isEmptyLanguage()) {
 				System.out.println("Property proved to be true thanks to knowledge (Minato strategy)");
@@ -784,7 +784,27 @@ public class LTLPropertySolver {
 				System.out.println("Property proved to be false thanks to knowledge (Minato strategy)");
 				return tgbarelax;
 			}
+			
+			// more aggressive : AND the knowledge
+			{
+				Expression allFacts = Expression.nop(Op.AND, knowledge);
+				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.ALL);
+			}
 
+			if (tgbarelax.isEmptyLanguage()) {
+				System.out.println("Property proved to be true thanks to conjunction of knowledge (Minato strategy)");
+				return tgbarelax;
+			} else if (tgbarelax.isUniversalLanguage()) {
+				System.out.println("Property proved to be false thanks to conjunction of knowledge (Minato strategy)");
+				return tgbarelax;
+			}
+
+			
+			if (tgba.isStutterInvariant()) {
+				System.out.println("Knowledge sufficient to adopt a stutter insensitive property.");
+			}
+
+			
 			// test inclusion
 			// autfilt --included-in=AnotPhi.hoa Kmoins.hoa
 			for (Expression factoid : falseKnowledge) {
@@ -793,9 +813,6 @@ public class LTLPropertySolver {
 					return TGBA.makeTrue();				
 				}
 			}
-
-			// 
-			tgbarelax = spot.givenThat(tgbarelax, knowledge, SpotRunner.GivenStrategy.ALL);
 
 			return tgbarelax;
 		} else {
