@@ -775,7 +775,7 @@ public class LTLPropertySolver {
 		if (true) {
 			// Spot 2.11+
 			TGBA tgbarelax = tgba;
-			tgbarelax = spot.givenThat(tgba, knowledge, SpotRunner.GivenStrategy.ALL);
+			tgbarelax = spot.givenThat(tgba, knowledge, SpotRunner.GivenStrategy.MINATO);
 
 			if (tgbarelax.isEmptyLanguage()) {
 				System.out.println("Property proved to be true thanks to knowledge (Minato strategy)");
@@ -788,7 +788,10 @@ public class LTLPropertySolver {
 			// more aggressive : AND the knowledge
 			{
 				Expression allFacts = Expression.nop(Op.AND, knowledge);
-				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.ALL);
+				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.MINATO);
+				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER);
+				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.MINATO);
+				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER);
 			}
 
 			if (tgbarelax.isEmptyLanguage()) {
@@ -800,7 +803,7 @@ public class LTLPropertySolver {
 			}
 
 			
-			if (tgba.isStutterInvariant()) {
+			if (! tgba.isStutterInvariant() && tgbarelax.isStutterInvariant()) {
 				System.out.println("Knowledge sufficient to adopt a stutter insensitive property.");
 			}
 
