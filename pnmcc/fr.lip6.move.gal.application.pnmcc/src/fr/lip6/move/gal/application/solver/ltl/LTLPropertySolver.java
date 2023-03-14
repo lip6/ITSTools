@@ -792,6 +792,7 @@ public class LTLPropertySolver {
 				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER);
 				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.MINATO);
 				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER);
+				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.ALL);
 			}
 
 			if (tgbarelax.isEmptyLanguage()) {
@@ -810,13 +811,16 @@ public class LTLPropertySolver {
 			
 			// test inclusion
 			// autfilt --included-in=AnotPhi.hoa Kmoins.hoa
-			for (Expression factoid : falseKnowledge) {
-				if (spot.isIncludedIn(factoid,tgbarelax)) {
-					System.out.println("Property proved to be false thanks to negative knowledge :" + factoid);
-					return TGBA.makeTrue();				
+			{
+				Expression allFacts = Expression.nop(Op.AND, knowledge);
+				for (Expression factoid : falseKnowledge) {				
+					Expression negFact = Expression.op(Op.AND,allFacts,factoid);
+					if (spot.isIncludedIn(negFact,tgbarelax)) {
+						System.out.println("Property proved to be false thanks to negative knowledge :" + factoid);
+						return TGBA.makeTrue();				
+					}
 				}
 			}
-
 			return tgbarelax;
 		} else {
 		
