@@ -73,14 +73,15 @@ public class ReachabilitySolver {
 
 				//  need to protect some variables
 				List<Integer> tocheckIndexes = new ArrayList<>();
-				List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
-				computeToCheck(spn, tocheckIndexes, tocheck);
+				List<Property> props = new ArrayList<>(spn.getProperties());
+				List<Expression> tocheck = new ArrayList<>(props.size());
+				computeToCheck(props, tocheckIndexes, tocheck);
 				RandomExplorer re = new RandomExplorer(sr);
 				int steps = 1000000; // 1 million
 				if ((iterations == 0 && iter==0) || timeout != -1) {
 					steps = 10000; // be more moderate on first run : 100k
 				}
-				if (randomCheckReachability(re, tocheck, spn, doneProps,steps) >0)
+				if (randomCheckReachability(re, tocheck, props, doneProps,steps) >0)
 					iter++;
 
 				if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished())
@@ -167,7 +168,7 @@ public class ReachabilitySolver {
 									maxsteps = 10*sz;
 								}
 								int [] verdicts = re.runGuidedReachabilityDetection(maxsteps, parikh, orders.get(v), tocheck,repr,maxt,false);
-								interpretWalkerVerdict(tocheck, spn, doneProps, verdicts, "PARIKH");
+								interpretWalkerVerdict(tocheck, props, doneProps, verdicts, "PARIKH");
 								if (tocheck.isEmpty()) {
 									break;
 								}
@@ -263,12 +264,15 @@ public class ReachabilitySolver {
 				sr.abstractReads();
 				sr.reduce(ReductionType.REACHABILITY);
 
-				List<Integer> tocheckIndexes = new ArrayList<>();
 				SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
 				spn.readFrom(sr);
-				List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
-				computeToCheck(spn, tocheckIndexes, tocheck);
-
+				
+				List<Integer> tocheckIndexes = new ArrayList<>();
+				List<Property> props = new ArrayList<>(spn.getProperties());
+				List<Expression> tocheck = new ArrayList<>(props.size());
+				computeToCheck(props, tocheckIndexes, tocheck);
+				
+				
 				List<Integer> repr = new ArrayList<>();
 				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, repr, iterations==0 ? 5:45, true);
 
@@ -314,15 +318,15 @@ public class ReachabilitySolver {
 		}
 	}
 
-	public static void computeToCheck(SparsePetriNet spn, List<Integer> tocheckIndexes, List<Expression> tocheck) {
-		for (fr.lip6.move.gal.structural.Property p : spn.getProperties()) {
+	public static void computeToCheck(List<Property> props, List<Integer> tocheckIndexes, List<Expression> tocheck) {
+		for (fr.lip6.move.gal.structural.Property p : props) {
 			if (p.getBody().getOp() == Op.EF) {
 				tocheck.add(((BinOp)p.getBody()).left);
 			} else if (p.getBody().getOp() == Op.AG) {
 				tocheck.add(Expression.not(((BinOp)p.getBody()).left));
 			}
 		}
-		for (int j=0; j < spn.getProperties().size(); j++) { tocheckIndexes.add(j);}
+		for (int j=0; j < props.size(); j++) { tocheckIndexes.add(j);}
 	}
 
 	static int treatSMTVerdicts(SparsePetriNet sparsePetriNet, DoneProperties doneProps, List<Expression> tocheck,
@@ -354,11 +358,11 @@ public class ReachabilitySolver {
 		return iter;
 	}
 
-	static int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, SparsePetriNet spn,
+	static int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, List<Property> props,
 			DoneProperties doneProps, int steps) {
 		long time = System.currentTimeMillis();
 		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1);
-		int seen = interpretWalkerVerdict(tocheck, spn, doneProps, verdicts,"RANDOM");
+		int seen = interpretWalkerVerdict(tocheck, props, doneProps, verdicts,"RANDOM");
 		if (tocheck.size() >= 15 && tocheck.size() < 100) {
 			steps /= 10;
 		}
@@ -378,7 +382,7 @@ public class ReachabilitySolver {
 				if (verdicts[j] != 0)
 					i--;
 			}
-			int seen1 = interpretWalkerVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST");
+			int seen1 = interpretWalkerVerdict(tocheck, props, doneProps, verdicts,"BESTFIRST");
 			seen+=seen1;
 			if (seen1 != 0) seen100 = i;
 		}
@@ -387,44 +391,44 @@ public class ReachabilitySolver {
 		if (seen == 0 || seen <= tocheck.size() / 10) {
 			RandomExplorer.WasExhaustive wex = new RandomExplorer.WasExhaustive();
 			verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck, maxt ,-1,false,wex);
-			seen += interpretWalkerVerdict(tocheck, spn, doneProps, verdicts,"PROBABILISTIC");
+			seen += interpretWalkerVerdict(tocheck, props, doneProps, verdicts,"PROBABILISTIC");
 			if (wex.wasExhaustive) {
 				wex = new RandomExplorer.WasExhaustive();
 				verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,maxt,-1,true,wex);
-				seen += interpretWalkerVerdict(tocheck, spn, doneProps, verdicts,"EXHAUSTIVE",wex.wasExhaustive);
+				seen += interpretWalkerVerdict(tocheck, props, doneProps, verdicts,"EXHAUSTIVE",wex.wasExhaustive);
 			}
 		}
 		return seen;
 	}
 
-	private static int interpretWalkerVerdict(List<Expression> tocheck, SparsePetriNet spn, DoneProperties doneProps,
+	private static int interpretWalkerVerdict(List<Expression> tocheck, List<Property> props, DoneProperties doneProps,
 			int[] verdicts, String walkType) {
-		return interpretWalkerVerdict(tocheck, spn, doneProps, verdicts, walkType, false);
+		return interpretWalkerVerdict(tocheck, props, doneProps, verdicts, walkType, false);
 	}
 
-	private static int interpretWalkerVerdict(List<Expression> tocheck, SparsePetriNet spn, DoneProperties doneProps,
+	private static int interpretWalkerVerdict(List<Expression> tocheck, List<Property> props, DoneProperties doneProps,
 			int[] verdicts, String walkType, boolean wasExhaustiveWalk) {
 		int seen = 0;
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
-				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
+				fr.lip6.move.gal.structural.Property prop = props.get(v);
 				if (prop.getBody().getOp() == Op.EF) {
 					doneProps.put(prop.getName(),true,"TOPOLOGICAL "+walkType+"_WALK");
 				} else {
 					doneProps.put(prop.getName(),false,"TOPOLOGICAL "+walkType+"_WALK");
 				}
 				tocheck.remove(v);
-				spn.getProperties().remove(v);
+				props.remove(v);
 				seen++;
 			} else if (wasExhaustiveWalk) {
-				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
+				fr.lip6.move.gal.structural.Property prop = props.get(v);
 				if (prop.getBody().getOp() == Op.EF) {
 					doneProps.put(prop.getName(),false,"TOPOLOGICAL "+walkType+"_WALK");
 				} else {
 					doneProps.put(prop.getName(),true,"TOPOLOGICAL "+walkType+"_WALK");
 				}
 				tocheck.remove(v);
-				spn.getProperties().remove(v);
+				props.remove(v);
 				seen++;
 			}
 		}
