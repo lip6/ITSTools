@@ -839,6 +839,8 @@ public class Application implements IApplication, Ender {
 						if (skel.testInInitial()>0) {
 							ReachabilitySolver.checkInInitial(skel, doneProps);
 						}
+						// just in case there are enablings still around; next procedure does not support them.
+						skel.toPredicates();
 						skel.removeConstantPlaces();
 						try {
 							if (skel.getFlowPT().getColumns().stream().allMatch(c -> c.size() > 0)) {
