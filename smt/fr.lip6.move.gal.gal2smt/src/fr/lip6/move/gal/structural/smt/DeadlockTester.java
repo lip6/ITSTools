@@ -177,13 +177,11 @@ public class DeadlockTester {
 		return results;
 	}
 
-	
-
 	public static Set<SparseIntArray> computeTinvariants(ISparsePetriNet sr, IntMatrixCol sumMatrix,
-			List<Integer> tnames) {
+			List<Integer> tnames, boolean onlyPositive) {
 		
 		List<String> strtnames = tnames.stream().map(id -> sr.getTnames().get(id)).collect(Collectors.toList());
-		Set<SparseIntArray> invarT = InvariantCalculator.computePInvariants(sumMatrix.transpose(), strtnames, true);
+		Set<SparseIntArray> invarT = InvariantCalculator.computePInvariants(sumMatrix.transpose(), strtnames, onlyPositive);
 	//	Set<SparseIntArray> invarT = InvariantCalculator.computePInvariants(sumMatrix.transpose(), strtnames, false, 120);
 		
 		if (DEBUG >=1 && invarT != null) {
@@ -206,7 +204,12 @@ public class DeadlockTester {
 				}
 			}
 		}
-		return invarT;
+		return invarT;	
+	}
+
+	public static Set<SparseIntArray> computeTinvariants(ISparsePetriNet sr, IntMatrixCol sumMatrix,
+			List<Integer> tnames) {
+		return computeTinvariants(sr, sumMatrix, tnames, true);
 	}
 	
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr, List<Integer> representative,
