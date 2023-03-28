@@ -139,6 +139,10 @@ public class Application implements IApplication, Ender {
 	private static final String NOSTUTTERLTL="--no-stutterltl";
 	private static final String REDUCE="--reduce";
 	private static final String REDUCESINGLE="--reduce-single";
+	private static final String PFLOW="--Pflows";
+	private static final String PSEMIFLOW="--Psemiflows";
+	private static final String TFLOW="--Tflows";
+	private static final String TSEMIFLOW="--Tsemiflows";
 
 	private List<IRunner> runners = new ArrayList<>();
 
@@ -218,6 +222,10 @@ public class Application implements IApplication, Ender {
 		boolean nosimplifications = false;
 		boolean invariants = false;
 		boolean applySR = false;
+		boolean pflows = true;
+		boolean psemiflows = false;
+		boolean tflows = false;
+		boolean tsemiflows = true;
 
 		boolean genDeadTransitions = false;
 		boolean genDeadPlaces = false;
@@ -284,6 +292,18 @@ public class Application implements IApplication, Ender {
 				unfold = true;
 			} else if (INVARIANT.equals(args[i])) {
 				invariants = true;
+			} else if (PFLOW.equals(args[i])) {
+				invariants = true;
+				pflows=true;
+			} else if (PSEMIFLOW.equals(args[i])) {
+				psemiflows = true;
+				invariants = true;
+			} else if (TFLOW.equals(args[i])) {
+				tflows = true;
+				invariants = true;
+			} else if (TSEMIFLOW.equals(args[i])) {
+				invariants = true;
+				tsemiflows = true;
 			} else if (SKELETON.equals(args[i])) {
 				unfold = true;
 				skeleton = true;
@@ -307,6 +327,8 @@ public class Application implements IApplication, Ender {
 				LTLPropertySolver.noKnowledgetest = true;
 			} else if (NOSTUTTERLTL.equals(args[i])) {
 				LTLPropertySolver.noStutterTest = true;
+			} else {
+				System.err.println("Unrecognized argument :"+args[i]+ " in position "+ i +". Skipping this argument.");
 			}
 		}
 
@@ -361,14 +383,32 @@ public class Application implements IApplication, Ender {
 			List<Integer> repr = new ArrayList<>();
 			IntMatrixCol sumMatrix = computeReducedFlow(reader.getSPN(), tnames, repr);
 			SparsePetriNet spn = reader.getSPN();
-			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, reader.getSPN().getPnames());
-			InvariantCalculator.printInvariant(invar, spn.getPnames(), reader.getSPN().getMarks());
-
-			Set<SparseIntArray> invarT = DeadlockTester.computeTinvariants(reader.getSPN(), sumMatrix, tnames);
-			List<Integer> empty = new ArrayList<>(tnames.size());
-			for (int i=0 ; i < tnames.size(); i++) empty.add(0);
-			List<String> strtnames = repr.stream().map(id -> spn.getTnames().get(id)).collect(Collectors.toList());
-			InvariantCalculator.printInvariant(invarT, strtnames, empty );
+			if (pflows || psemiflows) {
+				long time = System.currentTimeMillis();
+				Set<SparseIntArray> invar;
+				if (pflows) {
+					invar = InvariantCalculator.computePInvariants(sumMatrix, reader.getSPN().getPnames());
+				} else {
+					invar = InvariantCalculator.computePInvariants(sumMatrix, reader.getSPN().getPnames(), true, 120);
+				}
+				System.out.println("Computed "+invar.size()+" P "+(psemiflows?"semi":"")+" flows in "+(System.currentTimeMillis()-time)+" ms.");
+				InvariantCalculator.printInvariant(invar, spn.getPnames(), reader.getSPN().getMarks());
+			} 
+			
+			if (tflows || tsemiflows) {
+				long time = System.currentTimeMillis();
+				Set<SparseIntArray> invarT;
+				if (tflows) {
+					invarT= DeadlockTester.computeTinvariants(reader.getSPN(), sumMatrix, tnames,false);
+				} else {
+					invarT= DeadlockTester.computeTinvariants(reader.getSPN(), sumMatrix, tnames,true);					
+				}
+				List<Integer> empty = new ArrayList<>(tnames.size());
+				for (int i=0 ; i < tnames.size(); i++) empty.add(0);
+				List<String> strtnames = repr.stream().map(id -> spn.getTnames().get(id)).collect(Collectors.toList());
+				System.out.println("Computed "+invarT.size()+" T "+(psemiflows?"semi":"")+" flows in "+(System.currentTimeMillis()-time)+" ms.");
+				InvariantCalculator.printInvariant(invarT, strtnames, empty );				
+			}
 			return null;
 		}
 

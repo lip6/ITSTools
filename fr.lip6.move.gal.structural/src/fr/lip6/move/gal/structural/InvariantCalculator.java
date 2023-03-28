@@ -127,7 +127,7 @@ public class InvariantCalculator {
 			cache(pn, invar);
 			// InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 			Logger.getLogger("fr.lip6.move.gal").info(
-					"Computed " + invar.size() + " place invariants in " + (System.currentTimeMillis() - time) + " ms");
+					"Computed " + invar.size() + " invariants in " + (System.currentTimeMillis() - time) + " ms");
 		} catch (ArithmeticException e) {
 			invar = new HashSet<>();
 			Logger.getLogger("fr.lip6.move.gal")

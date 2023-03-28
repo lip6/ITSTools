@@ -129,8 +129,8 @@ public class InvariantCalculator {
 
 	/**
 	 * Holds the result of the check11b-check. That means it holds the row, the
-	 * columnindex where a component is less then respectivly greater than zero
-	 * and the P+ respectivly P- set if there exists a row in the given matrix
+	 * column index where a component is less than respectively greater than zero
+	 * and the P+ respectively P- set if there exists a row in the given matrix
 	 * such that |P+| == 1 or |P-| == 1.
 	 */
 	private static class Check11bResult {
@@ -143,10 +143,10 @@ public class InvariantCalculator {
 		public final SparseBoolArray p;
 		/**
 		 * Constructor to save the data.
-		 * @param k - the first columnindex where a component ist less
-		 * respectivly greater than zero.
+		 * @paramk - the first column index where a component is less
+		 * respectively greater than zero.
 		 * @param h - the whole row.
-		 * @param pPlus - the set P+ respectivly P-.
+		 * @param pPlus - the set P+ respectively P-.
 		 */
 		public Check11bResult(int k, int row, SparseBoolArray pPlus) {
 			this.col = k;
