@@ -21,7 +21,8 @@ public class PTSRTransformer {
 	}
 
 	public SparsePetriNet transform(PetriNet petriNet) {
-		String modelname = Utils.normalizeName(petriNet.getName().getText());
+		String modelname = "model";
+		if (petriNet.getName() != null) modelname = Utils.normalizeName(petriNet.getName().getText());
 		SparsePetriNet spn = new SparsePetriNet();
 		spn.setName(modelname);
 		for (Page p : petriNet.getPages()) {
