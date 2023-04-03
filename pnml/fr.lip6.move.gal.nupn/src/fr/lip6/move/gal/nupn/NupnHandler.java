@@ -116,7 +116,7 @@ public class NupnHandler extends DefaultHandler {
 			stack.pop();
 		} else if ( "places".equals(baliseName) || "subunits".equals(baliseName) ) { //$NON-NLS-1$
 			
-			String[] pnames = readString.toString().replaceAll("\n"," ").split(" ");
+			String[] pnames = readString.toString().replaceAll("\n"," ").replaceAll("\\s+"," ").split(" ");
 			Unit u = stack.peek();
 			for (String name : pnames) {
 				if (name.isEmpty()) {
