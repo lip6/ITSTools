@@ -95,7 +95,9 @@ public class ReachabilitySolver {
 					}
 					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, repr, smttime, true,orders);
 
-					iter += treatSMTVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths);
+					iter += treatSMTVerdicts(props, doneProps, tocheck, tocheckIndexes, paths);
+					if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
+						iter++;
 					long time = System.currentTimeMillis();
 
 					Map<SparseIntArray,List<Integer>> indexMap = new LinkedHashMap<>();
@@ -276,7 +278,7 @@ public class ReachabilitySolver {
 				List<Integer> repr = new ArrayList<>();
 				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, repr, iterations==0 ? 5:45, true);
 
-				iter += treatSMTVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
+				iter += treatSMTVerdicts(props, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
 
 				// give an exhaustive method a try
 				SparsePetriNet spnOri = reader.getSPN();
@@ -329,18 +331,18 @@ public class ReachabilitySolver {
 		for (int j=0; j < props.size(); j++) { tocheckIndexes.add(j);}
 	}
 
-	static int treatSMTVerdicts(SparsePetriNet sparsePetriNet, DoneProperties doneProps, List<Expression> tocheck,
+	static int treatSMTVerdicts(List<Property> props, DoneProperties doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths) {
-		return treatSMTVerdicts(sparsePetriNet, doneProps, tocheck, tocheckIndexes, paths, "");
+		return treatSMTVerdicts(props, doneProps, tocheck, tocheckIndexes, paths, "");
 	}
 
-	static int treatSMTVerdicts(SparsePetriNet spn, DoneProperties doneProps, List<Expression> tocheck,
+	static int treatSMTVerdicts(List<Property> props, DoneProperties doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths, String technique) {
 		int iter = 0;
 		for (int v = paths.size()-1 ; v >= 0 ; v--) {
 			SparseIntArray parikh = paths.get(v);
 			if (parikh == null) {
-				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(tocheckIndexes.get(v));
+				fr.lip6.move.gal.structural.Property prop = props.get(tocheckIndexes.get(v));
 				if (prop.getBody().getOp() == Op.EF) {
 					doneProps.put(prop.getName(),false,"STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT "+technique);
 				} else {
@@ -352,9 +354,7 @@ public class ReachabilitySolver {
 				tocheckIndexes.remove(v);
 				iter++;
 			}
-		}
-		if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
-			iter++;
+		}		
 		return iter;
 	}
 
