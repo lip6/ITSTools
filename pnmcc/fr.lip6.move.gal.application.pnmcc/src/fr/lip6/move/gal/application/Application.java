@@ -474,6 +474,11 @@ public class Application implements IApplication, Ender {
 					int newtok = sr.getMarks().stream().mapToInt(i->i).sum();
 					spn.readFrom(sr);
 					reader.setMissingTokens( (curtok-newtok) + reader.countMissingTokens());
+					
+					totaltok = reader.getSPN().removeConstantPlaces();
+					if (totaltok > 0) {
+						reader.setMissingTokens(totaltok+reader.countMissingTokens());
+					}
 				}
 				System.out.println("Final net has " + reader.getSPN().getPlaceCount() + " places and "
 						+ reader.getSPN().getTransitionCount() + " transitions.");
