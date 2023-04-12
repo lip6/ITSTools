@@ -276,10 +276,10 @@ public class UpperBoundsSolver {
 					System.out.println("Unexpected GlobalPropertySolved exception occurred while checking bounds.");
 					e.printStackTrace();
 				}
-				int reds= sr.ruleRedundantCompositionsBounds();
-				if (reds > 0) {					
-					iter++;
-				}
+//				int reds= sr.ruleRedundantCompositionsBounds();
+//				if (reds > 0) {					
+//					iter++;
+//				}
 				
 				// FlowPrinter.drawNet(sr, "Final Model", 1000);
 				spn.readFrom(sr);
