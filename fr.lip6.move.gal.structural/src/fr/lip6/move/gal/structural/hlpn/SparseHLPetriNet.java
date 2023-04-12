@@ -190,10 +190,13 @@ public class SparseHLPetriNet extends PetriNet {
 			for (HLPlace p : places) {
 				String hlname = p.getName();
 				sb.append(hlname);
-				sb.append('_');
-				for (int i=0,ie=p.getInitial().length ; i < ie ; i++) {
-					sb.setLength(hlname.length()+1);
-					sb.append(i);
+				int ie=p.getInitial().length;
+				if (ie != 1) sb.append('_');
+				for (int i=0 ; i < ie ; i++) {					
+					if (ie != 1) {
+						sb.setLength(hlname.length()+1);
+						sb.append(i);
+					}
 					spn.addPlace(sb.toString(), p.getInitial()[i]);
 				}
 				sb.setLength(0);
