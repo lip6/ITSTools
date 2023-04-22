@@ -1032,6 +1032,7 @@ public class Application implements IApplication, Ender {
 			if (doneProps.keySet().containsAll(
 					reader.getSPN().getProperties().stream().map(p -> p.getName()).collect(Collectors.toList()))) {
 				System.out.println("All properties solved without resorting to model-checking.");
+				allSolved(pwd,examination);
 				return null;
 			} else
 				tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
