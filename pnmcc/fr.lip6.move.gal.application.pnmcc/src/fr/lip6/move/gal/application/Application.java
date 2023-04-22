@@ -671,6 +671,7 @@ public class Application implements IApplication, Ender {
 				int solved = logicSolver.preSolveForLogic(reader, doneProps, false);
 				if (solved > 0) {
 					if (reader.getSPN().getProperties().isEmpty()) {
+						allSolved(pwd,examination);
 						return null;
 					}
 				}
