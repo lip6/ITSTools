@@ -671,6 +671,7 @@ public class Application implements IApplication, Ender {
 				int solved = logicSolver.preSolveForLogic(reader, doneProps, false);
 				if (solved > 0) {
 					if (reader.getSPN().getProperties().isEmpty()) {
+						allSolved(pwd,examination);
 						return null;
 					}
 				}
@@ -1036,6 +1037,7 @@ public class Application implements IApplication, Ender {
 			if (doneProps.keySet().containsAll(
 					reader.getSPN().getProperties().stream().map(p -> p.getName()).collect(Collectors.toList()))) {
 				System.out.println("All properties solved without resorting to model-checking.");
+				allSolved(pwd,examination);
 				return null;
 			} else
 				tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
