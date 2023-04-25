@@ -113,7 +113,7 @@ public class ReachabilitySolver {
 					if (indexMap.size() >= 20 || timeout != -1) {
 						maxTime = 30;
 					}
-					int beforeParikh = reader.getSPN().getProperties().size();
+					int beforeParikh = props.size();
 					long timeParikh = System.currentTimeMillis();
 					for (Entry<SparseIntArray, List<Integer>> ent:indexMap.entrySet()) {
 						int v = ent.getValue().get(0);
@@ -352,6 +352,7 @@ public class ReachabilitySolver {
 
 				tocheck.remove(v);
 				tocheckIndexes.remove(v);
+				props.remove(v);
 				iter++;
 			}
 		}		
