@@ -918,6 +918,7 @@ public class Application implements IApplication, Ender {
 						reader.getHLPN().getProperties().removeAll(todel);
 
 						if (! skel.getProperties().isEmpty()) {
+							ReachabilitySolver.applyReductions(reader, skelProps, timeout);
 							new AtomicReducerSR().strongReductions(reader.getSPN(), skelProps, null, true);
 							reader.getSPN().simplifyLogic();
 							ReachabilitySolver.checkInInitial(reader.getSPN(), skelProps);
@@ -926,6 +927,9 @@ public class Application implements IApplication, Ender {
 							reader.flattenSpec(false);
 							GALSolver.checkInInitial(reader.getSpec(), skelProps, reader.getSPN().isSafe());
 
+							ReachabilitySolver.applyReductions(reader, skelProps, timeout);
+							
+							
 							for (fr.lip6.move.gal.structural.Property p : reader.getHLPN().getProperties()) {
 								Boolean b = skelProps.getValue(p.getName());
 								if (b!=null) {
