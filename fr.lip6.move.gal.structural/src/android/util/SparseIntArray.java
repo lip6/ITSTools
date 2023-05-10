@@ -66,35 +66,48 @@ public class SparseIntArray implements Cloneable {
             mKeys = EmptyArray.INT;
             mValues = EmptyArray.INT;
         } else {
-            mKeys = ArrayUtils.newUnpaddedIntArray(initialCapacity);
-            mValues = new int[mKeys.length];
+            init(initialCapacity);
         }
         mSize = 0;
     }
+	private void init(int initialCapacity) {
+		mKeys = new int[initialCapacity];
+		mValues = new int[initialCapacity];
+	}
     /** 
      * Convert a classic List<Int> to a sparse representation.
      * @param marks
      */
     public SparseIntArray(List<Integer> marks) {
-    	// compute and set correct capacity
-    	this ( (int) marks.stream().filter(e -> e != 0).count());
-    	for (int  i = 0, e = marks.size() ; i < e ; i++) {
-    		int v = marks.get(i);
-    		if (v != 0) {
-    			append(i, v);    			
-    		}
-    	}    	
-	}
-    
+        int nonZeroCount = 0;
+        for (Integer mark : marks) {
+            if (mark != 0) {
+                nonZeroCount++;
+            }
+        }
+        init(nonZeroCount);
+        for (int i = 0, e = marks.size(); i < e; i++) {
+            int v = marks.get(i);
+            if (v != 0) {
+                append(i, v);
+            }
+        }
+    }
+
     public SparseIntArray(int[] marks) {
-    	// compute and set correct capacity
-    	this ( (int) Arrays.stream(marks).filter(e -> e != 0).count());
-    	for (int  i = 0, e = marks.length ; i < e ; i++) {
-    		int v = marks[i];
-    		if (v != 0) {
-    			append(i, v);    			
-    		}
-    	}
+        int nonZeroCount = 0;
+        for (int mark : marks) {
+            if (mark != 0) {
+                nonZeroCount++;
+            }
+        }
+        init(nonZeroCount);
+        for (int i = 0, e = marks.length; i < e; i++) {
+            int v = marks[i];
+            if (v != 0) {
+                append(i, v);
+            }
+        }
     }
     // produce an entry with value 1 for each set bit in the input
     public SparseIntArray(BitSet bs) {
@@ -124,7 +137,7 @@ public class SparseIntArray implements Cloneable {
     }
     
 	public List<Integer> toList (int size) {
-    	List<Integer> res = new ArrayList<Integer> (size);
+    	List<Integer> res = new ArrayList<> (size);
     	int  j = 0;
     	for (int i=0; i < size ; i++ ) {
     		if (j < size() && keyAt(j)==i) {
@@ -387,13 +400,15 @@ public class SparseIntArray implements Cloneable {
     	return sumProd(alpha, ta, beta, tb, -1);
     }
     public static SparseIntArray sumProd(int alpha, SparseIntArray ta, int beta, SparseIntArray tb, int except) {
-    	SparseIntArray flow = new SparseIntArray(Math.max(ta.size(), tb.size()));
-
+    	int asz = ta.size();
+		int bsz = tb.size();
+		SparseIntArray flow = new SparseIntArray(Math.max(asz, bsz));
+    	 
     	int i = 0;
     	int j = 0; 
-    	while (i < ta.size() || j < tb.size()) {					
-    		int ki = i==ta.size() ? Integer.MAX_VALUE : ta.keyAt(i);
-    		int kj = j==tb.size() ? Integer.MAX_VALUE : tb.keyAt(j);
+    	while (i < asz || j < bsz) {					
+    		int ki = i==asz ? Integer.MAX_VALUE : ta.keyAt(i);
+    		int kj = j==bsz ? Integer.MAX_VALUE : tb.keyAt(j);
     		if (ki == kj) {
     			int val = alpha * ta.valueAt(i)+ beta* tb.valueAt(j);
     			if (val != 0 && ki != except) {
@@ -416,11 +431,13 @@ public class SparseIntArray implements Cloneable {
 	}
     
     public static boolean keysIntersect(SparseIntArray s1, SparseIntArray s2) {
-		if (s1.size() == 0 || s2.size() == 0) {
+		int s1sz = s1.size();
+		int s2sz = s2.size();
+		if (s1sz == 0 || s2sz == 0) {
 			return true;
 		}				
 		
-		for (int j = 0, i = 0 , ss1 =  s1.size() , ss2 = s2.size() ; i < ss1 && j < ss2 ; ) {
+		for (int j = 0, i = 0  ; i < s1sz && j < s2sz ; ) {
 			int sk1 = s1.keyAt(i); 
 			int sk2 = s2.keyAt(j); 
 			if (sk1 == sk2) {
@@ -484,9 +501,11 @@ public class SparseIntArray implements Cloneable {
     	
     	int i = 0;
     	int j = 0; 
-    	while (i < ta.size() || j < tb.size()) {					
-    		int ki = i==ta.size() ? Integer.MAX_VALUE : ta.keyAt(i);
-    		int kj = j==tb.size() ? Integer.MAX_VALUE : tb.keyAt(j);
+    	int asz = ta.size();
+		int bsz = tb.size();
+		while (i < asz || j < bsz) {					
+    		int ki = i==asz ? Integer.MAX_VALUE : ta.keyAt(i);
+    		int kj = j==bsz ? Integer.MAX_VALUE : tb.keyAt(j);
     		if (ki == kj) {
     			dist += Math.abs(ta.valueAt(i) - tb.valueAt(j));
     			i++;
