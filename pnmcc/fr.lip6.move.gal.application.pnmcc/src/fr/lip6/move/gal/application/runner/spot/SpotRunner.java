@@ -120,7 +120,7 @@ public class SpotRunner {
 		pw.println(printLTLProperty(pmap.get(prop.getName())));
 	}
 
-	private TGBA computeTGBA(Property prop, AtomicPropManager atoms, Map<String, Expression> pmap)
+	public TGBA computeTGBA(Property prop, AtomicPropManager atoms, Map<String, Expression> pmap)
 			throws IOException, TimeoutException, InterruptedException {
 		TGBA tgba = null;
 		long time = System.currentTimeMillis();

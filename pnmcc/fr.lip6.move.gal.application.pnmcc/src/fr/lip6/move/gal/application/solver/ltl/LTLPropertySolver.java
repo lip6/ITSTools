@@ -632,7 +632,7 @@ public class LTLPropertySolver {
 		return falseKnowledge;
 	}
 
-	private void addInvarianceKnowledge(List<Expression> knowledge, List<Expression> falseKnowledge, SparsePetriNet spn, TGBA tgba) {
+	public void addInvarianceKnowledge(List<Expression> knowledge, List<Expression> falseKnowledge, SparsePetriNet spn, TGBA tgba) {
 		
 		SparsePetriNet spnred = new SparsePetriNet(spn);
 		spnred.getProperties().clear();
@@ -946,7 +946,7 @@ public class LTLPropertySolver {
 		return tgba;
 	}
 
-	private void addNextStateKnowledge(List<Expression> knowledge, List<Expression> falseKnowledge, SparsePetriNet spn, TGBA tgba) {
+	public void addNextStateKnowledge(List<Expression> knowledge, List<Expression> falseKnowledge, SparsePetriNet spn, TGBA tgba) {
 		Set<Expression> condX = new HashSet<>();
 		Set<Expression> condXX = new HashSet<>();
 		{
@@ -1087,7 +1087,7 @@ public class LTLPropertySolver {
 		}
 	}
 
-	private void addInitialStateKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
+	public void addInitialStateKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
 		SparseIntArray init = new SparseIntArray(spn.getMarks());
 		List<Expression> kis = new ArrayList<>();
 		for (AtomicProp ap : tgba.getAPs()) {
@@ -1100,7 +1100,7 @@ public class LTLPropertySolver {
 		knowledge.add(Expression.nop(Op.AND,kis));
 	}
 
-	private void addConvergenceKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
+	public void addConvergenceKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
 		// we are SCC free hence structurally we will meet a deadlock in all traces
 		// hence we must be accepted in one of these states, and they are by definition stuttering
 		boolean allPathsAreDead = testAFDead (spn);

@@ -4,6 +4,7 @@ import static fr.lip6.move.gal.structural.smt.SMTUtils.computeReducedFlow;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
@@ -24,6 +26,7 @@ import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import android.util.SparseIntArray;
+import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BoolProp;
 import fr.lip6.move.gal.False;
@@ -78,6 +81,7 @@ import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.StructuralToPNML;
+import fr.lip6.move.gal.structural.expr.AtomicPropManager;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
@@ -126,6 +130,7 @@ public class Application implements IApplication, Ender {
 	private static final String TIMEOUT = "-timeout";
 	private static final String REBUILDPNML = "-rebuildPNML";
 	private static final String EXPORT_LTL = "-exportLTL";
+	private static final String EXPORT_KNOWLEDGE = "-exportKnowledge";
 	private static final String UNFOLD = "--unfold";
 	private static final String SKELETON = "--skeleton";
 	private static final String NOSIMPLIFICATION = "--nosimplification";
@@ -226,7 +231,7 @@ public class Application implements IApplication, Ender {
 		boolean psemiflows = false;
 		boolean tflows = false;
 		boolean tsemiflows = true;
-
+		boolean exportKnowledge = false;
 		boolean genDeadTransitions = false;
 		boolean genDeadPlaces = false;
 
@@ -327,6 +332,8 @@ public class Application implements IApplication, Ender {
 				LTLPropertySolver.noKnowledgetest = true;
 			} else if (NOSTUTTERLTL.equals(args[i])) {
 				LTLPropertySolver.noStutterTest = true;
+			} else if (EXPORT_KNOWLEDGE.equals(args[i])) {
+				exportKnowledge = true;
 			} else {
 				System.err.println("Unrecognized argument :"+args[i]+ " in position "+ i +". Skipping this argument.");
 			}
@@ -660,6 +667,56 @@ public class Application implements IApplication, Ender {
 					MCCExporter.exportToMCCFormat(outsr, outform, copy);
 				}
 			}
+			return IApplication.EXIT_OK;
+		}
+		
+		if (exportKnowledge ) {
+			if (! examination.startsWith("LTL")) {
+				System.err.println("--export_knowledge flag only is compatible with LTL examination (e.g. LTLCardinality or LTLFireability).");
+				return IApplication.EXIT_OK;
+			}
+			LTLPropertySolver logicSolver = new LTLPropertySolver(pwd, false);
+			
+			if (reader.getHLPN() != null) {
+				reader.createSPN(false,false);				
+			}
+			SparsePetriNet spn = reader.getSPN();
+			spn.toPredicates();
+			SpotRunner.exportLTLProperties(spn, "raw"+examination, pwd);
+			SpotRunner sr = new SpotRunner(10);
+
+			
+			List<TGBA> automata = new ArrayList<>();
+			AtomicPropManager atoms = new AtomicPropManager();
+			Map<String, Expression> pmap = atoms.loadAtomicProps(spn.getProperties());
+			
+			
+			try {
+				for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {								
+					automata.add(sr.computeTGBA(prop, atoms, pmap));
+				}
+			} catch (IOException|TimeoutException|InterruptedException e) {
+				e.printStackTrace();
+			}
+				
+			// cheap knowledge 
+			List<Expression> knowledge = new ArrayList<>(); 
+			List<Expression> falseKnowledge = new ArrayList<>(); 
+			
+			for (TGBA tgba : automata) {
+				logicSolver.addInitialStateKnowledge(knowledge, spn, tgba);
+				logicSolver.addNextStateKnowledge(knowledge, falseKnowledge, spn, tgba);
+				logicSolver.addConvergenceKnowledge(knowledge, spn, tgba);
+				logicSolver.addInvarianceKnowledge(knowledge, falseKnowledge, spn, tgba);
+			}
+			
+			String stdOutput = pwd + "/"+"knowledge"+"-"+examination+".ltl";
+			PrintWriter pw = new PrintWriter(new File(stdOutput));
+			for (Expression factoid : knowledge) {
+				pw.println(SpotRunner.printLTLProperty(factoid));
+			}
+			pw.close();
+			
 			return IApplication.EXIT_OK;
 		}
 
