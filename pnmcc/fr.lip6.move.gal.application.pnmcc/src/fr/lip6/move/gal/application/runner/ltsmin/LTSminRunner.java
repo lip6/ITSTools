@@ -48,7 +48,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 		this.onlyGal = onlyGal;
 		try {
 			this.workFolder = Files.createTempDirectory("ltsmin").toFile();
-			workFolder.deleteOnExit();
+			if (DEBUG < 2) workFolder.deleteOnExit();
 		} catch (IOException e) {
 			System.out.println("Unable to create temporary folder.");
 		}
