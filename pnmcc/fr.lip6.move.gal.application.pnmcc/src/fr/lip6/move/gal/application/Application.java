@@ -26,6 +26,7 @@ import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import android.util.SparseIntArray;
+import fr.lip6.ltl.stats.KnowledgeStatsCalculator;
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BoolProp;
@@ -132,6 +133,7 @@ public class Application implements IApplication, Ender {
 	private static final String EXPORT_LTL = "-exportLTL";
 	private static final String EXPORT_KNOWLEDGE = "-exportKnowledge";
 	private static final String EXPORT_FALSE_KNOWLEDGE = "-exportFalseKnowledge";
+	private static final String STATS_KNOWLEDGE = "-knowledgeStats";
 	private static final String UNFOLD = "--unfold";
 	private static final String SKELETON = "--skeleton";
 	private static final String NOSIMPLIFICATION = "--nosimplification";
@@ -211,6 +213,7 @@ public class Application implements IApplication, Ender {
 		String blisspath = null;
 		String spotmcPath = null;
 		String orderHeur = null;
+		String outStats = null;
 
 		boolean doITS = false;
 		boolean doSMT = false;
@@ -267,6 +270,8 @@ public class Application implements IApplication, Ender {
 				doLTSmin = true;
 			} else if (READ_GAL.equals(args[i])) {
 				readGAL = args[++i];
+			} else if (STATS_KNOWLEDGE.equals(args[i])) {
+				outStats = args[++i];
 			} else if (TIMEOUT.equals(args[i])) {
 				timeout = Integer.parseInt(args[++i]);
 			} else if (REDUCE.equals(args[i]) || REDUCESINGLE.equals(args[i])) {
@@ -349,6 +354,18 @@ public class Application implements IApplication, Ender {
 		// EMF registration
 		SerializationUtil.setStandalone(true);
 
+		if (outStats != null) {
+			// special mode to analyze results of our knowledge 
+			if (pwd == null) {
+				System.err.println("Please specify path to INPUTS/ folder.");
+			} else {
+				System.out.println("Running knowledge statistics in "+pwd+" outputs produced in folder "+outStats);
+				new KnowledgeStatsCalculator().calculateStats(pwd, outStats);
+			}
+			
+			return IApplication.EXIT_OK;
+		}
+		
 		// setup a "reader" that parses input property files correctly and efficiently
 		MccTranslator reader = new MccTranslator(pwd, useLouvain);
 		reader.setITS(doITS);
