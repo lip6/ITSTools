@@ -131,6 +131,7 @@ public class Application implements IApplication, Ender {
 	private static final String REBUILDPNML = "-rebuildPNML";
 	private static final String EXPORT_LTL = "-exportLTL";
 	private static final String EXPORT_KNOWLEDGE = "-exportKnowledge";
+	private static final String EXPORT_FALSE_KNOWLEDGE = "-exportFalseKnowledge";
 	private static final String UNFOLD = "--unfold";
 	private static final String SKELETON = "--skeleton";
 	private static final String NOSIMPLIFICATION = "--nosimplification";
@@ -232,6 +233,7 @@ public class Application implements IApplication, Ender {
 		boolean tflows = false;
 		boolean tsemiflows = true;
 		boolean exportKnowledge = false;
+		boolean exportFalseKnowledge = false;		
 		boolean genDeadTransitions = false;
 		boolean genDeadPlaces = false;
 
@@ -334,6 +336,8 @@ public class Application implements IApplication, Ender {
 				LTLPropertySolver.noStutterTest = true;
 			} else if (EXPORT_KNOWLEDGE.equals(args[i])) {
 				exportKnowledge = true;
+			} else if (EXPORT_FALSE_KNOWLEDGE.equals(args[i])) {
+				exportFalseKnowledge = true;
 			} else {
 				System.err.println("Unrecognized argument :"+args[i]+ " in position "+ i +". Skipping this argument.");
 			}
@@ -670,7 +674,7 @@ public class Application implements IApplication, Ender {
 			return IApplication.EXIT_OK;
 		}
 		
-		if (exportKnowledge ) {
+		if (exportKnowledge || exportFalseKnowledge) {
 			if (! examination.startsWith("LTL")) {
 				System.err.println("--export_knowledge flag only is compatible with LTL examination (e.g. LTLCardinality or LTLFireability).");
 				return IApplication.EXIT_OK;
@@ -708,14 +712,26 @@ public class Application implements IApplication, Ender {
 				logicSolver.addNextStateKnowledge(knowledge, falseKnowledge, spn, tgba);
 				logicSolver.addConvergenceKnowledge(knowledge, spn, tgba);
 				logicSolver.addInvarianceKnowledge(knowledge, falseKnowledge, spn, tgba);
+				if (exportFalseKnowledge)
+					falseKnowledge.addAll(logicSolver.computeEGknowledge(spn, tgba));
 			}
 			
-			String stdOutput = pwd + "/"+"knowledge"+"-"+examination+".ltl";
-			PrintWriter pw = new PrintWriter(new File(stdOutput));
-			for (Expression factoid : knowledge) {
-				pw.println(SpotRunner.printLTLProperty(factoid));
+			if (exportKnowledge) {
+				String stdOutput = pwd + "/"+"knowledge"+"-"+examination+".ltl";
+				PrintWriter pw = new PrintWriter(new File(stdOutput));
+				for (Expression factoid : knowledge) {
+					pw.println(SpotRunner.printLTLProperty(factoid));
+				}
+				pw.close();
 			}
-			pw.close();
+			if (exportFalseKnowledge) {
+				String stdOutput = pwd + "/"+"falseKnowledge"+"-"+examination+".ltl";
+				PrintWriter pw = new PrintWriter(new File(stdOutput));
+				for (Expression factoid : falseKnowledge) {
+					pw.println(SpotRunner.printLTLProperty(factoid));
+				}
+				pw.close();
+			}
 			
 			return IApplication.EXIT_OK;
 		}

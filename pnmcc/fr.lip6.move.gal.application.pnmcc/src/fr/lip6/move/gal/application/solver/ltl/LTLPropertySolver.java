@@ -590,10 +590,14 @@ public class LTLPropertySolver {
 		return tgba;
 	}
 
-	private List<Expression> computeEGknowledge(SparsePetriNet spn, TGBA tgba) {
+	public List<Expression> computeEGknowledge(SparsePetriNet spn, TGBA tgba) {
 		List<Expression> falseKnowledge = new ArrayList<>();
 		SparseIntArray init = new SparseIntArray(spn.getMarks());
-		
+		List<Expression> infS = tgba.getInfStutter();
+		if (infS == null) {
+			SpotRunner sr = new SpotRunner(10);
+			sr.computeInfStutter(tgba);			
+		}
 		Expression ap = tgba.getInfStutter().get(tgba.getInitial());
 		boolean isInitiallyTrue = ap.eval(init)!=0;
 		if (isInitiallyTrue) {
