@@ -152,6 +152,45 @@ public class SpotRunner {
 		return tgba;
 	}
 
+	
+	public TGBA buildTGBA(String formula) throws IOException, TimeoutException, InterruptedException {
+	    TGBA tgba = null;
+	    long time = System.currentTimeMillis();
+	    CommandLine cl = new CommandLine();
+	    cl.addArg(pathToltl2tgba);
+	    cl.addArg("--check=stutter");
+	    cl.addArg("--hoaf=tv");
+	    cl.addArg("-f");
+	    cl.addArg(formula); // Directly use the formula string
+
+	    if (DEBUG > 0) System.out.println("Running Spot : " + cl);
+	    File stdOutput = Files.createTempFile("spotaut", ".hoa").toFile();
+	    if (DEBUG == 0) stdOutput.deleteOnExit();
+
+	    int status = Runner.runTool(timeout, cl, stdOutput, true);
+	    if (status == 0) {
+	        if (DEBUG >= 1) System.out.println("Successful run of Spot took " + (System.currentTimeMillis() - time) + " ms captured in " + stdOutput.getCanonicalPath());
+
+	        // Create a trivial or adapter version of AtomicPropManager
+	        AtomicPropManager trivialAPM = new AtomicPropManager() {
+	        	@Override
+	        	public AtomicProp findAP(String name) {
+	        		return new AtomicProp(name, Expression.constant(true));
+	        	}
+	        };
+
+	        tgba = TGBAparserHOAF.parseFrom(stdOutput.getCanonicalPath(), trivialAPM);
+	        if (DEBUG >= 2) System.out.println("Resulting TGBA : " + tgba.toString());
+	    } else {
+	        System.out.println("Spot run failed in " + (System.currentTimeMillis() - time) + " ms. Status : " + status);
+	        try (Stream<String> stream = Files.lines(Paths.get(stdOutput.getCanonicalPath()))) {
+	            stream.forEach(System.out::println);
+	        }
+	    }
+	    return tgba;
+	}
+
+	
 	public void runLTLSimplifications (PetriNet net) throws TimeoutException {
 
 		AtomicPropManager atoms = new AtomicPropManager();
