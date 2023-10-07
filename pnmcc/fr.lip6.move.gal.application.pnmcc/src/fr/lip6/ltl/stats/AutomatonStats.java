@@ -4,6 +4,7 @@ public class AutomatonStats {
 
 	// Fields for storing automaton statistics
 	private String name;
+	private String type;
 	private boolean universal;
 	private boolean empty;
 	private int numAP;
@@ -18,19 +19,21 @@ public class AutomatonStats {
 	private boolean deterministic;
 
 	// Default constructor
-	public AutomatonStats(String name) {
+	public AutomatonStats(String name,String type) {
 		this.name = name;
+		this.type = type;
 	}
 
 	// Build the CSV header line
-	public String buildHeaderLine() {
-		return "Name,|AP|,|S|,|Edges|,|Formula|,|Acc|,SI,Universal,Empty,VeryWeak,Weak,Terminal,Deterministic";
+	public static String buildHeaderLine() {
+		return "Name,Type,|AP|,|S|,|Edges|,|Formula|,|Acc|,SI,Universal,Empty,VeryWeak,Weak,Terminal,Deterministic";
 	}
 
-	public String buildLegend() {
+	public static String buildLegend() {
 		return "| Column      | Description                          |\n"
 				+ "|-------------|--------------------------------------|\n"
 				+ "| Name        | Name of the automaton                |\n"
+				+ "| Type        | Nature of formula                    |\n"
 				+ "| |AP|        | Num of atomic propositions           |\n"
 				+ "| |S|         | Num of states                        |\n"
 				+ "| |Edges|     | Num of edges                         |\n"
@@ -48,7 +51,7 @@ public class AutomatonStats {
 	// Convert the object's data to a CSV line
 	@Override
 	public String toString() {
-		return name + "," + numAP + "," + numStates + "," + numEdges + "," + formulaComplexity + "," + numAccSets + ","
+		return name + "," + type + ","+ numAP + "," + numStates + "," + numEdges + "," + formulaComplexity + "," + numAccSets + ","
 				+ (stutterInsensitive ? "1" : "0") + "," + (universal ? "1" : "0") + "," + (empty ? "1" : "0") + ","
 				+ (veryWeak ? "1" : "0") + "," + (weak ? "1" : "0") + "," + (terminal ? "1" : "0") + ","
 				+ (deterministic ? "1" : "0");
