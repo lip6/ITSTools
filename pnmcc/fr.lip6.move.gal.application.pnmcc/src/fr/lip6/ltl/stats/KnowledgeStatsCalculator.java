@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,8 +24,8 @@ import fr.lip6.move.gal.application.runner.spot.SpotRunner.GivenStrategy;
 
 public class KnowledgeStatsCalculator {
 
-	int nbFolder = 0;
-	int nbTreated = 0;
+	AtomicInteger nbFolder = new AtomicInteger(0);
+	AtomicInteger nbTreated = new AtomicInteger(0);
 
 	public void calculateStats(String inputFolder, String outputFolder, String formulaType) {
 		Path inputPath = Paths.get(inputFolder);
@@ -40,21 +41,31 @@ public class KnowledgeStatsCalculator {
 
 		File outputFile = outputDir.resolve("formulaStats.csv").toFile();
 		try (PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(outputFile)))) {
-			out.println(AutomatonStats.buildHeaderLine());
+		    synchronized (out) {
+		        out.println(AutomatonStats.buildHeaderLine());
+		    }
 
-			// Traverse the input directory
-			try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(inputPath)) {
-				for (Path path : directoryStream) {
-					if (Files.isDirectory(path)) {
-						findAndProcessFiles(path, out, formulaType);
-					}
-				}
-			} catch (IOException e) {
-				System.err.println("Error reading input directory: " + e.getMessage());
-			}
+		    // Traverse the input directory
+		    try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(inputPath)) {
+		        List<Path> paths = new ArrayList<>();
+		        for (Path path : directoryStream) {
+		            if (Files.isDirectory(path)) {
+		                paths.add(path);
+		            }
+		        }
 
+		        paths.parallelStream().forEach(path -> {
+		            try {
+		                findAndProcessFiles(path, out, formulaType);
+		            } catch (Exception e) {
+		                System.err.println("Error processing: " + path.toString() + " - " + e.getMessage());
+		            }
+		        });
+		    } catch (IOException e) {
+		        System.err.println("Error reading input directory: " + e.getMessage());
+		    }
 		} catch (FileNotFoundException e) {
-			System.err.println("Error opening output file: " + e.getMessage());
+		    System.err.println("Error opening output file: " + e.getMessage());
 		}
 
 	}
@@ -73,7 +84,7 @@ public class KnowledgeStatsCalculator {
 				if (file.getName().endsWith(formulaType + ".ltl")) {
 					if (file.getName().startsWith("raw")) {
 						formulasFile = file;
-						nbFolder++;
+						nbFolder.incrementAndGet();
 					} else if (file.getName().startsWith("knowledge")) {
 						knowledgeFile = file;
 					} else if (file.getName().startsWith("falseKnowledge")) {
@@ -85,7 +96,7 @@ public class KnowledgeStatsCalculator {
 			if (formulasFile != null && knowledgeFile != null && falseKnowledgeFile != null) {
 				// System.out.println("Working on "+dir+" for " + formulaType);
 				calculateBenchmarkStats(formulasFile, knowledgeFile, falseKnowledgeFile, out);
-				nbTreated++;
+				nbTreated.incrementAndGet();
 			} else {
 				System.err.println("Incomplete set of files in folder: " + benchmarkDir.toString());
 			}
@@ -97,7 +108,6 @@ public class KnowledgeStatsCalculator {
 
 		String model = formulasFile.getParentFile().getName();
 		String exam = formulasFile.getName().replace("raw", "").replace(".ltl", "");
-
 		String type = "raw";
 
 		//  generateStats(formulasFile, model, exam, type, out);
@@ -108,6 +118,9 @@ public class KnowledgeStatsCalculator {
 
 	private void generateMinMax(File formulasFile, File knowledgeFile, String model, String exam, PrintStream out, boolean negateFormula)  {
 		try {
+//			if (! model.equals("CloudOpsManagement-PT-00080by00040"))
+//				return;
+
 			List<String> rawFormulas = Files.readAllLines(formulasFile.toPath());
 			List<String> knowledgeFormulas = Files.readAllLines(knowledgeFile.toPath());
 
@@ -135,12 +148,18 @@ public class KnowledgeStatsCalculator {
 				}
 				Set<String> rawSupport = rawSupports.get(lineNumber);
 
+				String formulaName = model + "-" + exam + "-" + String.format("%02d", lineNumber);
+
 				// Generate raw stats
 				long time = System.currentTimeMillis();
-				TGBA rawTGBA = sr.buildTGBA(rawFormula);
-				String formulaName = model + "-" + exam + String.format("%02d", lineNumber);
+				TGBA rawTGBA = null;
+				try {
+					rawTGBA = sr.buildTGBA(rawFormula);
+				} catch (IOException|InterruptedException|TimeoutException e) {
+					e.printStackTrace();
+				}
 				AutomatonStats rawStats = AutomatonStatsCalculator.computeStats(rawTGBA, formulaName, "raw",time);
-				out.println(rawStats.toString());
+				synchronized (out) { out.println(rawStats.toString());}
 
 
 				ArrayList<String> selectedKnowledge = new ArrayList<>();
@@ -171,70 +190,53 @@ public class KnowledgeStatsCalculator {
 
 				time = System.currentTimeMillis();
 				// Min language
-				TGBA tgbaMin = sr.buildTGBAwithAlphabet(combinedMinFormula, toQuantify);
+				TGBA tgbaMin = null;
+				try {
+					tgbaMin = sr.buildTGBAwithAlphabet(combinedMinFormula, toQuantify);
+				} catch (IOException|InterruptedException|TimeoutException e) {
+					e.printStackTrace();
+				}
 				AutomatonStats statsMin = AutomatonStatsCalculator.computeStats(tgbaMin, formulaName, "min",time);
-				out.println(statsMin.toString());
+				synchronized (out) {out.println(statsMin.toString());}
 
 				// Max language
 				time = System.currentTimeMillis();
-				TGBA tgbaMax = sr.buildTGBAwithAlphabet(combinedMaxFormula, toQuantify);
+				TGBA tgbaMax = null;
+				try {
+					tgbaMax = sr.buildTGBAwithAlphabet(combinedMaxFormula, toQuantify);
+				} catch (IOException|InterruptedException|TimeoutException e) {
+					e.printStackTrace();
+				}
 				AutomatonStats statsMax = AutomatonStatsCalculator.computeStats(tgbaMax, formulaName, "max",time);
-				out.println(statsMax.toString());
+				synchronized (out) {out.println(statsMax.toString());}
 
 				// Minato
 				time = System.currentTimeMillis();
 				TGBA tgbaMinato = sr.givenThat(rawTGBA, selectedKnowledge, GivenStrategy.MINATO);
 				AutomatonStats statsMinato = AutomatonStatsCalculator.computeStats(tgbaMinato, formulaName, "Minato",time);
-				out.println(statsMinato.toString());
+				synchronized (out) {out.println(statsMinato.toString());}
 
 				// Stutter
 				time = System.currentTimeMillis();
 				TGBA tgbaStutter = sr.givenThat(rawTGBA, selectedKnowledge, GivenStrategy.STUTTER);
 				AutomatonStats statsStutter = AutomatonStatsCalculator.computeStats(tgbaStutter, formulaName, "si", time);
-				out.println(statsStutter.toString());
+				synchronized (out) {out.println(statsStutter.toString());}
 
 				// All
 				time = System.currentTimeMillis();
 				TGBA tgbaAll = sr.givenThat(rawTGBA, selectedKnowledge, GivenStrategy.ALL);
 				AutomatonStats statsAll = AutomatonStatsCalculator.computeStats(tgbaAll, formulaName, "all", time);
-				out.println(statsAll.toString());
+				synchronized (out) {out.println(statsAll.toString());}
 
 			}
-		} catch (IOException|TimeoutException|InterruptedException e) {
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			System.out.println("What is the problem ??");
 			e.printStackTrace();
 		}
 	}
 
-
-	//	public void generateStats(File formulasFile, String model, String exam, String type, PrintStream out) {
-	//		// Initialize the SpotRunner with a 10-second timeout
-	//        SpotRunner sr = new SpotRunner(10);
-	//
-	//        try (BufferedReader br = new BufferedReader(new FileReader(formulasFile))) {
-	//            String formula;
-	//            int lineNumber = 0;
-	//            while ((formula = br.readLine()) != null) {
-	//                // Build TGBA
-	//                TGBA tgba = sr.buildTGBA(formula);
-	//                
-	//                if (tgba != null) {
-	//                    // Derive name for stats
-	//                    String derivedName =  model + "-" + exam + "-" + String.format("%02d", lineNumber);
-	//
-	//                    // Compute stats
-	//                    AutomatonStats stats = AutomatonStatsCalculator.computeStats(tgba, derivedName,type);
-	//
-	//                    // Print the stats (to System.out for now)
-	//                    out.println(stats.toString());
-	//                } else {
-	//                    System.err.println("Failed to build TGBA for formula on line " + lineNumber);
-	//                }
-	//                lineNumber++;
-	//            }
-	//        } catch (IOException | TimeoutException | InterruptedException e) {
-	//            System.err.println("Error occurred: " + e.getMessage());
-	//        }
-	//	}
 
 	private static Set<String> support(String formula) {
 		Set<String> aps = new HashSet<>();
