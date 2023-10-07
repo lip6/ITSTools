@@ -779,8 +779,10 @@ public class LTLPropertySolver {
 		if (true) {
 			// Spot 2.11+
 			TGBA tgbarelax = tgba;
-			tgbarelax = spot.givenThat(tgba, knowledge, SpotRunner.GivenStrategy.MINATO);
-
+			TGBA res = null;
+			res = spot.givenThat(tgba, knowledge, SpotRunner.GivenStrategy.MINATO);
+			if (res != null) tgbarelax = res;
+			
 			if (tgbarelax.isEmptyLanguage()) {
 				System.out.println("Property proved to be true thanks to knowledge (Minato strategy)");
 				return tgbarelax;
@@ -792,11 +794,16 @@ public class LTLPropertySolver {
 			// more aggressive : AND the knowledge
 			{
 				Expression allFacts = Expression.nop(Op.AND, knowledge);
-				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.MINATO);
-				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER);
-				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.MINATO);
-				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER);
-				tgbarelax = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.ALL);
+				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.MINATO);
+				if (res != null) tgbarelax = res;
+				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER);
+				if (res != null) tgbarelax = res;
+				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.MINATO);
+				if (res != null) tgbarelax = res;
+				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER);
+				if (res != null) tgbarelax = res;
+				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.ALL);
+				if (res != null) tgbarelax = res;
 			}
 
 			if (tgbarelax.isEmptyLanguage()) {
