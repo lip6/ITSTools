@@ -10,6 +10,7 @@ import fr.lip6.move.gal.structural.expr.AtomicPropManager;
 import jhoafparser.parser.HOAFParser;
 
 public class TGBAparserHOAF {
+	private static final Object parserLock = new Object();
 	
 	public static TGBA parseFrom (String path, AtomicPropManager atoms) throws IOException {
 		BufferedInputStream fis = new BufferedInputStream(new FileInputStream(path));
@@ -22,7 +23,9 @@ public class TGBAparserHOAF {
 	
 	public static TGBA parseFrom (InputStream fis, AtomicPropManager atoms) throws IOException {
 		HOAtoTGBAConsumer hoa2tgba = new HOAtoTGBAConsumer(atoms);
-		HOAFParser.parseHOA(fis, hoa2tgba);
+		synchronized (parserLock) {
+			HOAFParser.parseHOA(fis, hoa2tgba);
+		}
 		return hoa2tgba.getTGBA();
 	}
 }
