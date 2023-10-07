@@ -8,9 +8,10 @@ import fr.lip6.move.gal.structural.expr.Expression;
 
 public class AutomatonStatsCalculator {
 
-    public static AutomatonStats computeStats(TGBA a, String name, String type) {
+    public static AutomatonStats computeStats(TGBA a, String name, String type, long time) {
         AutomatonStats stats = new AutomatonStats(name,type);
-
+        if (a != null) {
+        
         // Number of States
         stats.setNumStates(a.nbStates());
 
@@ -47,7 +48,11 @@ public class AutomatonStatsCalculator {
             }
         }
         stats.setFormulaComplexity(totalFormulaComplexity);
+    	} else {
+    		stats.setFailed(true);
+    	}
         
+        stats.setTime(System.currentTimeMillis() - time);
         return stats;
     }
     
