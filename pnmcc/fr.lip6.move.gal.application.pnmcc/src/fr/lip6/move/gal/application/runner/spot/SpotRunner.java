@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
@@ -171,15 +172,7 @@ public class SpotRunner {
 	    if (status == 0) {
 	        if (DEBUG >= 1) System.out.println("Successful run of Spot took " + (System.currentTimeMillis() - time) + " ms captured in " + stdOutput.getCanonicalPath());
 
-	        // Create a trivial or adapter version of AtomicPropManager
-	        AtomicPropManager trivialAPM = new AtomicPropManager() {
-	        	@Override
-	        	public AtomicProp findAP(String name) {
-	        		return new AtomicProp(name, Expression.constant(true));
-	        	}
-	        };
-
-	        tgba = TGBAparserHOAF.parseFrom(stdOutput.getCanonicalPath(), trivialAPM);
+	        tgba = parseAbstractTGBA(stdOutput);
 	        if (DEBUG >= 2) System.out.println("Resulting TGBA : " + tgba.toString());
 	    } else {
 	        System.out.println("Spot run failed in " + (System.currentTimeMillis() - time) + " ms. Status : " + status);
@@ -188,6 +181,60 @@ public class SpotRunner {
 	        }
 	    }
 	    return tgba;
+	}
+
+	public TGBA buildTGBAwithAlphabet(String formula, Set<String> rawSupport) throws IOException, TimeoutException, InterruptedException {
+	    long time = System.currentTimeMillis();
+	    File tgbaTempFile = Files.createTempFile("ltl2tgba", ".hoa").toFile();
+	    if (DEBUG == 0) tgbaTempFile.deleteOnExit();
+	    
+	    boolean buildSuccess = buildAutomaton(formula, tgbaTempFile);
+	    if (!buildSuccess) {
+	        return null;
+	    }
+
+	    CommandLine cl = new CommandLine();
+	    cl.addArg(pathToautfilt);
+	    cl.addArg("--hoaf=tv");
+	    cl.addArg("--small");
+	    cl.addArg("-F");
+	    cl.addArg(tgbaTempFile.getCanonicalPath());
+	    if (rawSupport != null) {
+	        cl.addArg("--remove-ap=" + String.join(",", rawSupport));
+	    }
+
+	    File autfiltOutput = Files.createTempFile("autfilt", ".hoa").toFile();
+	    if (DEBUG == 0) autfiltOutput.deleteOnExit();
+	    
+	    int status = Runner.runTool(timeout, cl, autfiltOutput, true);
+	    if (status == 0) {
+	        if (DEBUG >= 1) {
+	            System.out.println("Successful run of autfilt took "+ (System.currentTimeMillis() - time) + " ms, captured in " + autfiltOutput.getCanonicalPath());
+	        }
+	        TGBA tgba = parseAbstractTGBA(autfiltOutput);
+	        return tgba;
+	    } else {
+	        System.out.println("autfilt run failed in " + (System.currentTimeMillis() - time) + " ms. Status: " + status);
+	        try (Stream<String> stream = Files.lines(Paths.get(autfiltOutput.getCanonicalPath()))) {
+	            stream.forEach(System.out::println);
+	        }
+	        return null;
+	    }
+	}
+
+	
+	public TGBA parseAbstractTGBA(File hoaFile) throws IOException {
+		TGBA tgba;
+		// Create a trivial or adapter version of AtomicPropManager
+		AtomicPropManager trivialAPM = new AtomicPropManager() {
+			@Override
+			public AtomicProp findAP(String name) {
+				return new AtomicProp(name, Expression.constant(true));
+			}
+		};
+
+		tgba = TGBAparserHOAF.parseFrom(hoaFile.getCanonicalPath(), trivialAPM);
+		return tgba;
 	}
 
 	
@@ -794,9 +841,14 @@ public class SpotRunner {
 	public TGBA givenThat(TGBA tgba, Expression factoid, GivenStrategy constrain) {
 		return givenThat(tgba, Collections.singletonList(factoid), constrain);
 	}
-	
 	public TGBA givenThat(TGBA tgba, List<Expression> factoids, GivenStrategy constrain) {
-		TGBA tgbaout = tgba;
+		ArrayList<String> strFactoids = new ArrayList<>();
+		for (Expression factoid : factoids)
+			strFactoids.add(printLTLProperty(factoid));
+		return givenThat(tgba, strFactoids, constrain);
+	}
+	public TGBA givenThat(TGBA tgba, ArrayList<String> factoids, GivenStrategy constrain) {
+		TGBA tgbaout = null;
 		CommandLine cl = new CommandLine();
 		try {
 			long time = System.currentTimeMillis();
@@ -806,8 +858,8 @@ public class SpotRunner {
 			cl.addArg("--hoaf=tv"); // prefix notation for output
 		
 			cl.addArg("--small");
-			for (Expression factoid : factoids)
-				cl.addArg("--given-formula="+printLTLProperty(factoid));
+			for (String factoid : factoids)
+				cl.addArg("--given-formula="+factoid);
 
 			File curAut = Files.createTempFile("b4k", ".hoa").toFile();
 			if (DEBUG == 0) curAut.deleteOnExit();
