@@ -8,8 +8,8 @@ import fr.lip6.move.gal.structural.expr.Expression;
 
 public class AutomatonStatsCalculator {
 
-    public static AutomatonStats computeStats(TGBA a, String name) {
-        AutomatonStats stats = new AutomatonStats(name);
+    public static AutomatonStats computeStats(TGBA a, String name, String type) {
+        AutomatonStats stats = new AutomatonStats(name,type);
 
         // Number of States
         stats.setNumStates(a.nbStates());
