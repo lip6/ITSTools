@@ -164,27 +164,37 @@ public class KnowledgeStatsCalculator {
 
 				ArrayList<String> selectedKnowledge = new ArrayList<>();
 
-				// First and second pass
 				Set<String> extendedSupport = new HashSet<>(rawSupport);
+				// Two full passes
+				// first pass, keep if it intersects raw
+				for (int i = 0; i < knowledgeFormulas.size(); ++i) {
+					Set<String> kSupport = new HashSet<>(knowledgeSupports.get(i));
+					kSupport.retainAll(rawSupport);
+					if (!kSupport.isEmpty()) {
+						extendedSupport.addAll(kSupport);
+					}
+				}
+				// second pass, keep if it intersects formulas we kept in first pass
 				for (int i = 0; i < knowledgeFormulas.size(); ++i) {
 					Set<String> kSupport = new HashSet<>(knowledgeSupports.get(i));
 					kSupport.retainAll(extendedSupport);
 					if (!kSupport.isEmpty()) {
 						selectedKnowledge.add("(" + knowledgeFormulas.get(i) + ")");
-						extendedSupport.addAll(kSupport);
 					}
 				}
-
+				// make unique
+				selectedKnowledge = new ArrayList<>(new HashSet<>(selectedKnowledge));
+				
 				String combinedMinFormula;
 				String combinedMaxFormula;
-
+				String andknowledge = String.join(" && ", selectedKnowledge);
 				if (selectedKnowledge.isEmpty()) {
-					combinedMinFormula = "(" + rawFormula + ")";
-					combinedMaxFormula = "(" + rawFormula + ")";
-				} else {
-					combinedMinFormula = "(" + rawFormula + ") && " + String.join(" && ", selectedKnowledge);
-					combinedMaxFormula = "(" + rawFormula + ") || ! (" + String.join(" && ", selectedKnowledge) + ")";
+					andknowledge = "true";
 				}
+				combinedMinFormula = "(" + rawFormula + ") && " + andknowledge ;
+				combinedMaxFormula = "(" + rawFormula + ") || ! (" + andknowledge + ")";
+				
+				
 				Set<String> toQuantify = new HashSet<>(extendedSupport);
 				toQuantify.removeAll(rawSupport);
 
@@ -209,25 +219,14 @@ public class KnowledgeStatsCalculator {
 				}
 				AutomatonStats statsMax = AutomatonStatsCalculator.computeStats(tgbaMax, formulaName, "max",time);
 				synchronized (out) {out.println(statsMax.toString());}
-
-				// Minato
-				time = System.currentTimeMillis();
-				TGBA tgbaMinato = sr.givenThat(rawTGBA, selectedKnowledge, GivenStrategy.MINATO);
-				AutomatonStats statsMinato = AutomatonStatsCalculator.computeStats(tgbaMinato, formulaName, "Minato",time);
-				synchronized (out) {out.println(statsMinato.toString());}
-
-				// Stutter
-				time = System.currentTimeMillis();
-				TGBA tgbaStutter = sr.givenThat(rawTGBA, selectedKnowledge, GivenStrategy.STUTTER);
-				AutomatonStats statsStutter = AutomatonStatsCalculator.computeStats(tgbaStutter, formulaName, "si", time);
-				synchronized (out) {out.println(statsStutter.toString());}
-
-				// All
-				time = System.currentTimeMillis();
-				TGBA tgbaAll = sr.givenThat(rawTGBA, selectedKnowledge, GivenStrategy.ALL);
-				AutomatonStats statsAll = AutomatonStatsCalculator.computeStats(tgbaAll, formulaName, "all", time);
-				synchronized (out) {out.println(statsAll.toString());}
-
+				
+				// incremental
+				generateKnowledge(formulaName, rawTGBA, selectedKnowledge, out, sr,"");
+				// global
+				selectedKnowledge.clear();
+				selectedKnowledge.add(andknowledge);
+				// p stands for "precise"
+				generateKnowledge(formulaName, rawTGBA, selectedKnowledge, out, sr,"p");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -235,6 +234,28 @@ public class KnowledgeStatsCalculator {
 			System.out.println("What is the problem ??");
 			e.printStackTrace();
 		}
+	}
+
+	public void generateKnowledge(String formulaName, TGBA rawTGBA, ArrayList<String> selectedKnowledge,
+			PrintStream out, SpotRunner sr, String prefix) {
+		long time;
+		// Minato
+		time = System.currentTimeMillis();
+		TGBA tgbaMinato = sr.givenThat(rawTGBA, selectedKnowledge, GivenStrategy.MINATO);
+		AutomatonStats statsMinato = AutomatonStatsCalculator.computeStats(tgbaMinato, formulaName, prefix + "Minato",time);
+		synchronized (out) {out.println(statsMinato.toString());}
+
+		// Stutter
+		time = System.currentTimeMillis();
+		TGBA tgbaStutter = sr.givenThat(rawTGBA, selectedKnowledge, GivenStrategy.STUTTER);
+		AutomatonStats statsStutter = AutomatonStatsCalculator.computeStats(tgbaStutter, formulaName, prefix +"si", time);
+		synchronized (out) {out.println(statsStutter.toString());}
+
+		// All
+		time = System.currentTimeMillis();
+		TGBA tgbaAll = sr.givenThat(rawTGBA, selectedKnowledge, GivenStrategy.ALL);
+		AutomatonStats statsAll = AutomatonStatsCalculator.computeStats(tgbaAll, formulaName, prefix +"all", time);
+		synchronized (out) {out.println(statsAll.toString());}
 	}
 
 
