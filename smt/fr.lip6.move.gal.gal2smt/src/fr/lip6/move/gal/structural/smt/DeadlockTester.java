@@ -153,7 +153,8 @@ public class DeadlockTester {
 				if ("unsat".equals(issat)) {
 					results[i] = false;
 				} else if ("unknown".equals(issat)) {
-					results[i] = false;
+					// by default, assume it is possible.
+					results[i] = true;
 					System.out.println("Solver returned unknown.");
 				}
 				
