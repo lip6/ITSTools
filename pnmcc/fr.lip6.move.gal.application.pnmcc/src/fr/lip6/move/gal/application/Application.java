@@ -724,32 +724,53 @@ public class Application implements IApplication, Ender {
 			List<Expression> knowledge = new ArrayList<>(); 
 			List<Expression> falseKnowledge = new ArrayList<>(); 
 			
-			for (TGBA tgba : automata) {
-				logicSolver.addInitialStateKnowledge(knowledge, spn, tgba);
-				logicSolver.addNextStateKnowledge(knowledge, falseKnowledge, spn, tgba);
-				logicSolver.addConvergenceKnowledge(knowledge, spn, tgba);
-				logicSolver.addInvarianceKnowledge(knowledge, falseKnowledge, spn, tgba);
-				if (exportFalseKnowledge)
-					falseKnowledge.addAll(logicSolver.computeEGknowledge(spn, tgba));
-			}
-			
+			// Initialization and other code
+			// Open output files before loop
+			PrintWriter knowledgePw = null;
+			PrintWriter falseKnowledgePw = null;
 			if (exportKnowledge) {
-				String stdOutput = pwd + "/"+"knowledge"+"-"+examination+".ltl";
-				PrintWriter pw = new PrintWriter(new File(stdOutput));
-				for (Expression factoid : knowledge) {
-					pw.println(SpotRunner.printLTLProperty(factoid));
-				}
-				pw.close();
+				String knowledgeOutput = pwd + "/" + "knowledge" + "-" + examination + ".ltl";
+				knowledgePw = new PrintWriter(new File(knowledgeOutput));
 			}
 			if (exportFalseKnowledge) {
-				String stdOutput = pwd + "/"+"falseKnowledge"+"-"+examination+".ltl";
-				PrintWriter pw = new PrintWriter(new File(stdOutput));
-				for (Expression factoid : falseKnowledge) {
-					pw.println(SpotRunner.printLTLProperty(factoid));
-				}
-				pw.close();
+				String falseKnowledgeOutput = pwd + "/" + "falseKnowledge" + "-" + examination + ".ltl";
+				falseKnowledgePw = new PrintWriter(new File(falseKnowledgeOutput));
 			}
+
+			// First loop: Add initial state knowledge
+			for (TGBA tgba : automata) {
+				logicSolver.addInitialStateKnowledge(knowledge, spn, tgba);
+			}
+			printAndClear(knowledgePw, falseKnowledgePw, knowledge, falseKnowledge);
+
+			// Second loop: Add next state knowledge and false knowledge
+			for (TGBA tgba : automata) {
+				logicSolver.addNextStateKnowledge(knowledge, falseKnowledge, spn, tgba);
+			}
+			printAndClear(knowledgePw, falseKnowledgePw, knowledge, falseKnowledge);
+
+			for (TGBA tgba : automata) {
+				logicSolver.addConvergenceKnowledge(knowledge, spn, tgba);
+			}
+			printAndClear(knowledgePw, falseKnowledgePw, knowledge, falseKnowledge);
+
 			
+			for (TGBA tgba : automata) {
+				logicSolver.addInvarianceKnowledge(knowledge, falseKnowledge, spn, tgba);
+			}
+			printAndClear(knowledgePw, falseKnowledgePw, knowledge, falseKnowledge);
+
+			if (exportFalseKnowledge) {
+				for (TGBA tgba : automata) {
+					falseKnowledge.addAll(logicSolver.computeEGknowledge(spn, tgba));
+				}
+			}
+			printAndClear(knowledgePw, falseKnowledgePw, knowledge, falseKnowledge);
+			
+			// Close output files
+			if (knowledgePw != null) knowledgePw.close();
+			if (falseKnowledgePw != null) falseKnowledgePw.close();
+						
 			return IApplication.EXIT_OK;
 		}
 
@@ -1192,6 +1213,24 @@ public class Application implements IApplication, Ender {
 			e.printStackTrace();
 		}		
 	}
+	
+	// printAndClear function
+	private static void printAndClear(PrintWriter knowledgePw, PrintWriter falseKnowledgePw, List<Expression> knowledge, List<Expression> falseKnowledge) {
+	    flushKnowledge(knowledgePw, knowledge);
+	    flushKnowledge(falseKnowledgePw, falseKnowledge);
+	    knowledge.clear();
+	    falseKnowledge.clear();
+	}
+
+	// Utility function to flush knowledge to PrintWriter
+	private static void flushKnowledge(PrintWriter pw, List<Expression> exprList) {
+	    if (pw == null) return;
+	    for (Expression factoid : exprList) {
+	        pw.println(SpotRunner.printLTLProperty(factoid));
+	    }
+	    pw.flush();
+	}
+
 
 	private void tryRebuildPNML(String pwd, String examination, boolean rebuildPNML, MccTranslator reader,
 			DoneProperties doneProps) throws IOException {
