@@ -258,7 +258,13 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 
 	public void assumeOneSafe () {
 		for (Property prop : getProperties()) {
-			prop.setBody(Simplifier.assumeOnebounded(prop.getBody()));
+			Expression redProp = Simplifier.assumeOnebounded(prop.getBody());
+			if (redProp != prop) {
+				if (DEBUG >= 1) {
+					System.out.println("Assume one bounded rewrites :\n" + prop + "\nto\n"+redProp);
+				}
+				prop.setBody(redProp);
+			}
 		}
 	}
 	
