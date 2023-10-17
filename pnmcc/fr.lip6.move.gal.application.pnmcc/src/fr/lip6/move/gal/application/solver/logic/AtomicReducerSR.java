@@ -213,7 +213,7 @@ public class AtomicReducerSR {
 		}
 		
 		// make sure we don't just go crazy
-		if (spn.getProperties().size()*3 < atoms.size()) {
+		if (spn.getProperties().size()*6 < atoms.size()) {
 			// alternative version
 			//		if (spn.getProperties().size() > 1 &&  atoms.size() > spn.getProperties().size()*5) {
 			
