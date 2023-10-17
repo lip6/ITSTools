@@ -199,7 +199,7 @@ public class SpotRunner {
 	    cl.addArg("--small");
 	    cl.addArg("-F");
 	    cl.addArg(tgbaTempFile.getCanonicalPath());
-	    if (rawSupport != null) {
+	    if (rawSupport != null && ! rawSupport.isEmpty()) {
 	        cl.addArg("--remove-ap=" + String.join(",", rawSupport));
 	    }
 
