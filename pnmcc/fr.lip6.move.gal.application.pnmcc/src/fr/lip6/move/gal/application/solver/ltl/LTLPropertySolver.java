@@ -642,49 +642,45 @@ public class LTLPropertySolver {
 		spnred.getProperties().clear();
 		
 		
-		List<Expression> apForm = new ArrayList<>();
+		Set<Expression> apSet = new HashSet<>();
 		{
 			Set<Expression> seen = new HashSet<>();
 			for (int s=0,se=tgba.nbStates() ; s < se ; s++) {
 				for (TGBAEdge e : tgba.getEdges().get(s)) {
-					if (e.getCondition().getOp() != Op.BOOLCONST) {
-						Expression cmp = e.getCondition();
-						if (seen.add(cmp) && seen.add(Expression.not(cmp))) {
-							apForm.add(e.getCondition());
-						}
-					}
+					addCondition(e.getCondition(), seen, apSet);
 				}
 			}
 		}
 		// unify
-		apForm = new ArrayList<>(new LinkedHashSet<>(apForm));
+		List<Expression> apForm = new ArrayList<>(apSet);
+		
+		if (DEBUG >=1) {
+			System.out.println("Running invariance knowledge with AP :" + tgba.getAPs());
+		}
 		
 		// build a list of invariants to test with SMT/random
 		// for each of them test value in initial state
 		SparseIntArray istate = new SparseIntArray(spnred.getMarks());
-		
 		{
 			
-			int index = 0;
-			for (Expression cmp: apForm) {
+			for (int index = 0; index < apForm.size() ; index++) {
+       				Expression cmp = apForm.get(index);
 					int val = cmp.eval(istate);
-					String pname = "apf" + index++;
-					if (val == 1) {
-						// UNSAT => it never becomes false
-						Property p = new Property(Expression.nop(Op.EF, Expression.not(cmp)), PropertyType.INVARIANT, pname);
-						spnred.getProperties().add(p);
-
-					} else {
-						// UNSAT => it never becomes true
-						Property p = new Property(Expression.nop(Op.EF,cmp), PropertyType.INVARIANT, pname);
-						spnred.getProperties().add(p);				
+					if (val == 0) {
+						// initially false, reverse the expression so it is initially true
+						cmp = Simplifier.pushNegation(Expression.not(cmp));
+						
+						// update
+						apForm.set(index, cmp);						
 					}
-			}
-			for (Property prop : spnred.getProperties()) {
-				Expression nbody = AtomicPropManager.rewriteWithoutAP(prop.getBody());
-				if (prop.getBody() != nbody) {
-					prop.setBody(nbody);
-				}				
+					
+					// our new formula
+					String pname = "apf" + index;
+					// cleanup any AP refs in actual predicate
+					cmp = AtomicPropManager.rewriteWithoutAP(cmp);
+					// assert that the AP formula is invariant
+					Property p = new Property(Expression.nop(Op.AG, cmp), PropertyType.INVARIANT, pname);
+					spnred.getProperties().add(p);						
 			}
 		}
 		
@@ -713,31 +709,24 @@ public class LTLPropertySolver {
 			String pname = ent.getKey();
 			int pindex = Integer.parseInt(pname.replace("apf", ""));
 			Expression c = apForm.get(pindex);
-			boolean val = c.eval(istate) == 1;
-			if (! res) {
+			if (res) {
 				// cool we've proven an invariant, we can substitute							
-				if (DEBUG >= 1) System.out.println("SMT proved AP formula is invariant; concluding " + c + " is always " + val);						
+				if (DEBUG >= 1) System.out.println("Successfully proved AP formula is invariant; concluding " + pname +"="+ c + " is always true.");						
 
-				if (val) {
-					knowledge.add(Expression.nop(Op.G, c));
-				} else {
-					knowledge.add(Expression.nop(Op.G, Expression.not(c)));
-				}
+				knowledge.add(Expression.nop(Op.G, c));
 				nsolved ++;
 			} else {
-				// so we have proved that EF !p if p is initially true
-				
-				Expression FnotP = null;
-				if (val) {
-					FnotP = Expression.nop(Op.F, Expression.not(c));						
-				} else {
-					FnotP = Expression.nop(Op.F, c);
-				}
-				
+				// so we have proved that EF !p 
+				Expression FnotP = Expression.nop(Op.F, Expression.not(c));						
 				falseKnowledge.add(FnotP);
 			}
 		}
 		if (nsolved > 0) {
+			
+			if (DEBUG >=1) {
+				System.out.println("Finished invariance knowledge with AP :" + tgba.getAPs());
+			}
+			
 			System.out.println("Found "+nsolved+" invariant AP formulas.");
 		}		
 		
@@ -969,17 +958,11 @@ public class LTLPropertySolver {
 				if (edge.getDest() != tgba.getInitial() || edge.getCondition().getOp() != Op.BOOLCONST) {
 					int dest = edge.getDest();
 					for (TGBAEdge edgeX : tgba.getEdges().get(dest)) {
-						if (edgeX.getCondition().getOp() != Op.BOOLCONST) {
-							if (seen.add(edgeX.getCondition()) && seen.add(Expression.not(edgeX.getCondition()))) {
-								// grab formulas labeling edges out of this node
-								condX.add(edgeX.getCondition());
-							}
-						} 
+						Expression condition = edgeX.getCondition();
+						addCondition(condition, seen, condX); 
 						for (TGBAEdge edgeXX : tgba.getEdges().get(edgeX.getDest())) {
-							if (seenX.add(edgeXX.getCondition()) && seenX.add(Expression.not(edgeXX.getCondition()))) {
-								// grab formulas labeling edges out of this node
-								condXX.add(edgeXX.getCondition());
-							}
+							Expression conditionX = edgeXX.getCondition();
+							addCondition(conditionX, seenX, condXX);
 						}
 						
 					}
@@ -1097,6 +1080,36 @@ public class LTLPropertySolver {
 			}
 		}
 	}
+
+	public void addCondition(Expression condition, Set<Expression> seen, Set<Expression> condX) {
+		if (condition.getOp() != Op.BOOLCONST) {
+			if (seen.add(condition) && seen.add(Expression.not(condition))) {
+				// grab formulas labeling edges out of this node
+				condX.add(condition);
+			}
+			// now also extract pure AP
+			Set<Expression> aps = new HashSet<>();
+			extractAP(condition,aps);
+			for (Expression ap : aps) {
+				if (seen.add(ap) && seen.add(Expression.not(ap))) {
+					condX.add(ap);
+				}
+			}
+		}
+	}
+	
+	private void extractAP(Expression condition, Set<Expression> aps) {
+		if (condition == null) {
+			return;
+		} else if (condition.getOp() == Op.APREF) {
+			aps.add(condition);
+		} else {
+			for (int i=0, ie = condition.nbChildren() ; i < ie ; i++) {
+				extractAP(condition.childAt(i), aps);
+			}
+		}
+	}
+
 
 	public void addInitialStateKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
 		SparseIntArray init = new SparseIntArray(spn.getMarks());
