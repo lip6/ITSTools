@@ -40,7 +40,7 @@ public class RandomExplorer {
 		
 		long time = System.currentTimeMillis();
 		SparseIntArray state = wu.getInitial();
-		int [] list = wu.computeEnabled(state);
+		int [] list = wu.getInitialEnabling().clone();
 		wu.dropEmpty(list);		
 		wu.dropUnavailable(list, parikh);
 		
@@ -183,7 +183,7 @@ public class RandomExplorer {
 			for (; i < nbSteps && ! todo.isEmpty() && todo.size() < nbSteps ; i++) {
 				long dur = System.currentTimeMillis() - time + 1; 
 				if (dur > 1000 * timeout) {
-					System.out.println("Interrupted probabilistic random walk after "+ i + "  steps, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts));
+					System.out.println("Interrupted probabilistic random walk after "+ i + "  steps, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.stream(verdicts).filter(x->x>0).count()  + " out of " + exprs.size());
 					break;
 				}
 				SparseIntArray state = todo.remove(todo.size()-1);
@@ -269,7 +269,17 @@ public class RandomExplorer {
 	}
 
 	public int[] runRandomReachabilityDetection (long nbSteps, List<Expression> exprs, int timeout, int bestFirst) {
-		return runRandomReachabilityDetection(nbSteps,exprs,timeout,bestFirst,false);
+		
+		int [] threads = {0,1,2,3};
+		int [][] verdicts = new int [4][];
+		Arrays.stream(threads).unordered().parallel().forEach(id -> verdicts[id] = runRandomReachabilityDetection(nbSteps,exprs,timeout,bestFirst,false));
+		int [] finalverdict = new int [exprs.size()];
+		for (int [] v : verdicts) {
+			for (int i=0;i<v.length;i++) {
+				finalverdict[i] = Math.max(finalverdict[i], v[i]);
+			}
+		}
+		return finalverdict;
 	}
 	
 	/**
@@ -285,7 +295,7 @@ public class RandomExplorer {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		long time = System.currentTimeMillis();
 		SparseIntArray state = wu.getInitial();
-		int [] list = computeEnabled(state);
+		int [] list = wu.getInitialEnabling().clone();
 		wu.dropEmpty(list);		
 		
 		SparseIntArray initstate = state.clone();
@@ -405,10 +415,15 @@ public class RandomExplorer {
 	}
 
 	private boolean updateVerdicts(List<Expression> exprs, SparseIntArray state, int[] verdicts) {
-		int [] todo = new int[(int) Arrays.stream(verdicts).filter(v->v==0).count()];
-		if (todo.length == 0) {
+		int cnt = 0;
+		for (int v : verdicts) {
+			if (v==0)
+				cnt++;
+		}
+		if (cnt == 0) {
 			return false;
 		}
+		int [] todo = new int[cnt];		
 		{
 			int cur=0;
 			for (int i=0,ie=verdicts.length;i<ie;i++) {
@@ -418,7 +433,7 @@ public class RandomExplorer {
 			}
 		}
 		AtomicBoolean remains = new AtomicBoolean(false);
-		Arrays.stream(todo).parallel()
+		Arrays.stream(todo).unordered().parallel()
 				.forEach(v -> {					
 					if (exprs.get(v).eval(state) == 1) {
 						verdicts[v] = 1;
@@ -443,7 +458,7 @@ public class RandomExplorer {
 		SparseIntArray parikh = transformParikh(parikhori, repr, repSet);
 		parikhori = parikh.clone();
 		SparseIntArray state = wu.getInitial();
-		int [] list = computeEnabled(state);
+		int [] list = wu.getInitialEnabling().clone();
 		wu.dropEmpty(list);		
 		wu.dropUnavailable(list, parikh);		
 
@@ -527,7 +542,7 @@ public class RandomExplorer {
 		
 		long time = System.currentTimeMillis();
 		SparseIntArray state = wu.getInitial();
-		int [] list = computeEnabled(state);
+		int [] list = wu.getInitialEnabling().clone();
 		wu.dropEmpty(list);		
 		SparseIntArray initstate = state.clone();
 		int [] initlist = list.clone();
