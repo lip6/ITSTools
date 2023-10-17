@@ -48,6 +48,7 @@ public class ReachabilitySolver {
 
 	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, int timeout)
 			throws GlobalPropertySolvedException {
+		boolean withRandomWalk = true;
 		int iter;
 		int iterations =0;
 		long initial=System.currentTimeMillis();
@@ -55,6 +56,8 @@ public class ReachabilitySolver {
 		boolean doneSums = false;
 		boolean doneAtomsSR = false;
 		Thread t = null;
+		
+		ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 
 		if (reader.isDoITS() || reader.isDoLTSMin()) {
 			MccTranslator rc = reader.copy();
@@ -81,7 +84,7 @@ public class ReachabilitySolver {
 				if ((iterations == 0 && iter==0) || timeout != -1) {
 					steps = 10000; // be more moderate on first run : 100k
 				}
-				if (randomCheckReachability(re, tocheck, props, doneProps,steps) >0)
+				if (withRandomWalk && randomCheckReachability(re, tocheck, props, doneProps,steps) >0)
 					iter++;
 
 				if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished())
@@ -128,11 +131,12 @@ public class ReachabilitySolver {
 								sz += parikh.valueAt(i);
 							}
 							if (sz != 0) {
+								SparseIntArray partialOrder = orders.get(v);
 								if (Application.DEBUG >= 1) {
 									System.out.println("SMT solver thinks a reachable witness state is likely to occur in "+sz +" steps.");
 									SparseIntArray init = new SparseIntArray();
 									for (int i=0 ; i < parikh.size() ; i++) {
-										System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+										System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+ "["+ partialOrder.get(parikh.keyAt(i)) +"], ");
 										init = SparseIntArray.sumProd(1, init, - parikh.valueAt(i), sr.getFlowPT().getColumn(parikh.keyAt(i)));
 										init = SparseIntArray.sumProd(1, init, + parikh.valueAt(i), sr.getFlowTP().getColumn(parikh.keyAt(i)));
 									}
@@ -162,9 +166,9 @@ public class ReachabilitySolver {
 								if (tocheck.size() >= 200) {
 									maxt = 1;
 									maxsteps = sz;
-								} else if (tocheck.size() >= 100 || timeout != -1) {
+								} else if (tocheck.size() >= 100) {
 									maxt = 2;
-									maxsteps = 2*sz;
+									maxsteps = 5*sz;
 								} else if (tocheck.size() >= 16) {
 									maxt = 5;
 									maxsteps = 10*sz;
