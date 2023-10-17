@@ -747,6 +747,22 @@ public class Application implements IApplication, Ender {
 			for (TGBA tgba : automata) {
 				logicSolver.addNextStateKnowledge(knowledge, falseKnowledge, spn, tgba);
 			}
+			
+			
+			boolean DEBUGKNOWLEDGE = false;
+			
+			if (DEBUGKNOWLEDGE) {
+				SparsePetriNet spn2 = new SparsePetriNet(spn);
+				spn2.getProperties().clear();
+				int index = 0;
+				for (Expression e: knowledge) {
+					spn2.getProperties().add(new fr.lip6.move.gal.structural.Property(e,PropertyType.LTL,"k"+(index++)));
+				}
+				String outform = pwd + "/" + examination + "." + "next" + ".sr.xml";
+				String outsr = pwd + "/model."+ "next" +".sr.pnml";
+				MCCExporter.exportToMCCFormat(outsr, outform, spn2);
+			}
+			
 			printAndClear(knowledgePw, falseKnowledgePw, knowledge, falseKnowledge);
 
 			for (TGBA tgba : automata) {
@@ -758,6 +774,20 @@ public class Application implements IApplication, Ender {
 			for (TGBA tgba : automata) {
 				logicSolver.addInvarianceKnowledge(knowledge, falseKnowledge, spn, tgba);
 			}
+			
+			if (DEBUGKNOWLEDGE) {
+				SparsePetriNet spn2 = new SparsePetriNet(spn);
+				spn2.getProperties().clear();
+				int index = 0;
+				for (Expression e: knowledge) {
+					spn2.getProperties().add(new fr.lip6.move.gal.structural.Property(Expression.nop(Op.AG,e.childAt(0)),PropertyType.INVARIANT,"k"+(index++)));
+				}
+				String outform = pwd + "/" + examination + "." + "inv" + ".sr.xml";
+				String outsr = pwd + "/model."+ "inv" +".sr.pnml";
+				MCCExporter.exportToMCCFormat(outsr, outform, spn2);
+			}
+			
+			
 			printAndClear(knowledgePw, falseKnowledgePw, knowledge, falseKnowledge);
 
 			if (exportFalseKnowledge) {
@@ -1218,6 +1248,9 @@ public class Application implements IApplication, Ender {
 	private static void printAndClear(PrintWriter knowledgePw, PrintWriter falseKnowledgePw, List<Expression> knowledge, List<Expression> falseKnowledge) {
 	    flushKnowledge(knowledgePw, knowledge);
 	    flushKnowledge(falseKnowledgePw, falseKnowledge);
+	    if (DEBUG >= 1) {
+	    	System.out.println("Current knowledge :" + knowledge);
+	    }
 	    knowledge.clear();
 	    falseKnowledge.clear();
 	}
