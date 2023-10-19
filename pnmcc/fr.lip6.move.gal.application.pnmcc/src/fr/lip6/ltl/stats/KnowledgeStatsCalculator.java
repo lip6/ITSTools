@@ -27,7 +27,7 @@ public class KnowledgeStatsCalculator {
 	AtomicInteger nbFolder = new AtomicInteger(0);
 	AtomicInteger nbTreated = new AtomicInteger(0);
 
-	public void calculateStats(String inputFolder, String outputFolder, String formulaType) {
+	public void calculateStats(String inputFolder, String outputFolder) {
 		Path inputPath = Paths.get(inputFolder);
 		Path outputDir = Paths.get(outputFolder);
 
@@ -56,7 +56,8 @@ public class KnowledgeStatsCalculator {
 
 		        paths.parallelStream().forEach(path -> {
 		            try {
-		                findAndProcessFiles(path, out, formulaType);
+		                findAndProcessFiles(path, out, "LTLFireability");
+		                findAndProcessFiles(path, out, "LTLCardinality");
 		            } catch (Exception e) {
 		                System.err.println("Error processing: " + path.toString() + " - " + e.getMessage());
 		            }
@@ -64,9 +65,13 @@ public class KnowledgeStatsCalculator {
 		    } catch (IOException e) {
 		        System.err.println("Error reading input directory: " + e.getMessage());
 		    }
+		    synchronized (out) {
+		    	out.flush();
+		    }
 		} catch (FileNotFoundException e) {
 		    System.err.println("Error opening output file: " + e.getMessage());
 		}
+		System.out.println("In total out of "+nbFolder+" found knowledge information in "+ nbTreated + " cases.");
 
 	}
 
@@ -97,6 +102,9 @@ public class KnowledgeStatsCalculator {
 				// System.out.println("Working on "+dir+" for " + formulaType);
 				calculateBenchmarkStats(formulasFile, knowledgeFile, falseKnowledgeFile, out);
 				nbTreated.incrementAndGet();
+			    synchronized (out) {
+			    	out.flush();
+			    }
 			} else {
 				System.err.println("Incomplete set of files in folder: " + benchmarkDir.toString());
 			}
@@ -159,7 +167,7 @@ public class KnowledgeStatsCalculator {
 					e.printStackTrace();
 				}
 				AutomatonStats rawStats = AutomatonStatsCalculator.computeStats(rawTGBA, formulaName, "raw",time);
-				synchronized (out) { out.println(rawStats.toString());}
+				synchronized (out) { out.println(rawStats.toString()); out.flush();}
 
 
 				ArrayList<String> selectedKnowledge = new ArrayList<>();
@@ -204,7 +212,7 @@ public class KnowledgeStatsCalculator {
 				try {
 					tgbaMin = sr.buildTGBAwithAlphabet(combinedMinFormula, toQuantify);
 				} catch (IOException|InterruptedException|TimeoutException e) {
-					e.printStackTrace();
+					System.out.println("Detected an error : "+e.getMessage() + " when treating Min formula for "+ model+ "-" + exam + "-" + lineNumber);
 				}
 				AutomatonStats statsMin = AutomatonStatsCalculator.computeStats(tgbaMin, formulaName, "min",time);
 				synchronized (out) {out.println(statsMin.toString());}
@@ -215,18 +223,18 @@ public class KnowledgeStatsCalculator {
 				try {
 					tgbaMax = sr.buildTGBAwithAlphabet(combinedMaxFormula, toQuantify);
 				} catch (IOException|InterruptedException|TimeoutException e) {
-					e.printStackTrace();
+					System.out.println("Detected an error : "+e.getMessage() + " when treating Max formula for "+ model+ "-" + exam + "-" + lineNumber);					
 				}
 				AutomatonStats statsMax = AutomatonStatsCalculator.computeStats(tgbaMax, formulaName, "max",time);
 				synchronized (out) {out.println(statsMax.toString());}
 				
 				// incremental
-				generateKnowledge(formulaName, rawTGBA, selectedKnowledge, out, sr,"");
+				applyGivenThat(formulaName, rawTGBA, selectedKnowledge, out, sr,"");
 				// global
 				selectedKnowledge.clear();
 				selectedKnowledge.add(andknowledge);
 				// p stands for "precise"
-				generateKnowledge(formulaName, rawTGBA, selectedKnowledge, out, sr,"p");
+				applyGivenThat(formulaName, rawTGBA, selectedKnowledge, out, sr,"p");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -236,26 +244,22 @@ public class KnowledgeStatsCalculator {
 		}
 	}
 
-	public void generateKnowledge(String formulaName, TGBA rawTGBA, ArrayList<String> selectedKnowledge,
+	public void applyGivenThat(String formulaName, TGBA rawTGBA, ArrayList<String> selectedKnowledge,
 			PrintStream out, SpotRunner sr, String prefix) {
-		long time;
-		// Minato
-		time = System.currentTimeMillis();
-		TGBA tgbaMinato = sr.givenThat(rawTGBA, selectedKnowledge, GivenStrategy.MINATO);
-		AutomatonStats statsMinato = AutomatonStatsCalculator.computeStats(tgbaMinato, formulaName, prefix + "Minato",time);
-		synchronized (out) {out.println(statsMinato.toString());}
+		
+		computeStats(formulaName, rawTGBA, GivenStrategy.MINATO, selectedKnowledge, out, sr, prefix);
+		computeStats(formulaName, rawTGBA, GivenStrategy.STUTTER, selectedKnowledge, out, sr, prefix);
+		computeStats(formulaName, rawTGBA, GivenStrategy.ALL, selectedKnowledge, out, sr, prefix);
 
-		// Stutter
-		time = System.currentTimeMillis();
-		TGBA tgbaStutter = sr.givenThat(rawTGBA, selectedKnowledge, GivenStrategy.STUTTER);
-		AutomatonStats statsStutter = AutomatonStatsCalculator.computeStats(tgbaStutter, formulaName, prefix +"si", time);
-		synchronized (out) {out.println(statsStutter.toString());}
+	}
 
-		// All
-		time = System.currentTimeMillis();
-		TGBA tgbaAll = sr.givenThat(rawTGBA, selectedKnowledge, GivenStrategy.ALL);
-		AutomatonStats statsAll = AutomatonStatsCalculator.computeStats(tgbaAll, formulaName, prefix +"all", time);
-		synchronized (out) {out.println(statsAll.toString());}
+	public void computeStats(String formulaName, TGBA rawTGBA, GivenStrategy strat, ArrayList<String> selectedKnowledge,
+			PrintStream out, SpotRunner sr, String prefix) {
+		
+		long time = System.currentTimeMillis();
+		TGBA tgbaRes = sr.givenThat(rawTGBA, selectedKnowledge, strat);
+		AutomatonStats stats = AutomatonStatsCalculator.computeStats(tgbaRes, formulaName, prefix + strat,time);
+		synchronized (out) {out.println(stats.toString());}
 	}
 
 
@@ -272,14 +276,6 @@ public class KnowledgeStatsCalculator {
 	}
 
 
-	public void calculateStats(String inputFolder, String outputFolder) {
 
-		calculateStats(inputFolder, outputFolder, "LTLFireability");
-
-		calculateStats(inputFolder, outputFolder, "LTLCardinality");
-
-		System.out.println("In total out of "+nbFolder+" found knowledge information in "+ nbTreated + " cases.");
-
-	}
 
 }
