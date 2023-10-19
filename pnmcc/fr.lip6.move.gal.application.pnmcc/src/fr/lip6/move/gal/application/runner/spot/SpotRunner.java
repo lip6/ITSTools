@@ -55,7 +55,18 @@ public class SpotRunner {
 		/** A variant of relax designed to make the language SI */
 		STUTTER,
 		/** do both [the default] */
-		ALL
+		ALL;
+		
+		public String toString() {
+			switch (this) {
+			case RESTRICT: return "restrict";
+			case RELAX: return "relax";
+			case MINATO: return "Minato";
+			case STUTTER: return "si";
+			case ALL: return "all";
+			default : return null;
+			}
+		}
 	}
 	
 	private static final int DEBUG = 0;
@@ -982,8 +993,11 @@ public class SpotRunner {
 				pw.close();
 				cl.addArg("-F");
 				cl.addArg(curAut.getCanonicalPath());	
-
-				cl.addArg("--given-strategy="+constrain.toString().toLowerCase());
+				if (constrain != GivenStrategy.STUTTER) {
+					cl.addArg("--given-strategy="+constrain.toString().toLowerCase());
+				} else {
+					cl.addArg("--given-strategy=stutter");
+				}
 
 				if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
 				File stdOutput = Files.createTempFile("prod", ".hoa").toFile();
@@ -1001,8 +1015,8 @@ public class SpotRunner {
 					}
 				}
 			} catch (IOException | TimeoutException | InterruptedException e) {
-				System.err.println("Error while executing :"+ cl);
-				e.printStackTrace();
+				System.err.println("Error "+ e.getMessage() + " while executing :"+ cl);
+				// e.printStackTrace();
 			}
 			return tgbaout;
 		} finally {
