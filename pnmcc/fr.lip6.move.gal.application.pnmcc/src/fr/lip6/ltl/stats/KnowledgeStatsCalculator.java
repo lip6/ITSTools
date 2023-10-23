@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -170,28 +171,62 @@ public class KnowledgeStatsCalculator {
 				synchronized (out) { out.println(rawStats.toString()); out.flush();}
 
 
+				
+				// the assertions we keep
 				ArrayList<String> selectedKnowledge = new ArrayList<>();
-
+				// the support of these assertions
 				Set<String> extendedSupport = new HashSet<>(rawSupport);
-				// Two full passes
-				// first pass, keep if it intersects raw
-				for (int i = 0; i < knowledgeFormulas.size(); ++i) {
-					Set<String> kSupport = new HashSet<>(knowledgeSupports.get(i));
-					kSupport.retainAll(rawSupport);
-					if (!kSupport.isEmpty()) {
-						extendedSupport.addAll(kSupport);
+				
+				// First pass to retain facts whose alphabet intersects formula
+				{	
+					
+					boolean[] toadd = new boolean[knowledgeFormulas.size()];				
+					// first pass, keep in toadd if it intersects raw
+					for (int i = 0; i < knowledgeFormulas.size(); ++i) {
+						Set<String> kSupport = new HashSet<>(knowledgeSupports.get(i));
+						kSupport.retainAll(rawSupport);
+						if (!kSupport.isEmpty()) {
+							// cumulate in extended support the AP we see
+							extendedSupport.addAll(knowledgeSupports.get(i));
+							toadd[i]=true;
+						}
+					}
+					
+					// update so we can existentially quantify these AP
+					for (int i =0; i < knowledgeFormulas.size() ; i++) {
+						if (toadd[i])
+							selectedKnowledge.add("(" + knowledgeFormulas.get(i) + ")");
 					}
 				}
-				// second pass, keep if it intersects formulas we kept in first pass
-				for (int i = 0; i < knowledgeFormulas.size(); ++i) {
-					Set<String> kSupport = new HashSet<>(knowledgeSupports.get(i));
-					kSupport.retainAll(extendedSupport);
-					if (!kSupport.isEmpty()) {
-						selectedKnowledge.add("(" + knowledgeFormulas.get(i) + ")");
+
+				
+				// second pass, keep if it intersects formulas we kept in first pass : touches extendedSupport
+				// currently disabled
+				boolean secondPass = false;
+				if (secondPass) {
+					
+					boolean[] toadd2 = new boolean[knowledgeFormulas.size()];
+					Set<String> finalSupport = new HashSet<>(extendedSupport);
+					for (int i = 0; i < knowledgeFormulas.size(); ++i) {						
+						Set<String> kSupport = new HashSet<>(knowledgeSupports.get(i));
+						kSupport.retainAll(extendedSupport);
+						if (!kSupport.isEmpty()) {
+							finalSupport.addAll(kSupport);
+							toadd2[i]=true;
+						}
 					}
+
+					for (int i =0; i < knowledgeFormulas.size() ; i++) {					
+						if (toadd2[i])
+							selectedKnowledge.add("(" + knowledgeFormulas.get(i) + ")");
+					}
+					
+					// update alphabet for "--remove-ap" invocations
+					extendedSupport = finalSupport;
 				}
-				// make unique
-				selectedKnowledge = new ArrayList<>(new HashSet<>(selectedKnowledge));
+				
+				// make unique, but preserve order
+				selectedKnowledge = new ArrayList<>(new LinkedHashSet<>(selectedKnowledge));
 				
 				String combinedMinFormula;
 				String combinedMaxFormula;
