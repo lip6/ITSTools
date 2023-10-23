@@ -238,6 +238,7 @@ public class SpotRunner {
 			int status = Runner.runTool(timeout, cl, autfiltOutput, true);
 			if (status == 0) {
 				if (DEBUG >= 1) {
+					System.out.println("Running :" +cl);
 					System.out.println("Successful run of autfilt took "+ (System.currentTimeMillis() - time) + " ms, captured in " + autfiltOutput.getCanonicalPath());
 				}
 				TGBA tgba = parseAbstractTGBA(autfiltOutput);
