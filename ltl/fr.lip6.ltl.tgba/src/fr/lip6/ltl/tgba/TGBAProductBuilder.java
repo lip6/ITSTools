@@ -163,7 +163,7 @@ public class TGBAProductBuilder {
 					aps.removeAll(a.getAPs());
 					
 					for (AtomicProp ap : aps) {
-						expr = Simplifier.existentialQuantification(ap, expr);
+						expr = Simplifier.existentialQuantification(expr, ap.getName());
 					}
 					
 					quotient.addEdge(ea.getSrc(), ea.getDest(), expr, ea.getAcceptance());										
