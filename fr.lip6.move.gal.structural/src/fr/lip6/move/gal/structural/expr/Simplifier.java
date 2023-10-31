@@ -612,12 +612,12 @@ public class Simplifier {
 	}
 
 	
-	public static Expression evalWithAPValue (AtomicProp ap, boolean value, Expression expr) {
+	public static Expression evalWithAPValue (Expression expr, String apname, boolean value) {
 		if (expr == null) {
 			return null;
 		} else if (expr instanceof AtomicPropRef) {
 			AtomicPropRef apref = (AtomicPropRef) expr;
-			if (apref.getAp().equals(ap)) {
+			if (apref.getAp().getName().equals(apname)) {
 				return Expression.constant(value);
 			}			
 		} 							
@@ -629,7 +629,7 @@ public class Simplifier {
 		boolean changed = false;
 		for (int cid = 0, cide = expr.nbChildren() ; cid < cide ; cid++) {
 			Expression child = expr.childAt(cid);
-			Expression e = evalWithAPValue(ap,value,child);
+			Expression e = evalWithAPValue(child,apname,value);
 			resc.add(e);
 			if (e != child) {
 				changed = true;
@@ -642,8 +642,8 @@ public class Simplifier {
 		}	
 	}
 	
-	public static Expression existentialQuantification (AtomicProp ap, Expression expr) {				
-		return simplifyBoolean(Expression.op(Op.OR, evalWithAPValue(ap, false, expr), evalWithAPValue(ap, true, expr)));
+	public static Expression existentialQuantification (Expression expr, String ap) {				
+		return simplifyBoolean(Expression.op(Op.OR, evalWithAPValue(expr, ap, false), evalWithAPValue(expr, ap, true)));
 	}
 
 	public static Expression simplifySumComparisons(Expression expr) {
