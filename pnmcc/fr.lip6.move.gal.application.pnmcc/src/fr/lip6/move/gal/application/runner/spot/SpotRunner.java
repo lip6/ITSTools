@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -182,8 +183,14 @@ public class SpotRunner {
 			cl.addArg(pathToltl2tgba);
 			cl.addArg("--check=stutter");
 			cl.addArg("--hoaf=tv");
-			cl.addArg("-f");
-			cl.addArg(formula); // Directly use the formula string
+			
+			File formOutput = Files.createTempFile("form", ".ltl").toFile();
+			todel.add(formOutput);
+			try (FileOutputStream fos = new FileOutputStream(formOutput)) {
+				fos.write(formula.getBytes());
+			}
+			cl.addArg("-F");
+			cl.addArg(formOutput.getCanonicalPath()); // Directly use the formula string
 
 			if (DEBUG > 0) System.out.println("Running Spot : " + cl);
 			File stdOutput = Files.createTempFile("spotaut", ".hoa").toFile();
