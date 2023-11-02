@@ -159,18 +159,8 @@ public class KnowledgeStatsCalculator {
 
 				String formulaName = model + "-" + exam + "-" + String.format("%02d", lineNumber);
 
-				// Generate raw stats
-				long time = System.currentTimeMillis();
-				TGBA rawTGBA = null;
-				try {
-					rawTGBA = sr.buildTGBA(rawFormula);
-				} catch (IOException|InterruptedException|TimeoutException e) {
-					e.printStackTrace();
-				}
-				AutomatonStats rawStats = AutomatonStatsCalculator.computeStats(rawTGBA, formulaName, "raw",time);
-				synchronized (out) { out.println(rawStats.toString()); out.flush();}
-
-
+				
+				TGBA rawTGBA = buildAndPrintAutomatonStats("raw", rawFormula, formulaName, out, sr);
 				
 				// the assertions we keep
 				ArrayList<String> selectedKnowledge = new ArrayList<>();
@@ -228,40 +218,30 @@ public class KnowledgeStatsCalculator {
 				// make unique, but preserve order
 				selectedKnowledge = new ArrayList<>(new LinkedHashSet<>(selectedKnowledge));
 				
-				String combinedMinFormula;
-				String combinedMaxFormula;
 				String andknowledge = String.join(" && ", selectedKnowledge);
 				if (selectedKnowledge.isEmpty()) {
-					andknowledge = "true";
+					andknowledge = "1";
 				}
-				combinedMinFormula = "(" + rawFormula + ") && " + andknowledge ;
-				combinedMaxFormula = "(" + rawFormula + ") || ! (" + andknowledge + ")";
-				
-				
+			
+				buildAndPrintAutomatonStats("min", "(" + rawFormula + ")&&" + andknowledge, formulaName, out, sr);
+
+				buildAndPrintAutomatonStats("max", "(" + rawFormula + ")||!(" + andknowledge + ")", formulaName, out, sr);
+
 				Set<String> toQuantify = new HashSet<>(extendedSupport);
 				toQuantify.removeAll(rawSupport);
+				//andknowledge = "(G((p16||!p32)))";
+				{
+					// with QE
+					List<String> selectedKnowledgeQE = new ArrayList<>(selectedKnowledge.size());
+					for (String k:selectedKnowledge) {
+						selectedKnowledgeQE.add(quantifySyntactically(k, toQuantify));
+					}
+					String quantifiedKnowledge = selectedKnowledgeQE.isEmpty() ? "1" : String.join(" && ", selectedKnowledgeQE);
+					
+					buildAndPrintAutomatonStats("minqe", "(" + rawFormula + ")&&" + quantifiedKnowledge, formulaName, out, sr);
 
-				time = System.currentTimeMillis();
-				// Min language
-				TGBA tgbaMin = null;
-				try {
-					tgbaMin = sr.buildTGBAwithAlphabet(combinedMinFormula, toQuantify);
-				} catch (IOException|InterruptedException|TimeoutException e) {
-					System.out.println("Detected an error : "+e.getMessage() + " when treating Min formula for "+ model+ "-" + exam + "-" + lineNumber);
+					buildAndPrintAutomatonStats("maxqe", "(" + rawFormula + ")||!(" + quantifiedKnowledge + ")", formulaName, out, sr);
 				}
-				AutomatonStats statsMin = AutomatonStatsCalculator.computeStats(tgbaMin, formulaName, "min",time);
-				synchronized (out) {out.println(statsMin.toString());}
-
-				// Max language
-				time = System.currentTimeMillis();
-				TGBA tgbaMax = null;
-				try {
-					tgbaMax = sr.buildTGBAwithAlphabet(combinedMaxFormula, toQuantify);
-				} catch (IOException|InterruptedException|TimeoutException e) {
-					System.out.println("Detected an error : "+e.getMessage() + " when treating Max formula for "+ model+ "-" + exam + "-" + lineNumber);					
-				}
-				AutomatonStats statsMax = AutomatonStatsCalculator.computeStats(tgbaMax, formulaName, "max",time);
-				synchronized (out) {out.println(statsMax.toString());}
 				
 				// incremental
 				applyGivenThat(formulaName, rawTGBA, selectedKnowledge, out, sr,"");
@@ -277,6 +257,35 @@ public class KnowledgeStatsCalculator {
 			System.out.println("What is the problem ??");
 			e.printStackTrace();
 		}
+	}
+
+	private String quantifySyntactically(String form, Set<String> toQuantify) {
+		StringBuilder sb = new StringBuilder(form);
+		for (String ap : toQuantify) {
+			if (form.matches(".*\\b"+ap+"\\b.*")) {
+				StringBuilder sb2 = new StringBuilder(2*sb.length()+16);
+				sb2.append("((").append(sb.toString().replaceAll("\\b"+ap+"\\b","1")).append(")")
+				.append("||")
+				.append("(").append(sb.toString().replaceAll("\\b"+ap+"\\b","0")).append("))");
+				sb = sb2;
+			}
+		}
+		return sb.toString();
+	}
+
+	public TGBA buildAndPrintAutomatonStats(String type, String formula, String formulaName, PrintStream out,
+			SpotRunner sr) {
+		// Generate raw stats
+		long time = System.currentTimeMillis();
+		TGBA tgba = null;
+		try {
+			tgba = sr.buildTGBA(formula);
+		} catch (IOException|InterruptedException|TimeoutException e) {
+			System.out.println("Detected an error : "+e.getMessage() + " when treating "+type+" formula for "+ formulaName);					
+		}
+		AutomatonStats rawStats = AutomatonStatsCalculator.computeStats(tgba, formulaName, type,time);
+		synchronized (out) { out.println(rawStats.toString()); }
+		return tgba;
 	}
 
 	public void applyGivenThat(String formulaName, TGBA rawTGBA, ArrayList<String> selectedKnowledge,
