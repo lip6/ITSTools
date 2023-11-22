@@ -4,6 +4,7 @@ import java.util.List;
 
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.ltl.tgba.TGBAEdge;
+import fr.lip6.move.gal.application.runner.spot.SpotRunner;
 import fr.lip6.move.gal.structural.expr.Expression;
 
 public class AutomatonStatsCalculator {
@@ -48,6 +49,41 @@ public class AutomatonStatsCalculator {
             }
         }
         stats.setFormulaComplexity(totalFormulaComplexity);
+        
+        
+        
+        {
+        	SpotRunner sr = new SpotRunner(10);
+        	List<Integer> stat = sr.computeStats(a);
+        	if (! stat.isEmpty()) {
+        		// %c, number of SCC
+        		stats.setNbSCC(stat.get(0));
+        		// %[a]c, accepting SCC
+        		stats.setNbAccSCC(stat.get(1));
+        		// %[r]c, rejecting SCC
+        		stats.setNbRejSCC(stat.get(2));
+        		// %[v]c, trivial SCC
+        		stats.setNbTrivSCC(stat.get(3));
+        		// %t, number of transition (with True = 2^AP)
+        		stats.setNbTrans(stat.get(4));
+        		// %n, number of non deterministic states
+        		stats.setNbNonDet(stat.get(5));
+        	} else {
+        		stats.setNbSCC(-1);
+        		// %[a]c, accepting SCC
+        		stats.setNbAccSCC(-1);
+        		// %[r]c, rejecting SCC
+        		stats.setNbRejSCC(-1);
+        		// %[v]c, trivial SCC
+        		stats.setNbTrivSCC(-1);
+        		// %t, number of transition (with True = 2^AP)
+        		stats.setNbTrans(-1);
+        		// %n, number of non deterministic states
+        		stats.setNbNonDet(-1);
+        	}
+        }
+
+        
     	} else {
     		stats.setFailed(true);
     	}
