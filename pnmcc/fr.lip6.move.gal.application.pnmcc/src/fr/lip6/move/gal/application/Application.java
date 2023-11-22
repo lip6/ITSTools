@@ -231,10 +231,10 @@ public class Application implements IApplication, Ender {
 		boolean nosimplifications = false;
 		boolean invariants = false;
 		boolean applySR = false;
-		boolean pflows = true;
+		boolean pflows = false;
 		boolean psemiflows = false;
 		boolean tflows = false;
-		boolean tsemiflows = true;
+		boolean tsemiflows = false;
 		boolean exportKnowledge = false;
 		boolean exportFalseKnowledge = false;		
 		boolean genDeadTransitions = false;
@@ -406,7 +406,7 @@ public class Application implements IApplication, Ender {
 		}
 
 		if (invariants) {
-			reader.createSPN();
+			reader.createSPN(false,false);
 			List<Integer> tnames = new ArrayList<>();
 			List<Integer> repr = new ArrayList<>();
 			IntMatrixCol sumMatrix = computeReducedFlow(reader.getSPN(), tnames, repr);
