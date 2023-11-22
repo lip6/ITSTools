@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.Tool;
@@ -1191,6 +1193,69 @@ public class SpotRunner {
 				}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns some stats on the argument TGBA, in this order :
+	 * %c, number of SCC
+	 * %[a]c, accepting SCC
+	 * %[r]c, rejecting SCC
+	 * %[v]c, trivial SCC
+	 * %t, number of transition (with True = 2^AP)
+	 * %n, number of non deterministic states
+	 * @param tgba
+	 * @return
+	 */
+	public List<Integer> computeStats(TGBA tgba) {
+		List<File> todel = new ArrayList<>();
+		try {
+
+			long time = System.currentTimeMillis();
+			CommandLine cl = new CommandLine();
+			cl.addArg(pathToautfilt);
+			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
+			todel.add(curAut);
+			PrintWriter pw = new PrintWriter(curAut);
+			tgba.exportAsHOA(pw, ExportMode.SPOTAP);
+			pw.close();
+			cl.addArg(curAut.getCanonicalPath());
+			
+			cl.addArg("--stats");
+			cl.addArg("%c,%[a]c,%[r]c,%[v]c,%t,%n");
+			if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
+			File outPath = Files.createTempFile("outstats", ".txt").toFile();
+			todel.add(outPath);
+			int status = 1;
+			try {
+				status = Runner.runTool(timeout, cl, outPath, true);
+			} catch (IOException | TimeoutException | InterruptedException e) {
+				throw new IOException(e);
+			}
+			if (status == 0) {
+				if (DEBUG >= 1) System.out.println("Successful run of Spot took " + (System.currentTimeMillis() - time) + " ms captured in "
+						+ outPath.getCanonicalPath());
+				BufferedReader br = new BufferedReader(new FileReader(outPath));
+				String line = br.readLine();
+				br.close();
+				
+				return  Arrays.stream(line.split(",")).map(Integer::parseInt).collect(Collectors.toList());
+
+			} else {
+				System.out.println("Spot run failed in " + (System.currentTimeMillis() - time) + " ms. Status :" + status);
+				try (Stream<String> stream = Files.lines(Paths.get(outPath.getCanonicalPath()))) {
+					stream.forEach(System.out::println);
+				}
+				throw new IOException();
+			}
+		} catch (IOException e) {
+			// set -1
+		} finally {
+			if (DEBUG == 0)
+				for (File f : todel) {
+					f.delete();
+				}
+		}
+		return Collections.emptyList();
 	}
 
 }
