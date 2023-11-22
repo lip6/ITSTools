@@ -19,6 +19,19 @@ public class AutomatonStats {
 	private boolean deterministic;
 	private long time=-1;
 	private boolean hasFailed;
+	// %c, number of SCC
+	private int nbSCC;
+	// %[a]c, accepting SCC
+	private int nbAccSCC;
+	// %[r]c, rejecting SCC
+	private int nbRejSCC;
+	// %[v]c, trivial SCC
+	private int nbTrivSCC;
+	// %t, number of transition (with True = 2^AP)
+	private int nbTrans;
+	// %n, number of non deterministic states
+	private int nbNonDet;
+	
 
 	// Default constructor
 	public AutomatonStats(String name,String type) {
@@ -28,7 +41,7 @@ public class AutomatonStats {
 
 	// Build the CSV header line
 	public static String buildHeaderLine() {
-		return "Name,Type,AP,S,Edges,Formula,Acc,SI,Universal,Empty,VeryWeak,Weak,Terminal,Deterministic,Time";
+		return "Name,Type,AP,S,Edges,Formula,Acc,SI,Universal,Empty,VeryWeak,Weak,Terminal,Deterministic,nbSCC,nbAccSCC,nbRejSCC,nbTrivSCC,nbTrans,nbNonDet,Time";
 	}
 
 	public static String buildLegend() {
@@ -58,9 +71,10 @@ public class AutomatonStats {
 			return name + "," + type + ","+ numAP + "," + numStates + "," + numEdges + "," + formulaComplexity + "," + numAccSets + ","
 				+ (stutterInsensitive ? "1" : "0") + "," + (universal ? "1" : "0") + "," + (empty ? "1" : "0") + ","
 				+ (veryWeak ? "1" : "0") + "," + (weak ? "1" : "0") + "," + (terminal ? "1" : "0") + ","
-				+ (deterministic ? "1" : "0") + "," + time;
+				+ (deterministic ? "1" : "0")  + "," + nbSCC + "," + nbAccSCC +","+ nbRejSCC + "," + nbTrivSCC + "," + nbTrans 
+				+ "," + nbNonDet + "," + time;
 		} else {
-			return name + "," + type + ",-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1," + time;
+			return name + "," + type + ",-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,"+ time ;
 		}
 	}
 
@@ -160,4 +174,25 @@ public class AutomatonStats {
 		this.hasFailed = hasFailed;		
 	}
 
+	
+	public void setNbAccSCC(int nbAccSCC) {
+		this.nbAccSCC = nbAccSCC;
+	}
+	public void setNbNonDet(int nbNonDet) {
+		this.nbNonDet = nbNonDet;
+	}
+	public void setNbSCC(int nbSCC) {
+		this.nbSCC = nbSCC;
+	}
+	public void setNbRejSCC(int nbRejSCC) {
+		this.nbRejSCC = nbRejSCC;
+	}
+	public void setNbTrivSCC(int nbTrivSCC) {
+		this.nbTrivSCC = nbTrivSCC;
+	}
+	public void setNbTrans(int nbTrans) {
+		this.nbTrans = nbTrans;
+	}
+	
+	
 }
