@@ -120,22 +120,25 @@ public class KnowledgeStatsCalculator {
 		String type = "raw";
 
 		//  generateStats(formulasFile, model, exam, type, out);
-		generateMinMax(formulasFile,knowledgeFile,model,exam,out,false);
-		generateMinMax(formulasFile,knowledgeFile,model,exam,out,true);
+		generateMinMax(formulasFile,knowledgeFile,falseKnowledgeFile,model,exam,out, false);
+		generateMinMax(formulasFile,knowledgeFile,falseKnowledgeFile,model,exam,out, true);
 
 	}
 
-	private void generateMinMax(File formulasFile, File knowledgeFile, String model, String exam, PrintStream out, boolean negateFormula)  {
+	private void generateMinMax(File formulasFile, File knowledgeFile, File falseKnowledgeFile, String model, String exam, PrintStream out, boolean negateFormula)  {
 		try {
 //			if (! model.equals("CloudOpsManagement-PT-00080by00040"))
 //				return;
 
 			List<String> rawFormulas = Files.readAllLines(formulasFile.toPath());
 			List<String> knowledgeFormulas = Files.readAllLines(knowledgeFile.toPath());
+			List<String> falseKnowledgeFormulas = Files.readAllLines(falseKnowledgeFile.toPath());
 
 			List<Set<String>> rawSupports = new ArrayList<>();
 			List<Set<String>> knowledgeSupports = new ArrayList<>();
+			List<Set<String>> falseKnowledgeSupports = new ArrayList<>();
 
+			
 			// Compute support sets once and store
 			for (String formula : rawFormulas) {
 				rawSupports.add(support(formula));
@@ -143,7 +146,10 @@ public class KnowledgeStatsCalculator {
 			for (String formula : knowledgeFormulas) {
 				knowledgeSupports.add(support(formula));
 			}
-
+			for (String formula : falseKnowledgeFormulas) {
+				falseKnowledgeSupports.add(support(formula));
+			}
+			
 			SpotRunner sr = new SpotRunner(10);
 
 			if (negateFormula) {
@@ -160,7 +166,7 @@ public class KnowledgeStatsCalculator {
 				String formulaName = model + "-" + exam + "-" + String.format("%02d", lineNumber);
 
 				
-				TGBA rawTGBA = buildAndPrintAutomatonStats("raw", rawFormula, formulaName, out, sr);
+				
 				
 				// the assertions we keep
 				ArrayList<String> selectedKnowledge = new ArrayList<>();
@@ -168,61 +174,26 @@ public class KnowledgeStatsCalculator {
 				Set<String> extendedSupport = new HashSet<>(rawSupport);
 				
 				// First pass to retain facts whose alphabet intersects formula
-				{	
-					
-					boolean[] toadd = new boolean[knowledgeFormulas.size()];				
-					// first pass, keep in toadd if it intersects raw
-					for (int i = 0; i < knowledgeFormulas.size(); ++i) {
-						Set<String> kSupport = new HashSet<>(knowledgeSupports.get(i));
-						kSupport.retainAll(rawSupport);
-						if (!kSupport.isEmpty()) {
-							// cumulate in extended support the AP we see
-							extendedSupport.addAll(knowledgeSupports.get(i));
-							toadd[i]=true;
-						}
-					}
-					
-					// update so we can existentially quantify these AP
-					for (int i =0; i < knowledgeFormulas.size() ; i++) {
-						if (toadd[i])
-							selectedKnowledge.add("(" + knowledgeFormulas.get(i) + ")");
-					}
-				}
-
-				
-				// second pass, keep if it intersects formulas we kept in first pass : touches extendedSupport
-				// currently disabled
-				boolean secondPass = false;
-				if (secondPass) {
-					
-					boolean[] toadd2 = new boolean[knowledgeFormulas.size()];
-					Set<String> finalSupport = new HashSet<>(extendedSupport);
-					for (int i = 0; i < knowledgeFormulas.size(); ++i) {						
-						Set<String> kSupport = new HashSet<>(knowledgeSupports.get(i));
-						kSupport.retainAll(extendedSupport);
-						if (!kSupport.isEmpty()) {
-							finalSupport.addAll(kSupport);
-							toadd2[i]=true;
-						}
-					}
-
-					for (int i =0; i < knowledgeFormulas.size() ; i++) {					
-						if (toadd2[i])
-							selectedKnowledge.add("(" + knowledgeFormulas.get(i) + ")");
-					}
-					
-					// update alphabet for "--remove-ap" invocations
-					extendedSupport = finalSupport;
-				}
-				
+				selectKnowledge(knowledgeFormulas, knowledgeSupports, rawSupport, selectedKnowledge, extendedSupport);
 				// make unique, but preserve order
 				selectedKnowledge = new ArrayList<>(new LinkedHashSet<>(selectedKnowledge));
+
+				ArrayList<String> falseKnowledge = new ArrayList<>();
+				selectKnowledge(falseKnowledgeFormulas, falseKnowledgeSupports, rawSupport, falseKnowledge, extendedSupport);
+				falseKnowledge = new ArrayList<>(new LinkedHashSet<>(falseKnowledge));
 				
 				String andknowledge = String.join(" && ", selectedKnowledge);
 				if (selectedKnowledge.isEmpty()) {
+					System.out.println("No knowledge for formula " + formulaName + " (negative facts :"+falseKnowledge.size()+ ")");
+					
 					andknowledge = "1";
+					continue;
 				}
-			
+				
+				
+				
+				TGBA rawTGBA = buildAndPrintAutomatonStats("raw", rawFormula, formulaName, out, sr);
+				
 				buildAndPrintAutomatonStats("min", "(" + rawFormula + ")&&" + andknowledge, formulaName, out, sr);
 
 				buildAndPrintAutomatonStats("max", "(" + rawFormula + ")||!(" + andknowledge + ")", formulaName, out, sr);
@@ -241,6 +212,31 @@ public class KnowledgeStatsCalculator {
 					buildAndPrintAutomatonStats("minqe", "(" + rawFormula + ")&&" + quantifiedKnowledge, formulaName, out, sr);
 
 					buildAndPrintAutomatonStats("maxqe", "(" + rawFormula + ")||!(" + quantifiedKnowledge + ")", formulaName, out, sr);
+					
+					/* negative knowledge */
+					/* K- inter K+ inter A(phi) = empty */
+					/* So negate formula, AND the quantified knowledge -> automaton */
+					/* then test AND (product) the negative knowledge one by one is empty */
+					if (! falseKnowledge.isEmpty()) {
+						long time = System.currentTimeMillis();
+						
+						String negRawFormula = rawFormulas.get(lineNumber);
+						if (! negateFormula) {
+							negRawFormula = "!(" + negRawFormula + ")";
+						}
+						// cumulate positive knowledge and negated formula automaton
+						String knowledgeAndPhi = "(" + negRawFormula + ")&&" + quantifiedKnowledge;
+						// Build our automaton for (K+ AND phi)
+						boolean hasCounterExample = sr.testNegativeKnowledge(falseKnowledge, knowledgeAndPhi);
+						
+						TGBA tgba = null;
+						if (hasCounterExample) {
+							tgba = TGBA.makeTrue();
+						}
+						AutomatonStats rawStats = AutomatonStatsCalculator.computeStats(tgba, formulaName, "negative",time);
+						synchronized (out) { out.println(rawStats.toString()); }												
+					}
+					
 				}
 				
 				// incremental
@@ -256,6 +252,52 @@ public class KnowledgeStatsCalculator {
 		} catch (Exception e) {
 			System.out.println("What is the problem ??");
 			e.printStackTrace();
+		}
+	}
+
+	public void selectKnowledge(List<String> knowledgeFormulas, List<Set<String>> knowledgeSupports,
+			Set<String> rawSupport, ArrayList<String> selectedKnowledge, Set<String> extendedSupport) {
+		boolean[] toadd = new boolean[knowledgeFormulas.size()];
+		// first pass, keep in toadd if it intersects raw
+		for (int i = 0; i < knowledgeFormulas.size(); ++i) {
+			Set<String> kSupport = new HashSet<>(knowledgeSupports.get(i));
+			kSupport.retainAll(rawSupport);
+			if (!kSupport.isEmpty()) {
+				// cumulate in extended support the AP we see
+				extendedSupport.addAll(knowledgeSupports.get(i));
+				toadd[i]=true;
+			}					
+		}
+		// update so we can existentially quantify these AP
+		for (int i =0; i < knowledgeFormulas.size() ; i++) {
+			if (toadd[i])
+				selectedKnowledge.add("(" + knowledgeFormulas.get(i) + ")");
+		}
+		
+		
+		// second pass, keep if it intersects formulas we kept in first pass : touches extendedSupport
+		// currently disabled
+		boolean secondPass = false;
+		if (secondPass) {
+			
+			boolean[] toadd2 = new boolean[knowledgeFormulas.size()];
+			Set<String> finalSupport = new HashSet<>(extendedSupport);
+			for (int i = 0; i < knowledgeFormulas.size(); ++i) {						
+				Set<String> kSupport = new HashSet<>(knowledgeSupports.get(i));
+				kSupport.retainAll(extendedSupport);
+				if (!kSupport.isEmpty()) {
+					finalSupport.addAll(kSupport);
+					toadd2[i]=true;
+				}
+			}
+
+			for (int i =0; i < knowledgeFormulas.size() ; i++) {					
+				if (toadd2[i])
+					selectedKnowledge.add("(" + knowledgeFormulas.get(i) + ")");
+			}
+			
+			// update alphabet for "--remove-ap" invocations
+			extendedSupport = finalSupport;
 		}
 	}
 
@@ -292,7 +334,8 @@ public class KnowledgeStatsCalculator {
 			PrintStream out, SpotRunner sr, String prefix) {
 		
 		computeStats(formulaName, rawTGBA, GivenStrategy.MINATO, selectedKnowledge, out, sr, prefix);
-		computeStats(formulaName, rawTGBA, GivenStrategy.STUTTER, selectedKnowledge, out, sr, prefix);
+		computeStats(formulaName, rawTGBA, GivenStrategy.STUTTER_RELAX, selectedKnowledge, out, sr, prefix);
+		computeStats(formulaName, rawTGBA, GivenStrategy.STUTTER_RESTRICT, selectedKnowledge, out, sr, prefix);
 		computeStats(formulaName, rawTGBA, GivenStrategy.ALL, selectedKnowledge, out, sr, prefix);
 
 	}
