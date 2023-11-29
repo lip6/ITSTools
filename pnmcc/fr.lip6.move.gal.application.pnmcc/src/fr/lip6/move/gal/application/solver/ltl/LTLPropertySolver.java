@@ -785,11 +785,11 @@ public class LTLPropertySolver {
 				Expression allFacts = Expression.nop(Op.AND, knowledge);
 				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.MINATO);
 				if (res != null) tgbarelax = res;
-				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER);
+				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER_RELAX);
 				if (res != null) tgbarelax = res;
 				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.MINATO);
 				if (res != null) tgbarelax = res;
-				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER);
+				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER_RELAX);
 				if (res != null) tgbarelax = res;
 				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.ALL);
 				if (res != null) tgbarelax = res;
@@ -859,7 +859,7 @@ public class LTLPropertySolver {
 
 			if (!tgba.isStutterInvariant()) {
 				Expression allFacts = Expression.nop(Op.AND, knowledge);
-				tgba = spot.givenThat(tgba, allFacts, SpotRunner.GivenStrategy.STUTTER);
+				tgba = spot.givenThat(tgba, allFacts, SpotRunner.GivenStrategy.STUTTER_RELAX);
 				if (tgba.isStutterInvariant()) {
 					System.out.println("Knowledge sufficient to adopt a stutter insensitive property.");
 				}
