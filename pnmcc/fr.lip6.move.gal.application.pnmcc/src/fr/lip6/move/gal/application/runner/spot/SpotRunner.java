@@ -56,7 +56,9 @@ public class SpotRunner {
 		/**restrict/relax edge labels to their useful subset*/
 		MINATO,
 		/** A variant of relax designed to make the language SI */
-		STUTTER,
+		STUTTER_RELAX,
+		/** A variant of restrict designed to make the language SI */
+		STUTTER_RESTRICT,
 		/** do both [the default] */
 		ALL;
 		
@@ -64,8 +66,9 @@ public class SpotRunner {
 			switch (this) {
 			case RESTRICT: return "restrict";
 			case RELAX: return "relax";
-			case MINATO: return "Minato";
-			case STUTTER: return "si";
+			case MINATO: return "minato";
+			case STUTTER_RELAX: return "stutter-relax";
+			case STUTTER_RESTRICT: return "stutter-restrict";
 			case ALL: return "all";
 			default : return null;
 			}
@@ -1003,11 +1006,8 @@ public class SpotRunner {
 				pw.close();
 				cl.addArg("-F");
 				cl.addArg(curAut.getCanonicalPath());	
-				if (constrain != GivenStrategy.STUTTER) {
-					cl.addArg("--given-strategy="+constrain.toString().toLowerCase());
-				} else {
-					cl.addArg("--given-strategy=stutter");
-				}
+				cl.addArg("--given-strategy="+constrain.toString());
+
 
 				if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
 				File stdOutput = Files.createTempFile("prod", ".hoa").toFile();
@@ -1256,6 +1256,90 @@ public class SpotRunner {
 				}
 		}
 		return Collections.emptyList();
+	}
+
+	public boolean testNegativeKnowledge(ArrayList<String> falseKnowledge, String knowledgeAndPhi) {
+		List<File> todel = new ArrayList<>();
+		long time = System.currentTimeMillis();
+		boolean result = false;
+		try {
+			File curAut = Files.createTempFile("aut", ".hoa").toFile();
+			todel.add(curAut);
+			
+			if (! buildAutomaton(knowledgeAndPhi, curAut)) {
+				return false;
+			}
+			
+			File falseFactFile = Files.createTempFile("falseFact", ".hoa").toFile();
+			todel.add(falseFactFile);
+			
+			CommandLine cl = new CommandLine();
+			cl.addArg(pathToautfilt);
+			cl.addArg("-F");
+			cl.addArg(curAut.getCanonicalPath());
+
+			cl.addArg("--product-and="+falseFactFile.getCanonicalPath());
+			
+			cl.addArg("--is-empty");
+			
+			File outPath = Files.createTempFile("out", ".hoa").toFile();
+			todel.add(outPath);
+			
+			if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
+			
+			for (String falseFact : falseKnowledge) {
+				long loopTime = System.currentTimeMillis();
+				if (! buildAutomaton(falseFact, falseFactFile)) {
+					return false;
+				}
+								
+				int status = 1;
+				try {
+					status = Runner.runTool(timeout, cl, outPath, true);
+				} catch (IOException | TimeoutException | InterruptedException e) {
+					throw new IOException(e);
+				}
+				/*From autfilt --help :
+				Exit status:
+					  0  if some automata were output
+					  1  if no automata were output (no match)
+					  2  if any error has been reported
+				*/
+				if (status == 0 || status == 1) {
+					if (DEBUG >= 1) System.out.println("Successful run of Spot took " + (System.currentTimeMillis() - loopTime) + " ms captured in "
+							+ outPath.getCanonicalPath());
+					if (status == 0) {
+						
+						if (DEBUG >= 1) {
+							System.out.println("Concluded with negative knowledge : "+falseFact);
+						}
+						result=true;
+						return true;
+					}					
+				} else {
+					System.out.println("Spot run failed in " + (System.currentTimeMillis() - time) + " ms. Status :" + status);
+					try (Stream<String> stream = Files.lines(Paths.get(outPath.getCanonicalPath()))) {
+						stream.forEach(System.out::println);
+					}
+					throw new IOException();
+				}
+				
+			}
+			
+		} catch (IOException|InterruptedException|TimeoutException e) {
+			// set -1
+			
+		} finally {
+			if (DEBUG >= 1) {
+				System.out.println("Complete false knowledge loop with " + falseKnowledge.size() + " negative factoids took "+ (System.currentTimeMillis() - time) + " ms and concluded "+result);
+			}
+			
+			if (DEBUG == 0)
+				for (File f : todel) {
+					f.delete();
+				}
+		}
+		return false;
 	}
 
 }
