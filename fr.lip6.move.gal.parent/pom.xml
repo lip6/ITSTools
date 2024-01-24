@@ -142,9 +142,9 @@
 		<platform-version-name>2023-12</platform-version-name>
 		<tycho-version>4.0.4</tycho-version>
 		<sonar.exclusions>**/Messages.java</sonar.exclusions>
-		<xtextVersion>2.28.0</xtextVersion>
-		<xtendVersion>2.28.0</xtendVersion>
-		<mwe2Version>2.13.0</mwe2Version>
+		<xtextVersion>2.33.0</xtextVersion>
+		<xtendVersion>2.33.0</xtendVersion>
+		<mwe2Version>2.16.0</mwe2Version>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
