@@ -195,7 +195,7 @@
 				<configuration>
 					<resolver>p2</resolver>
 					<pomDependencies>consider</pomDependencies>
-					<executionEnvironment>JavaSE-11</executionEnvironment>
+					<executionEnvironment>JavaSE-17</executionEnvironment>
 					<environments>
 						<environment>
 							<os>win32</os>

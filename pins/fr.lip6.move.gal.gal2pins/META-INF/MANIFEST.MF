@@ -4,7 +4,7 @@ Bundle-Name: fr.lip6.move.gal.gal2pins
 Bundle-SymbolicName: fr.lip6.move.gal.gal2pins
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: LIP6/UPMC
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: fr.lip6.move.gal,
  org.eclipse.core.runtime,
  fr.lip6.move.gal.gal2smt,

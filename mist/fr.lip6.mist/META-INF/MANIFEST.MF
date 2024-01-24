@@ -4,7 +4,7 @@ Bundle-Name: fr.lip6.mist
 Bundle-SymbolicName: fr.lip6.mist
 Bundle-Version: 1.0.0.qualifier
 Automatic-Module-Name: fr.lip6.lola
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: fr.lip6.move.gal.structural,
  org.antlr.runtime;bundle-version="4.7.2",
  fr.lip6.move.gal.pnml.togal

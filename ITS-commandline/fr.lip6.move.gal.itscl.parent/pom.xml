@@ -96,7 +96,7 @@
 				<configuration>
 					<resolver>p2</resolver>
 					<pomDependencies>consider</pomDependencies>
-					<executionEnvironmentDefault>JavaSE-11</executionEnvironmentDefault>
+					<executionEnvironmentDefault>JavaSE-17</executionEnvironmentDefault>
 					<!-- <target> <artifact> <groupId>org.eclipselabs.spray</groupId> <artifactId>org.eclipselabs.spray.targetplatform</artifactId> 
 						<version>0.4.0-SNAPSHOT</version> <classifier>spray</classifier> </artifact> 
 						</target> -->
