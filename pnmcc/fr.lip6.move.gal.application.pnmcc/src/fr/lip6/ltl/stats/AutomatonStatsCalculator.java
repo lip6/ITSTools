@@ -9,7 +9,7 @@ import fr.lip6.move.gal.structural.expr.Expression;
 
 public class AutomatonStatsCalculator {
 
-    public static AutomatonStats computeStats(TGBA a, String name, String type, long time) {
+    public static AutomatonStats computeStats(TGBA a, String name, String type, long time, int nbFacts) {
         AutomatonStats stats = new AutomatonStats(name,type);
         if (a != null) {
         
@@ -87,7 +87,7 @@ public class AutomatonStatsCalculator {
     	} else {
     		stats.setFailed(true);
     	}
-        
+        stats.setNbFacts(nbFacts);
         stats.setTime(System.currentTimeMillis() - time);
         return stats;
     }

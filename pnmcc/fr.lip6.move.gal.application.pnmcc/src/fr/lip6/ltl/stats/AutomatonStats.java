@@ -31,6 +31,8 @@ public class AutomatonStats {
 	private int nbTrans;
 	// %n, number of non deterministic states
 	private int nbNonDet;
+	// Number of factoids used to compute this one
+	private int nbFacts;
 	
 
 	// Default constructor
@@ -41,7 +43,7 @@ public class AutomatonStats {
 
 	// Build the CSV header line
 	public static String buildHeaderLine() {
-		return "Name,Type,AP,S,Edges,Formula,Acc,SI,Universal,Empty,VeryWeak,Weak,Terminal,Deterministic,nbSCC,nbAccSCC,nbRejSCC,nbTrivSCC,nbTrans,nbNonDet,Time";
+		return "Name,Type,AP,S,Edges,Formula,Acc,SI,Universal,Empty,VeryWeak,Weak,Terminal,Deterministic,nbSCC,nbAccSCC,nbRejSCC,nbTrivSCC,nbTrans,nbNonDet,nbFact,Time";
 	}
 
 	public static String buildLegend() {
@@ -60,7 +62,8 @@ public class AutomatonStats {
 				+ "| VeryWeak    | 1 if very-weak, 0 otherwise          |\n"
 				+ "| Weak        | 1 if weak, 0 otherwise               |\n"
 				+ "| Terminal    | 1 if terminal, 0 otherwise           |\n"
-				+ "| Determinist | 1 if deterministic, 0 otherwise    |\n"
+				+ "| Determinist | 1 if deterministic, 0 otherwise      |\n"
+				+ "| nbFact      | number of factoids used              |\n"
 		        + "| Time        | run time in ms                       |";
 	}
 
@@ -72,9 +75,9 @@ public class AutomatonStats {
 				+ (stutterInsensitive ? "1" : "0") + "," + (universal ? "1" : "0") + "," + (empty ? "1" : "0") + ","
 				+ (veryWeak ? "1" : "0") + "," + (weak ? "1" : "0") + "," + (terminal ? "1" : "0") + ","
 				+ (deterministic ? "1" : "0")  + "," + nbSCC + "," + nbAccSCC +","+ nbRejSCC + "," + nbTrivSCC + "," + nbTrans 
-				+ "," + nbNonDet + "," + time;
+				+ "," + nbNonDet + "," + nbFacts + "," + time;
 		} else {
-			return name + "," + type + ",-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,"+ time ;
+			return name + "," + type + ",-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,"+ time ;
 		}
 	}
 
@@ -192,6 +195,10 @@ public class AutomatonStats {
 	}
 	public void setNbTrans(int nbTrans) {
 		this.nbTrans = nbTrans;
+	}
+
+	public void setNbFacts(int nbFacts) {
+		this.nbFacts = nbFacts;
 	}
 	
 	
