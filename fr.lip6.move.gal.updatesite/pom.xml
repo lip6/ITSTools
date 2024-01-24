@@ -21,12 +21,16 @@
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-p2-publisher-plugin</artifactId>
                 <version>${tycho-version}</version>
-                <configuration>
-					<includeAllDependencies>true</includeAllDependencies>
-					<createArtifactRepository>true</createArtifactRepository>
-					<compress>true</compress>
-					<publishArtifacts>true</publishArtifacts>
-                </configuration> 
+                <executions>
+					<execution>
+						<phase>package</phase>
+						<id>package-artefacts</id>
+						<goals>
+							<goal>attach-artifacts</goal>
+							<goal>publish-categories</goal>
+						</goals>
+					</execution>					
+                </executions> 
             </plugin>
         </plugins>
     </build>
