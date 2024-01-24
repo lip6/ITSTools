@@ -55,14 +55,21 @@ public class KnowledgeStatsCalculator {
 		            }
 		        }
 
-		        paths.parallelStream().forEach(path -> {
+		        paths.parallelStream().unordered().forEach(path -> {
 		            try {
 		                findAndProcessFiles(path, out, "LTLFireability");
+		            } catch (Exception e) {
+		                System.err.println("Error processing: " + path.toString() + " - " + e.getMessage());
+		            }
+		        });
+		        paths.parallelStream().unordered().forEach(path -> {
+		            try {
 		                findAndProcessFiles(path, out, "LTLCardinality");
 		            } catch (Exception e) {
 		                System.err.println("Error processing: " + path.toString() + " - " + e.getMessage());
 		            }
 		        });
+		        
 		    } catch (IOException e) {
 		        System.err.println("Error reading input directory: " + e.getMessage());
 		    }
@@ -163,9 +170,7 @@ public class KnowledgeStatsCalculator {
 				}
 				Set<String> rawSupport = rawSupports.get(lineNumber);
 
-				String formulaName = model + "-" + exam + "-" + String.format("%02d", lineNumber);
-
-				
+				String formulaName = model + "-" + exam + "-" + String.format("%02d", lineNumber);				
 				
 				
 				// the assertions we keep
@@ -178,26 +183,29 @@ public class KnowledgeStatsCalculator {
 				// make unique, but preserve order
 				selectedKnowledge = new ArrayList<>(new LinkedHashSet<>(selectedKnowledge));
 
-				ArrayList<String> falseKnowledge = new ArrayList<>();
-				selectKnowledge(falseKnowledgeFormulas, falseKnowledgeSupports, rawSupport, falseKnowledge, extendedSupport);
-				falseKnowledge = new ArrayList<>(new LinkedHashSet<>(falseKnowledge));
+				ArrayList<String> selectedFalseKnowledge = new ArrayList<>();
+				selectKnowledge(falseKnowledgeFormulas, falseKnowledgeSupports, rawSupport, selectedFalseKnowledge, extendedSupport);
+				selectedFalseKnowledge = new ArrayList<>(new LinkedHashSet<>(selectedFalseKnowledge));
 				
 				String andknowledge = String.join(" && ", selectedKnowledge);
 				if (selectedKnowledge.isEmpty()) {
-					System.out.println("No knowledge for formula " + formulaName + " (negative facts :"+falseKnowledge.size()+ ")");
+					System.out.println("No knowledge for formula " + formulaName + " (negative facts :"+selectedFalseKnowledge.size()+ ")");
 					
 					andknowledge = "1";
 					continue;
 				}
 				
+				TGBA rawTGBA = buildAndPrintAutomatonStats("raw", rawFormula, formulaName, out, sr,0);
 				
+				boolean withMinMax = false;
 				
-				TGBA rawTGBA = buildAndPrintAutomatonStats("raw", rawFormula, formulaName, out, sr);
-				
-				buildAndPrintAutomatonStats("min", "(" + rawFormula + ")&&" + andknowledge, formulaName, out, sr);
+				if (withMinMax) {
+					// NB : no existential quantification
+					buildAndPrintAutomatonStats("min", "(" + rawFormula + ")&&" + andknowledge, formulaName, out, sr,selectedKnowledge.size());
 
-				buildAndPrintAutomatonStats("max", "(" + rawFormula + ")||!(" + andknowledge + ")", formulaName, out, sr);
-
+					buildAndPrintAutomatonStats("max", "(" + rawFormula + ")||!(" + andknowledge + ")", formulaName, out, sr,selectedKnowledge.size());
+				}
+				
 				Set<String> toQuantify = new HashSet<>(extendedSupport);
 				toQuantify.removeAll(rawSupport);
 				//andknowledge = "(G((p16||!p32)))";
@@ -209,15 +217,15 @@ public class KnowledgeStatsCalculator {
 					}
 					String quantifiedKnowledge = selectedKnowledgeQE.isEmpty() ? "1" : String.join(" && ", selectedKnowledgeQE);
 					
-					buildAndPrintAutomatonStats("minqe", "(" + rawFormula + ")&&" + quantifiedKnowledge, formulaName, out, sr);
+					buildAndPrintAutomatonStats("minqe", "(" + rawFormula + ")&&" + quantifiedKnowledge, formulaName, out, sr,selectedKnowledge.size());
 
-					buildAndPrintAutomatonStats("maxqe", "(" + rawFormula + ")||!(" + quantifiedKnowledge + ")", formulaName, out, sr);
+					buildAndPrintAutomatonStats("maxqe", "(" + rawFormula + ")||!(" + quantifiedKnowledge + ")", formulaName, out, sr,selectedKnowledge.size());
 					
 					/* negative knowledge */
 					/* K- inter K+ inter A(phi) = empty */
 					/* So negate formula, AND the quantified knowledge -> automaton */
 					/* then test AND (product) the negative knowledge one by one is empty */
-					if (! falseKnowledge.isEmpty()) {
+					if (false && ! selectedFalseKnowledge.isEmpty()) {
 						long time = System.currentTimeMillis();
 						
 						String negRawFormula = rawFormulas.get(lineNumber);
@@ -227,13 +235,13 @@ public class KnowledgeStatsCalculator {
 						// cumulate positive knowledge and negated formula automaton
 						String knowledgeAndPhi = "(" + negRawFormula + ")&&" + quantifiedKnowledge;
 						// Build our automaton for (K+ AND phi)
-						boolean hasCounterExample = sr.testNegativeKnowledge(falseKnowledge, knowledgeAndPhi);
+						boolean hasCounterExample = sr.testNegativeKnowledge(selectedFalseKnowledge, knowledgeAndPhi);
 						
 						TGBA tgba = null;
 						if (hasCounterExample) {
 							tgba = TGBA.makeTrue();
 						}
-						AutomatonStats rawStats = AutomatonStatsCalculator.computeStats(tgba, formulaName, "negative",time);
+						AutomatonStats rawStats = AutomatonStatsCalculator.computeStats(tgba, formulaName, "negative",time,selectedFalseKnowledge.size());
 						synchronized (out) { out.println(rawStats.toString()); }												
 					}
 					
@@ -315,8 +323,9 @@ public class KnowledgeStatsCalculator {
 		return sb.toString();
 	}
 
+
 	public TGBA buildAndPrintAutomatonStats(String type, String formula, String formulaName, PrintStream out,
-			SpotRunner sr) {
+			SpotRunner sr, int nbFacts) {
 		// Generate raw stats
 		long time = System.currentTimeMillis();
 		TGBA tgba = null;
@@ -325,7 +334,7 @@ public class KnowledgeStatsCalculator {
 		} catch (IOException|InterruptedException|TimeoutException e) {
 			System.out.println("Detected an error : "+e.getMessage() + " when treating "+type+" formula for "+ formulaName);					
 		}
-		AutomatonStats rawStats = AutomatonStatsCalculator.computeStats(tgba, formulaName, type,time);
+		AutomatonStats rawStats = AutomatonStatsCalculator.computeStats(tgba, formulaName, type,time,nbFacts);		
 		synchronized (out) { out.println(rawStats.toString()); }
 		return tgba;
 	}
@@ -333,20 +342,51 @@ public class KnowledgeStatsCalculator {
 	public void applyGivenThat(String formulaName, TGBA rawTGBA, ArrayList<String> selectedKnowledge,
 			PrintStream out, SpotRunner sr, String prefix) {
 		
-		computeStats(formulaName, rawTGBA, GivenStrategy.MINATO, selectedKnowledge, out, sr, prefix);
-		computeStats(formulaName, rawTGBA, GivenStrategy.STUTTER_RELAX, selectedKnowledge, out, sr, prefix);
-		computeStats(formulaName, rawTGBA, GivenStrategy.STUTTER_RESTRICT, selectedKnowledge, out, sr, prefix);
-		computeStats(formulaName, rawTGBA, GivenStrategy.ALL, selectedKnowledge, out, sr, prefix);
+		boolean compositions = true;
+		boolean doubleCompositions = false;
+		
+		TGBA minato = computeStats(formulaName, rawTGBA, GivenStrategy.MINATO, selectedKnowledge, out, sr, prefix+ GivenStrategy.MINATO);
+		// minato/minato
+		// computeStats(formulaName, minato, GivenStrategy.MINATO, selectedKnowledge, out, sr, prefix+ GivenStrategy.MINATO+ GivenStrategy.MINATO);
+		if (compositions && minato != null) {
+			TGBA minrelax = computeStats(formulaName, minato, GivenStrategy.STUTTER_RELAX, selectedKnowledge, out, sr, prefix+ GivenStrategy.MINATO+GivenStrategy.STUTTER_RELAX);
+			if (doubleCompositions &&  minrelax != null) {
+				TGBA minrelaxmin = computeStats(formulaName, minrelax, GivenStrategy.MINATO, selectedKnowledge, out, sr, prefix+ GivenStrategy.MINATO+ GivenStrategy.STUTTER_RELAX+ GivenStrategy.MINATO);
+				if (minrelaxmin != null) { 
+					TGBA minrelaxminrelax = computeStats(formulaName, minrelaxmin, GivenStrategy.STUTTER_RELAX, selectedKnowledge, out, sr, prefix+ GivenStrategy.MINATO+ GivenStrategy.STUTTER_RELAX+ GivenStrategy.MINATO + GivenStrategy.STUTTER_RELAX);
+				}
+			}
+		}
+		
+		TGBA relax = computeStats(formulaName, rawTGBA, GivenStrategy.STUTTER_RELAX, selectedKnowledge, out, sr, prefix+ GivenStrategy.STUTTER_RELAX);
+		if (compositions && relax != null) {
+			TGBA relaxmin = computeStats(formulaName, relax, GivenStrategy.MINATO, selectedKnowledge, out, sr, prefix+ GivenStrategy.STUTTER_RELAX+ GivenStrategy.MINATO);
+			if (doubleCompositions && relaxmin != null) {
+				TGBA relaxminrelax = computeStats(formulaName, relaxmin, GivenStrategy.STUTTER_RELAX, selectedKnowledge, out, sr, prefix+ GivenStrategy.STUTTER_RELAX+ GivenStrategy.MINATO+ GivenStrategy.STUTTER_RELAX);
+				if (relaxminrelax != null) { 
+					TGBA relaxminrelaxmin = computeStats(formulaName, relaxminrelax, GivenStrategy.MINATO, selectedKnowledge, out, sr, prefix+ GivenStrategy.STUTTER_RELAX+ GivenStrategy.MINATO+ GivenStrategy.STUTTER_RELAX+ GivenStrategy.MINATO);
+				}
+			}
+		}
+		
+		computeStats(formulaName, rawTGBA, GivenStrategy.STUTTER_RESTRICT, selectedKnowledge, out, sr, prefix+ GivenStrategy.STUTTER_RESTRICT);
+		
+//		TGBA all =computeStats(formulaName, rawTGBA, GivenStrategy.ALL, selectedKnowledge, out, sr, prefix+ GivenStrategy.ALL);
+//		
+//		if (compositions && all != null) {
+//			TGBA allall =computeStats(formulaName, all, GivenStrategy.ALL, selectedKnowledge, out, sr, prefix+ GivenStrategy.ALL+ GivenStrategy.ALL);
+//		}
 
 	}
 
-	public void computeStats(String formulaName, TGBA rawTGBA, GivenStrategy strat, ArrayList<String> selectedKnowledge,
+	public TGBA computeStats(String formulaName, TGBA rawTGBA, GivenStrategy strat, ArrayList<String> selectedKnowledge,
 			PrintStream out, SpotRunner sr, String prefix) {
 		
 		long time = System.currentTimeMillis();
 		TGBA tgbaRes = sr.givenThat(rawTGBA, selectedKnowledge, strat);
-		AutomatonStats stats = AutomatonStatsCalculator.computeStats(tgbaRes, formulaName, prefix + strat,time);
+		AutomatonStats stats = AutomatonStatsCalculator.computeStats(tgbaRes, formulaName, prefix,time,selectedKnowledge.size());
 		synchronized (out) {out.println(stats.toString());}
+		return tgbaRes;
 	}
 
 

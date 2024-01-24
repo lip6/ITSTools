@@ -994,7 +994,7 @@ public class SpotRunner {
 				cl.addArg(pathToautfilt);
 				cl.addArg("--check=stutter");
 				cl.addArg("--hoaf=tv"); // prefix notation for output
-
+				cl.addArg("--tgba");
 				cl.addArg("--small");
 				for (String factoid : factoids)
 					cl.addArg("--given-formula="+factoid);
@@ -1025,7 +1025,7 @@ public class SpotRunner {
 					}
 				}
 			} catch (IOException | TimeoutException | InterruptedException e) {
-				System.err.println("Error "+ e.getMessage() + " while executing :"+ cl);
+				System.err.println("Error "+ e.getMessage());
 				// e.printStackTrace();
 			}
 			return tgbaout;
