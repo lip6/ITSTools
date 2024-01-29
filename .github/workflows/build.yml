@@ -24,7 +24,7 @@ jobs:
       with:
         maven-version: 3.9.6
     - name: Build with Maven
-      run: cd fr.lip6.move.gal.parent && mvn -e generate-sources install && cd -
+      run: cd fr.lip6.move.gal.parent && mvn -e install && cd -
     - name: copy update site to website
       run: cp -r fr.lip6.move.gal.updatesite/target/repository/* website/
     - name: Copy scripts
