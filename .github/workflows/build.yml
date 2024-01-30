@@ -24,13 +24,41 @@ jobs:
       with:
         maven-version: 3.9.6
     - name: Build with Maven
-      run: cd fr.lip6.move.gal.parent && mvn -e generate-sources && mvn -e package && mvn -e install && cd -
+      run: cd fr.lip6.move.gal.parent && mvn -e install && cd -
     - name: copy update site to website
       run: cp -r fr.lip6.move.gal.updatesite/target/repository/* website/ ; ls website/
     - name: Copy scripts
       run: cp ITS-commandline/fr.lip6.move.gal.itscl.product/target/products/*.zip website/ ; ls website/
-    - name: delete unused platform specifics from dist
-      run: cd website ; zip -d fr.lip6.move.gal.itscl.product-linux.gtk.x86_64.zip '*its-*-win64' '*its-*-Darwin' ; zip -d fr.lip6.move.gal.itscl.product-macosx.cocoa.x86_64.zip '*its-*-win64' '*its-*-linux64' ; zip -d fr.lip6.move.gal.itscl.product-win32.win32.x86_64.zip '*its-*-linux64' '*its-*-Darwin' ; cd .. 
+    - name: Prepare website directory
+      run: mkdir -p website/temp
+    - name: Copy zip files to website
+      run: |
+           mkdir -p website
+           cp ITS-commandline/fr.lip6.move.gal.itscl.product/target/products/*.zip website/
+    - name: Convert tar.gz to zip and move to website
+      run: |
+        mkdir -p temp
+        for file in ITS-commandline/fr.lip6.move.gal.itscl.product/target/products/*.tar.gz; do
+          # Extract the tar.gz file to a temporary directory
+          tar -zxvf "$file" -C temp
+          # Get the base name of the file
+          base_name=$(basename "$file" .tar.gz)
+          # Create a zip file with the same base name in the website directory
+          (cd temp && zip -r "../website/${base_name}.zip" .)
+          # Clean up the contents of the temporary directory
+          rm -rf temp/*
+        done
+        # Remove the temporary directory
+        rm -rf temp
+    - name: Delete unused platform specifics from dist
+      run: |
+        cd website
+        zip -d fr.lip6.move.gal.itscl.product-linux.gtk.x86_64.zip '*-win64' '*-Darwin'
+        zip -d fr.lip6.move.gal.itscl.product-macosx.cocoa.x86_64.zip '*-win64' '*-linux64'
+        zip -d fr.lip6.move.gal.itscl.product-win32.win32.x86_64.zip '*-linux64' '*-Darwin'
+        cd ..
+    - name: Clean up temporary files
+      run: rm -rf website/temp
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@v4.5.0
       with:
