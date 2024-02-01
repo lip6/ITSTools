@@ -191,13 +191,16 @@ public class KnowledgeStatsCalculator {
 				if (selectedKnowledge.isEmpty()) {
 					System.out.println("No knowledge for formula " + formulaName + " (negative facts :"+selectedFalseKnowledge.size()+ ")");
 					
-					andknowledge = "1";
+					andknowledge = "1";					
+				}
+				if (selectedKnowledge.isEmpty() && selectedFalseKnowledge.isEmpty()) {
+					System.out.println("No knowledge for formula " + formulaName + " (negative facts :"+selectedFalseKnowledge.size()+ ")");
 					continue;
 				}
 				
 				TGBA rawTGBA = buildAndPrintAutomatonStats("raw", rawFormula, formulaName, out, sr,0);
 				
-				boolean withMinMax = false;
+				boolean withMinMax = true;
 				
 				if (withMinMax) {
 					// NB : no existential quantification
@@ -217,15 +220,18 @@ public class KnowledgeStatsCalculator {
 					}
 					String quantifiedKnowledge = selectedKnowledgeQE.isEmpty() ? "1" : String.join(" && ", selectedKnowledgeQE);
 					
-					buildAndPrintAutomatonStats("minqe", "(" + rawFormula + ")&&" + quantifiedKnowledge, formulaName, out, sr,selectedKnowledge.size());
-
+					TGBA minqe = buildAndPrintAutomatonStats("minqe", "(" + rawFormula + ")&&" + quantifiedKnowledge, formulaName, out, sr,selectedKnowledge.size());
+					if (minqe != null) {
+						TGBA minrelax = computeStats(formulaName, minqe, GivenStrategy.STUTTER_RELAX, selectedKnowledge, out, sr, "p"+ "minqe"+GivenStrategy.STUTTER_RELAX);
+					}
+					
 					buildAndPrintAutomatonStats("maxqe", "(" + rawFormula + ")||!(" + quantifiedKnowledge + ")", formulaName, out, sr,selectedKnowledge.size());
 					
 					/* negative knowledge */
 					/* K- inter K+ inter A(phi) = empty */
 					/* So negate formula, AND the quantified knowledge -> automaton */
 					/* then test AND (product) the negative knowledge one by one is empty */
-					if (false && ! selectedFalseKnowledge.isEmpty()) {
+					if (! selectedFalseKnowledge.isEmpty()) {
 						long time = System.currentTimeMillis();
 						
 						String negRawFormula = rawFormulas.get(lineNumber);
