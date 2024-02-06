@@ -1093,6 +1093,70 @@ public class SpotRunner {
 	}
 
 	
+	public boolean isIncludedIn(List<String> negKnowledge, TGBA tgba) {
+		int lDEBUG=2;
+		List<File> todel = new ArrayList<>();
+		CommandLine cl = new CommandLine();
+		try {
+			long time = System.currentTimeMillis();
+
+			cl.addArg(pathToautfilt);
+
+			// build automaton for tgba
+			// pass TGBA in HOAF
+			// build automaton for tgba
+			// pass TGBA in HOAF
+			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
+			todel.add(curAut);
+			PrintWriter pw = new PrintWriter(curAut);
+			tgba.exportAsHOA(pw, ExportMode.SPOTAP);
+			pw.close();
+			cl.addArg("--included-in="+curAut.getCanonicalPath());
+
+			// build and pass aut for false factoid
+			File falseAut = Files.createTempFile("ffact", ".hoa").toFile();
+			todel.add(falseAut);
+			cl.addArg(falseAut.getCanonicalPath());
+
+			File stdOutput = Files.createTempFile("isImply", ".out").toFile();
+			todel.add(stdOutput);
+
+			for (String ltlFalseFact : negKnowledge) {
+
+				if (! buildAutomaton("!(" + ltlFalseFact +")",falseAut)) {
+					return false;
+				}
+
+
+
+				if (lDEBUG >= 1) System.out.println("Running Spot : " + cl);
+
+				int status = Runner.runTool(timeout, cl, stdOutput, true);
+				if (status == 0 || status == 1) {
+					if (lDEBUG >= 1) System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());
+
+					if (stdOutput.length() > 0) {
+						return true;
+					}
+				} else {
+					System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+					try (Stream<String> stream = Files.lines(Paths.get(stdOutput.getCanonicalPath()))) {
+						stream.forEach(System.out::println);
+					}
+				}
+			}
+		} catch (IOException | TimeoutException | InterruptedException e) {
+			System.err.println("Error while executing :"+ cl);
+			e.printStackTrace();
+		} finally {
+			if (lDEBUG == 0)
+				for (File f : todel) {
+					f.delete();
+				}
+		}				
+		return false;
+	}
+	
 	public boolean isIncludedIn(Expression falseFact, TGBA tgba) {
 		List<File> todel = new ArrayList<>();
 		CommandLine cl = new CommandLine();
