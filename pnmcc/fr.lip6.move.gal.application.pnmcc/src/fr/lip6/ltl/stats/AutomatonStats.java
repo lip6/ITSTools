@@ -77,7 +77,7 @@ public class AutomatonStats {
 				+ (deterministic ? "1" : "0")  + "," + nbSCC + "," + nbAccSCC +","+ nbRejSCC + "," + nbTrivSCC + "," + nbTrans 
 				+ "," + nbNonDet + "," + nbFacts + "," + time;
 		} else {
-			return name + "," + type + ",-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,"+ time ;
+			return name + "," + type + ",-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,"+nbFacts+","+ time ;
 		}
 	}
 
