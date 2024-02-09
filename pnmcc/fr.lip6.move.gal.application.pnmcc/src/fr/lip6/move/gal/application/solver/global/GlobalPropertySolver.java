@@ -403,12 +403,24 @@ public class GlobalPropertySolver {
 					reader.getHLPN().getProperties().clear();
 				}
 				readercopy.getSPN().getProperties().clear();
+				
+				GlobalDonePropertyPrinter localDone = new GlobalDonePropertyPrinter(QUASI_LIVENESS, false);
 				Optional<Boolean> qlResult = solveProperty(QUASI_LIVENESS, readercopy,
-						new GlobalDonePropertyPrinter(QUASI_LIVENESS, false));
+						localDone);
 
-				if (qlResult.isPresent() && !qlResult.get()) {
-					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES QUASILIVENESS_TEST");
-					return Optional.of(false);
+				if (qlResult.isPresent()) {
+					if (!qlResult.get()) {
+						System.out.println("FORMULA " + examination + " FALSE TECHNIQUES QUASILIVENESS_TEST");
+						return Optional.of(false);
+					} else {
+						
+						doneProps.put(QUASI_LIVENESS, true, localDone.computeTechniques() +" " + "QUASI_LIVE_REVERSIBLE");
+						// Quasi live + reversible => live
+						// this is a single property to check (initial state is a home state), might be simpler.
+						System.out.println("Net is quasi-live, checking if it reversible to establish liveness.");
+						reader.getSPN().getProperties().clear();
+						buildReversibleProperty(reader.getSPN());
+					}
 				} else if (reader.getHLPN() != null) {
 					reader.getHLPN().getProperties().clear();
 					reader.getHLPN().getProperties().addAll(hlpnprops);
@@ -536,7 +548,13 @@ public class GlobalPropertySolver {
 					}
 					reader.getSPN().readFrom(sr);
 				}
-				buildProperties(examination, reader.getSPN(), doneProps);
+				if (examination.equals(LIVENESS) && Boolean.valueOf(true).equals(doneProps.getValue(QUASI_LIVENESS))) {
+					System.out.println("Net is quasi-live, checking if it is reversible to establish liveness.");
+					reader.getSPN().getProperties().clear();
+					buildReversibleProperty(reader.getSPN());
+				} else {				
+					buildProperties(examination, reader.getSPN(), doneProps);
+				}
 			}
 
 			SparsePetriNet spn = reader.getSPN();
@@ -755,6 +773,15 @@ public class GlobalPropertySolver {
 		}
 	}
 
+	private void buildReversibleProperty(SparsePetriNet spn) {
+		List<Expression> places = new ArrayList<>();
+		for (int p=0; p < spn.getPlaceCount() ; p++) {
+			Expression initialState = Expression.op(Op.EQ, Expression.var(p), Expression.constant(spn.getMarks().get(p)));
+			places.add(initialState);
+		}
+		spn.getProperties().add(new Property(Expression.nop(Op.AG, Expression.nop(Op.EF, Expression.nop(Op.AND,places))), PropertyType.CTL,"HOMESTATE"));
+	}
+	
 	public boolean isSuccess(DoneProperties doneProperties, String examination) {
 		if (examination.equals(ONE_SAFE) || examination.equals(QUASI_LIVENESS) || examination.equals(LIVENESS)) {
 			// at least one false
