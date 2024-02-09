@@ -394,6 +394,13 @@ This Agreement is governed by the laws of the State of New York and the intellec
          unpack="false"/>
 
    <plugin
+         id="org.apache.ws.commons.axiom.axiom-dom"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="wrapped.com.thaiopensource.jing"
          download-size="0"
          install-size="0"
