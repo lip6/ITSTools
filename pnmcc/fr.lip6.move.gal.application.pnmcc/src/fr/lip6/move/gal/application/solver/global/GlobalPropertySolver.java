@@ -144,9 +144,16 @@ public class GlobalPropertySolver {
 	}
 
 	void buildStableMarkingProperty(PetriNet spn, DoneProperties doneProps) {
-		boolean[] todiscard = null;
+		boolean[] todiscard = new boolean[spn.getPlaceCount()];
 		if (spn instanceof SparsePetriNet) {
 			SparsePetriNet sspn = (SparsePetriNet) spn;
+			
+			int nbp= spn.getPlaceCount();
+			sspn.removeConstantPlaces();
+			if (sspn.getPlaceCount() < nbp) {
+				doneProps.put(STABLE_MARKING, true, "CONSTANT_TEST");
+			}
+			
 			//todiscard = computeNonStablePlaces(sspn, doneProps);
 			todiscard = GraphSuffix.computeNonStablePlaces(sspn, doneProps);
 
@@ -673,7 +680,10 @@ public class GlobalPropertySolver {
 						}
 					});
 					itsRunner.join();
-				} catch (IOException | InterruptedException e) {
+				} catch (InterruptedException e) {
+					System.out.println("ITS runner timed out or was interrupted.");					
+					wasInterrupted = true;
+				} catch (IOException e) {
 					System.out.println("ITS runner failed with exception " + e.getMessage());
 					e.printStackTrace();
 					wasInterrupted = true;
