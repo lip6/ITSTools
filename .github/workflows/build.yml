@@ -20,11 +20,11 @@ jobs:
         java-version: 17
         distribution: 'temurin'
     - name: Setup Maven
-      uses: stCarolas/setup-maven@v.4.5
+      uses: stCarolas/setup-maven@v5
       with:
         maven-version: 3.9.6
     - name: Build with Maven
-      run: cd fr.lip6.move.gal.parent && mvn -e install && cd -
+      run: cd fr.lip6.move.gal.parent && mvn -B -e install && cd -
     - name: copy update site to website
       run: cp -r fr.lip6.move.gal.updatesite/target/repository/* website/ ; ls website/
     - name: Copy scripts

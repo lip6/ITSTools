@@ -6,6 +6,6 @@ Bundle-Version: 1.0.0.qualifier
 Automatic-Module-Name: fr.lip6.lola
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: fr.lip6.move.gal.structural,
- org.antlr.runtime;bundle-version="4.10.1",
+ org.antlr.antlr4-runtime;bundle-version="4.13.1",
  fr.lip6.move.gal.pnml.togal
 Export-Package: fr.lip6.mist.io
