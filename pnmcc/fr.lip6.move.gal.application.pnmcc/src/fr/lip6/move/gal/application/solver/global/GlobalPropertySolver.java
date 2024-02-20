@@ -56,6 +56,8 @@ public class GlobalPropertySolver {
 
 	private static final String ONE_SAFE = "OneSafe";
 
+	private static final String REVERSIBLE = "Reversible";
+	
 	private static final int DEBUG = 0;
 
 	public GlobalPropertySolver() {
@@ -414,12 +416,9 @@ public class GlobalPropertySolver {
 						return Optional.of(false);
 					} else {
 						
-						doneProps.put(QUASI_LIVENESS, true, localDone.computeTechniques() +" " + "QUASI_LIVE_REVERSIBLE");
+						doneProps.put(QUASI_LIVENESS, true, localDone.computeTechniques());
 						// Quasi live + reversible => live
 						// this is a single property to check (initial state is a home state), might be simpler.
-						System.out.println("Net is quasi-live, checking if it reversible to establish liveness.");
-						reader.getSPN().getProperties().clear();
-						buildReversibleProperty(reader.getSPN());
 					}
 				} else if (reader.getHLPN() != null) {
 					reader.getHLPN().getProperties().clear();
@@ -548,85 +547,109 @@ public class GlobalPropertySolver {
 					}
 					reader.getSPN().readFrom(sr);
 				}
-				if (examination.equals(LIVENESS) && Boolean.valueOf(true).equals(doneProps.getValue(QUASI_LIVENESS))) {
+				buildProperties(examination, reader.getSPN(), doneProps);
+			}
+			
+			if (examination.equals(LIVENESS) && Boolean.valueOf(true).equals(doneProps.getValue(QUASI_LIVENESS))) {
 					System.out.println("Net is quasi-live, checking if it is reversible to establish liveness.");
-					reader.getSPN().getProperties().clear();
-					buildReversibleProperty(reader.getSPN());
-				} else {				
-					buildProperties(examination, reader.getSPN(), doneProps);
-				}
-			}
 
-			SparsePetriNet spn = reader.getSPN();
-
-			spn.simplifyLogic();
-			spn.toPredicates();
-			if (spn.testInInitial() > 0) {
-				ReachabilitySolver.checkInInitial(spn, doneProps);
-			}
-			spn.removeConstantPlaces();
-			spn.removeRedundantTransitions(false);
-			spn.removeConstantPlaces();
-			ReachabilitySolver.checkInInitial(spn, doneProps);
-			spn.simplifyLogic();
-			if (spn.isSafe()) {
-				spn.assumeOneSafe();
-			}
-			ReachabilitySolver.checkInInitial(spn, doneProps);
-
-			if (ONE_SAFE.equals(examination) && reader.getHLPN() == null) {
-				executeOneSafeOnHLPNTest(doneProps, spn);
-			}
-
-			// vire les prop triviales, utile ?
-			if (!LIVENESS.equals(examination))
-				applyReachabilitySolver(reader, doneProps);
-
-			spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-
-			if (!spn.getProperties().isEmpty() && !doneProps.isFinished()) {
-				for (int i=1; i<=1000; i*=10) {
-					if (LIVENESS.equals(examination)) {
-						verifyWithSDD(reader, doneProps, "CTLFireability", 3*i);						
+					MccTranslator readercopy = reader.copy();
+					readercopy.getSPN().getProperties().clear();
+					buildReversibleProperty(readercopy.getSPN());
+					
+					GlobalDonePropertyPrinter localDone = new GlobalDonePropertyPrinter(LIVENESS, false);
+					
+					Optional<Boolean> result = applyExhaustiveMethods(examination, readercopy, localDone);
+					if (result.isPresent() && result.get()) {
+						doneProps.put(REVERSIBLE, true, localDone.computeTechniques());
+						doneProps.put(examination, true, localDone.computeTechniques() + " QUASI_LIVE_REVERSIBLE");
+						GlobalDonePropertyPrinter gdpp = ((GlobalDonePropertyPrinter) doneProps);
+						if (gdpp.shouldTrace()) {
+							System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + gdpp.computeTechniques());
+						}
+						reader.getSPN().getProperties().clear();
 					} else {
-						verifyWithSDD(reader, doneProps, "ReachabilityFireability", 3*i);
+						// doneProps.put(REVERSIBLE, false, localDone.computeTechniques());
 					}
-					if (doneProps.isFinished()) {
-						return Optional.of(doneProps.getValue(examination));
-					}
-					if (spn.getProperties().isEmpty()) {
-						break;
-					}
-				}
 			}
 
-			if (doneProps.containsKey(examination)) {
-				return Optional.of(doneProps.getValue(examination));
-			}
+			
 
-			spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-
-			if (!spn.getProperties().isEmpty()) {
-				System.out.println("Unable to solve all queries for examination " + examination + ". Remains :"
-						+ spn.getProperties().size() + " assertions to prove.");
-				return Optional.empty();
-			} else {
-				System.out.println(
-						"Able to resolve query " + examination + " after proving " + doneProps.size() + " properties.");
-				boolean success = isSuccess(doneProps, examination);
-
-				GlobalDonePropertyPrinter gdpp = (GlobalDonePropertyPrinter) doneProps;
-				if (gdpp.shouldTrace()) {
-					if (success)
-						System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + gdpp.computeTechniques());
-					else
-						System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + gdpp.computeTechniques());
-				}
-				return Optional.of(success);
-			}
+			return applyExhaustiveMethods(examination, reader, doneProps);
 
 		} catch (GlobalPropertySolverException e) {
 			return Optional.of(e.verdict);
+		}
+	}
+
+	public Optional<Boolean> applyExhaustiveMethods(String examination, MccTranslator reader,
+			DoneProperties doneProps) {
+		SparsePetriNet spn = reader.getSPN();
+
+		spn.simplifyLogic();
+		spn.toPredicates();
+		if (spn.testInInitial() > 0) {
+			ReachabilitySolver.checkInInitial(spn, doneProps);
+		}
+		spn.removeConstantPlaces();
+		spn.removeRedundantTransitions(false);
+		spn.removeConstantPlaces();
+		ReachabilitySolver.checkInInitial(spn, doneProps);
+		spn.simplifyLogic();
+		if (spn.isSafe()) {
+			spn.assumeOneSafe();
+		}
+		ReachabilitySolver.checkInInitial(spn, doneProps);
+
+		if (ONE_SAFE.equals(examination) && reader.getHLPN() == null) {
+			executeOneSafeOnHLPNTest(doneProps, spn);
+		}
+		boolean hasCTL = spn.getProperties().stream().anyMatch(p -> p.getType() == PropertyType.CTL);
+		// vire les prop triviales, utile ?
+		if (!hasCTL)
+			applyReachabilitySolver(reader, doneProps);
+
+		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+
+		if (!spn.getProperties().isEmpty() && !doneProps.isFinished()) {
+			for (int i=1; i<=1000; i*=10) {
+				if (hasCTL) {
+					verifyWithSDD(reader, doneProps, "CTLFireability", 3*i);						
+				} else {
+					verifyWithSDD(reader, doneProps, "ReachabilityFireability", 3*i);
+				}
+				if (doneProps.isFinished()) {
+					return Optional.of(doneProps.getValue(examination));
+				}
+				if (spn.getProperties().isEmpty()) {
+					break;
+				}
+			}
+		}
+
+		if (doneProps.containsKey(examination)) {
+			return Optional.of(doneProps.getValue(examination));
+		}
+
+		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+
+		if (!spn.getProperties().isEmpty()) {
+			System.out.println("Unable to solve all queries for examination " + examination + ". Remains :"
+					+ spn.getProperties().size() + " assertions to prove.");
+			return Optional.empty();
+		} else {
+			System.out.println(
+					"Able to resolve query " + examination + " after proving " + doneProps.size() + " properties.");
+			boolean success = isSuccess(doneProps, examination);
+
+			GlobalDonePropertyPrinter gdpp = (GlobalDonePropertyPrinter) doneProps;
+			if (gdpp.shouldTrace()) {
+				if (success)
+					System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + gdpp.computeTechniques());
+				else
+					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + gdpp.computeTechniques());
+			}
+			return Optional.of(success);
 		}
 	}
 
@@ -779,7 +802,7 @@ public class GlobalPropertySolver {
 			Expression initialState = Expression.op(Op.EQ, Expression.var(p), Expression.constant(spn.getMarks().get(p)));
 			places.add(initialState);
 		}
-		spn.getProperties().add(new Property(Expression.nop(Op.AG, Expression.nop(Op.EF, Expression.nop(Op.AND,places))), PropertyType.CTL,"HOMESTATE"));
+		spn.getProperties().add(new Property(Expression.nop(Op.AG, Expression.nop(Op.EF, Expression.nop(Op.AND,places))), PropertyType.CTL,REVERSIBLE));
 	}
 	
 	public boolean isSuccess(DoneProperties doneProperties, String examination) {
