@@ -558,5 +558,18 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		return (this.getFlowPT().getColumns().stream().mapToInt(c->c.size()).sum() + this.getFlowTP().getColumns().stream().mapToInt(c->c.size()).sum());
 	}
 
+	/**
+	 * A net is conservative if all transitions consume as many tokens as they produce (hence total tokens is always the same as initial tokens).
+	 * @return whether the net is conservative
+	 */
+	public boolean isConservative() {
+		for (int t=0,te=getTransitionCount(); t < te ; t++) {
+			if (flowPT.getColumn(t).sumValues() != flowTP.getColumn(t).sumValues()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 
 }
