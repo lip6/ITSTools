@@ -797,10 +797,17 @@ public class GlobalPropertySolver {
 	}
 
 	private void buildReversibleProperty(SparsePetriNet spn) {
+		boolean conservative = spn.isConservative();
+		if (conservative) {
+			System.out.println("Net is conservative; using simplified expression for initial state.");
+		}
 		List<Expression> places = new ArrayList<>();
 		for (int p=0; p < spn.getPlaceCount() ; p++) {
-			Expression initialState = Expression.op(Op.EQ, Expression.var(p), Expression.constant(spn.getMarks().get(p)));
-			places.add(initialState);
+			int mark = spn.getMarks().get(p);
+			if (!conservative || mark != 0) {
+				Expression initialState = Expression.op(Op.EQ, Expression.var(p), Expression.constant(mark));
+				places.add(initialState);
+			}
 		}
 		spn.getProperties().add(new Property(Expression.nop(Op.AG, Expression.nop(Op.EF, Expression.nop(Op.AND,places))), PropertyType.CTL,REVERSIBLE));
 	}
