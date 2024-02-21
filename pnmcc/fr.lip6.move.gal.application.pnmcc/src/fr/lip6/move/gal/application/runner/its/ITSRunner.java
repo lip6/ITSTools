@@ -364,7 +364,8 @@ public class ITSRunner extends AbstractRunner {
 
 
 	public String outputPropertyFile() throws IOException {
-		String proppath ; 
+		String proppath ;
+		spec.getProperties().removeIf(p-> doneProps.containsKey(p.getName()));
 		if (examination.contains("CTL")) {
 			File file = Files.createTempFile(examination, ".ctl").toFile();
 			if (DEBUG == 0) file.deleteOnExit();
