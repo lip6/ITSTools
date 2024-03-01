@@ -1,8 +1,10 @@
 package fr.lip6.move.gal.structural;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,10 +35,10 @@ public class RandomExplorer {
 	public int[] runGuidedReachabilityDetection (long nbSteps, SparseIntArray parikhori, SparseIntArray porori, List<Expression> exprs, List<Integer> repr, int timeout, boolean max) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
-		Map<Integer, List<Integer>> repSet = computeMap(repr);		
-		SparseIntArray parikh = transformParikh(parikhori, repr, repSet);
+		Map<Integer, List<Integer>> repSet = InvariantCalculator.computeMap(repr);		
+		SparseIntArray parikh = InvariantCalculator.transformParikh(parikhori, repSet);
 		parikhori = parikh.clone();
-		int [] por = transformParikh(porori, repr, repSet).toArray(wu.getNet().getTransitionCount());
+		int [] por = InvariantCalculator.transformParikh(porori, repSet).toArray(wu.getNet().getTransitionCount());
 		
 		long time = System.currentTimeMillis();
 		SparseIntArray state = wu.getInitial();
@@ -454,8 +456,8 @@ public class RandomExplorer {
 	public void runGuidedDeadlockDetection (long nbSteps, SparseIntArray parikhori, List<Integer> repr, int timeout) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		long time = System.currentTimeMillis();
-		Map<Integer, List<Integer>> repSet = computeMap(repr);		
-		SparseIntArray parikh = transformParikh(parikhori, repr, repSet);
+		Map<Integer, List<Integer>> repSet = InvariantCalculator.computeMap(repr);		
+		SparseIntArray parikh = InvariantCalculator.transformParikh(parikhori, repSet);
 		parikhori = parikh.clone();
 		SparseIntArray state = wu.getInitial();
 		int [] list = wu.getInitialEnabling().clone();
@@ -506,37 +508,9 @@ public class RandomExplorer {
 		long dur = System.currentTimeMillis() -time + 1; // avoid zero divide
 		System.out.println("Parikh directed walk for "+ i + "  steps, including "+nbresets+ " resets, run took "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );
 	}
-
-	private SparseIntArray transformParikh(SparseIntArray parikhori, List<Integer> repr, Map<Integer, List<Integer>> repSet) {
-		SparseIntArray parikh = new SparseIntArray();
-		for (int i=0, e=parikhori.size() ; i < e ; i++) {
-			int t = repr.get(parikhori.keyAt(i));
-			int k = parikhori.valueAt(i);
-			for (int tr : repSet.get(t)) {
-				parikh.put(tr, k);
-			}
-		}
-		return parikh;
-	}
-
-	private Map<Integer, List<Integer>> computeMap(List<Integer> repr) {
-		Map<Integer,List<Integer>> repSet = new HashMap<>();
-		for (int i=0, e=repr.size(); i < e ; i++) {
-			final int t = i;
-			repSet.compute(repr.get(t), (k, v) ->  {
-				if (v == null) {
-					List<Integer> l = new ArrayList<>();
-					l.add(t);
-					return l;
-				} else {
-					v.add(t);
-					return v;
-				}
-			});
-		}
-		return repSet;
-	}
 	
+
+
 	public void runDeadlockDetection (long nbSteps, boolean fullRand, int timeout) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
@@ -638,6 +612,134 @@ public class RandomExplorer {
 			}
 		}
 		return repeat;
+	}
+
+
+	public int[] runProbabilisticReachabilityDetectionWithEnabled (long nbSteps, List<Expression> exprs, int timeout, int bestFirst, boolean exhaustive, WasExhaustive wex) {
+		long time = System.currentTimeMillis();
+		boolean isLifo = false;
+		SparseIntArray istate = wu.getInitial();
+
+		int [] verdicts = new int [exprs.size()];
+		int  i=0;
+		long explored = 0;
+		long seen = 1; // initial state
+
+		try {
+			Deque<SparseIntArray> todo = new ArrayDeque<>();
+			todo.add(istate);
+			Deque<int[]> todoEnabled = new ArrayDeque<>();
+			todoEnabled.add(wu.getInitialEnabling().clone());
+			BloomFilter bloom = null;
+			Set<SparseIntArray> real = null; 
+			if (! exhaustive) {
+				bloom = new BloomFilter(10000000, 16*1024*1024*8);
+				bloom.add(istate);
+			} else {
+				real = new HashSet<>();
+				real.add(istate);
+			}
+			if (! updateVerdicts(exprs, istate, verdicts)) {
+				System.out.println("Finished probabilistic random walk after "+ i + "  steps, run visited all " +exprs.size()+ " properties in 0 ms. (steps per millisecond=0 )"+ (DEBUG >=1 ? (" reached state " + istate):"") );				
+				return verdicts;
+			}
+			int shuffled =0;
+			for (; i < nbSteps && ! todo.isEmpty() && todo.size() < nbSteps ; i++) {
+				long dur = System.currentTimeMillis() - time + 1; 
+				if (dur > 1000 * timeout) {
+					System.out.println("Interrupted probabilistic random walk after "+ i + "  steps, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.stream(verdicts).filter(x->x>0).count()  + " out of " + exprs.size());
+					break;
+				}
+				SparseIntArray state ;
+				int [] list ;
+				if (isLifo) {
+					state = todo.pollLast();
+					list = todoEnabled.pollLast();
+				} else {
+					state = todo.pollFirst();
+					list = todoEnabled.pollFirst();					
+				}
+				explored++;
+
+				if (list[0] == 0){
+					//System.out.println("Dead end with self loop(s) found at step " + i);				
+					continue;
+				}
+
+				boolean dobreak = false;
+				for (int ti = 1 ; ti-1 < list[0] && i < nbSteps && todo.size() < nbSteps; ti++, i++) {
+					SparseIntArray succ = wu.fire(list[ti],state);
+					if (!exhaustive) {
+						if (! bloom.contains(succ)) {
+							todo.add(succ);
+							int [] en = list.clone();
+							wu.updateEnabled(succ, en, list[ti]);
+							todoEnabled.add(en);
+							bloom.add(succ);
+							seen++;
+							if (! updateVerdicts(exprs, succ, verdicts)) {
+								System.out.println("Finished probabilistic random walk after "+ i + "  steps, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
+								dobreak = true;
+								break;
+							}
+						}
+					} else {
+						if (!real.contains(succ)) {
+							todo.add(succ);
+							int [] en = list.clone();
+							wu.updateEnabled(succ, en, list[ti]);
+							todoEnabled.add(en);
+							real.add(succ);
+							seen++;
+							if (! updateVerdicts(exprs, succ, verdicts)) {
+								System.out.println("Finished exhaustive random walk after "+ i + "  steps, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
+								dobreak = true;
+								break;
+							}
+							if (DEBUG >=2) {
+								if (! bloom.contains(succ)) {
+									bloom.add(succ);
+								} else {
+									System.out.println("collision " + succ);
+								}
+							}
+						}
+					}
+
+					if (list[0] > 1000 && ti%1000 == 0) {
+						dur = System.currentTimeMillis() - time + 1; 
+						if (dur > 1000 * timeout) {
+							dobreak = true;
+							break;
+						}
+					}
+				}
+				if (dobreak) 
+					break;
+				if (i/10000 > shuffled) {
+					shuffled = i / 1000;
+					isLifo = ! isLifo;
+				}
+			}
+			if (todo.isEmpty()) {
+				wex.wasExhaustive = true;
+				if (! exhaustive) {
+					System.out.println("Probably explored full state space saw : "+ seen + "  states, properties seen :" + Arrays.stream(verdicts).filter(x->x>0).count());
+				} else {
+					System.out.println("Explored full state space saw : "+ seen + "  states, properties seen :" + Arrays.stream(verdicts).filter(x->x>0).count() );
+				}
+			}
+			long dur = System.currentTimeMillis() - time + 1; 
+			if (! exhaustive) {
+				System.out.println("Probabilistic random walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.stream(verdicts).filter(x->x>0).count()  );
+			} else {
+				System.out.println("Exhaustive walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.stream(verdicts).filter(x->x>0).count()  );
+			}
+		} catch (OutOfMemoryError e) {
+			long dur = System.currentTimeMillis() - time + 1; 
+			System.out.println("Probabilistic random walk exhausted memory after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.stream(verdicts).filter(x->x>0).count()  );
+		}
+		return verdicts;
 	}
 
 	
