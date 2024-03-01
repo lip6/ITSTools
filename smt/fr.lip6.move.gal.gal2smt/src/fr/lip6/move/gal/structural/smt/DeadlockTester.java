@@ -2293,7 +2293,7 @@ public class DeadlockTester {
 
 			SparseIntArray line = mat.getColumn(varindex);
 			
-			IExpr constraint = buildRowConstraint(line, ef);
+			IExpr constraint = ef.fcn(ef.symbol("+"), ef.numeral(initialMarking.get(varindex)), buildRowConstraint(line, ef));
 						
 			script.add(
 					new C_assert(
