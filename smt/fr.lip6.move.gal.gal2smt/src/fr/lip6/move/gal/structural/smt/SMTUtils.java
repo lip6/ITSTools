@@ -2,9 +2,7 @@ package fr.lip6.move.gal.structural.smt;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import org.smtlib.ICommand;
@@ -12,23 +10,20 @@ import org.smtlib.ICommand.Icheck_sat;
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.IExpr.ISymbol;
-import org.smtlib.SMT.Configuration;
 import org.smtlib.IPrinter;
 import org.smtlib.IResponse;
 import org.smtlib.ISolver;
 import org.smtlib.SMT;
+import org.smtlib.SMT.Configuration;
 import org.smtlib.Utils;
 import org.smtlib.command.C_assert;
 import org.smtlib.impl.Script;
 
-import android.util.SparseIntArray;
 import fr.lip6.move.gal.gal2smt.Solver;
-import fr.lip6.move.gal.structural.ISparsePetriNet;
-import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.smt.z3.binaries.BinaryToolsPlugin;
 
 public class SMTUtils {
-	
+
 	enum POType {
 		Plunge, // use Nat or Real
 		Forall, // use explicit predicates/constraints
@@ -40,14 +35,15 @@ public class SMTUtils {
 	private static final int DEBUG = 0;
 
 	// utility class, don't instantiate
-	private SMTUtils() {}
-	
+	private SMTUtils() {
+	}
+
 	public static IExpr makeAnd(List<IExpr> list) {
 		IFactory ef = new SMT().smtConfig.exprFactory;
 		list.removeIf(e -> e instanceof ISymbol && "true".equals(((ISymbol) e).value()));
 		if (list.isEmpty()) {
 			return ef.symbol("true");
-		} else if (list.size()==1) {
+		} else if (list.size() == 1) {
 			return list.get(0);
 		} else {
 			return ef.fcn(ef.symbol("and"), list);
@@ -59,7 +55,7 @@ public class SMTUtils {
 		list.removeIf(e -> e instanceof ISymbol && "false".equals(((ISymbol) e).value()));
 		if (list.isEmpty()) {
 			return ef.symbol("false");
-		} else if (list.size()==1) {
+		} else if (list.size() == 1) {
 			return list.get(0);
 		} else {
 			return ef.fcn(ef.symbol("or"), list);
@@ -67,14 +63,16 @@ public class SMTUtils {
 	}
 
 	/**
-	 * Start an instance of a Z3 solver, with timeout at provided, logic QF_LIA/LRA, with produce models.
-	 * @param smt the smt instance to configure/setup
-	 * @param solveWithReals 
+	 * Start an instance of a Z3 solver, with timeout at provided, logic QF_LIA/LRA,
+	 * with produce models.
+	 * 
+	 * @param smt            the smt instance to configure/setup
+	 * @param solveWithReals
 	 * @return a started solver or throws a RuntimeEx
 	 */
 	public static ISolver initSolver(org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
 		if (useAbstractDataType == POType.Forall) {
-			return  initSolver(smt, "AUFLIRA", timeoutQ, timeoutT);
+			return initSolver(smt, "AUFLIRA", timeoutQ, timeoutT);
 		} else if (useAbstractDataType == POType.Plunge) {
 			if (solveWithReals) {
 				return initSolver(smt, "QF_LRA", timeoutQ, timeoutT);
@@ -88,7 +86,7 @@ public class SMTUtils {
 
 	public static ISolver initSolver(org.smtlib.SMT smt, String logic, int timeoutQ, int timeoutT) {
 		smt.smtConfig.executable = "";
-		
+
 		try {
 			smt.smtConfig.executable = BinaryToolsPlugin.getProgramURI().getPath();
 		} catch (IOException e) {
@@ -99,13 +97,15 @@ public class SMTUtils {
 		smt.smtConfig.timeout = timeoutQ;
 		smt.smtConfig.timeoutTotal = timeoutT;
 		Solver engine = Solver.Z3;
-		ISolver solver = engine.getSolver(smt.smtConfig);		
+		ISolver solver = engine.getSolver(smt.smtConfig);
 		// start the solver
 		IResponse err = solver.start();
 		if (err.isError()) {
-			throw new RuntimeException("Could not start solver "+ engine+" from path "+ smt.smtConfig.executable + " raised error :"+err);
+			throw new RuntimeException("Could not start solver " + engine + " from path " + smt.smtConfig.executable
+					+ " raised error :" + err);
 		}
-		err = solver.set_option(smt.smtConfig.exprFactory.keyword(Utils.PRODUCE_MODELS), smt.smtConfig.exprFactory.symbol("true"));
+		err = solver.set_option(smt.smtConfig.exprFactory.keyword(Utils.PRODUCE_MODELS),
+				smt.smtConfig.exprFactory.symbol("true"));
 		if (err.isError()) {
 			throw new RuntimeException("Could not set :produce-models option :" + err);
 		}
@@ -139,8 +139,9 @@ public class SMTUtils {
 		IResponse res = solver.check_sat();
 		IPrinter printer = smtConf.defaultPrinter;
 		String textReply = printer.toString(res);
-		if (DEBUG >= 2)
+		if (DEBUG >= 2) {
 			System.out.println(textReply);
+		}
 		if ("unknown".equals(textReply) && retry) {
 			Logger.getLogger("fr.lip6.move.gal").info("SMT solver returned unknown. Retrying;");
 			res = solver.check_sat();
@@ -156,50 +157,52 @@ public class SMTUtils {
 		return declareVariables(nbvars, prefix, false, false, smt, "Bool");
 	}
 
-	public static Script declareVariables(int nbvars, String prefix, boolean isSafe, boolean isPositive, org.smtlib.SMT smt, boolean solveWithReals) {
+	public static Script declareVariables(int nbvars, String prefix, boolean isSafe, boolean isPositive,
+			org.smtlib.SMT smt, boolean solveWithReals) {
 		return declareVariables(nbvars, prefix, isSafe, isPositive, smt, solveWithReals ? "Real" : "Int");
 	}
 
-	public static Script declareVariables(int nbvars, String prefix, boolean isSafe, boolean isPositive, org.smtlib.SMT smt, String type) {
+	public static Script declareVariables(int nbvars, String prefix, boolean isSafe, boolean isPositive,
+			org.smtlib.SMT smt, String type) {
 		Script script = new Script();
 		IFactory ef = smt.smtConfig.exprFactory;
 		org.smtlib.ISort.IApplication ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol(type));
-		
-		for (int i=0 ; i < nbvars ; i++) {
-			ISymbol si = ef.symbol(prefix+i);
-			script.add(new org.smtlib.command.C_declare_fun(
-					si,
-					Collections.emptyList(),
-					ints2								
-					));
-			if (isPositive)
+
+		for (int i = 0; i < nbvars; i++) {
+			ISymbol si = ef.symbol(prefix + i);
+			script.add(new org.smtlib.command.C_declare_fun(si, Collections.emptyList(), ints2));
+			if (isPositive) {
 				script.add(new C_assert(ef.fcn(ef.symbol(">="), si, ef.numeral(0))));
+			}
 			if (isSafe) {
 				script.add(new C_assert(ef.fcn(ef.symbol("<="), si, ef.numeral(1))));
-			}			
+			}
 		}
 		return script;
 	}
 
 	/**
-	 * Creates and returns a script declaring N natural integer variables, with names prefix0 to prefixN-1. *
-	 * If isSafe is true the upper bound is set to 1 (so they are 0 or 1 ~ boolean variables in effect).
-	 * @param nbvars the number of variables to add  in the script
-	 * @param prefix the prefix used in building variable names
-	 * @param isSafe do we have an upper bound of 1 on these variables (lower bound 0 is always applied)
-	 * @param smt access to the smt factories
-	 * @param solveWithReals 
+	 * Creates and returns a script declaring N natural integer variables, with
+	 * names prefix0 to prefixN-1. * If isSafe is true the upper bound is set to 1
+	 * (so they are 0 or 1 ~ boolean variables in effect).
+	 * 
+	 * @param nbvars         the number of variables to add in the script
+	 * @param prefix         the prefix used in building variable names
+	 * @param isSafe         do we have an upper bound of 1 on these variables
+	 *                       (lower bound 0 is always applied)
+	 * @param smt            access to the smt factories
+	 * @param solveWithReals
 	 * @return a script containing declaration + constraints on a set of variables.
 	 */
-	public static Script declareVariables(int nbvars, String prefix, boolean isSafe, org.smtlib.SMT smt, boolean solveWithReals) {
+	public static Script declareVariables(int nbvars, String prefix, boolean isSafe, org.smtlib.SMT smt,
+			boolean solveWithReals) {
 		return declareVariables(nbvars, prefix, isSafe, true, smt, solveWithReals);
 	}
 
-
 	public static void execAndCheckResult(Script script, ISolver solver) {
-		if (DEBUG >=2) {
+		if (DEBUG >= 2) {
 			for (ICommand a : script.commands()) {
-				System.out.println(a);				
+				System.out.println(a);
 			}
 		}
 		long time = System.currentTimeMillis();
@@ -209,15 +212,16 @@ public class SMTUtils {
 				// checkpoint
 				if ("unsat".equals(textResp) || "unknown".equals(textResp)) {
 					return;
-				}				
+				}
 			} else {
 				IResponse res = a.execute(solver);
 				if (res.isError()) {
 					String ress = res.toString();
-					throw new RuntimeException("SMT solver raised an error when submitting script. Raised " + ress.substring(0,Math.min(70, ress.length()))+"...");
-				}	
+					throw new RuntimeException("SMT solver raised an error when submitting script. Raised "
+							+ ress.substring(0, Math.min(70, ress.length())) + "...");
+				}
 			}
-		}				
+		}
 	}
 
 }
