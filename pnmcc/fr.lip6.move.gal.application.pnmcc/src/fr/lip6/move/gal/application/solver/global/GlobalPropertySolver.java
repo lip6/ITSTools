@@ -610,7 +610,8 @@ public class GlobalPropertySolver {
 			applyReachabilitySolver(reader, doneProps);
 
 		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-
+		
+		int curprops = doneProps.size();
 		if (!spn.getProperties().isEmpty() && !doneProps.isFinished()) {
 			for (int i=1; i<=1000; i*=10) {
 				if (hasCTL) {
@@ -624,6 +625,12 @@ public class GlobalPropertySolver {
 				if (spn.getProperties().isEmpty()) {
 					break;
 				}
+			}
+			if (doneProps.size() < curprops && !hasCTL) {
+				curprops = doneProps.size();
+				
+				// We could do this, but we need lower timeout.
+				// applyReachabilitySolver(reader, doneProps);
 			}
 		}
 
@@ -668,7 +675,7 @@ public class GlobalPropertySolver {
 		{
 			// effect matrix
 			IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
-			invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames(), false, 60);
+			invar = InvariantCalculator.computePInvariants(sumMatrix, false, 60);
 		}
 
 		UpperBoundsSolver.approximateStructuralBoundsUsingInvariants(spn, invar, toCheck, maxStruct);
