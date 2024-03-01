@@ -38,12 +38,15 @@ import fr.lip6.move.gal.util.IntMatrixCol;
  * based on the paper of D'Anna and Trigila "Concurrent system analysis using
  * Petri nets – an optimised algorithm for finding net invariants", Mario D'Anna
  * and Sebastiano Trigila, Computer Communications vol 11, no. 4 august 1988.
- * @author Dennis-Michael Borde, Manuel Gieseking , Adapted to ITS-tools by Yann Thierry-Mieg, 2017.
- * 
+ *
+ * @author Dennis-Michael Borde, Manuel Gieseking , Adapted to ITS-tools by Yann
+ *         Thierry-Mieg, 2017.
+ *
  */
 public class InvariantCalculator {
 
 	static final boolean DEBUG = false;
+
 	/**
 	 * Hidden constructor
 	 */
@@ -55,8 +58,7 @@ public class InvariantCalculator {
 	 */
 	public enum InvariantAlgorithm {
 
-		FARKAS,
-		PIPE;
+		FARKAS, PIPE;
 	}
 
 	/**
@@ -70,13 +72,14 @@ public class InvariantCalculator {
 		// P+ set
 		public final SparseBoolArray pPlus = new SparseBoolArray();
 		// P- set
-		public final SparseBoolArray pMinus= new SparseBoolArray();
+		public final SparseBoolArray pMinus = new SparseBoolArray();
 
 		/**
 		 * initially empty.
+		 *
 		 * @param row
 		 */
-		public PpPm (int row) {
+		public PpPm(int row) {
 			this.row = row;
 		}
 
@@ -97,41 +100,40 @@ public class InvariantCalculator {
 		public String toString() {
 			return "PpPm [row=" + row + ", pPlus=" + pPlus + ", pMinus=" + pMinus + "]";
 		}
-		
-		
+
 	}
 
 	/**
 	 * Calculates for a given matrix the P+ = {j | c_hj &gt; 0} and P- = {j | c_hj
 	 * less 0} sets for each row.
+	 *
 	 * @param matC - the matrix from which the sets should be calculated.
 	 * @return The result of the calculation
 	 */
 	private static List<PpPm> calcPpPm(IntMatrixCol matC) {
 		final List<PpPm> result = new ArrayList<>();
-		for (int row = 0; row < matC.getRowCount() ; row++) {
+		for (int row = 0; row < matC.getRowCount(); row++) {
 			result.add(new PpPm(row));
 		}
-		for (int icol=0, cole=matC.getColumnCount() ; icol < cole ; icol++) {
+		for (int icol = 0, cole = matC.getColumnCount(); icol < cole; icol++) {
 			SparseIntArray col = matC.getColumn(icol);
-			for (int i=0,ie=col.size() ; i < ie ;  i++) {
+			for (int i = 0, ie = col.size(); i < ie; i++) {
 				PpPm toedit = result.get(col.keyAt(i));
 				if (col.valueAt(i) < 0) {
-					toedit.pMinus.append(icol,true);
+					toedit.pMinus.append(icol, true);
 				} else {
-					toedit.pPlus.append(icol,true);
+					toedit.pPlus.append(icol, true);
 				}
 			}
 		}
 		return result;
 	}
 
-
 	/**
 	 * Holds the result of the check11b-check. That means it holds the row, the
 	 * column index where a component is less than respectively greater than zero
-	 * and the P+ respectively P- set if there exists a row in the given matrix
-	 * such that |P+| == 1 or |P-| == 1.
+	 * and the P+ respectively P- set if there exists a row in the given matrix such
+	 * that |P+| == 1 or |P-| == 1.
 	 */
 	private static class Check11bResult {
 
@@ -141,11 +143,13 @@ public class InvariantCalculator {
 		public final int row;
 		// The set P+ respectivly P-
 		public final SparseBoolArray p;
+
 		/**
 		 * Constructor to save the data.
-		 * @paramk - the first column index where a component is less
-		 * respectively greater than zero.
-		 * @param h - the whole row.
+		 *
+		 * @paramk - the first column index where a component is less respectively
+		 *         greater than zero.
+		 * @param h     - the whole row.
 		 * @param pPlus - the set P+ respectively P-.
 		 */
 		public Check11bResult(int k, int row, SparseBoolArray pPlus) {
@@ -156,12 +160,12 @@ public class InvariantCalculator {
 	}
 
 	/**
-	 * Checks if there exists a row in the given matrix such that |P+| == 1 or
-	 * |P-| == 1 and returns the row or null if such a row do not exists.
-	 * @param pppms the list of all rows with P+ and P- sets.
-	 * @param startIndex 
-	 * @return the row which satisfy |P+| == 1 or |P-| == 1 or null if not
-	 * existent.
+	 * Checks if there exists a row in the given matrix such that |P+| == 1 or |P-|
+	 * == 1 and returns the row or null if such a row do not exists.
+	 *
+	 * @param pppms      the list of all rows with P+ and P- sets.
+	 * @param startIndex
+	 * @return the row which satisfy |P+| == 1 or |P-| == 1 or null if not existent.
 	 */
 	private static Check11bResult check11b(List<PpPm> pppms, int startIndex) {
 		for (PpPm pppm : pppms.subList(startIndex, pppms.size())) {
@@ -179,7 +183,6 @@ public class InvariantCalculator {
 		return null;
 	}
 
-
 	private static Check11bResult check11bPppm(PpPm pppm) {
 		if (pppm.pMinus.size() == 1) {
 			return new Check11bResult(pppm.pMinus.keyAt(0), pppm.row, pppm.pPlus);
@@ -188,14 +191,14 @@ public class InvariantCalculator {
 		}
 		return null;
 	}
-	
-	
+
 	/**
 	 * Calculates the invariants with the algorithm based on
 	 * http://pipe2.sourceforge.net/documents/PIPE-Report.pdf (page 19).
-	 * @param mat - the matrix to calculate the invariants from.
+	 *
+	 * @param mat          - the matrix to calculate the invariants from.
 	 * @param onlyPositive whether we just stop at Flows or go for Semi-Flows
-	 * @param pnames variable names 
+	 * @param pnames       variable names
 	 * @return a generator set of the invariants.
 	 */
 	public static Set<SparseIntArray> calcInvariantsPIPE(IntMatrixCol mat, boolean onlyPositive) {
@@ -204,87 +207,91 @@ public class InvariantCalculator {
 		}
 		IntMatrixCol tmat = mat.transpose();
 		Set<SparseIntArray> normed = new HashSet<>();
-		for (int i=0; i < tmat.getColumnCount() ; i++) {
+		for (int i = 0; i < tmat.getColumnCount(); i++) {
 			SparseIntArray norm = tmat.getColumn(i);
 			normalize(norm);
 			normed.add(norm);
 		}
 		if (normed.size() < tmat.getColumnCount()) {
-			System.out.println("Normalized transition count is "+normed.size() + " out of "+ tmat.getColumnCount() + " initially.");			
+			System.out.println("Normalized transition count is " + normed.size() + " out of " + tmat.getColumnCount()
+					+ " initially.");
 		}
-		IntMatrixCol matnorm = new IntMatrixCol(tmat.getRowCount(),0);
+		IntMatrixCol matnorm = new IntMatrixCol(tmat.getRowCount(), 0);
 		for (SparseIntArray col : normed) {
 			matnorm.appendColumn(col);
 		}
 		final IntMatrixCol matB = phase1PIPE(matnorm.transpose());
-		
+
 //		final MatrixCol matB = phase1PIPE(new MatrixCol(mat));
 		// We want to work with columns in this part of the algorithm
-		// We add and remove columns all day => we want to switch to a column based representation
-		// order of rows is really irrelevant + columns which are identical up to scaling factor are useless
+		// We add and remove columns all day => we want to switch to a column based
+		// representation
+		// order of rows is really irrelevant + columns which are identical up to
+		// scaling factor are useless
 		// let's use a set of columns.
-		Set<SparseIntArray> colsBsparse = new HashSet<>(2*matB.getColumnCount());
-		for (int i=0; i < matB.getColumnCount() ; i++) {
+		Set<SparseIntArray> colsBsparse = new HashSet<>(2 * matB.getColumnCount());
+		for (int i = 0; i < matB.getColumnCount(); i++) {
 			SparseIntArray col = matB.getColumn(i);
 			if (col.size() != 0) {
 				normalizeWithSign(col);
 				colsBsparse.add(col);
 			}
 		}
-		
-		if (! onlyPositive) {
+
+		if (!onlyPositive) {
 			return colsBsparse;
-		} 
-		
+		}
+
 		IntMatrixCol colsB = new IntMatrixCol(tmat.getRowCount(), 0);
 		for (SparseIntArray cb : colsBsparse) {
-			colsB.appendColumn(cb);			
+			colsB.appendColumn(cb);
 		}
-				
-		// phase 2				
-		System.out.println("// Phase 2 : computing semi flows from basis of "+ colsB.getColumnCount() +" invariants ");
-		
-		int iter=0;
+
+		// phase 2
+		System.out
+				.println("// Phase 2 : computing semi flows from basis of " + colsB.getColumnCount() + " invariants ");
+
+		int iter = 0;
 		SparseBoolArray treated = new SparseBoolArray();
 		colsBsparse = new HashSet<>();
 		while (colsB.getColumnCount() < 20000) {
 			/// InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
-			if (treated.size() >0) {
-				for (int i=treated.size()-1; i >=0; i--) {
+			if (treated.size() > 0) {
+				for (int i = treated.size() - 1; i >= 0; i--) {
 					colsBsparse.add(colsB.getColumn(treated.keyAt(i)));
 					colsB.deleteColumn(treated.keyAt(i));
 				}
 				treated.clear();
 			}
-		
+
 			List<PpPm> pppms = calcPpPm(colsB);
 			SparseBoolArray negRows = new SparseBoolArray();
-						
-			int minRow = -1 ;
+
+			int minRow = -1;
 			int minRowWeight = -1;
-			for (int row = 0, rowe=pppms.size() ; row < rowe ; row++) {
+			for (int row = 0, rowe = pppms.size(); row < rowe; row++) {
 				PpPm pp = pppms.get(row);
 				int pps = pp.pPlus.size();
 				int ppm = pp.pMinus.size();
 				int weight = pps + ppm;
-				
+
 				if (pps == 0) {
-					for (int i=0;i<ppm;i++) {
+					for (int i = 0; i < ppm; i++) {
 						negRows.set(pp.pMinus.keyAt(i));
 					}
 				}
 				if (pps > 0 && ppm > 0) {
-					if (pps==1 || ppm==1) {
+					if (pps == 1 || ppm == 1) {
 						// can't grow the size
-						minRow =row;
+						minRow = row;
 						break;
-					}					
+					}
 					if (minRow == -1 || minRowWeight > weight) {
 						int refinedweight = 0;
-						for (int i=0,ie=pp.pPlus.size();i<ie;i++) {
+						for (int i = 0, ie = pp.pPlus.size(); i < ie; i++) {
 							refinedweight += colsB.getColumn(pp.pPlus.keyAt(i)).size();
 						}
-						for (int i=0,ie=pp.pMinus.size();i<ie;i++) {
+						for (int i = 0, ie = pp.pMinus.size(); i < ie; i++) {
 							refinedweight += colsB.getColumn(pp.pMinus.keyAt(i)).size();
 						}
 						if (minRow == -1 || minRowWeight > refinedweight) {
@@ -294,36 +301,36 @@ public class InvariantCalculator {
 					}
 				}
 			}
-			
-			if (negRows.size()>0) {
+
+			if (negRows.size() > 0) {
 				// cleanup
-				for (int j=negRows.size()-1 ; j >= 0 ; j--) {
+				for (int j = negRows.size() - 1; j >= 0; j--) {
 					colsB.deleteColumn(negRows.keyAt(j));
 				}
 				continue;
 			}
 			// check for a pure positive column
 			int purePos = -1;
-			
-			for (int i=0,ie=colsB.getColumnCount(); i<ie ; i++) {
+
+			for (int i = 0, ie = colsB.getColumnCount(); i < ie; i++) {
 				if (treated.get(i)) {
 					continue;
 				}
 				SparseIntArray col = colsB.getColumn(i);
 				boolean hasNeg = false;
-				for (int j=0,je=col.size(); j<je ; j++) {
-					if (col.valueAt(j)<0) {
-						hasNeg=true;
+				for (int j = 0, je = col.size(); j < je; j++) {
+					if (col.valueAt(j) < 0) {
+						hasNeg = true;
 						break;
 					}
 				}
 				if (!hasNeg) {
 					// check intersection
 					boolean needed = false;
-					for (int j=0,je=col.size(); j<je ; j++) {
+					for (int j = 0, je = col.size(); j < je; j++) {
 						int row = col.keyAt(j);
 						PpPm ppm = pppms.get(row);
-						if (ppm.pMinus.size()>0) {
+						if (ppm.pMinus.size() > 0) {
 							needed = true;
 							purePos = i;
 							minRow = row;
@@ -337,24 +344,24 @@ public class InvariantCalculator {
 					}
 				}
 			}
-						
+
 			int targetRow = minRow;
 			if (targetRow == -1) {
 				// no more negative rows to treat
 				break;
 			}
-			PpPm ppm = pppms.get(targetRow);			
+			PpPm ppm = pppms.get(targetRow);
 			if (ppm.pPlus.size() > 0) {
-				for (int j=0,je=ppm.pPlus.size();j<je;j++) {
+				for (int j = 0, je = ppm.pPlus.size(); j < je; j++) {
 					SparseIntArray colj = colsB.getColumn(ppm.pPlus.keyAt(j));
 					if (purePos != -1) {
 						colj = colsB.getColumn(purePos);
-						j=je;
-					} 
-					for (int k=0,ke=ppm.pMinus.size();k<ke;k++) {
+						j = je;
+					}
+					for (int k = 0, ke = ppm.pMinus.size(); k < ke; k++) {
 						SparseIntArray colk = colsB.getColumn(ppm.pMinus.keyAt(k));
 						// operate a linear combination on the columns of indices j and k
-						// in order to get a  new column having the pair.getFirst element equal
+						// in order to get a new column having the pair.getFirst element equal
 						// to zero
 						int a = -colk.get(targetRow);
 						int b = colj.get(targetRow);
@@ -362,61 +369,63 @@ public class InvariantCalculator {
 						// add normalization step : we don't need scalar scaling of each other
 						normalize(column);
 						// append column to matrix B
-						// tests existence 
-						if (column.size() >0)
+						// tests existence
+						if (column.size() > 0) {
 							colsB.appendColumn(column);
+						}
 					}
 				}
 				// Delete from B all the columns of index k \in P-
 				// cleanup
-				for (int j=ppm.pMinus.size()-1 ; j >= 0 ; j--) {
+				for (int j = ppm.pMinus.size() - 1; j >= 0; j--) {
 					colsB.deleteColumn(ppm.pMinus.keyAt(j));
 					treated.deleteAndShift(ppm.pMinus.keyAt(j));
 				}
 			}
-		//	System.out.println("Phase 2 iter "+ (iter++) + " rows : " + colsB.getRowCount() + " cols " + colsB.getColumnCount() + " treated " + colsBsparse.size());
-		//	System.out.println(colsB);
+			// System.out.println("Phase 2 iter "+ (iter++) + " rows : " +
+			// colsB.getRowCount() + " cols " + colsB.getColumnCount() + " treated " +
+			// colsBsparse.size());
+			// System.out.println(colsB);
 		}
 		// System.out.println("Found "+ colsB.getColumnCount() + " invariants.");
-		
+
 		for (SparseIntArray l : colsB.getColumns()) {
-			if (l.size() > 0)
+			if (l.size() > 0) {
 				colsBsparse.add(l);
+			}
 		}
 		// System.out.println("Found "+ colsBsparse.size() + " different invariants.");
 		colsBsparse.removeIf(a -> {
-			for (int i=0,ie=a.size();i<ie;i++) {
-				if (a.valueAt(i)<0) {
+			for (int i = 0, ie = a.size(); i < ie; i++) {
+				if (a.valueAt(i) < 0) {
 					return true;
 				}
 			}
 			return false;
-			
+
 		});
-		System.out.println("Found "+ colsBsparse.size() + " positive invariants.");
+		System.out.println("Found " + colsBsparse.size() + " positive invariants.");
 		return colsBsparse;
 	}
 
-	
-	
 	private static List<Integer> normalize(SparseIntArray col, int size) {
 		List<Integer> list = new ArrayList<>(size);
 		boolean allneg = true;
-		for (int i=0 ; i < col.size() ; i++) {
+		for (int i = 0; i < col.size(); i++) {
 			if (col.valueAt(i) > 0) {
 				allneg = false;
 				break;
 			}
 		}
 		if (allneg) {
-			for (int i=0 ; i < col.size() ; i++) {
-				col.setValueAt(i , - col.valueAt(i));
+			for (int i = 0; i < col.size(); i++) {
+				col.setValueAt(i, -col.valueAt(i));
 			}
 		}
-		
-		for (int i=0; i < size ; i++) {
+
+		for (int i = 0; i < size; i++) {
 			list.add(col.get(i, 0));
-		}		
+		}
 		normalize(list);
 		return list;
 	}
@@ -424,17 +433,18 @@ public class InvariantCalculator {
 	private static IntMatrixCol phase1PIPE(IntMatrixCol matC) {
 		// incidence matrix
 		final IntMatrixCol matB = IntMatrixCol.identity(matC.getColumnCount(), matC.getColumnCount());
-		
-		System.out.println("// Phase 1: matrix "+matC.getRowCount()+" rows "+matC.getColumnCount()+" cols");
+
+		System.out.println("// Phase 1: matrix " + matC.getRowCount() + " rows " + matC.getColumnCount() + " cols");
 		List<PpPm> pppms = calcPpPm(matC);
 		int startIndex = 0;
-		while (! matC.isZero()) {
+		while (!matC.isZero()) {
 			startIndex = test1b(matC, matB, pppms, startIndex);
 		}
 		return matB;
 	}
 
-	private static int test1b(final IntMatrixCol matC, final IntMatrixCol matB, final List<PpPm> pppms, int startIndex) {
+	private static int test1b(final IntMatrixCol matC, final IntMatrixCol matB, final List<PpPm> pppms,
+			int startIndex) {
 		// [1.1.b] if there exists a row h in C such that |P+| == 1 or |P-| == 1
 		final Check11bResult chkResult = check11b(pppms, startIndex);
 		if (chkResult != null) {
@@ -445,56 +455,61 @@ public class InvariantCalculator {
 		}
 		return startIndex;
 	}
-	
-	public static SparseBoolArray sumProdInto(double alpha, SparseIntArray ta, double beta, SparseIntArray tb) throws ArithmeticException {
-    	SparseBoolArray changed = new SparseBoolArray();
+
+	public static SparseBoolArray sumProdInto(double alpha, SparseIntArray ta, double beta, SparseIntArray tb)
+			throws ArithmeticException {
+		SparseBoolArray changed = new SparseBoolArray();
 		SparseIntArray flow = new SparseIntArray(Math.max(ta.size(), tb.size()));
 
-    	int i = 0;
-    	int j = 0; 
-    	while (i < ta.size() || j < tb.size()) {					
-    		int ki = i==ta.size() ? Integer.MAX_VALUE : ta.keyAt(i);
-    		int kj = j==tb.size() ? Integer.MAX_VALUE : tb.keyAt(j);
-    		if (ki == kj) {    			
-    			double dval = alpha * ta.valueAt(i)+ beta* tb.valueAt(j); 					
+		int i = 0;
+		int j = 0;
+		while (i < ta.size() || j < tb.size()) {
+			int ki = i == ta.size() ? Integer.MAX_VALUE : ta.keyAt(i);
+			int kj = j == tb.size() ? Integer.MAX_VALUE : tb.keyAt(j);
+			if (ki == kj) {
+				double dval = alpha * ta.valueAt(i) + beta * tb.valueAt(j);
 				if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
 					throw new ArithmeticException();
 				}
 				int val = (int) dval;
-    			if (val != 0) {
-    				flow.append(ki, val);
-    			}
-    			if (val != ta.valueAt(i)) {
-    				changed.set(ki);
-    			}
-    			i++;
-    			j++;
-    		} else if (ki < kj) {
-    			double dval = alpha * ta.valueAt(i); 					
+				if (val != 0) {
+					flow.append(ki, val);
+				}
+				if (val != ta.valueAt(i)) {
+					changed.set(ki);
+				}
+				i++;
+				j++;
+			} else if (ki < kj) {
+				double dval = alpha * ta.valueAt(i);
 				if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
 					throw new ArithmeticException();
 				}
 				int val = (int) dval;
-    			if (val != 0) flow.append(ki, val);
-    			if (val != ta.valueAt(i)) {
-    				changed.set(ki);
-    			}
-    			i++;
-    		} else if (kj < ki) {
-    			double dval = beta * tb.valueAt(j); 					
+				if (val != 0) {
+					flow.append(ki, val);
+				}
+				if (val != ta.valueAt(i)) {
+					changed.set(ki);
+				}
+				i++;
+			} else if (kj < ki) {
+				double dval = beta * tb.valueAt(j);
 				if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
 					throw new ArithmeticException();
 				}
 				int val = (int) dval;
-    			if (val != 0) flow.append(kj, val);
-    			if (val != 0) {
-    				changed.set(kj);
-    			}
-    			j++;
-    		}
-    	}
-    	ta.move(flow);
-    	return changed;
+				if (val != 0) {
+					flow.append(kj, val);
+				}
+				if (val != 0) {
+					changed.set(kj);
+				}
+				j++;
+			}
+		}
+		ta.move(flow);
+		return changed;
 	}
 
 	private static void test1b2(final IntMatrixCol matC, final IntMatrixCol matB, final List<PpPm> pppms) {
@@ -506,54 +521,55 @@ public class InvariantCalculator {
 		int totalcand = Integer.MAX_VALUE;
 		for (int col = 0; col < matC.getColumnCount(); col++) {
 			int size = matC.getColumn(col).size();
-			if (size==0) {
+			if (size == 0) {
 				continue;
-			} else if (size <= szcand) {				
+			} else if (size <= szcand) {
 				int total = sumAbsValues(matC.getColumn(col));
-				if ( size < szcand || ( size == szcand && total <= totalcand)) {
+				if (size < szcand || (size == szcand && total <= totalcand)) {
 					candidate = col;
 					szcand = size;
 					totalcand = total;
-				}						
+				}
 			}
 		}
 		// int [] pair = matC.getNoneZeroRow();
-		int tRow = matC.getColumn(candidate).keyAt(0);		
+		int tRow = matC.getColumn(candidate).keyAt(0);
 		int tCol = candidate;
-		
-		int cHk = matC.get(tRow,tCol);
+
+		int cHk = matC.get(tRow, tCol);
 		int bbeta = Math.abs(cHk);
-		
-		if (DEBUG) System.out.println("Rule 1b2 : "+tCol);
+
+		if (DEBUG) {
+			System.out.println("Rule 1b2 : " + tCol);
+		}
 		// for all cols j with j != tCol and c[tRow][j] != 0
 		PpPm rowppm = pppms.get(tRow);
 		SparseBoolArray toVisit = SparseBoolArray.or(rowppm.pMinus, rowppm.pPlus);
-		
-		for (int i=0; i < toVisit.size() ; i++) {
-			int j=toVisit.keyAt(i);
-			SparseIntArray colj = matC.getColumn(j); 
-			
+
+		for (int i = 0; i < toVisit.size(); i++) {
+			int j = toVisit.keyAt(i);
+			SparseIntArray colj = matC.getColumn(j);
+
 			if (j == tCol) {
 				continue;
 			}
-			
+
 			int cHj = colj.get(tRow);
 			if (cHj != 0) {
-				//substitute to the column of index j the linear combination
+				// substitute to the column of index j the linear combination
 				// of the columns of indices tCol and j with coefficients
 				// alpha and beta defined as follows:
-				int alpha = ((Math.signum(cHj) * Math.signum(cHk)) < 0)
-					? Math.abs(cHj) : -Math.abs(cHj);
+				int alpha = ((Math.signum(cHj) * Math.signum(cHk)) < 0) ? Math.abs(cHj) : -Math.abs(cHj);
 				if (alpha == 0 && bbeta == 1) {
 					continue;
 				}
-				int gcd = MathTools.gcd(alpha,bbeta);
+				int gcd = MathTools.gcd(alpha, bbeta);
 				alpha /= gcd;
-				int beta = bbeta /gcd; 
-				
+				int beta = bbeta / gcd;
+
 				SparseBoolArray changed = sumProdInto(beta, colj, alpha, matC.getColumn(tCol));
-				for (int ind=0, inde = changed.size(); ind < inde ; ind++) {
-					pppms.get(changed.keyAt(ind)).setValue(j,colj.get(changed.keyAt(ind)));
+				for (int ind = 0, inde = changed.size(); ind < inde; ind++) {
+					pppms.get(changed.keyAt(ind)).setValue(j, colj.get(changed.keyAt(ind)));
 				}
 				SparseIntArray coljb = matB.getColumn(j);
 				sumProdInto(beta, coljb, alpha, matB.getColumn(tCol));
@@ -562,12 +578,11 @@ public class InvariantCalculator {
 		clearColumn(tCol, matC, matB, pppms);
 	}
 
-
 	public static void clearColumn(int tCol, final IntMatrixCol matC, final IntMatrixCol matB, final List<PpPm> pppms) {
 		// delete from the extended matrix the column of index k
 		SparseIntArray colk = matC.getColumn(tCol);
-		for (int i=0,ie=colk.size() ; i < ie ; i++) {
-			pppms.get(colk.keyAt(i)).setValue(tCol,0);
+		for (int i = 0, ie = colk.size(); i < ie; i++) {
+			pppms.get(colk.keyAt(i)).setValue(tCol, 0);
 		}
 		colk.clear();
 		matB.getColumn(tCol).clear();
@@ -575,7 +590,7 @@ public class InvariantCalculator {
 
 	private static int sumAbsValues(SparseIntArray col) {
 		int tot = 0;
-		for (int i=0; i < col.size(); i++) {
+		for (int i = 0; i < col.size(); i++) {
 			tot += Math.abs(col.valueAt(i));
 		}
 		return tot;
@@ -583,23 +598,25 @@ public class InvariantCalculator {
 
 	private static void test1b1(final IntMatrixCol matC, final IntMatrixCol matB, final List<PpPm> pppms,
 			final Check11bResult chkResult) {
-		if (DEBUG) System.out.println("Rule 1b.1 : "+chkResult.row);
+		if (DEBUG) {
+			System.out.println("Rule 1b.1 : " + chkResult.row);
+		}
 		int tCol = chkResult.col;
 		// [1.1.b.1] let k be the unique index of column belonging to P+ (resp. to P-)
-		while ( chkResult.p.size() > 0 ) {
+		while (chkResult.p.size() > 0) {
 			int j = chkResult.p.keyAt(0);
 			// substitute to the column of index j the linear combination of
-			//the columns indexed by k and j with the coefficients
-			//|chj| and |chk| respectively.
+			// the columns indexed by k and j with the coefficients
+			// |chj| and |chk| respectively.
 			int chk = Math.abs(matC.get(chkResult.row, tCol));
-			int chj = Math.abs(matC.get(chkResult.row,j));
+			int chj = Math.abs(matC.get(chkResult.row, j));
 			int gcd = MathTools.gcd(chk, chj);
 			chk /= gcd;
 			chj /= gcd;
-			
+
 			SparseBoolArray changed = sumProdInto(chk, matC.getColumn(j), chj, matC.getColumn(tCol));
-			for (int ind=0, inde = changed.size(); ind < inde ; ind++) {
-				pppms.get(changed.keyAt(ind)).setValue(j,matC.getColumn(j).get(changed.keyAt(ind)));
+			for (int ind = 0, inde = changed.size(); ind < inde; ind++) {
+				pppms.get(changed.keyAt(ind)).setValue(j, matC.getColumn(j).get(changed.keyAt(ind)));
 			}
 			SparseIntArray coljb = matB.getColumn(j);
 			sumProdInto(chk, coljb, chj, matB.getColumn(tCol));
@@ -608,45 +625,44 @@ public class InvariantCalculator {
 		clearColumn(chkResult.col, matC, matB, pppms);
 	}
 
-
 	private static void normalize(List<Integer> invariants) {
 		int gcd = MathTools.gcd(invariants);
 		if (gcd > 1) {
 			for (int j = 0; j < invariants.size(); ++j) {
-				int norm =  invariants.get(j) / gcd;								
+				int norm = invariants.get(j) / gcd;
 				invariants.set(j, norm);
 			}
 		}
 	}
-	
-	public static void normalizeWithSign (SparseIntArray col) {
+
+	public static void normalizeWithSign(SparseIntArray col) {
 		boolean allneg = true;
-		for (int i=0 ; i < col.size() ; i++) {
+		for (int i = 0; i < col.size(); i++) {
 			if (col.valueAt(i) > 0) {
 				allneg = false;
 				break;
 			}
 		}
 		if (allneg) {
-			for (int i=0 ; i < col.size() ; i++) {
-				col.setValueAt(i , - col.valueAt(i));
+			for (int i = 0; i < col.size(); i++) {
+				col.setValueAt(i, -col.valueAt(i));
 			}
 		}
-		
+
 		int gcd = MathTools.gcd(col);
 		if (gcd > 1) {
 			for (int j = 0; j < col.size(); ++j) {
-				int norm =  col.valueAt(j) / gcd;								
+				int norm = col.valueAt(j) / gcd;
 				col.setValueAt(j, norm);
 			}
 		}
 	}
-	
-	public static void normalize (SparseIntArray invariants) {
+
+	public static void normalize(SparseIntArray invariants) {
 		int gcd = MathTools.gcd(invariants);
 		if (gcd > 1) {
 			for (int j = 0; j < invariants.size(); ++j) {
-				int norm =  invariants.valueAt(j) / gcd;								
+				int norm = invariants.valueAt(j) / gcd;
 				invariants.setValueAt(j, norm);
 			}
 		}
@@ -655,6 +671,7 @@ public class InvariantCalculator {
 	/**
 	 * Calculates the invariants with the algorithm based on
 	 * http://de.scribd.com/doc/49919842/Pn-ESTII (slide 88)
+	 *
 	 * @param mat matrix to calculate the invariants from.
 	 * @return a generator set of the invariants.
 	 */
@@ -682,7 +699,7 @@ public class InvariantCalculator {
 				}
 			}
 		}
-		System.out.println("Phase 2 : rows :" + d.size()+ " cols : " + d.get(0).size());
+		System.out.println("Phase 2 : rows :" + d.size() + " cols : " + d.get(0).size());
 		// for all columns (transitions)
 		// time: O()
 		// place: O()
@@ -698,7 +715,7 @@ public class InvariantCalculator {
 				for (int j1 = 0; j1 < rows - 1; ++j1) {
 					final List<Integer> z1 = d.get(j1);
 					for (int j2 = j1 + offset; j2 < rows; ++j2) {
-					//	InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
+						// InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
 						final List<Integer> z2 = d.get(j2);
 						// check opposite signum at position i
 						if (Math.signum(z1.get(i)) * Math.signum(z2.get(i)) < 0) {
@@ -713,7 +730,7 @@ public class InvariantCalculator {
 								int a = z2abs * z1.get(k);
 								int b = z1abs * z2.get(k);
 								z.add(k, a + b);
-								//z.add(k, z2abs * z1.get(k) + z1abs * z2.get(k));
+								// z.add(k, z2abs * z1.get(k) + z1abs * z2.get(k));
 
 							}
 							// normalize z
@@ -731,7 +748,7 @@ public class InvariantCalculator {
 				}
 				offset = rows;
 				// check new added rows.
-				System.out.println("Phase 2 : rows :" + d.size()+ " cols : " + d.get(0).size());
+				System.out.println("Phase 2 : rows :" + d.size() + " cols : " + d.get(0).size());
 			} while (rows < d.size());
 			// remove all rows z with z(i) != 0
 			for (int j = d.size() - 1; j >= 0; --j) {
@@ -739,7 +756,7 @@ public class InvariantCalculator {
 					d.remove(j);
 				}
 			}
-			System.out.println("Phase 2 end of iteration : rows :" + d.size()+ " cols : " + d.get(0).size());
+			System.out.println("Phase 2 end of iteration : rows :" + d.size() + " cols : " + d.get(0).size());
 		}
 
 		// the result is at the right side of d (remove left transitions-count columns).
@@ -749,63 +766,61 @@ public class InvariantCalculator {
 		for (List<Integer> z : d) {
 			result.add(z.subList(cols, dcols));
 		}
-		
-		
-		HashSet<SparseIntArray> colsBsparse = new HashSet<>(2*result.size());
+
+		HashSet<SparseIntArray> colsBsparse = new HashSet<>(2 * result.size());
 		for (List<Integer> l : result) {
 			colsBsparse.add(new SparseIntArray(l));
 		}
-		
+
 		return colsBsparse;
 	}
 
 	/**
 	 * Calculates the s-invariants of the the given petri net with the pipe
 	 * algorithm.
+	 *
 	 * @param pn - the petri net to calculate the s-invariants from.
 	 * @return a generator set of the invariants.
 	 */
 	public static Set<SparseIntArray> calcSInvariants(FlowMatrix pn, boolean onlyPositive) {
 		return calcSInvariants(pn, InvariantAlgorithm.PIPE, onlyPositive);
 	}
-	
+
 	/**
 	 * Calculates the s-invariants of the the given petri net with the given
 	 * algorithm.
-	 * @param pn - the petri net to calculate the s-invariants from.
-	 * @param algo - the algorithm with which the invariants should be
-	 * calculated.
+	 *
+	 * @param pn   - the petri net to calculate the s-invariants from.
+	 * @param algo - the algorithm with which the invariants should be calculated.
 	 * @return a generator set of the invariants.
 	 */
 	public static Set<SparseIntArray> calcSInvariants(FlowMatrix pn, InvariantAlgorithm algo, boolean onlyPositive) {
 		switch (algo) {
-			case FARKAS:
-				return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix().explicit());
-			case PIPE:
-				return InvariantCalculator.calcInvariantsPIPE(pn.getIncidenceMatrix().transpose(), onlyPositive);
-			default:
-				return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix().explicit());
+		case FARKAS:
+			return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix().explicit());
+		case PIPE:
+			return InvariantCalculator.calcInvariantsPIPE(pn.getIncidenceMatrix().transpose(), onlyPositive);
+		default:
+			return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix().explicit());
 		}
 	}
 
 	/**
 	 * Calculates the t-invariants of the the given petri net with the given
 	 * algorithm.
-	 * @param pn - the petri net to calculate the t-invariants from.
-	 * @param algo - the algorithm with which the invariants should be
-	 * calculated.
+	 *
+	 * @param pn   - the petri net to calculate the t-invariants from.
+	 * @param algo - the algorithm with which the invariants should be calculated.
 	 * @return a generator set of the invariants.
 	 */
 	public static Set<SparseIntArray> calcTInvariants(FlowMatrix pn, InvariantAlgorithm algo) {
 		switch (algo) {
-			case FARKAS:
-				return InvariantCalculator.calcInvariantsFarkas(
-						pn.getIncidenceMatrix().explicit());
-			case PIPE:
-				return InvariantCalculator.calcInvariantsPIPE(pn.getIncidenceMatrix(),true);
-			default:
-				return InvariantCalculator.calcInvariantsFarkas(
-						pn.getIncidenceMatrix().transpose().explicit());
+		case FARKAS:
+			return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix().explicit());
+		case PIPE:
+			return InvariantCalculator.calcInvariantsPIPE(pn.getIncidenceMatrix(), true);
+		default:
+			return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix().transpose().explicit());
 		}
 	}
 
