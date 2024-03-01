@@ -1,7 +1,5 @@
 package fr.lip6.move.gal.application;
 
-import static fr.lip6.move.gal.structural.smt.SMTUtils.computeReducedFlow;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -407,36 +405,41 @@ public class Application implements IApplication, Ender {
 
 		if (invariants) {
 			reader.createSPN(false,false);
-			List<Integer> tnames = new ArrayList<>();
 			List<Integer> repr = new ArrayList<>();
-			IntMatrixCol sumMatrix = computeReducedFlow(reader.getSPN(), tnames, repr);
+			IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(reader.getSPN(), repr);
 			SparsePetriNet spn = reader.getSPN();
 			if (pflows || psemiflows) {
 				long time = System.currentTimeMillis();
 				Set<SparseIntArray> invar;
 				if (pflows) {
-					invar = InvariantCalculator.computePInvariants(sumMatrix, reader.getSPN().getPnames());
+					invar = InvariantCalculator.computePInvariants(sumMatrix);
 				} else {
-					invar = InvariantCalculator.computePInvariants(sumMatrix, reader.getSPN().getPnames(), true, 120);
+					invar = InvariantCalculator.computePInvariants(sumMatrix, true, 120);
 				}
 				System.out.println("Computed "+invar.size()+" P "+(psemiflows?"semi":"")+" flows in "+(System.currentTimeMillis()-time)+" ms.");
-				InvariantCalculator.printInvariant(invar, spn.getPnames(), reader.getSPN().getMarks());
+//				InvariantSet inv = new InvariantSet(invar, sumMatrix.transpose());
+//				inv.print(System.out, spn.getPnames(), spn.getMarks());
+				InvariantCalculator.printInvariant(invar, spn.getPnames(), spn.getMarks());
 			} 
 			
 			if (tflows || tsemiflows) {
 				long time = System.currentTimeMillis();
 				Set<SparseIntArray> invarT;
 				if (tflows) {
-					invarT= DeadlockTester.computeTinvariants(reader.getSPN(), sumMatrix, tnames,false);
+					invarT= InvariantCalculator.computeTinvariants(reader.getSPN(), sumMatrix, repr,false);
 				} else {
-					invarT= DeadlockTester.computeTinvariants(reader.getSPN(), sumMatrix, tnames,true);					
+					invarT= InvariantCalculator.computeTinvariants(reader.getSPN(), sumMatrix, repr,true);					
 				}
-				List<Integer> empty = new ArrayList<>(tnames.size());
-				for (int i=0 ; i < tnames.size(); i++) empty.add(0);
-				List<String> strtnames = repr.stream().map(id -> spn.getTnames().get(id)).collect(Collectors.toList());
+
 				System.out.println("Computed "+invarT.size()+" T "+(psemiflows?"semi":"")+" flows in "+(System.currentTimeMillis()-time)+" ms.");
-				InvariantCalculator.printInvariant(invarT, strtnames, empty );				
+				//InvariantSet inv = new InvariantSet(invarT, sumMatrix);
+				//inv.print(System.out, reader.getSPN().getTnames(), null);
+				InvariantCalculator.printInvariant(invarT, reader.getSPN().getTnames(), null );				
 			}
+			
+			// Still WIP
+			// SparseIntArray inv = DeadlockTester.findPositiveTsemiflow(sumMatrix);
+			
 			return null;
 		}
 
@@ -1186,8 +1189,7 @@ public class Application implements IApplication, Ender {
 			if (false) {
 				IntMatrixCol sumP = IntMatrixCol.sumProd(-1, reader.getSPN().getFlowPT(), 1,
 						reader.getSPN().getFlowTP());
-				Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumP, reader.getSPN().getPnames(),
-						true);
+				Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumP, true);
 				InvariantCalculator.printInvariant(invar, reader.getSPN().getPnames(), reader.getSPN().getMarks());
 			}
 			reader.rebuildSpecification(doneProps);
