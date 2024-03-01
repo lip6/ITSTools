@@ -66,7 +66,7 @@ public class UpperBoundsSolver {
 		{
 			// effect matrix
 			IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
-			invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+			invar = InvariantCalculator.computePInvariants(sumMatrix);
 		}
 		approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
 		
@@ -158,8 +158,9 @@ public class UpperBoundsSolver {
 					Set<SparseIntArray> invar ;
 					{
 						// effect matrix
-						IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
-						invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+						List<Integer> repr = new ArrayList<>();
+						IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(spn, repr);
+						invar = InvariantCalculator.computePInvariants(sumMatrix);
 					}
 					approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
 					checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
