@@ -12,13 +12,13 @@
 	<packaging>eclipse-plugin</packaging>
 	<name>LogicNG Library</name>
 
-<!-- This part is only run when there is a new release of LogicNG (currently 2.4.1 Mar2023) -->
+<!-- This part is only run when there is a new release of LogicNG (currently 2.4.3 Mar2024) -->
 <!--
 	<dependencies>
 	<dependency>
 		<groupId>org.logicng</groupId>
-		<artifactId>logicng</artifactId>
-		<version>2.4.1</version>
+		<artifactId>logicng-j11</artifactId>
+		<version>2.4.3</version>
 	</dependency>
 	</dependencies>
 
