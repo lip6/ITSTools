@@ -782,7 +782,9 @@ public class DeadlockTester {
 //			textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 //		}
 
-		{
+		// currently disabled due to high cost and low rewards
+		boolean minimizeTraces = false;
+		if (minimizeTraces){
 			long ttime = System.currentTimeMillis();
 			if (minmax == null) {
 				System.out.println("Attempting to minimize the solution found.");				
@@ -801,7 +803,9 @@ public class DeadlockTester {
 			}
 			checkResults(propertiesWithSE, done, parikhs, pors, verdicts, solver, withWitness);
 			System.out.println("Minimization took " + (System.currentTimeMillis() - ttime) + " ms.");				
-		}	
+		} else {
+			checkResults(propertiesWithSE, done, parikhs, pors, verdicts, solver, withWitness);			
+		}
 		
 		solver.exit();		
 		return verdicts;
@@ -1040,8 +1044,11 @@ public class DeadlockTester {
 //				textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 //			}
 //		}
+		// currently disabled due to high cost and low rewards
+		boolean minimizeTraces = false;
+
 		if (textReply.equals("sat") && parikh != null) {
-			if (true && sumMatrix.getColumnCount() < 3000) {
+			if (minimizeTraces && sumMatrix.getColumnCount() < 3000) {
 				long ttime = System.currentTimeMillis();
 				if (minmax == null) {
 					System.out.println("Attempting to minimize the solution found.");				
