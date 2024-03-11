@@ -28,7 +28,7 @@
                             <target>
                                 <echo message="Get Z3 binaries"/>
                                 <mkdir dir="bin"/>                                
-                                <get src="https://github.com/Z3Prover/z3/releases/download/z3-4.11.2/z3-4.11.2-x64-glibc-2.31.zip" dest="bin/z3.zip"/>
+                                <get src="https://github.com/Z3Prover/z3/releases/download/z3-4.13.0/z3-4.13.0-x64-glibc-2.35.zip" dest="bin/z3.zip"/>
 								<unzip src="bin/z3.zip" dest="bin/">
 									<patternset>
 										<include name="**/bin/z3" />
