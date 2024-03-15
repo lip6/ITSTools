@@ -10,16 +10,21 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class WalkUtils {
 
-	private int behaviorCount;
-	private int[] behaviorMap;
-	private int[][] behaviors;
-	private IntMatrixCol combFlow;
-	private ISparsePetriNet net;
-	private IntMatrixCol tFlowPT;
-	private int emptyEffect = -1;
-	private int[] initialEnabling;
+    // Constants and member variables
+    private int behaviorCount; // The number of unique effect sets.
+    private int[] behaviorMap; // Maps transitions to their corresponding behavior indices.
+    private int[][] behaviors; // Stores transitions grouped by their effects.
+    private IntMatrixCol combFlow; // Combined flow matrix representing the net's dynamics.
+    private ISparsePetriNet net; // The Petri net instance.
+    private IntMatrixCol tFlowPT; // Transposed flow matrix from places to transitions.
+    private int emptyEffect = -1; // Index for the behavior with no effect (empty set).
+    private int[] initialEnabling; // Cache for the initially enabled transitions.
 
-	public WalkUtils(ISparsePetriNet sr) {
+    /**
+     * Constructs a WalkUtils instance for a given sparse Petri net.
+     * @param sr The sparse Petri net to be used.
+     */
+    public WalkUtils(ISparsePetriNet sr) {
 		this.net = sr;
 
 		LinkedHashMap<SparseIntArray, List<Integer>> effects = new LinkedHashMap<>();
@@ -50,6 +55,11 @@ public class WalkUtils {
 		tFlowPT = net.getFlowPT().transpose();
 	}
 
+    /**
+     * Computes the enabled transitions for a given state in the Petri net.
+     * @param state The current state of the Petri net.
+     * @return An array of enabled transitions.
+     */
 	public int[] computeEnabled(SparseIntArray state) {
 		int[] list = new int[net.getTransitionCount() + 1];
 		// to clear any similar effects
@@ -68,7 +78,11 @@ public class WalkUtils {
 		list[0] = li - 1;					
 		return list;
 	}
-	
+    /**
+     * Checks if the net can stutter, i.e., if there are enabled transitions that don't change the state.
+     * @param enabled An array of enabled transitions.
+     * @return True if the net can stutter, false otherwise.
+     */
 	public boolean canStutter (int [] enabled) {
 		for (int i = enabled[0]; i >= 1; i--) {
 			int t = enabled[i];
