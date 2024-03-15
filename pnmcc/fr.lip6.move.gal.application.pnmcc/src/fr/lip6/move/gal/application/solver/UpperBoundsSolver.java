@@ -3,6 +3,7 @@ package fr.lip6.move.gal.application.solver;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -107,7 +108,7 @@ public class UpperBoundsSolver {
 	}
 	
 
-	public static void applyReductions(SparsePetriNet spn, DoneProperties doneProps, List<Integer> initMaxStruct) {
+	public static List<Integer> applyReductions(SparsePetriNet spn, DoneProperties doneProps, List<Integer> initMaxStruct) {
 			int iter;
 			int iterations =0;
 
@@ -163,6 +164,8 @@ public class UpperBoundsSolver {
 						invar = InvariantCalculator.computePInvariants(sumMatrix);
 					}
 					approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
+					
+					System.out.println("Current structural bounds on expressions (after invariants) : " + maxStruct+ " Max seen :" + maxSeen);
 					checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
 				} else {
 					hasSkel = false;
@@ -177,6 +180,8 @@ public class UpperBoundsSolver {
 				if (randomCheckReachability(re, tocheck, spn, doneProps,steps,maxSeen,maxStruct) >0)
 					iter++;
 				
+				System.out.println("Current structural bounds on expressions (after WALK) : " + maxStruct+ " Max seen :" + maxSeen);
+				
 				checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL RANDOM_WALK");
 				
 				if (spn.getProperties().isEmpty())
@@ -186,7 +191,7 @@ public class UpperBoundsSolver {
 					List<SparseIntArray> orders=new ArrayList<>();
 					List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, repr, orders, iterations==0 ? 5:45, true);
 					
-					//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
+					// interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], "PARIKH", maxSeen, maxStruct);
 					System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct+ " Max seen :" + maxSeen);
 
 					iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct,orders);
@@ -290,7 +295,7 @@ public class UpperBoundsSolver {
 				checkInInitial(spn, doneProps);
 				
 				if (spn.getProperties().isEmpty()) {
-					return;
+					return Collections.emptyList();
 				}
 								
 				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
@@ -299,7 +304,8 @@ public class UpperBoundsSolver {
 				
 				iterations++;
 			} while ( (iterations<=1 || iter > 0 || !lastMaxSeen.equals(maxSeen)) && ! spn.getProperties().isEmpty());
-						
+			
+			return maxStruct;
 		}
 
 	public static void approximateStructuralBoundsUsingInvariants(ISparsePetriNet sr, Set<SparseIntArray> invar, List<Expression> tocheck,
