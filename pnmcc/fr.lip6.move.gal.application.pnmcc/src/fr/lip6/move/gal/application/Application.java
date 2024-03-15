@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -901,7 +902,7 @@ public class Application implements IApplication, Ender {
 
 				UpperBoundsSolver.checkInInitial(reader.getSPN(), doneProps);
 
-				UpperBoundsSolver.applyReductions(reader.getSPN(), doneProps, skelBounds);
+				List<Integer> maxStruct = UpperBoundsSolver.applyReductions(reader.getSPN(), doneProps, skelBounds);
 
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				// checkInInitial(reader.getSpec(), doneProps, isSafe);
@@ -920,7 +921,7 @@ public class Application implements IApplication, Ender {
 						r2.getSPN().getProperties().clear();
 						r2.getSPN().getProperties().add(p);
 						UpperBoundsSolver.checkInInitial(r2.getSPN(), doneProps);
-						UpperBoundsSolver.applyReductions(r2.getSPN(), doneProps, null);
+						UpperBoundsSolver.applyReductions(r2.getSPN(), doneProps, Collections.singletonList(maxStruct.get(pid)));
 						System.out.println("Ending property specific reduction for " + p.getName() + " in "
 								+ (System.currentTimeMillis() - time) + " ms.");
 					}
