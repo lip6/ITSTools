@@ -179,7 +179,7 @@ public class DeadlockTester {
 	}
 
 	
-	public static SparseIntArray findPositiveTsemiflow(IntMatrixCol sumMatrix) {
+	public static SparseIntArray findPositiveTsemiflow(IntMatrixCol sumMatrix, int positivePlace) {
 		org.smtlib.SMT smt = new SMT();
 		
 		ISolver solver = initSolver(smt, false, 4000, 6000);
@@ -215,7 +215,7 @@ public class DeadlockTester {
 		// assert >= 0 effects of transitions on each place
 		// we work with one constraint for each place => use transposed
 		IntMatrixCol mat = sumMatrix.transpose();
-		List<IExpr> topos = new ArrayList<IExpr>();
+		
 		SparseIntArray total = new SparseIntArray();
 		for (int varindex = 0 ; varindex < mat.getColumnCount() ; varindex++) {
 
@@ -223,22 +223,27 @@ public class DeadlockTester {
 			IExpr constraint = buildRowConstraint(line, ef);
 			
 			total = SparseIntArray.sumProd(1, total, 1, line);
-			
+			int min =0;
+			if (positivePlace == varindex) {
+				min = 1;
+			}			
 			script.add(
 					new C_assert(
 							ef.fcn(ef.symbol("<="), 
-									ef.numeral(0),
+									ef.numeral(min),
 									// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
 									constraint)));
 		}
 		
-		// must be positive solution		
-		script.add(new C_assert(
-				ef.fcn(ef.symbol(">="), 
-						buildRowConstraint(total, ef),
-						ef.numeral(1)						
-						)));
-				
+		if (positivePlace < 0) {
+			// must be positive solution		
+			script.add(new C_assert(
+					ef.fcn(ef.symbol(">="), 
+							buildRowConstraint(total, ef),
+							ef.numeral(1)						
+							)));
+		}
+		
 		
 		execAndCheckResult(script, solver);
 		
@@ -249,7 +254,10 @@ public class DeadlockTester {
 			SparseIntArray state = new SparseIntArray();
 			SparseIntArray parikh = new SparseIntArray();
 			SparseIntArray order = new SparseIntArray();
-			queryVariables(state, parikh, order, solver);
+			if (queryVariables(state, parikh, order, solver)) {
+				System.out.println("SMT solver failed to extract model.");
+				return null;
+			}
 			System.out.println("This invariant on transitions " + parikh);
 			System.out.println("Produces a positive solution :" + state);
 			
@@ -261,9 +269,14 @@ public class DeadlockTester {
 				System.out.println("Minimization OK="+ response +"took " + (System.currentTimeMillis() - ttime) + " ms.");				
 			}
 			result = checkSat(solver);
+			SparseIntArray oldparikh = parikh;
 			parikh = new SparseIntArray();
 			
-			queryVariables(state, parikh, order, solver);
+			if (queryVariables(state, parikh, order, solver)) {
+				System.out.println("SMT solver failed to minimize model, returning non optimized solution.");
+				return oldparikh;
+			}
+
 			System.out.println("This minimized invariant on transitions " + parikh);
 			System.out.println("Produces a positive solution");
 			
@@ -273,7 +286,12 @@ public class DeadlockTester {
 		} else {
 			solver.exit();
 			System.out.println("When looking for a positive semi flow solution, solver replied " + result);
-			return null;
+			
+			if ("unsat".equals(result)) {
+				return new SparseIntArray();
+			} else {
+				return null;
+			}
 		}
 		
 	}
@@ -783,7 +801,7 @@ public class DeadlockTester {
 //		}
 
 		// currently disabled due to high cost and low rewards
-		boolean minimizeTraces = false;
+		boolean minimizeTraces = true;
 		if (minimizeTraces){
 			long ttime = System.currentTimeMillis();
 			if (minmax == null) {
@@ -1337,7 +1355,9 @@ public class DeadlockTester {
 		do {
 			SparseIntArray state = new SparseIntArray();
 			SparseIntArray pk = new SparseIntArray();
-			queryVariables(state, pk, new SparseIntArray(),solver);
+			if (queryVariables(state, pk, new SparseIntArray(),solver)) {
+				return "sat";
+			}
 			trap = testTrapWithSMT(sr, state);
 			if (DEBUG >=1)
 				confirmTrap(sr,trap, state);
@@ -1445,7 +1465,10 @@ public class DeadlockTester {
 	static SparseIntArray lastParikh = null;
 	private static boolean queryVariables(SparseIntArray state, SparseIntArray parikh, SparseIntArray order, ISolver solver) {
 		boolean hasReals = false;
-		IResponse r = new C_get_model().execute(solver);			
+		IResponse r = new C_get_model().execute(solver);
+		if (r.isError()) {
+			return true;
+		}
 		if (r instanceof ISeq) {
 			ISeq seq = (ISeq) r;
 			for (ISexpr v : seq.sexprs()) {
@@ -2683,7 +2706,7 @@ public class DeadlockTester {
 					por = new SparseIntArray();
 				}
 				boolean solveWithReals = true;
-				IExpr smtexpr = Expression.op(Op.GT, tocheck.get(i), Expression.constant(maxSeen.get(i))).accept(new ExprTranslator());
+				IExpr smtexpr = Expression.op(Op.GEQ, tocheck.get(i), Expression.constant(maxSeen.get(i)+1)).accept(new ExprTranslator());
 				Script property = new Script();
 				property.add(new C_assert(smtexpr));
 				// Add a requirement on solver to please max the value of the expression
