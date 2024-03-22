@@ -21,7 +21,11 @@ public class MccDonePropertyPrinter extends ConcurrentHashDoneProperties {
 	public Boolean put(String prop, Integer value, String techniques) {
 		Boolean b = super.put(prop, value, techniques);
 		if (b == null) {
-			System.out.println("FORMULA "+prop+" "+value+ " TECHNIQUES "+techniques);
+			if (value != Integer.MAX_VALUE) {
+				System.out.println("FORMULA "+prop+" "+value+ " TECHNIQUES "+techniques);
+			} else {
+				System.out.println("FORMULA "+prop+" +inf TECHNIQUES "+techniques);
+			}
 		} 
 		return b;
 	}
