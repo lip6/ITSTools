@@ -571,5 +571,9 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		return true;
 	}
 
+	public void setInitial(List<Integer> marks) {
+		this.marks = marks;
+	}
+
 
 }
