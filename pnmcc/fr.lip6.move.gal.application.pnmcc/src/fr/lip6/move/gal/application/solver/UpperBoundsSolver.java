@@ -202,7 +202,7 @@ public class UpperBoundsSolver {
 					// interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], "PARIKH", maxSeen, maxStruct);
 					
 					iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct,orders);
-					printBounds("after SMT", lastMaxSeen, maxStruct);
+					printBounds("after SMT", maxSeen, maxStruct);
 				
 					
 					for (int v = paths.size()-1 ; v >= 0 ; v--) {
@@ -339,7 +339,7 @@ public class UpperBoundsSolver {
 							int[] verdicts = cw.runRandomReachabilityDetection(10000, tocheck, 3000, -1, true,maxState);
 							
 							iter += interpretVerdict(tocheck, spn, doneProps, verdicts,"COVER",maxSeen,maxStruct);
-							printBounds("after cover walk", lastMaxSeen, maxStruct);
+							printBounds("after cover walk", maxSeen, maxStruct);
 
 							// Experimental code : try to remove sources of infinity.
 							if (false && ! spn.getProperties().isEmpty()) {
