@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -12,7 +13,7 @@ import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.Application;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
-import fr.lip6.move.gal.structural.DeadlockFound;
+import fr.lip6.move.gal.structural.CoverWalker;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
@@ -28,6 +29,8 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class UpperBoundsSolver {
 
+	private static final int omega  = Integer.MAX_VALUE;
+	
 	public static void checkInInitial(SparsePetriNet spn, DoneProperties doneProps) {
 		for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(spn.getProperties())) {
 			if (prop.getBody().getOp() == Op.CONST) {
@@ -87,8 +90,8 @@ public class UpperBoundsSolver {
 			List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, repr, new ArrayList<>(), 5, true);
 			
 			//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
-			System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct);
-
+			printBounds("after SMT", maxSeen, maxStruct);
+			
 			checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL SAT_SMT CPN_APPROX INITIAL_STATE");
 		return maxStruct;
 	}
@@ -133,8 +136,10 @@ public class UpperBoundsSolver {
 			boolean hasSkel = false;
 			if (initMaxStruct != null) {
 				for (int i=0; i < maxStruct.size() ; i++) {
-					maxStruct.set(i, Math.min(maxStruct.get(i)==-1?Integer.MAX_VALUE:maxStruct.get(i), 
-							             	  initMaxStruct.get(i)==-1?Integer.MAX_VALUE:initMaxStruct.get(i)));
+					int init=initMaxStruct.get(i); 
+					if (init != -1 && (maxStruct.get(i) <0 || maxStruct.get(i) > init)) {
+						maxStruct.set(i, init);
+					}
 				}
 				hasSkel = true;
 			}
@@ -165,7 +170,7 @@ public class UpperBoundsSolver {
 					}
 					approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
 					
-					System.out.println("Current structural bounds on expressions (after invariants) : " + maxStruct+ " Max seen :" + maxSeen);
+					printBounds("after invariants", maxSeen, maxStruct);
 					checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
 				} else {
 					hasSkel = false;
@@ -180,9 +185,12 @@ public class UpperBoundsSolver {
 				if (randomCheckReachability(re, tocheck, spn, doneProps,steps,maxSeen,maxStruct) >0)
 					iter++;
 				
-				System.out.println("Current structural bounds on expressions (after WALK) : " + maxStruct+ " Max seen :" + maxSeen);
-				
 				checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL RANDOM_WALK");
+				printBounds("after WALK",maxSeen,maxStruct);
+				
+				
+				Optional<Boolean> isBounded = Optional.empty();
+				
 				
 				if (spn.getProperties().isEmpty())
 					break;
@@ -192,10 +200,10 @@ public class UpperBoundsSolver {
 					List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, repr, orders, iterations==0 ? 5:45, true);
 					
 					// interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], "PARIKH", maxSeen, maxStruct);
-					System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct+ " Max seen :" + maxSeen);
-
+					
 					iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct,orders);
-									
+					printBounds("after SMT", lastMaxSeen, maxStruct);
+				
 					
 					for (int v = paths.size()-1 ; v >= 0 ; v--) {
 						SparseIntArray parikh = paths.get(v);
@@ -261,7 +269,9 @@ public class UpperBoundsSolver {
 				
 				sr.setProtected(support);
 				
-				if (spn.isSafe() && tocheck.size() == 1 && support.cardinality()==1) {
+				
+				// a single place, that is one bounded : kill it's consumers
+				if (support.cardinality()==1 && maxStruct.get(0)==1) {
 					int pid = support.nextSetBit(0);
 					List<Integer> tfeed = new ArrayList<>();
 					SparseIntArray fpt = sr.getFlowPT().transpose().getColumn(pid);
@@ -269,7 +279,7 @@ public class UpperBoundsSolver {
 						tfeed.add(fpt.keyAt(i));
 					}					
 					if (!tfeed.isEmpty()) 
-						sr.dropTransitions(tfeed , true,"Remove Feeders");
+						sr.dropTransitions(tfeed , true,"Removing consumers from one bounded place "+sr.getPnames().get(pid));
 				}
 				
 				try {
@@ -302,11 +312,107 @@ public class UpperBoundsSolver {
 					iter++;
 							
 				
+				if (!isBounded.isPresent()) {
+					// check if we still have inf upper bounds
+					int hasInf = -1;
+					for (int index=0; index < maxStruct.size() ; index++) {
+						if (maxStruct.get(index) == -1) {
+							hasInf = index;
+							break;
+						}
+					}
+					
+					// test if we are bounded using SMT
+					if (hasInf >= 0) {
+						// effect matrix
+						List<Integer> repr2 = new ArrayList<>();
+						IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(spn, repr2);
+						
+						// debatable : use the index of the structurally unbounded place ? 
+//						SparseIntArray inv = DeadlockTester.findPositiveTsemiflow(sumMatrix, hasInf);
+						SparseIntArray inv = DeadlockTester.findPositiveTsemiflow(sumMatrix, -1);
+						if (inv.size()==0) {
+							isBounded = Optional.of(true);
+						} else {
+							CoverWalker cw = new CoverWalker(spn);
+							SparseIntArray maxState = new SparseIntArray();
+							int[] verdicts = cw.runRandomReachabilityDetection(10000, tocheck, 3000, -1, true,maxState);
+							
+							iter += interpretVerdict(tocheck, spn, doneProps, verdicts,"COVER",maxSeen,maxStruct);
+							printBounds("after cover walk", lastMaxSeen, maxStruct);
+
+							// Experimental code : try to remove sources of infinity.
+							if (false && ! spn.getProperties().isEmpty()) {
+								System.out.println("Resetting from maxState :" + maxState);
+								SparsePetriNet spnMax = new SparsePetriNet(spn);
+								
+								List<Integer> marks= new ArrayList<>(spnMax.getPlaceCount());
+								for (int i=0,ie=spnMax.getPlaceCount();i<ie;i++) {
+									marks.add(0);
+								}
+								List<Integer> omegas = new ArrayList<>();
+								for (int i=0; i < maxState.size() ; i++) {
+									if (maxState.valueAt(i) != Integer.MAX_VALUE) {
+										marks.set(i,maxState.valueAt(i));
+									} else {
+										omegas.add(maxState.keyAt(i));
+									}
+								}
+								//spnMax.setInitial(marks);
+								
+								System.out.println("Removing omega places with index :" + omegas);
+								
+								StructuralReduction srMax = new StructuralReduction(spnMax);
+								srMax.dropPlaces(omegas, false, "CoverMax");
+								spnMax.readFrom(srMax);
+								
+								spn = spnMax;
+								
+								{
+									List<Integer> repr3 = new ArrayList<>();
+									IntMatrixCol sumMatrix2 = InvariantCalculator.computeReducedFlow(spn, repr3);
+									SparseIntArray inv2 = DeadlockTester.findPositiveTsemiflow(sumMatrix2,-1);
+									if (inv2.size()==0) {
+										isBounded = Optional.of(true);
+										System.out.println("After discarding omega places, the net is now bounded.");
+									} else {
+										System.out.println("Even after discarding omega places, the net is still structurally unbounded.");
+									}
+								}
+							}
+						}
+					}
+					
+				}
+				
 				iterations++;
 			} while ( (iterations<=1 || iter > 0 || !lastMaxSeen.equals(maxSeen)) && ! spn.getProperties().isEmpty());
 			
 			return maxStruct;
 		}
+
+	private static void printBounds(String rule, List<Integer> maxSeen, List<Integer> maxStruct) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Max Seen:");		
+		printOmegas(maxSeen, sb);
+		sb.append(" Max Struct:");		
+		printOmegas(maxStruct, sb);
+		
+		System.out.println("Current structural bounds on expressions ("+ rule + ") : " + sb.toString());
+	}
+
+	public static void printOmegas(List<Integer> bounds, StringBuilder sb) {
+		sb.append("[");
+		boolean first = true;
+		for (Integer i : bounds) {
+			if (!first)
+				sb.append(", ");
+			else
+				first=false;
+			sb.append(i==-1||i==omega ? "+inf" : i.toString());
+		}
+		sb.append("]");
+	}
 
 	public static void approximateStructuralBoundsUsingInvariants(ISparsePetriNet sr, Set<SparseIntArray> invar, List<Expression> tocheck,
 			List<Integer> maxStruct) {
@@ -507,10 +613,12 @@ public class UpperBoundsSolver {
 		int seen = 0; 
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			int cur = verdicts[v];
-			maxSeen.set(v,Math.max(maxSeen.get(v), cur));
-			if (maxSeen.get(v).equals(maxStruct.get(v))) {
+			Integer value = maxSeen.get(v);
+			maxSeen.set(v,Math.max(value, cur));
+			
+			if (value == Integer.MAX_VALUE ||  value.equals(maxStruct.get(v))) {
 				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
-				doneProps.put(prop.getName(),maxSeen.get(v),"TOPOLOGICAL "+walkType+"_WALK");
+				doneProps.put(prop.getName(),value,"TOPOLOGICAL "+walkType+"_WALK");
 				tocheck.remove(v);
 				spn.getProperties().remove(v);
 				maxSeen.remove(v);
