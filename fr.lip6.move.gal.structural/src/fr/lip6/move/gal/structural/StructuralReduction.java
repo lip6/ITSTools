@@ -1295,7 +1295,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		}
 		int totalp = deleted.size();
 		if (totalp >0 && trace) {
-			System.out.println("Drop transitions removed "+totalp+" transitions "+ (DEBUG >=1 ? (" : "+ deleted ) : ""));			
+			System.out.println("Drop transitions ("+rule +") removed "+totalp+" transitions "+ (DEBUG >=1 ? (" : "+ deleted ) : ""));			
 		}
 	}
 	
