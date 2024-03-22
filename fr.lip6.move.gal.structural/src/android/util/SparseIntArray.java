@@ -430,6 +430,46 @@ public class SparseIntArray implements Cloneable {
     	return flow;
 	}
     
+    private static final int omega  = Integer.MAX_VALUE;
+    
+	public static SparseIntArray sumProdOmega(int alpha, SparseIntArray ta, int beta, SparseIntArray tb) {
+		int asz = ta.size();
+		int bsz = tb.size();
+		SparseIntArray flow = new SparseIntArray(Math.max(asz, bsz));
+
+		int i = 0;
+		int j = 0;
+		while (i < asz || j < bsz) {
+			int ki = i == asz ? Integer.MAX_VALUE : ta.keyAt(i);
+			int kj = j == bsz ? Integer.MAX_VALUE : tb.keyAt(j);
+			if (ki == kj) {
+				int va = ta.valueAt(i);
+				int vb = tb.valueAt(j);
+
+				int val = va != omega && vb != omega ? alpha * va + beta * vb : omega;
+				if (val != 0) {
+					flow.append(ki, val);
+				}
+				i++;
+				j++;
+			} else if (ki < kj) {
+				int va = ta.valueAt(i);
+				int val = va != omega ? alpha * va : omega;
+				if (val != 0)
+					flow.append(ki, val);
+				i++;
+			} else if (kj < ki) {
+				int vb = tb.valueAt(j);
+				int val = vb != omega ? beta * tb.valueAt(j) : omega;
+				if (val != 0)
+					flow.append(kj, val);
+				j++;
+			}
+		}
+
+		return flow;
+	}
+    
     public static boolean keysIntersect(SparseIntArray s1, SparseIntArray s2) {
 		int s1sz = s1.size();
 		int s2sz = s2.size();
@@ -450,6 +490,88 @@ public class SparseIntArray implements Cloneable {
 		}
 		return false;
 	}
+    
+	/**
+	 * Test whether all entries in s1 are greater or equal than the corresponding
+	 * entry in s2 and at least one is strictly greater.
+	 * 
+	 * Returns true iff. for all i, s1[i] >= s2[i] and exists i s1[i] > s2[i].
+	 * 
+	 * @param s1 the greater array
+	 * @param s2 the smaller/lower valued array
+	 * @return true iff for all i, s1[i] >= s2[i] and exists i s1[i] > s2[i].
+	 */
+	public static boolean coversStrictly(SparseIntArray s1, SparseIntArray s2) {
+		// Get the sizes of both SparseIntArrays
+		int ss1 = s1.size(), ss2 = s2.size();
+
+		// If s1 has fewer entries than s2, s1 cannot strictly cover s2
+		if (ss1 < ss2) {
+			return false;
+		}
+
+		// If s2 is empty and s1 is not, then s1 strictly covers s2
+		if (ss2 == 0 && ss1 > 0) {
+			return true;
+		}
+
+		// Flag to track if there's any point where s1 strictly dominates s2
+		boolean dominated = false;
+
+		// Iterate over both arrays simultaneously
+		for (int j = 0, i = 0; i < ss1 && j < ss2;) {
+			// Get the current keys from both arrays
+			int sk1 = s1.keyAt(i);
+			int sk2 = s2.keyAt(j);
+
+			// When keys are equal, compare their values
+			if (sk1 == sk2) {
+				// Get the values for the current keys
+				int sv1 = s1.valueAt(i), sv2 = s2.valueAt(j);
+
+				// If s1's value is less than s2's, s1 does not cover s2
+				if (sv1 < sv2) {
+					return false;
+				}
+
+				// If s1's value is greater, mark as dominated
+				if (sv1 > sv2) {
+					dominated = true;
+				}
+
+				// Move to the next entries in both arrays
+				i++;
+				j++;
+			} else if (sk1 > sk2) {
+				// If s1's key is greater, s2 has an entry s1 does not, meaning no strict
+				// coverage
+				return false;
+			} else {
+				// s1 has an entry that s2 does not, indicating strict coverage at this point
+				dominated = true;
+
+				// Use binary search to find the position in s1 that matches or exceeds sk2
+				int ii = ContainerHelpers.binarySearch(s1.mKeys, sk2, i + 1, ss1 - 1);
+
+				// If no such position is found, s1 cannot cover s2
+				if (ii < 0) {
+					return false;
+				}
+
+				// Update the index in s1 to the found position
+				i = ii;
+
+				// If there are not enough entries left in s1 to cover the rest of s2, return
+				// false
+				if (ss1 - i < ss2 - j) {
+					return false;
+				}
+			}
+		}
+		// Return true if s1 dominates s2 at any point, false otherwise
+		return dominated;
+	}
+    
     
     /**
      * Test whether all entries in s1 are greater or equal than the corresponding entry in s2.
@@ -539,6 +661,60 @@ public class SparseIntArray implements Cloneable {
 		}
 	}
 	
+	
+	/**
+	 * Test whether all keys in the second array are contained in the first array.
+	 * 
+	 * Returns true if for every key in s2, there is a corresponding key in s1.
+	 * 
+	 * @param s1 the array that should contain all keys from s2.
+	 * @param s2 the array whose keys need to be contained in s1.
+	 * @return true if all keys in s2 are contained in s1.
+	 */
+	public static boolean containsAllKeys(SparseIntArray s1, SparseIntArray s2) {
+	    int ss1 = s1.size(), ss2 = s2.size();
+
+	    // If s2 has more entries than s1, s2 cannot be fully contained in s1
+	    if (ss2 > ss1) {
+	        return false;
+	    }
+	
+	    int i = 0, j = 0;
+	    for (; i < ss1 && j < ss2;) {
+	        int sk1 = s1.keyAt(i);
+	        int sk2 = s2.keyAt(j);
+
+	        if (sk1 == sk2) {
+	            // Move to the next key in both arrays
+	            i++;
+	            j++;
+	        } else if (sk1 < sk2) {
+	            // Use binary search to find the position in s1 that matches or exceeds sk2
+	            int ii = ContainerHelpers.binarySearch(s1.mKeys, sk2, i + 1, ss1 - 1);
+
+	            // If no such position is found, s1 cannot contain all keys from s2
+	            if (ii < 0) {
+	                return false;
+	            }
+
+	            // Update the index in s1 to the found position
+	            i = ii;
+
+	            // If there are not enough entries left in s1 to cover the rest of s2, return false
+	            if (ss1 - i < ss2 - j) {
+	                return false;
+	            }
+	        } else {
+	            // If sk2 > sk1 and the binary search didn't find a match, s1 doesn't contain all keys
+	            return false;
+	        }
+	    }
+
+	    // If we have gone through all of s2's keys, return true; otherwise, return false
+	    return j == ss2;
+	}
+
+	
 	/**
 	 * More efficient one pass version for removing many at once.
 	 * @param todel a list of decreasing sorted indexes.
@@ -568,5 +744,14 @@ public class SparseIntArray implements Cloneable {
 		return sum;
 	}
    
+	public int sumValuesOmega() {
+		int sum = 0;
+		for (int i=0, ie=mSize; i<ie ; i++) {
+			int val = mValues[i];
+			if (val != Integer.MAX_VALUE)
+				sum+=val;
+		}
+		return sum;
+	}
 
 }
