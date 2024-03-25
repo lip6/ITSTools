@@ -152,7 +152,6 @@ public class UpperBoundsSolver {
 			do {
 				iter =0;
 				if (! first)  {
-					tocheck = new ArrayList<>(spn.getProperties().size());
 					computeToCheck(spn, tocheckIndexes, tocheck, doneProps);			
 				} else {
 					first = false;
@@ -200,9 +199,9 @@ public class UpperBoundsSolver {
 					List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, repr, orders, iterations==0 ? 5:45, true);
 					
 					// interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], "PARIKH", maxSeen, maxStruct);
-					
-					iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct,orders);
 					printBounds("after SMT", maxSeen, maxStruct);
+					iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct,orders);
+					
 				
 					
 					for (int v = paths.size()-1 ; v >= 0 ; v--) {
@@ -334,6 +333,7 @@ public class UpperBoundsSolver {
 						if (inv.size()==0) {
 							isBounded = Optional.of(true);
 						} else {
+							computeToCheck(spn, tocheckIndexes, tocheck, doneProps);
 							CoverWalker cw = new CoverWalker(spn);
 							SparseIntArray maxState = new SparseIntArray();
 							int[] verdicts = cw.runRandomReachabilityDetection(10000, tocheck, 3000, -1, true,maxState);
@@ -574,6 +574,8 @@ public class UpperBoundsSolver {
 
 	public static void computeToCheck(SparsePetriNet spn, List<Integer> tocheckIndexes, List<Expression> tocheck, DoneProperties doneProps) {
 		int j=0;
+		tocheckIndexes.clear();
+		tocheck.clear();
 		for (fr.lip6.move.gal.structural.Property p : spn.getProperties()) {
 			if (! doneProps.containsKey(p.getName()) && p.getType() == PropertyType.BOUNDS) {
 				tocheck.add(p.getBody());
