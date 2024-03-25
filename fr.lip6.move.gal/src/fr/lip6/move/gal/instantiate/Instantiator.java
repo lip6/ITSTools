@@ -880,7 +880,7 @@ public class Instantiator {
 			t2.getParams().addAll(params);
 			
 			
-			todo.add(new BoundTransition(t2,new ArrayList<>(t2.getParams())));
+			todo.add(new BoundTransition<>(t2,new ArrayList<>(t2.getParams())));
 		} else {
 			done.add(t2);
 		}
@@ -927,7 +927,7 @@ public class Instantiator {
 								
 				tcopy.setName(tcopy.getName()+"_"+ param.getName().substring(1) +i );
 				if (! pcopy.isEmpty()) {
-					todo.add(new BoundTransition(tcopy, pcopy));
+					todo.add(new BoundTransition<>(tcopy, pcopy));
 				} else {
 					done.add(tcopy);
 				}
