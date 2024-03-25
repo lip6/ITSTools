@@ -902,7 +902,7 @@ public class Application implements IApplication, Ender {
 
 				UpperBoundsSolver.checkInInitial(reader.getSPN(), doneProps);
 
-				List<Integer> maxStruct = UpperBoundsSolver.applyReductions(reader.getSPN(), doneProps, skelBounds);
+				List<Integer> maxStruct = UpperBoundsSolver.applyReductions(reader, doneProps, skelBounds);
 
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				// checkInInitial(reader.getSpec(), doneProps, isSafe);
@@ -921,7 +921,7 @@ public class Application implements IApplication, Ender {
 						r2.getSPN().getProperties().clear();
 						r2.getSPN().getProperties().add(p);
 						UpperBoundsSolver.checkInInitial(r2.getSPN(), doneProps);
-						UpperBoundsSolver.applyReductions(r2.getSPN(), doneProps, Collections.singletonList(maxStruct.get(pid)));
+						UpperBoundsSolver.applyReductions(r2, doneProps, Collections.singletonList(maxStruct.get(pid)));
 						System.out.println("Ending property specific reduction for " + p.getName() + " in "
 								+ (System.currentTimeMillis() - time) + " ms.");
 					}
