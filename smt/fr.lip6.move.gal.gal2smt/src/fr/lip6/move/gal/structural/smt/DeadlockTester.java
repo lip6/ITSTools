@@ -2110,21 +2110,16 @@ public class DeadlockTester {
 			int pi = implicitPlaces.get(i);
 			SparseIntArray piPT = tFlowPT.getColumn(pi);
 			boolean isOk = true;
-			// make sure that the outputs of this place will still have at least one condition
+			// make sure that the outputs of this place will not lose more than one condition
 			for (int j=0; j < piPT.size() ; j++) {
 				int tid = piPT.keyAt(j);
 				SparseIntArray pret = sr.getFlowPT().getColumn(tid);
-				boolean allImplicit = true;
 				for (int k=0; k < pret.size() ; k++) {
 					int pp = pret.keyAt(k);
-					if (pp!=pi && ! realImplicit.contains(pp)) {
-						allImplicit = false;
+					if (pp!=pi && realImplicit.contains(pp)) {
+						isOk = false;
 						break;
 					}
-				}
-				if (allImplicit) {
-					isOk = false;
-					break;
 				}
 			}
 			if (isOk) {
