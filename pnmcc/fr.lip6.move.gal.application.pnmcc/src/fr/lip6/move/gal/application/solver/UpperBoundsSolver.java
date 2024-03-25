@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,11 +13,13 @@ import java.util.Set;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.Application;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
+import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.CoverWalker;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
+import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -111,10 +114,11 @@ public class UpperBoundsSolver {
 	}
 	
 
-	public static List<Integer> applyReductions(SparsePetriNet spn, DoneProperties doneProps, List<Integer> initMaxStruct) {
+	public static List<Integer> applyReductions(MccTranslator reader, DoneProperties doneProps, List<Integer> initMaxStruct) {
 			int iter;
 			int iterations =0;
 
+			SparsePetriNet spn = reader.getSPN();
 			//  need to protect some variables
 			List<Integer> tocheckIndexes = new ArrayList<>();
 			List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
@@ -309,7 +313,8 @@ public class UpperBoundsSolver {
 								
 				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
-							
+				
+				
 				
 				if (!isBounded.isPresent()) {
 					// check if we still have inf upper bounds
@@ -388,8 +393,67 @@ public class UpperBoundsSolver {
 				iterations++;
 			} while ( (iterations<=1 || iter > 0 || !lastMaxSeen.equals(maxSeen)) && ! spn.getProperties().isEmpty());
 			
+			
+			reader.setSpn(spn,false);
+			
+			testWithReachability(reader,maxSeen,maxStruct,doneProps);
+			
 			return maxStruct;
 		}
+
+	private static void testWithReachability(MccTranslator ori, List<Integer> maxSeen, List<Integer> maxStruct,
+			DoneProperties doneProps) {
+
+		SparsePetriNet spnori = ori.getSPN();
+		MccTranslator subproblem = ori.copy();
+		SparsePetriNet spn = subproblem.getSPN();		
+		spn.getProperties().clear();
+		for (int id=0; id < spnori.getProperties().size() ; id++) {
+			Property prop = spnori.getProperties().get(id);
+			if (maxStruct.get(id) > 0) {
+				Property reachMax = new Property(
+						Expression.nop(Op.EF, 
+								Expression.nop(Op.EQ, prop.getBody(), Expression.constant(maxStruct.get(id)))), PropertyType.INVARIANT, prop.getName()+"MAX" );
+				spn.getProperties().add(reachMax);
+			}
+			Property seenIsBound = new Property(
+					Expression.nop(Op.AG, 
+							Expression.nop(Op.LEQ, prop.getBody(), Expression.constant(maxSeen.get(id)))), PropertyType.INVARIANT, prop.getName()+"MIN" );
+			spn.getProperties().add(seenIsBound);			
+		}
+		DoneProperties localDone = new ConcurrentHashDoneProperties();
+			
+		try {
+			ReachabilitySolver.applyReductions(subproblem,localDone,100);
+		} catch (GlobalPropertySolvedException e) {
+			e.printStackTrace();
+		}
+		for (Entry<String, Boolean> ent : localDone.entrySet()) {
+			if (ent.getKey().endsWith("MAX") && ent.getValue()) {
+				// We *can* reach the structural max.
+				String pname = ent.getKey().substring(0,ent.getKey().length()-3);
+				int id = -1;
+				for (id = 0; id < spnori.getProperties().size() ; id++) {
+					if (spnori.getProperties().get(id).getName().equals(pname)) {
+						break;
+					}
+				}
+				doneProps.put(pname, maxStruct.get(id), "REACHABILITY_MAX");
+			} else if (ent.getKey().endsWith("MIN") && ent.getValue()) {
+				// We *cannot exceed* the seen value.
+				String pname = ent.getKey().substring(0,ent.getKey().length()-3);
+				int id = -1;
+				for (id = 0; id < spnori.getProperties().size() ; id++) {
+					if (spnori.getProperties().get(id).getName().equals(pname)) {
+						break;
+					}
+				}
+				doneProps.put(pname, maxSeen.get(id), "REACHABILITY_MIN");				
+			}
+			System.out.println("Result : " + ent);
+		}
+		
+	}
 
 	private static void printBounds(String rule, List<Integer> maxSeen, List<Integer> maxStruct) {
 		StringBuilder sb = new StringBuilder();
