@@ -56,7 +56,7 @@ public class ReachabilitySolver {
 		boolean doneSums = false;
 		boolean doneAtomsSR = false;
 		Thread t = null;
-		
+		reader.getSPN().testAliasing(doneProps);
 		ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 
 		if (reader.isDoITS() || reader.isDoLTSMin()) {
@@ -71,7 +71,7 @@ public class ReachabilitySolver {
 			do {
 				iter =0;
 				SparsePetriNet spn = reader.getSPN();
-
+				spn.testAliasing(doneProps);
 				StructuralReduction sr = new StructuralReduction(spn);
 
 				//  need to protect some variables
@@ -265,48 +265,55 @@ public class ReachabilitySolver {
 			} while ( (iterations<=1 || iter > 0) && ! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished());
 
 			if (! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished()) {
+				long time = System.currentTimeMillis();
+				int init = reader.getSPN().getProperties().size();
 				// try to disprove on an overapprox.
 				StructuralReduction sr = new StructuralReduction(reader.getSPN());
-				sr.abstractReads();
-				sr.reduce(ReductionType.REACHABILITY);
+				if (sr.abstractReads() >0) {
+					System.out.println("Attempting over-approximation, by ignoring read arcs.");
 
-				SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
-				spn.readFrom(sr);
-				
-				List<Integer> tocheckIndexes = new ArrayList<>();
-				List<Property> props = new ArrayList<>(spn.getProperties());
-				List<Expression> tocheck = new ArrayList<>(props.size());
-				computeToCheck(props, tocheckIndexes, tocheck);
-				
-				
-				List<Integer> repr = new ArrayList<>();
-				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, repr, iterations==0 ? 5:45, true);
+					sr.reduce(ReductionType.REACHABILITY);
 
-				iter += treatSMTVerdicts(props, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
+					SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
+					spn.readFrom(sr);
 
-				// give an exhaustive method a try
-				SparsePetriNet spnOri = reader.getSPN();
-				reader.setSpn(spn, true);
-				DoneProperties todoProps = new ConcurrentHashDoneProperties();
-				if (reader.getSPN().getTransitionCount() <= 2000) {
-					// a bit of exhaustive for relatively small systems
-					GlobalPropertySolver.verifyWithSDD(reader, todoProps , "ReachabilityCardinality", 15);
+					List<Integer> tocheckIndexes = new ArrayList<>();
+					List<Property> props = new ArrayList<>(spn.getProperties());
+					List<Expression> tocheck = new ArrayList<>(props.size());
+					computeToCheck(props, tocheckIndexes, tocheck);
 
-					for (Entry<String, Boolean> prop : todoProps.entrySet()) {
-						for (Property p : spnOri.getProperties()) {
-							if (p.getName().equals(prop.getKey())) {
-								if (p.getBody().getOp() == Op.AG && prop.getValue()
-										|| p.getBody().getOp() == Op.EF && !prop.getValue()) {
-									// reliable on over approximation
-									doneProps.put(prop.getKey(), prop.getValue(), "OVER_APPROXIMATION");
+
+					List<Integer> repr = new ArrayList<>();
+					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, repr, iterations==0 ? 5:45, true);
+
+					iter += treatSMTVerdicts(props, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
+
+					// give an exhaustive method a try
+					SparsePetriNet spnOri = reader.getSPN();
+					reader.setSpn(spn, true);
+					DoneProperties todoProps = new ConcurrentHashDoneProperties();
+					if (reader.getSPN().getTransitionCount() <= 2000) {
+						// a bit of exhaustive for relatively small systems
+						GlobalPropertySolver.verifyWithSDD(reader, todoProps , "ReachabilityCardinality", 15);
+
+						for (Entry<String, Boolean> prop : todoProps.entrySet()) {
+							for (Property p : spnOri.getProperties()) {
+								if (p.getName().equals(prop.getKey())) {
+									if (p.getBody().getOp() == Op.AG && prop.getValue()
+											|| p.getBody().getOp() == Op.EF && !prop.getValue()) {
+										// reliable on over approximation
+										doneProps.put(prop.getKey(), prop.getValue(), "OVER_APPROXIMATION");
+									}
+									break;
 								}
-								break;
 							}
 						}
 					}
+					reader.setSpn(spnOri, false);
+					checkInInitial(spnOri, doneProps);
+
+					System.out.println("Over-approximation ignoring read arcs solved "+(spnOri.getProperties().size()-init)+ " properties in "+(System.currentTimeMillis()-time) + " ms.");
 				}
-				reader.setSpn(spnOri, false);
-				checkInInitial(spnOri, doneProps);
 			}
 
 
