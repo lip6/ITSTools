@@ -20,7 +20,7 @@ public class FlowPrinter {
 	
 	
 	public static String drawNet (ISparsePetriNet sr, String title)  {
-		return drawNet(sr, title, Collections.emptySet(), Collections.emptySet(),200);
+		return drawNet(sr, title, Collections.emptySet(), Collections.emptySet(),150);
 	}
 
 	public static String drawNet (ISparsePetriNet sr, String title, int maxShown)  {
@@ -28,7 +28,7 @@ public class FlowPrinter {
 	}
 	
 	public static String drawNet (ISparsePetriNet sr, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans)  {
-		return drawNet(sr, title, hlPlaces, hlTrans, 200);
+		return drawNet(sr, title, hlPlaces, hlTrans, 150);
 	}
 	public static String drawNet (ISparsePetriNet sr, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans, int maxShown)  {
 		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames(), sr.computeSupport(), "places: "+sr.getPnames().size() + " trans:"+ sr.getTnames().size()+ " " + title, hlPlaces, hlTrans, maxShown);
@@ -102,7 +102,7 @@ public class FlowPrinter {
 			}
 			pw.println("label=\""+ title +"\";");
 
-			
+			int totalArcs=0;
 			for (int ti=0 ; ti < tnames.size() ; ti++) {
 				if (isLarge && !toret.contains(ti)) {
 					continue;
@@ -112,29 +112,40 @@ public class FlowPrinter {
 					color = ",color=\"blue\""+",peripheries=2";
 				}
 				boolean incomplete = false;
-				SparseIntArray col = flowPT.getColumn(ti);				
-				for (int i = 0; i < col.size(); i++) {
-					if (!isLarge || torep.contains(col.keyAt(i))) {
-						pw.print(" p" + col.keyAt(i)+" -> t"+ti);
-						if (col.valueAt(i) != 1) {
-							pw.print(" [label=\""+col.valueAt(i)+"\"]"); 
+				SparseIntArray col = flowPT.getColumn(ti);
+				if (totalArcs < maxShown * 4) {
+					for (int i = 0; i < col.size(); i++) {
+						if (!isLarge || torep.contains(col.keyAt(i))) {
+							pw.print(" p" + col.keyAt(i)+" -> t"+ti);
+							if (col.valueAt(i) != 1) {
+								pw.print(" [label=\""+col.valueAt(i)+"\"]"); 
+							}
+							pw.println(";");
+							totalArcs ++;
+						} else {
+							incomplete = true; 
 						}
-						pw.println(";");
-					} else {
-						incomplete = true; 
 					}
+				} else {
+					incomplete = true;
 				}
 				col = flowTP.getColumn(ti);
-				for (int i = 0; i < col.size(); i++) {					
-					if (!isLarge || torep.contains(col.keyAt(i))) {
-						pw.print("  t"+ti+" -> p" + col.keyAt(i) );
-						if (col.valueAt(i) != 1) {
-							pw.print(" [label=\""+col.valueAt(i)+"\"]"); 
+				if (totalArcs < maxShown * 4) {
+					for (int i = 0; i < col.size(); i++) {					
+
+						if (!isLarge || torep.contains(col.keyAt(i))) {
+							pw.print("  t"+ti+" -> p" + col.keyAt(i) );
+							if (col.valueAt(i) != 1) {
+								pw.print(" [label=\""+col.valueAt(i)+"\"]"); 
+							}
+							pw.println(";");
+							totalArcs++;
+						} else {
+							incomplete = true; 
 						}
-						pw.println(";");
-					} else {
-						incomplete = true; 
 					}
+				} else {
+					incomplete = true;
 				}
 				if (incomplete) {
 					color += ",style=\"dashed\"";
