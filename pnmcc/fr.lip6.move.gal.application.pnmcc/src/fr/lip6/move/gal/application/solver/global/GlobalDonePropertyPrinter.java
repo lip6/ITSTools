@@ -67,11 +67,6 @@ public class GlobalDonePropertyPrinter extends ConcurrentHashDoneProperties {
 		return super.put(prop, value, techniques);
 	}
 
-	@Override
-	public Boolean put(String prop, Integer value, String techniques) {
-		//
-		return super.put(prop, value, techniques);
-	}
 	
 	@Override
 	public boolean isFinished() {
