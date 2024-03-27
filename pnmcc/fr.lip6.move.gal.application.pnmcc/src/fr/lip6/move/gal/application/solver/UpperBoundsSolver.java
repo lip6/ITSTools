@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -16,9 +18,11 @@ import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.CoverWalker;
+import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
+import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
@@ -121,6 +125,7 @@ public class UpperBoundsSolver {
 			SparsePetriNet spn = reader.getSPN();
 			//  need to protect some variables
 			List<Integer> tocheckIndexes = new ArrayList<>();
+			spn.testAliasing(doneProps);
 			List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
 			computeToCheck(spn, tocheckIndexes, tocheck, doneProps);
 
@@ -155,6 +160,7 @@ public class UpperBoundsSolver {
 			boolean first = true;
 			do {
 				iter =0;
+				spn.testAliasing(doneProps);
 				if (! first)  {
 					computeToCheck(spn, tocheckIndexes, tocheck, doneProps);			
 				} else {
@@ -174,6 +180,7 @@ public class UpperBoundsSolver {
 					approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
 					
 					printBounds("after invariants", maxSeen, maxStruct);
+				//	FlowPrinter.drawNet(sr, "After Invariants");
 					checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
 				} else {
 					hasSkel = false;
@@ -271,7 +278,26 @@ public class UpperBoundsSolver {
 				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 				
 				sr.setProtected(support);
+
+				boolean foundDeadTrans = false;
+				if (iterations >= 2 || iter == 0) {
+					List<Integer> deadTransitions = findDeadTransitions(reader);
+
+					if (!deadTransitions.isEmpty()) {
+						sr.dropTransitions(deadTransitions, true, "Dead transitions detected with 'AG(!fireable(t))'");						
+						iter++;
+						foundDeadTrans = true;
+					}
+				}
 				
+				if (iterations >= 1 && !foundDeadTrans) {
+					List<Integer> deadPlaces = findDeadPlaces(reader);
+
+					if (!deadPlaces.isEmpty()) {
+						sr.dropSurroundingTransitions(deadPlaces, "Dead places");
+						iter++;
+					}
+				}
 				
 				// a single place, that is one bounded : kill it's consumers
 				if (support.cardinality()==1 && maxStruct.get(0)==1) {
@@ -400,7 +426,79 @@ public class UpperBoundsSolver {
 			
 			return maxStruct;
 		}
+	
+	
+	private static List<Integer> findDeadTransitions (MccTranslator ori) {
+		MccTranslator subproblem = ori.copy();
+		SparsePetriNet spn = subproblem.getSPN();		
+		spn.getProperties().clear();
+		
+		SparseIntArray initial = new SparseIntArray(spn.getMarks());
+		for (int tid=0; tid < spn.getTransitionCount() ; tid++) {
+			SparseIntArray pt = spn.getFlowPT().getColumn(tid);
+			if (! SparseIntArray.greaterOrEqual(initial, pt)) {
+				Property tisdead = new Property(
+						Expression.nop(Op.AG, 
+								Expression.nop(Op.NOT, Expression.nop(Op.ENABLED,Expression.trans(tid)))), PropertyType.INVARIANT, "DEAD"+tid);
+				spn.getProperties().add(tisdead);
+			}
+		}
+		subproblem.setSpn(spn, true);
+		subproblem.simplifySPN(true, true);
+		
+		long time = System.currentTimeMillis();
+		System.out.println("Running "+spn.getProperties().size()+"sub problems to find dead transitions.");
+		DoneProperties localDone = new ConcurrentHashDoneProperties();
+		try {
+			ReachabilitySolver.applyReductions(subproblem,localDone,100);
+		} catch (GlobalPropertySolvedException e) {
+			e.printStackTrace();
+		}
+		List<Integer> deadTrans = new ArrayList<Integer>();
+		for (Entry<String, Boolean> ent : localDone.entrySet()) {
+			if (ent.getValue()) {
+				int tid = Integer.parseInt(ent.getKey().substring(4));
+				deadTrans.add(tid);
+			}
+		}
+		System.out.println("Search for dead transitions found "+deadTrans.size()+ " dead transitions in " + (System.currentTimeMillis()-time) + "ms");
+		return deadTrans;
+	}
+	
 
+	private static List<Integer> findDeadPlaces (MccTranslator ori) {
+		MccTranslator subproblem = ori.copy();
+		SparsePetriNet spn = subproblem.getSPN();		
+		spn.getProperties().clear();
+		
+		for (int pid=0; pid < spn.getPlaceCount() ; pid++) {
+			if (spn.getMarks().get(pid) == 0) {
+				Property pisdead = new Property(
+						Expression.nop(Op.AG, 
+								Expression.nop(Op.EQ, Expression.var(pid), Expression.constant(0))), PropertyType.INVARIANT, "DEAD"+pid);
+				spn.getProperties().add(pisdead);
+			}
+		}
+		
+		long time = System.currentTimeMillis();
+		System.out.println("Running "+spn.getProperties().size()+"sub problems to find dead places.");
+		DoneProperties localDone = new ConcurrentHashDoneProperties();
+		try {
+			ReachabilitySolver.applyReductions(subproblem,localDone,100);
+		} catch (GlobalPropertySolvedException e) {
+			e.printStackTrace();
+		}
+		List<Integer> deadPlaces = new ArrayList<Integer>();
+		for (Entry<String, Boolean> ent : localDone.entrySet()) {
+			if (ent.getValue()) {
+				int pid = Integer.parseInt(ent.getKey().substring(4));
+				deadPlaces.add(pid);
+			}
+		}
+		System.out.println("Search for dead places found "+deadPlaces.size()+ " dead places in " + (System.currentTimeMillis()-time) + "ms");
+		return deadPlaces;
+	}
+	
 	private static void testWithReachability(MccTranslator ori, List<Integer> maxSeen, List<Integer> maxStruct,
 			DoneProperties doneProps) {
 
@@ -408,19 +506,52 @@ public class UpperBoundsSolver {
 		MccTranslator subproblem = ori.copy();
 		SparsePetriNet spn = subproblem.getSPN();		
 		spn.getProperties().clear();
+		
+		
+		IntMatrixCol tflowTP = subproblem.getSPN().getFlowTP().transpose();
+		Map<Integer,String> propId = new HashMap<>();
 		for (int id=0; id < spnori.getProperties().size() ; id++) {
 			Property prop = spnori.getProperties().get(id);
+			propId.put(id, prop.getName());
 			if (maxStruct.get(id) > 0) {
 				Property reachMax = new Property(
 						Expression.nop(Op.EF, 
-								Expression.nop(Op.EQ, prop.getBody(), Expression.constant(maxStruct.get(id)))), PropertyType.INVARIANT, prop.getName()+"MAX" );
+								Expression.nop(Op.EQ, prop.getBody(), Expression.constant(maxStruct.get(id)))), PropertyType.INVARIANT, "MAX"+id );
 				spn.getProperties().add(reachMax);
 			}
 			Property seenIsBound = new Property(
 					Expression.nop(Op.AG, 
-							Expression.nop(Op.LEQ, prop.getBody(), Expression.constant(maxSeen.get(id)))), PropertyType.INVARIANT, prop.getName()+"MIN" );
-			spn.getProperties().add(seenIsBound);			
+							Expression.nop(Op.LEQ, prop.getBody(), Expression.constant(maxSeen.get(id)))), PropertyType.INVARIANT, "MIN"+id );
+			spn.getProperties().add(seenIsBound);
+			
+			BitSet support = new BitSet();
+			PetriNet.addSupport(prop.getBody(),support);
+			if (support.cardinality() == 1) {
+				int pid = support.nextSetBit(0);
+				List<Expression> feeders = new ArrayList<>();
+				SparseIntArray row = tflowTP.getColumn(pid);
+				for (int i=0; i < row.size() ; i++) {
+					int val = row.valueAt(i);
+					int tid = row.keyAt(i);
+					int pre = spn.getFlowPT().getColumn(tid).get(pid);
+					if (val-pre >0) {
+						// true feeder
+						feeders.add(Expression.trans(tid));
+					}
+				}
+				
+				Property canIncreaseSeen = new Property(
+						Expression.nop(Op.EF,
+								Expression.nop(Op.AND,
+										Expression.nop(Op.EQ, prop.getBody(), Expression.constant(maxSeen.get(id))),
+										Expression.nop(Op.ENABLED,feeders)
+									))
+						, PropertyType.INVARIANT, "ADD"+id );
+				spn.getProperties().add(canIncreaseSeen);
+			}
+			
 		}
+		subproblem.simplifySPN(true, true);
 		DoneProperties localDone = new ConcurrentHashDoneProperties();
 			
 		try {
@@ -429,26 +560,21 @@ public class UpperBoundsSolver {
 			e.printStackTrace();
 		}
 		for (Entry<String, Boolean> ent : localDone.entrySet()) {
-			if (ent.getKey().endsWith("MAX") && ent.getValue()) {
+			if (ent.getKey().startsWith("MAX") && ent.getValue()) {
 				// We *can* reach the structural max.
-				String pname = ent.getKey().substring(0,ent.getKey().length()-3);
-				int id = -1;
-				for (id = 0; id < spnori.getProperties().size() ; id++) {
-					if (spnori.getProperties().get(id).getName().equals(pname)) {
-						break;
-					}
-				}
+				int id = Integer.parseInt(ent.getKey().substring(3));
+				String pname = propId.get(id);
 				doneProps.put(pname, maxStruct.get(id), "REACHABILITY_MAX");
-			} else if (ent.getKey().endsWith("MIN") && ent.getValue()) {
+			} else if (ent.getKey().startsWith("MIN") && ent.getValue()) {
 				// We *cannot exceed* the seen value.
-				String pname = ent.getKey().substring(0,ent.getKey().length()-3);
-				int id = -1;
-				for (id = 0; id < spnori.getProperties().size() ; id++) {
-					if (spnori.getProperties().get(id).getName().equals(pname)) {
-						break;
-					}
-				}
-				doneProps.put(pname, maxSeen.get(id), "REACHABILITY_MIN");				
+				int id = Integer.parseInt(ent.getKey().substring(3));
+				String pname = propId.get(id);
+				doneProps.put(pname, maxSeen.get(id), "REACHABILITY_MIN");
+			} else if (ent.getKey().startsWith("ADD") && ! ent.getValue()) {
+				// We *cannot exceed* the seen value.
+				int id = Integer.parseInt(ent.getKey().substring(3));
+				String pname = propId.get(id);
+				doneProps.put(pname, maxSeen.get(id), "REACHABILITY_ADD");
 			}
 			System.out.println("Result : " + ent);
 		}
