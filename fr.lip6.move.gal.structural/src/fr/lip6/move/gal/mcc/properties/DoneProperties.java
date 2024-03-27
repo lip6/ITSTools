@@ -22,4 +22,6 @@ public interface DoneProperties {
 	public Boolean getValue(String prop);
 
 	boolean isFinished();
+	
+	void addAlias(String propToCheck, String aka);
 }

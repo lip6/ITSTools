@@ -2,8 +2,12 @@ package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -56,5 +60,25 @@ public abstract class PetriNet {
 			addSupport(((AtomicPropRef) expr).getAp().getExpression(), supp);
 		}
 		return null;
+	}
+	
+	
+	public void testAliasing(DoneProperties doneProps) {
+		int init = getProperties().size();
+		Map<Expression,String> alias = new HashMap<>();
+		Iterator<Property> it = getProperties().iterator();
+		while (it.hasNext()) {
+			Property prop = it.next();
+			String aka = alias.get(prop.getBody());
+			if (aka == null) {
+				alias.put(prop.getBody(), prop.getName());
+			} else {
+				doneProps.addAlias(aka, prop.getName());
+				it.remove();
+			}
+		}
+		if (init != getProperties().size()) {
+			System.out.println("Reduction of identical properties reduced properties to check from "+init+" to "+getProperties().size());
+		}
 	}
 }
