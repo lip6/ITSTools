@@ -187,7 +187,6 @@ public class ITSRunner extends AbstractRunner {
 		private String examination;
 		private boolean withStructure;
 		private MccTranslator reader;
-		private DoneProperties seen;
 		private Set<String> todoProps;
 		private Ender ender;
 
@@ -196,7 +195,6 @@ public class ITSRunner extends AbstractRunner {
 			this.examination = examination;
 			this.withStructure = withStructure;
 			this.reader = reader;
-			this.seen = doneProps;
 			this.todoProps = todoProps; 
 			this.ender = ender;
 		}
@@ -250,7 +248,7 @@ public class ITSRunner extends AbstractRunner {
 							Property dead = reader.getSpec().getProperties().get(0);
 							String pname = dead.getName();
 							double nbdead = Double.parseDouble(line.split("\\s+")[2]);
-							seen.put(pname,nbdead != 0,"DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":""));
+							doneProps.put(pname,nbdead != 0,"DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":""));
 						}
 					}
 					if ( line.matches("Bounds property.*")) {
@@ -279,7 +277,7 @@ public class ITSRunner extends AbstractRunner {
 									it.prune();
 								}
 							}
-							seen.put(pname,(bound+toadd),"DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
+							doneProps.put(pname,(bound+toadd),"DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
 						}
 					}
 					if ( examination.startsWith("CTL")) {
@@ -288,7 +286,7 @@ public class ITSRunner extends AbstractRunner {
 							int formindex = Integer.parseInt(tab[0].split(" ")[1]);
 							int verdict = Integer.parseInt(tab[1]);
 							String pname = reader.getSpec().getProperties().get(formindex).getName();
-							seen.put(pname,verdict != 0,"DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
+							doneProps.put(pname,verdict != 0,"DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
 						}
 					}
 					if ( examination.startsWith("LTL")) {
@@ -298,10 +296,10 @@ public class ITSRunner extends AbstractRunner {
 							String res = tab[3];
 							if (reader.getTgba() != null) {
 								String pname = reader.getTgba().getName();
-								seen.put(pname, "TRUE".equals(res),"KNOWLEDGE HOA DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
+								doneProps.put(pname, "TRUE".equals(res),"KNOWLEDGE HOA DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
 							} else {
 								String pname = reader.getSpec().getProperties().get(formindex).getName();
-								seen.put(pname, "TRUE".equals(res),"DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
+								doneProps.put(pname, "TRUE".equals(res),"DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
 							}
 						}
 					}
@@ -324,8 +322,8 @@ public class ITSRunner extends AbstractRunner {
 								res = "TRUE";
 							}
 							pname = pname.replaceAll("\\s", "");
-							if (!seen.containsKey(pname)) {
-								seen.put(pname,"TRUE".equals(res),"DECISION_DIAGRAMS TOPOLOGICAL COLLATERAL_PROCESSING " + (withStructure?"USE_NUPN":""));
+							if (!doneProps.containsKey(pname)) {
+								doneProps.put(pname,"TRUE".equals(res),"DECISION_DIAGRAMS TOPOLOGICAL COLLATERAL_PROCESSING " + (withStructure?"USE_NUPN":""));
 							}
 						}
 					}
@@ -340,7 +338,7 @@ public class ITSRunner extends AbstractRunner {
 				ender.killAll();
 				return;
 			}
-			if (seen.keySet().containsAll(todoProps)) {
+			if (doneProps.keySet().containsAll(todoProps)) {
 				if (examination.equals("StateSpace") && seenCounts < 3) {
 					// NOP
 				} else {
