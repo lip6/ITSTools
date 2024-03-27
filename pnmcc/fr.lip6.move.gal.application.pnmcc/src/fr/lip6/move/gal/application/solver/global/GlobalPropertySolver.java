@@ -701,6 +701,7 @@ public class GlobalPropertySolver {
 
 	public static void verifyWithSDD(MccTranslator reader, DoneProperties doneProps, String examinationForITS,
 			int timeout) {
+		long time = System.currentTimeMillis();
 		boolean wasInterrupted = false;
 		if (reader.isDoITS())
 		try {
@@ -716,11 +717,11 @@ public class GlobalPropertySolver {
 					reader.setLouvain(true);
 					reader.setOrder(null);
 					reader.flattenSpec(true);
-				}			
+				}
+				final IRunner itsRunner = new ITSRunner(examinationForITS, reader, true, false, reader.getFolder(), timeout,
+						null);
 				try {
 					// decompose + simplify as needed
-					IRunner itsRunner = new ITSRunner(examinationForITS, reader, true, false, reader.getFolder(), timeout,
-							null);
 					itsRunner.configure(reader.getSpec(), doneProps);
 					itsRunner.solve(new Ender() {
 						public void killAll() {
@@ -735,6 +736,15 @@ public class GlobalPropertySolver {
 					System.out.println("ITS runner failed with exception " + e.getMessage());
 					e.printStackTrace();
 					wasInterrupted = true;
+				} finally {
+					if (itsRunner != null) {
+						itsRunner.interrupt();
+						try {
+							itsRunner.join();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 				reader.getSPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
 				if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished()) {
@@ -746,9 +756,11 @@ public class GlobalPropertySolver {
 			System.out.println("ITSRunner failed with out of memory error.");
 		}
 		
-		if (doneProps.isFinished() || wasInterrupted) {
+		if (doneProps.isFinished() || wasInterrupted || reader.getSPN().getProperties().isEmpty()) {
 			return;
 		}
+		timeout -= (System.currentTimeMillis() - time) * 1000;
+		if (timeout < 0) return;
 		//CTL is not for LTSmin
 		if (reader.isDoLTSMin())
 		if (! reader.getSPN().getProperties().isEmpty() && !examinationForITS.startsWith("CTL")) {
@@ -756,6 +768,7 @@ public class GlobalPropertySolver {
 			try {
 				ltsminRunner.configure(null, doneProps);
 				ltsminRunner.setNet(reader.getSPN());
+				// ltsminRunner.setShouldRetry(false);
 				
 				ltsminRunner.solve(new Ender() {
 					public void killAll() {
@@ -768,8 +781,16 @@ public class GlobalPropertySolver {
 				ltsminRunner.join();
 			} catch (IOException | InterruptedException e) {
 				System.out.println("LTSmin runner failed with exception " + e.getMessage());
-				wasInterrupted = true;
+				wasInterrupted = true;								
+				
 				e.printStackTrace();				
+			} finally {
+				ltsminRunner.interrupt();
+				try {
+					ltsminRunner.join();
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}		
 		reader.getSPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
