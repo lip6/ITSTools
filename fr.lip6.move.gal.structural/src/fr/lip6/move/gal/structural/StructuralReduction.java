@@ -2903,7 +2903,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 
 
-	public void abstractReads() {
+	public int abstractReads() {
+		int abstracted = 0;
 		for (int tid = 0 ; tid < tnames.size() ; tid++) {
 			SparseIntArray pre = new SparseIntArray();
 			SparseIntArray post = new SparseIntArray();
@@ -2914,6 +2915,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				int v = cpre.valueAt(i);
 				if (cpost.get(p) != v) {
 					pre.append(p, v);
+				} else {
+					abstracted++;
 				}
 			}
 			for (int i=0,ie=cpost.size(); i < ie ;  i++) {
@@ -2926,6 +2929,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			flowPT.setColumn(tid, pre);
 			flowTP.setColumn(tid, post);
 		}		
+		return abstracted;
 	}
 
 
@@ -3024,6 +3028,24 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		if (DEBUG >= 1) {
 			FlowPrinter.drawNet(pn, "Stabilizing places/transitions", stablePlaces, stableTransitions);
 		}
+	}
+
+
+	public void dropSurroundingTransitions(List<Integer> deadPlaces, String rule) {
+		Set<Integer> tokill = new HashSet<>();
+		IntMatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowTP = flowTP.transpose();
+		for (Integer pid : deadPlaces) {
+			SparseIntArray row = tflowPT.getColumn(pid);
+			for (int i=0,ie=row.size(); i < ie ; i++) {
+				tokill.add(row.keyAt(i));
+			}
+			row = tflowTP.getColumn(pid);
+			for (int i=0,ie=row.size(); i < ie ; i++) {
+				tokill.add(row.keyAt(i));
+			}
+		}
+		dropTransitions(new ArrayList<>(tokill), true, rule);
 	}
 	
 }
