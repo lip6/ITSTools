@@ -90,9 +90,9 @@ public class MathTools {
 	 */
 	public static int gcd(int a, int b) {
 		if (a < b) {
-			return BigInteger.valueOf(b).gcd(BigInteger.valueOf(a)).intValue();
+			return BigInteger.valueOf(b).gcd(BigInteger.valueOf(a)).intValueExact();
 		} else {
-			return BigInteger.valueOf(a).gcd(BigInteger.valueOf(b)).intValue();
+			return BigInteger.valueOf(a).gcd(BigInteger.valueOf(b)).intValueExact();
 		}
 	}
 	

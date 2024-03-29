@@ -456,7 +456,7 @@ public class InvariantCalculator {
 		return startIndex;
 	}
 
-	public static SparseBoolArray sumProdInto(double alpha, SparseIntArray ta, double beta, SparseIntArray tb)
+	public static SparseBoolArray sumProdInto(int alpha, SparseIntArray ta, int beta, SparseIntArray tb)
 			throws ArithmeticException {
 		SparseBoolArray changed = new SparseBoolArray();
 		SparseIntArray flow = new SparseIntArray(Math.max(ta.size(), tb.size()));
@@ -467,11 +467,7 @@ public class InvariantCalculator {
 			int ki = i == ta.size() ? Integer.MAX_VALUE : ta.keyAt(i);
 			int kj = j == tb.size() ? Integer.MAX_VALUE : tb.keyAt(j);
 			if (ki == kj) {
-				double dval = alpha * ta.valueAt(i) + beta * tb.valueAt(j);
-				if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
-					throw new ArithmeticException();
-				}
-				int val = (int) dval;
+				int val =  Math.addExact( Math.multiplyExact(alpha, ta.valueAt(i)) , Math.multiplyExact(beta, tb.valueAt(j)));
 				if (val != 0) {
 					flow.append(ki, val);
 				}
@@ -481,11 +477,7 @@ public class InvariantCalculator {
 				i++;
 				j++;
 			} else if (ki < kj) {
-				double dval = alpha * ta.valueAt(i);
-				if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
-					throw new ArithmeticException();
-				}
-				int val = (int) dval;
+				int val = Math.multiplyExact(alpha, ta.valueAt(i));
 				if (val != 0) {
 					flow.append(ki, val);
 				}
@@ -494,11 +486,7 @@ public class InvariantCalculator {
 				}
 				i++;
 			} else if (kj < ki) {
-				double dval = beta * tb.valueAt(j);
-				if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
-					throw new ArithmeticException();
-				}
-				int val = (int) dval;
+				int val = Math.multiplyExact(beta, tb.valueAt(j));
 				if (val != 0) {
 					flow.append(kj, val);
 				}
