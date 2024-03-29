@@ -58,8 +58,12 @@ public class InvariantCalculator {
 			PrintStream out) {
 		for (SparseIntArray rv : invariants) {
 			StringBuilder sb = new StringBuilder();
-			int sum = printEquation(rv, initial, pnames, sb);
-			out.println("inv : " + sb.toString() + " = " + sum);
+			try {
+				long sum = printEquation(rv, initial, pnames, sb);			
+				out.println("inv : " + sb.toString() + " = " + sum);
+			} catch (ArithmeticException e) {
+				System.err.println("Overflow of 'long' when computing constant for invariant.");
+			}
 		}
 		out.println("Total of " + invariants.size() + " invariants.");
 	}
@@ -69,9 +73,9 @@ public class InvariantCalculator {
 		printInvariant(invariants, pnames, initial, System.out);
 	}
 
-	public static int printEquation(SparseIntArray inv, List<Integer> initial, List<String> pnames, StringBuilder sb) {
+	public static long printEquation(SparseIntArray inv, List<Integer> initial, List<String> pnames, StringBuilder sb) {
 		boolean first = true;
-		int sum = 0;
+		long sum = 0;
 		for (int i = 0; i < inv.size(); i++) {
 			int k = inv.keyAt(i);
 			int v = inv.valueAt(i);
@@ -95,7 +99,9 @@ public class InvariantCalculator {
 				} else {
 					sb.append(pnames.get(k));
 				}
-				sum += initial != null ? v * initial.get(k) : 0;
+				if (initial != null) {
+					sum = Math.addExact(sum, (Math.multiplyExact((long)v, initial.get(k))));					
+				}
 			}
 		}
 		return sum;
