@@ -715,7 +715,7 @@ public class DeadlockTester {
 			boolean isSafe, IntMatrixCol sumMatrix, Set<SparseIntArray> invar,
 			Set<SparseIntArray> invarT, boolean solveWithReals, List<SparseIntArray> parikhs, List<SparseIntArray> pors,
 			List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax, boolean[] done, boolean withWitness) {
-		long time;		
+		long time = System.currentTimeMillis();		
 		lastState = null;
 		lastParikh = null;
 		lastOrder = null;
@@ -728,8 +728,10 @@ public class DeadlockTester {
 				verdicts.add("sat");
 			}
 		}
+		ISolver solver = initSolver(smt, solveWithReals,2*timeoutQ,2*timeoutT);	
+		try {
 		
-		ISolver solver = initSolver(smt, solveWithReals,timeoutQ,timeoutT);		
+			
 		{
 			// STEP 1 : declare variables, assert net is dead.
 			time = System.currentTimeMillis();
@@ -825,7 +827,12 @@ public class DeadlockTester {
 			checkResults(propertiesWithSE, done, parikhs, pors, verdicts, solver, withWitness);			
 		}
 		
-		solver.exit();		
+		} catch (RuntimeException re) {
+			System.out.println("SMT process timed out, exceeded limit of "+timeoutT);
+			reportReplies(verdicts, solveWithReals,"After timeout", time);
+		} 		
+		solver.exit();
+		
 		return verdicts;
 	}
 
@@ -838,6 +845,10 @@ public class DeadlockTester {
 		
 		int nbdone = 0;
 		
+		boolean hasTraps = true;
+		for (int iter=0; hasTraps; iter++) {
+			hasTraps = false;
+			System.out.println("TRAPS : Iteration " + iter);
 		for (int pid = 0, pide = properties.size() ; pid < pide ; pid++) {
 			if (done[pid]) {
 				nbdone++;
@@ -900,9 +911,11 @@ public class DeadlockTester {
 				if (! traps.commands().isEmpty()) {
 					execAndCheckResult(traps, solver);
 					traps = new Script();
+					hasTraps = true;
 				}
 				
 			}
+		}
 		}
 
 		// true if no more props to check
