@@ -304,15 +304,48 @@ public class RandomExplorer {
 
 		int[] threads = { 0, 1, 2, 3 };
 		int[][] verdicts = new int[4][];
+		WalkStats ws = new WalkStats(bestFirst<0 ? WalkType.RANDOM : WalkType.BEST_FIRST);
 		Arrays.stream(threads).unordered().parallel().forEach(
-				id -> verdicts[id] = runRandomReachabilityDetection(nbSteps, exprs, timeout, bestFirst, false));
+				id -> verdicts[id] = runRandomReachabilityDetection(nbSteps, exprs, timeout, bestFirst, false, ws));
 		int[] finalverdict = new int[exprs.size()];
 		for (int[] v : verdicts) {
 			for (int i = 0; i < v.length; i++) {
 				finalverdict[i] = Math.max(finalverdict[i], v[i]);
 			}
 		}
+		long remaining = Arrays.stream(finalverdict).filter(i -> i==0).count();
+		System.out.println(ws + " remains " + remaining + "/" + exprs.size() + " properties");
 		return finalverdict;
+	}
+	
+	public enum WalkType {
+		RANDOM, BEST_FIRST, PARIKH, MAX, PROBABILISTIC, EXHAUSTIVE
+	}
+	
+	public static class WalkStats {
+		WalkType type;
+		int steps;
+		long resets;
+		long duration;
+		int states=-1;
+		
+		public WalkStats(WalkType wt) {
+			type = wt;
+		}
+		
+		public synchronized void addStats(int steps, long resets, long duration) {
+			this.steps += steps;
+			this.resets += resets;
+			this.duration += duration;
+		}
+		
+		public synchronized void setStates(int states) {
+			this.states = states;
+		}
+		
+		public String toString() {
+			return type +" walk for " + steps + " steps ("+resets +" resets) in " + duration + " ms. (" + (steps/duration) + " steps per ms)" + (states>0 ? " saw "+states + " states" :""); 
+		}
 	}
 
 	/**
@@ -325,12 +358,13 @@ public class RandomExplorer {
 	 *                  target with the Best-first heuristic
 	 * @param max       if true, we are trying to maximize the expressions (bounds)
 	 *                  rather than test their truth value
+	 * @param stats TODO
 	 * @return a set of answers, one per expression in exprs. For "normal" case
 	 *         these are 1 if we found a counter example or 0 otherwise. For bounds
 	 *         these are the max value of the expression.
 	 */
 	public int[] runRandomReachabilityDetection(long nbSteps, List<Expression> exprs, int timeout, int bestFirst,
-			boolean max) {
+			boolean max, WalkStats stats) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		long time = System.currentTimeMillis();
 		SparseIntArray state = wu.getInitial();
@@ -353,17 +387,10 @@ public class RandomExplorer {
 				// worst case is double evaluating when timeout is reached, who cares on small
 				// problems.
 				if (!updateVerdicts(exprs, state, verdicts)) {
-					System.out.println("Finished " + (bestFirst >= 0 ? "Best-First " : "") + "random walk after " + i
-							+ "  steps, including " + nbresets + " resets, run visited all " + exprs.size()
-							+ " properties in " + dur + " ms. (steps per millisecond=" + (i / dur) + " )"
-							+ (DEBUG >= 1 ? (" reached state " + state) : ""));
+					stats.addStats(i, nbresets, dur);
 					return verdicts;
 				}
-				int nbSeen = Arrays.stream(verdicts).sum();
-				System.out.println("Interrupted " + (bestFirst >= 0 ? "Best-First " : "") + "random walk after " + i
-						+ "  steps, including " + nbresets + " resets, run timeout after " + dur
-						+ " ms. (steps per millisecond=" + (i / dur) + " )" + " properties seen " + nbSeen
-						+ (DEBUG >= 1 ? new SparseIntArray(verdicts) + (" reached state " + state) : ""));
+				stats.addStats(i, nbresets, dur);
 				return verdicts;
 			}
 			boolean skipVerdict = false;
@@ -375,10 +402,7 @@ public class RandomExplorer {
 				}
 				if (!skipVerdict) {
 					if (!updateVerdicts(exprs, state, verdicts)) {
-						System.out.println("Finished " + (bestFirst >= 0 ? "Best-First " : "") + "random walk after "
-								+ i + "  steps, including " + nbresets + " resets, run visited all " + exprs.size()
-								+ " properties in " + dur + " ms. (steps per millisecond=" + (i / dur) + " )"
-								+ (DEBUG >= 1 ? (" reached state " + state) : ""));
+						stats.addStats(i, nbresets, dur);
 						return verdicts;
 					}
 				}
@@ -389,10 +413,7 @@ public class RandomExplorer {
 				// System.out.println("Dead end with self loop(s) found at step " + i);
 				if (skipVerdict) {
 					if (!updateVerdicts(exprs, state, verdicts)) {
-						System.out.println("Finished " + (bestFirst >= 0 ? "Best-First " : "") + "random walk after "
-								+ i + "  steps, including " + nbresets + " resets, run visited all " + exprs.size()
-								+ " properties in " + dur + " ms. (steps per millisecond=" + (i / dur) + " )"
-								+ (DEBUG >= 1 ? (" reached state " + state) : ""));
+						stats.addStats(i, nbresets, dur);
 						return verdicts;
 					}
 				}
@@ -457,13 +478,7 @@ public class RandomExplorer {
 			}
 		}
 		long dur = System.currentTimeMillis() - time + 1;
-		if (nbSteps > 50) {
-			System.out.println("Incomplete " + (bestFirst >= 0 ? "Best-First " : "") + "random walk after " + i
-					+ "  steps, including " + nbresets + " resets, run finished after " + dur
-					+ " ms. (steps per millisecond=" + (i / dur) + " )" + " properties (out of " + exprs.size()
-					+ ") seen :" + Arrays.stream(verdicts).sum() + (DEBUG >= 1 ? (" reached state " + state) : ""));
-		}
-
+		stats.addStats(i, nbresets, dur);
 		return verdicts;
 	}
 
