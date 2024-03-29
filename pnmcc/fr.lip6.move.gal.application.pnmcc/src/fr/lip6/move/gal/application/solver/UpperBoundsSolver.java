@@ -26,6 +26,8 @@ import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
+import fr.lip6.move.gal.structural.RandomExplorer.WalkStats;
+import fr.lip6.move.gal.structural.RandomExplorer.WalkType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -439,7 +441,7 @@ public class UpperBoundsSolver {
 			if (! SparseIntArray.greaterOrEqual(initial, pt)) {
 				Property tisdead = new Property(
 						Expression.nop(Op.AG, 
-								Expression.nop(Op.NOT, Expression.nop(Op.ENABLED,Expression.trans(tid)))), PropertyType.INVARIANT, "DEAD"+tid);
+								Expression.nop(Op.NOT, Expression.nop(Op.ENABLED,Expression.trans(tid)))), PropertyType.INVARIANT, "TDEAD"+tid);
 				spn.getProperties().add(tisdead);
 			}
 		}
@@ -447,7 +449,7 @@ public class UpperBoundsSolver {
 		subproblem.simplifySPN(true, true);
 		
 		long time = System.currentTimeMillis();
-		System.out.println("Running "+spn.getProperties().size()+"sub problems to find dead transitions.");
+		System.out.println("Running "+spn.getProperties().size()+" sub problems to find dead transitions.");
 		DoneProperties localDone = new ConcurrentHashDoneProperties();
 		try {
 			ReachabilitySolver.applyReductions(subproblem,localDone,100);
@@ -457,7 +459,7 @@ public class UpperBoundsSolver {
 		List<Integer> deadTrans = new ArrayList<Integer>();
 		for (Entry<String, Boolean> ent : localDone.entrySet()) {
 			if (ent.getValue()) {
-				int tid = Integer.parseInt(ent.getKey().substring(4));
+				int tid = Integer.parseInt(ent.getKey().substring(5));
 				deadTrans.add(tid);
 			}
 		}
@@ -475,13 +477,13 @@ public class UpperBoundsSolver {
 			if (spn.getMarks().get(pid) == 0) {
 				Property pisdead = new Property(
 						Expression.nop(Op.AG, 
-								Expression.nop(Op.EQ, Expression.var(pid), Expression.constant(0))), PropertyType.INVARIANT, "DEAD"+pid);
+								Expression.nop(Op.EQ, Expression.var(pid), Expression.constant(0))), PropertyType.INVARIANT, "PDEAD"+pid);
 				spn.getProperties().add(pisdead);
 			}
 		}
 		
 		long time = System.currentTimeMillis();
-		System.out.println("Running "+spn.getProperties().size()+"sub problems to find dead places.");
+		System.out.println("Running "+spn.getProperties().size()+" sub problems to find dead places.");
 		DoneProperties localDone = new ConcurrentHashDoneProperties();
 		try {
 			ReachabilitySolver.applyReductions(subproblem,localDone,100);
@@ -491,7 +493,7 @@ public class UpperBoundsSolver {
 		List<Integer> deadPlaces = new ArrayList<Integer>();
 		for (Entry<String, Boolean> ent : localDone.entrySet()) {
 			if (ent.getValue()) {
-				int pid = Integer.parseInt(ent.getKey().substring(4));
+				int pid = Integer.parseInt(ent.getKey().substring(5));
 				deadPlaces.add(pid);
 			}
 		}
@@ -824,15 +826,18 @@ public class UpperBoundsSolver {
 	
 	static int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, SparsePetriNet spn,
 			DoneProperties doneProps, int steps, List<Integer> maxSeen, List<Integer> maxStruct) {
-		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1,true);
+		WalkStats ws = new WalkStats(WalkType.RANDOM);
+		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1,true, ws);
+		System.out.println(ws);
 		
+		ws = new WalkStats(WalkType.BEST_FIRST);
 		int seen = interpretVerdict(tocheck, spn, doneProps, verdicts,"RANDOM",maxSeen,maxStruct);
 		for (int i=0 ; i < tocheck.size() ; i++) {			
-			verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i,true);
+			verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i,true, ws);
 			
 			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST",maxSeen,maxStruct);			
 		}
-
+		System.out.println(ws);
 		
 		
 //		if (seen == 0) {
