@@ -344,7 +344,7 @@ public class RandomExplorer {
 		}
 		
 		public String toString() {
-			return type +" walk for " + steps + " steps ("+resets +" resets) in " + duration + " ms. (" + (steps/duration) + " steps per ms)" + (states>0 ? " saw "+states + " states" :""); 
+			return type +" walk for " + steps + " steps ("+resets +" resets) in " + duration + " ms. (" + (steps/(duration+1)) + " steps per ms)" + (states>0 ? " saw "+states + " states" :""); 
 		}
 	}
 
