@@ -1025,7 +1025,7 @@ public class DeadlockTester {
 
 		// STEP 3 : go heavy, use the state equation to refine our solution
 		time = System.currentTimeMillis();
-		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Adding state equation constraints to refine reachable states.");
+		// Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Adding state equation constraints to refine reachable states.");
 		Script script = declareStateEquation(sumMatrix, sr.getMarks(), smt,solveWithReals, invarT);
 		
 		execAndCheckResult(script, solver);
@@ -2533,15 +2533,15 @@ public class DeadlockTester {
 
 	private static void addInvariant(ISparsePetriNet sr, IFactory efactory, Script script,
 			SparseIntArray invariant) {
-		int sum = 0;
+		long sum = 0;
 		// assert : cte = m0 * x0 + ... + m_n*x_n
 		// build sum up
 		List<IExpr> toadd = new ArrayList<>();
 		List<IExpr> torem = new ArrayList<>();
-		for (int i = 0 ; i < invariant.size() ; i++) {
-			int v = invariant.keyAt(i);
-			int val = invariant.valueAt(i);
-			if (val != 0) {
+		try {
+			for (int i = 0 ; i < invariant.size() ; i++) {
+				int v = invariant.keyAt(i);
+				int val = invariant.valueAt(i);
 				IExpr ss = efactory.symbol("s"+v);
 				if (val != 1 && val != -1) {
 					ss = efactory.fcn(efactory.symbol("*"), efactory.numeral( Math.abs(val)), ss );
@@ -2550,8 +2550,11 @@ public class DeadlockTester {
 					toadd.add(ss);
 				else
 					torem.add(ss);
-				sum += sr.getMarks().get(v) * val;
+				sum  = Math.addExact(sum, Math.multiplyExact((long)val, sr.getMarks().get(v))) ; 
 			}
+		} catch (ArithmeticException e) {
+			System.err.println("Invariant declaration overflow for the constant !");
+			return;
 		}
 		if (sum < 0) {
 			toadd.add(efactory.numeral(-sum));
