@@ -281,25 +281,25 @@ public class UpperBoundsSolver {
 				
 				sr.setProtected(support);
 
-				boolean foundDeadTrans = false;
-				if (iterations >= 2 || iter == 0) {
-					List<Integer> deadTransitions = findDeadTransitions(reader);
-
-					if (!deadTransitions.isEmpty()) {
-						sr.dropTransitions(deadTransitions, true, "Dead transitions detected with 'AG(!fireable(t))'");						
-						iter++;
-						foundDeadTrans = true;
-					}
-				}
-				
-				if (iterations >= 1 && !foundDeadTrans) {
+				boolean foundDead = false;
+				if (iterations >= 1 && !foundDead) {
 					List<Integer> deadPlaces = findDeadPlaces(reader);
 
 					if (!deadPlaces.isEmpty()) {
 						sr.dropSurroundingTransitions(deadPlaces, "Dead places");
 						iter++;
+						foundDead=true;
 					}
 				}
+				if (iterations >= 1 && !foundDead) {
+					List<Integer> deadTransitions = findDeadTransitions(reader);
+
+					if (!deadTransitions.isEmpty()) {
+						sr.dropTransitions(deadTransitions, true, "Dead transitions detected with 'AG(!fireable(t))'");						
+						iter++;
+					}
+				}
+				
 				
 				// a single place, that is one bounded : kill it's consumers
 				if (support.cardinality()==1 && maxStruct.get(0)==1) {
