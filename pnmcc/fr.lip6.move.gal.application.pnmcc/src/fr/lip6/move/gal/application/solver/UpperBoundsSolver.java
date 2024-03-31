@@ -82,6 +82,7 @@ public class UpperBoundsSolver {
 			invar = InvariantCalculator.computePInvariants(sumMatrix);
 		}
 		approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
+		printBounds("after Invariants on skeleton", maxSeen, maxStruct);
 		
 		checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL CPN_APPROX INITIAL_STATE");
 		
@@ -99,7 +100,7 @@ public class UpperBoundsSolver {
 			List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, repr, new ArrayList<>(), 5, true);
 			
 			//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
-			printBounds("after SMT", maxSeen, maxStruct);
+			printBounds("after SMT on skeleton", maxSeen, maxStruct);
 			
 			checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL SAT_SMT CPN_APPROX INITIAL_STATE");
 		return maxStruct;
@@ -135,16 +136,24 @@ public class UpperBoundsSolver {
 			List<Integer> maxSeen = new ArrayList<>(tocheckIndexes.size());
 			{
 				SparseIntArray m0 = new SparseIntArray(spn.getMarks());
-				for (Expression tc:tocheck) {
-					maxSeen.add(tc.eval(m0));
-					if (spn.isSafe() && tc.getOp() == Op.PLACEREF) {
-						maxStruct.add(1);
-					} else {
+				if (spn.isSafe()) {
+					SparseIntArray ones = new SparseIntArray(spn.getMarks().size());
+					for (int i=0,ie=spn.getPlaceCount();i<ie; i++) {
+						ones.append(i, 1);
+					}
+					for (Expression tc:tocheck) {
+						maxSeen.add(tc.eval(m0));
+						maxStruct.add(tc.eval(ones));
+					}
+					printBounds("Initiallly, because the net is safe", maxSeen, maxStruct);
+				} else {
+					for (Expression tc:tocheck) {
+						maxSeen.add(tc.eval(m0));
 						maxStruct.add(-1);
 					}
+					printBounds("Initially", maxSeen, maxStruct);
 				}
 			}
-			boolean hasSkel = false;
 			if (initMaxStruct != null) {
 				for (int i=0; i < maxStruct.size() ; i++) {
 					int init=initMaxStruct.get(i); 
@@ -152,12 +161,14 @@ public class UpperBoundsSolver {
 						maxStruct.set(i, init);
 					}
 				}
-				hasSkel = true;
+				printBounds("Adding known information on max bounds.", maxSeen, maxStruct);
 			}
 			
 			checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
 			
 			List<Integer> lastMaxSeen = null;
+			
+			printBounds("Before main loop", maxSeen, maxStruct);
 			
 			boolean first = true;
 			do {
@@ -170,23 +181,19 @@ public class UpperBoundsSolver {
 				}
 				StructuralReduction sr = new StructuralReduction(spn);
 				
-				if (!hasSkel) {
-					// the invariants themselves
-					Set<SparseIntArray> invar ;
-					{
-						// effect matrix
-						List<Integer> repr = new ArrayList<>();
-						IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(spn, repr);
-						invar = InvariantCalculator.computePInvariants(sumMatrix);
-					}
-					approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
-					
-					printBounds("after invariants", maxSeen, maxStruct);
-				//	FlowPrinter.drawNet(sr, "After Invariants");
-					checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
-				} else {
-					hasSkel = false;
+				// the invariants themselves
+				Set<SparseIntArray> invar ;
+				{
+					// effect matrix
+					List<Integer> repr = new ArrayList<>();
+					IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(spn, repr);
+					invar = InvariantCalculator.computePInvariants(sumMatrix);
 				}
+				approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
+
+				printBounds("after invariants", maxSeen, maxStruct);
+				//	FlowPrinter.drawNet(sr, "After Invariants");
+				checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
 				
 				lastMaxSeen = new ArrayList<>(maxSeen);
 				RandomExplorer re = new RandomExplorer(sr);
@@ -560,7 +567,7 @@ public class UpperBoundsSolver {
 				seen++;
 			}
 		}
-		printBounds("After reachability solving "+seen+"queries.", maxSeen, maxStruct);
+		printBounds("After reachability solving "+seen+" queries.", maxSeen, maxStruct);
 	}
 
 	private static void printBounds(String rule, List<Integer> maxSeen, List<Integer> maxStruct) {
@@ -571,6 +578,11 @@ public class UpperBoundsSolver {
 		printOmegas(maxStruct, sb);
 		
 		System.out.println("Current structural bounds on expressions ("+ rule + ") : " + sb.toString());
+		for (int i=0; i< maxSeen.size() ; i++) {
+			if (maxStruct.get(i) >= 0 && maxSeen.get(i) > maxStruct.get(i)) {
+				System.out.println("Inconsistency detected : max struct is less than max seen for bound index "+i);
+			}
+		}
 	}
 
 	public static void printOmegas(List<Integer> bounds, StringBuilder sb) {
