@@ -525,33 +525,6 @@ public class UpperBoundsSolver {
 					Expression.nop(Op.AG, 
 							Expression.nop(Op.LEQ, prop.getBody(), Expression.constant(maxSeen.get(id)))), PropertyType.INVARIANT, "MIN"+id );
 			spn.getProperties().add(seenIsBound);
-			
-			BitSet support = new BitSet();
-			PetriNet.addSupport(prop.getBody(),support);
-			if (support.cardinality() == 1) {
-				int pid = support.nextSetBit(0);
-				List<Expression> feeders = new ArrayList<>();
-				SparseIntArray row = tflowTP.getColumn(pid);
-				for (int i=0; i < row.size() ; i++) {
-					int val = row.valueAt(i);
-					int tid = row.keyAt(i);
-					int pre = spn.getFlowPT().getColumn(tid).get(pid);
-					if (val-pre >0) {
-						// true feeder
-						feeders.add(Expression.trans(tid));
-					}
-				}
-				
-				Property canIncreaseSeen = new Property(
-						Expression.nop(Op.EF,
-								Expression.nop(Op.AND,
-										Expression.nop(Op.EQ, prop.getBody(), Expression.constant(maxSeen.get(id))),
-										Expression.nop(Op.ENABLED,feeders)
-									))
-						, PropertyType.INVARIANT, "ADD"+id );
-				spn.getProperties().add(canIncreaseSeen);
-			}
-			
 		}
 		subproblem.simplifySPN(true, true);
 		DoneProperties localDone = new ConcurrentHashDoneProperties();
@@ -561,26 +534,32 @@ public class UpperBoundsSolver {
 		} catch (GlobalPropertySolvedException e) {
 			e.printStackTrace();
 		}
-		for (Entry<String, Boolean> ent : localDone.entrySet()) {
-			if (ent.getKey().startsWith("MAX") && ent.getValue()) {
+		int seen = 0;
+		for (int id = spnori.getProperties().size() ; id >= 0 ; id--) {
+			boolean done = false;
+			Boolean b = localDone.getValue("MAX"+id);
+			String pname = propId.get(id);
+			if (b!=null && b) {
 				// We *can* reach the structural max.
-				int id = Integer.parseInt(ent.getKey().substring(3));
-				String pname = propId.get(id);
 				doneProps.put(pname, maxStruct.get(id), "REACHABILITY_MAX");
-			} else if (ent.getKey().startsWith("MIN") && ent.getValue()) {
+				done = true;
+			} else {
+				b = localDone.getValue("MIN"+id);
+
+				if (b!=null && b) {
 				// We *cannot exceed* the seen value.
-				int id = Integer.parseInt(ent.getKey().substring(3));
-				String pname = propId.get(id);
 				doneProps.put(pname, maxSeen.get(id), "REACHABILITY_MIN");
-			} else if (ent.getKey().startsWith("ADD") && ! ent.getValue()) {
-				// We *cannot exceed* the seen value.
-				int id = Integer.parseInt(ent.getKey().substring(3));
-				String pname = propId.get(id);
-				doneProps.put(pname, maxSeen.get(id), "REACHABILITY_ADD");
+				done = true;
+				}
 			}
-			System.out.println("Result : " + ent);
+			if (done) {
+				ori.getSPN().getProperties().remove(id);
+				maxSeen.remove(id);
+				maxStruct.remove(id);
+				seen++;
+			}
 		}
-		
+		printBounds("After reachability solving "+seen+"queries.", maxSeen, maxStruct);
 	}
 
 	private static void printBounds(String rule, List<Integer> maxSeen, List<Integer> maxStruct) {
