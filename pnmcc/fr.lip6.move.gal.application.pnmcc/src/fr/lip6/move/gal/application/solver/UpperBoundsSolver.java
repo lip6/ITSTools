@@ -269,6 +269,7 @@ public class UpperBoundsSolver {
 					if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 						iter++;
 					
+					printBounds("After Parikh guided walk", maxSeen, maxStruct);
 				
 				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
