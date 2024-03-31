@@ -1079,7 +1079,7 @@ public class DeadlockTester {
 		boolean minimizeTraces = false;
 
 		if (textReply.equals("sat") && parikh != null) {
-			if (minimizeTraces && sumMatrix.getColumnCount() < 3000) {
+			if (minmax != null || (minimizeTraces && sumMatrix.getColumnCount() < 3000)) {
 				long ttime = System.currentTimeMillis();
 				if (minmax == null) {
 					System.out.println("Attempting to minimize the solution found.");				
