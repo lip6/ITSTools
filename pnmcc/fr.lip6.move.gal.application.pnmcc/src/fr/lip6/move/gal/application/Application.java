@@ -560,7 +560,12 @@ public class Application implements IApplication, Ender {
 
 		// Now load properties from examination
 		reader.loadProperties(examination);
-
+		if (reader.getHLPN() != null) {
+			reader.getHLPN().testAliasing(doneProps);
+		} else if (reader.getSPN() != null){
+			reader.getSPN().testAliasing(doneProps);
+		}
+		
 //		if (redForExamination != null) {
 //			if ("StateSpace".equals(examination) || "Liveness".equals(examination) || "QuasiLiveness".equals(examination) || "StableMarking".equals(examination))
 //				reader.createSPN(false, false);
