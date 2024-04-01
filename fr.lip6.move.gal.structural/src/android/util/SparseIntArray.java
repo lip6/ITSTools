@@ -713,7 +713,43 @@ public class SparseIntArray implements Cloneable {
 	    // If we have gone through all of s2's keys, return true; otherwise, return false
 	    return j == ss2;
 	}
+	/**
+	 * Return an array c, such that c[i]=a[i] if b[i]=0, or c[i]=0 otherwise.
+	 * Note that values associated to b's elements are not examined; we are manipulating these SparseArrays as sets.
+	 * @param a
+	 * @param b
+	 * @return c
+	 */
+	public static SparseIntArray removeAll(SparseIntArray a, SparseIntArray b) {
+		SparseIntArray c = new SparseIntArray(a.size());
 
+		int asz = a.size();
+		int bsz = b.size();
+
+		int i = 0;
+		int j = 0;
+		while (i < asz || j < bsz) {
+			int ki;
+			if (i == asz)
+				break;
+			else
+				ki = a.keyAt(i);
+
+			int kj = j == bsz ? Integer.MAX_VALUE : b.keyAt(j);
+			if (ki == kj) {
+				// dropping value in a
+				i++;
+				j++;
+			} else if (ki < kj) {
+				c.append(ki, a.valueAt(i));
+				i++;
+			} else if (kj < ki) {
+				j++;
+			}
+		}
+
+		return c;
+	}
 	
 	/**
 	 * More efficient one pass version for removing many at once.
