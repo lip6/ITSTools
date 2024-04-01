@@ -414,38 +414,29 @@ public class DeadlockTester {
 	public static List<SparseIntArray> testUnreachableWithSMTIncremental(List<Expression> tocheck, ISparsePetriNet sr,
 			List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> pors) {
 		
-		IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(sr, representative);
-
-		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix);		
-		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-		Set<SparseIntArray> invarT = null ; //computeTinvariants(sr, sumMatrix, tnames);
-		timeout *= 5;
-		boolean [] done = new boolean [tocheck.size()];
 		List<Script> properties = new ArrayList<>(tocheck.size());
 		List<Script> propertiesWithSE = new ArrayList<>(tocheck.size());
-		List<SparseIntArray> parikhs = new ArrayList<>(tocheck.size());		
+		IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(sr, representative);
+				
 		
 		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
-			SparseIntArray parikh = new SparseIntArray();
-			parikhs.add(parikh);
-			
 			IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
 			Script property = new Script();
-			property.add(new C_assert(smtexpr));
+			ICommand propAssert = new C_assert(smtexpr);
+			property.add(propAssert );
 			properties.add(property);
 			
 			// compute predecessor constraint
-			Script s=null;
+			Script s=new Script();
+			s.add(propAssert);
 			try {
 				// let's not go overboard, we haven't even started the solver yet.
 				if (sumMatrix.getColumnCount() < 20000) {
 					s = computePredConstraint(tocheck.get(i),sumMatrix,representative,sr);
 					s.add(new C_assert(smtexpr));
-				} else {
-					s = new Script();
 				}
 			} catch (OutOfMemoryError err) {
-				s = new Script();
+				System.out.println("Skipping predecessor constraint due to memory overflow.");
 			} finally {
 				propertiesWithSE.add(s);
 			}
@@ -456,6 +447,17 @@ public class DeadlockTester {
 				por = new SparseIntArray();
 			pors.add(por);
 			
+		}
+
+		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix);		
+		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+		Set<SparseIntArray> invarT = null ; //computeTinvariants(sr, sumMatrix, tnames);
+		timeout *= 5;
+		boolean [] done = new boolean [tocheck.size()];
+		List<SparseIntArray> parikhs = new ArrayList<>(tocheck.size());
+		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
+			SparseIntArray parikh = new SparseIntArray();
+			parikhs.add(parikh);
 		}
 		
 		ReadFeedCache rfc = new ReadFeedCache();
