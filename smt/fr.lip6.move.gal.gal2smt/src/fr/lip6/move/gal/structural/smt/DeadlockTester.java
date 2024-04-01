@@ -414,12 +414,12 @@ public class DeadlockTester {
 	public static List<SparseIntArray> testUnreachableWithSMTIncremental(List<Expression> tocheck, ISparsePetriNet sr,
 			List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> pors) {
 		
-		List<Script> properties = new ArrayList<>(tocheck.size());
-		List<Script> propertiesWithSE = new ArrayList<>(tocheck.size());
+		int tcsize = tocheck.size();
+		List<Script> properties = new ArrayList<>(tcsize);
+		List<Script> propertiesWithSE = new ArrayList<>(tcsize);
 		IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(sr, representative);
-				
-		
-		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
+
+		for (int i=0 ; i < tcsize ; i++) {			
 			IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
 			Script property = new Script();
 			ICommand propAssert = new C_assert(smtexpr);
@@ -440,24 +440,39 @@ public class DeadlockTester {
 			} finally {
 				propertiesWithSE.add(s);
 			}
-			
-			
-			SparseIntArray por = null;
-			if (withWitness)
-				por = new SparseIntArray();
-			pors.add(por);
-			
 		}
 
+		return escalateRealToInt(sr, properties, propertiesWithSE, timeout, withWitness, representative, pors, sumMatrix);
+	}
+	
+	public static List<SparseIntArray> escalateRealToInt(ISparsePetriNet sr, List<Script> properties,
+			int timeout, boolean withWitness, List<Integer> representative,
+			List<SparseIntArray> pors, IntMatrixCol sumMatrix) {
+		return escalateRealToInt(sr, properties, null, timeout, withWitness, representative, pors, sumMatrix);		
+	}
+
+
+	public static List<SparseIntArray> escalateRealToInt(ISparsePetriNet sr, List<Script> properties,
+			List<Script> propertiesWithSE, int timeout, boolean withWitness, List<Integer> representative,
+			List<SparseIntArray> pors, IntMatrixCol sumMatrix) {
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix);		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Set<SparseIntArray> invarT = null ; //computeTinvariants(sr, sumMatrix, tnames);
 		timeout *= 5;
-		boolean [] done = new boolean [tocheck.size()];
-		List<SparseIntArray> parikhs = new ArrayList<>(tocheck.size());
-		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
+		int tcsize = properties.size();
+		boolean [] done = new boolean [tcsize];
+		List<SparseIntArray> parikhs = new ArrayList<>(tcsize);
+		for (int i=0, e=tcsize ; i < e ; i++) {			
 			SparseIntArray parikh = new SparseIntArray();
 			parikhs.add(parikh);
+			SparseIntArray por = null;
+			if (withWitness)
+				por = new SparseIntArray();
+			pors.add(por);
+		}
+		
+		if (propertiesWithSE == null) {
+			propertiesWithSE = properties;
 		}
 		
 		ReadFeedCache rfc = new ReadFeedCache();
@@ -470,7 +485,7 @@ public class DeadlockTester {
 			replies = verifyPossible(sr, properties, propertiesWithSE, sr.isSafe(), sumMatrix, invar, invarT, solveWithReal, parikhs, pors, representative,rfc, 9000, timeout, null, done, withWitness);
 			reportReplies(replies,true,"all constraints",time);
 			if (replies.contains("real")) {
-				for (int i=0; i < tocheck.size() ; i++) {
+				for (int i=0; i < properties.size() ; i++) {
 					if (! "unsat".equals(replies.get(i))) {
 						done [i] = false;
 					}
@@ -677,7 +692,7 @@ public class DeadlockTester {
 		return supp;
 	}
 	
-	private static Expression rewriteAfterEffect (Expression expr, SparseIntArray t, boolean before) {
+	public static Expression rewriteAfterEffect (Expression expr, SparseIntArray t, boolean before) {
 		if (expr == null) {
 			return null;
 		} else if (expr instanceof VarRef) {
