@@ -24,48 +24,50 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 public class ExclusiveImplicantsComputer {
 
 	/**
-	 * Captures a drain problem : are all transitions in "setT" drain transitions of "setA" ?
+	 * Captures a drain problem : are all transitions in "setT" drain transitions of
+	 * "setA" ?
 	 */
 	private static class DrainProblem {
 		SparseIntArray setA;
 		SparseIntArray setT;
 		String name;
 		Optional<Boolean> result = Optional.empty();
+
 		public DrainProblem(SparseIntArray setA, SparseIntArray setT, String name) {
 			this.setA = setA;
 			this.setT = setT;
 			this.name = name;
 		}
-		
+
 	}
-	
+
 	public static void studyImplicants(MccTranslator reader) {
-		
+
 		SparseIntArray a = new SparseIntArray();
 		SparseIntArray b = new SparseIntArray();
-		
+
 		a.append(0, 1);
 		b.append(1, 1);
-		
-		testInvariants(a,b,reader);
-		
+
+		testInvariants(a, b, reader);
+
 	}
 
 	private static void testInvariants(SparseIntArray a, SparseIntArray b, MccTranslator reader) {
-		
+
 		SparsePetriNet spn = reader.getSPN();
-		
+
 		boolean matchExclusive = true;
 		boolean matchAimpliesB = true;
 		boolean matchBimpliesA = true;
-		
+
 		SparseIntArray initial = new SparseIntArray(spn.getMarks());
 		{
 			// initial conditions.
-			
+
 			// Exclusive : M0(A) <> M0(B) must hold initially
 			// Implicant : M0(A) => M0(B) must hold initially
-			
+
 			boolean amarked = SparseIntArray.keysIntersect(a, initial);
 			boolean bmarked = SparseIntArray.keysIntersect(b, initial);
 			if (amarked && bmarked) {
@@ -78,23 +80,23 @@ public class ExclusiveImplicantsComputer {
 				// both a and b are initially empty; no contradiction.
 			}
 		}
-		
+
 		List<DrainProblem> problems = new ArrayList<>();
-				
+
 		// compute relevant sets
 		{
-			// .A   transitions feeding A
+			// .A transitions feeding A
 			SparseIntArray feedA = new SparseIntArray();
-			// A.   transitions consuming in A
+			// A. transitions consuming in A
 			SparseIntArray consA = new SparseIntArray();
 			computeFeedCons(spn, a, feedA, consA);
-			
+
 			// .B
 			SparseIntArray feedB = new SparseIntArray();
 			// B.
 			SparseIntArray consB = new SparseIntArray();
 			computeFeedCons(spn, b, feedB, consB);
-			
+
 			if (matchExclusive) {
 				// .A \ A.
 				SparseIntArray feedNotConsA = SparseIntArray.removeAll(feedA, consA);
@@ -105,14 +107,16 @@ public class ExclusiveImplicantsComputer {
 				if (SparseIntArray.keysIntersect(feedNotConsA, feedNotConsB)) {
 					matchExclusive = false;
 				} else {
-					
+
 					// TODO : A single problem, the OR of these two properties
-					
+
 					// add drain problems
-					if (feedNotConsB.size() > 0)
+					if (feedNotConsB.size() > 0) {
 						problems.add(new DrainProblem(a, feedNotConsB, "FeedNotConsBsubsetsDrainA"));
-					if (feedNotConsA.size() > 0)
+					}
+					if (feedNotConsA.size() > 0) {
 						problems.add(new DrainProblem(b, feedNotConsA, "FeedNotConsAsubsetsDrainB"));
+					}
 				}
 			}
 
@@ -126,9 +130,10 @@ public class ExclusiveImplicantsComputer {
 				} else {
 					// B. \ .B
 					SparseIntArray consNotFeedB = SparseIntArray.removeAll(consB, feedB);
-					if (consNotFeedB.size() > 0)
+					if (consNotFeedB.size() > 0) {
 						// must be drain transitions of A
 						problems.add(new DrainProblem(a, consNotFeedB, "ConsNotFeedBsubsetsDrainA"));
+					}
 				}
 			}
 
@@ -142,109 +147,106 @@ public class ExclusiveImplicantsComputer {
 				} else {
 					// A. \ .A
 					SparseIntArray consNotFeedA = SparseIntArray.removeAll(consA, feedA);
-					if (consNotFeedA.size() > 0)
+					if (consNotFeedA.size() > 0) {
 						// must be drain transitions of B
 						problems.add(new DrainProblem(b, consNotFeedA, "ConsNotFeedAsubsetsDrainB"));
+					}
 				}
 			}
 		}
-		
-		solveDrainProblems(spn,problems);
-		
+
+		solveDrainProblems(spn, problems);
+
 	}
 
 	private static void solveDrainProblems(SparsePetriNet spn, List<DrainProblem> problems) {
-		
-		
+
 		int tcsize = problems.size();
 		List<Script> properties = new ArrayList<>();
 
-		
-		for (int probid=0 ; probid < tcsize ; probid++) {
+		for (int probid = 0; probid < tcsize; probid++) {
 			DrainProblem dp = problems.get(probid);
 			// A is not unmarked in M' and in M
-			
+
 			SparseIntArray setA = dp.setA;
 
 			Expression MpANonEmpty;
 			{
 				List<Expression> vars = new ArrayList<>();
-				for (int i=0,ie=setA.size(); i <ie; i++) {
+				for (int i = 0, ie = setA.size(); i < ie; i++) {
 					vars.add(Expression.var(setA.keyAt(i)));
 				}
-				MpANonEmpty = Expression.op(Op.GEQ, 
-						Expression.nop(Op.ADD,vars),
-						Expression.constant(1));				
+				MpANonEmpty = Expression.op(Op.GEQ, Expression.nop(Op.ADD, vars), Expression.constant(1));
 			}
-			
-			
+
 			// Now add all the transitions to test
 			// If any of them is SAT, we cannot prove our invariant.
-			List<Expression> drainExpressions = new ArrayList<>();		
+			List<Expression> drainExpressions = new ArrayList<>();
 			SparseIntArray setT = dp.setT;
-			for (int i=0,ie=setT.size(); i<ie;i++) {
+			for (int i = 0, ie = setT.size(); i < ie; i++) {
 				// for each transition in the set; t must be a drain.
 				int tid = setT.keyAt(i);
 				// TODO : WIP
-				// 
-				SparseIntArray teffect = SparseIntArray.sumProd(-1, spn.getFlowPT().getColumn(tid), 1, spn.getFlowTP().getColumn(tid));
+				//
+				SparseIntArray teffect = SparseIntArray.sumProd(-1, spn.getFlowPT().getColumn(tid), 1,
+						spn.getFlowTP().getColumn(tid));
 				// false means *predecessor* must satisfy expression
 				Expression beforeT = rewriteAfterEffect(MpANonEmpty, teffect, false);
-				
+
 				// T enabling conditions
 				Expression tEnabled = Expression.nop(Op.ENABLED, Expression.trans(tid));
 				// replace with variable comparisons
 				tEnabled = spn.replacePredicates(tEnabled);
 				// take a step back : they hold in M
 				Expression tEnabledBefore = rewriteAfterEffect(tEnabled, teffect, false);
-				
+
 				// T was feasibly fired last
 				Expression tFeasiblyLast;
 				{
 					List<Expression> conditions = new ArrayList<>();
 					SparseIntArray tp = spn.getFlowTP().getColumn(tid);
-					for (int j=0,je=tp.size();j<je;j++) {
+					for (int j = 0, je = tp.size(); j < je; j++) {
 						int p = tp.keyAt(j);
 						int v = tp.valueAt(j);
 
 						// M(p) >= post(t)
-						conditions.add(Expression.nop(Op.GEQ,Expression.var(p),Expression.constant(v)));
+						conditions.add(Expression.nop(Op.GEQ, Expression.var(p), Expression.constant(v)));
 					}
-					tFeasiblyLast = Expression.nop(Op.AND,conditions);
+					tFeasiblyLast = Expression.nop(Op.AND, conditions);
 				}
-				
-				drainExpressions.add(Expression.nop(Op.AND,MpANonEmpty,beforeT,tEnabledBefore,tFeasiblyLast));
+
+				drainExpressions.add(Expression.nop(Op.AND, MpANonEmpty, beforeT, tEnabledBefore, tFeasiblyLast));
 			}
 
-			// OR: if we can SAT this problem using any transition in setT, we cannot prove our constraint.
-			Expression totest = Expression.nop(Op.OR,drainExpressions);
-			
+			// OR: if we can SAT this problem using any transition in setT, we cannot prove
+			// our constraint.
+			Expression totest = Expression.nop(Op.OR, drainExpressions);
+
 			IExpr smtexpr = totest.accept(new ExprTranslator());
 			Script property = new Script();
 			ICommand propAssert = new C_assert(smtexpr);
-			property.add(propAssert );
-			properties.add(property);			
+			property.add(propAssert);
+			properties.add(property);
 		}
 
-		
-		
 		List<Integer> representative = new ArrayList<>();
 		IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(spn, representative);
-		
+
 		List<SparseIntArray> pors = new ArrayList<>();
 		int timeout = 30; // in seconds
-		List<SparseIntArray> result = DeadlockTester.escalateRealToInt(spn, properties, timeout, false /*no witness needed*/, representative, pors, sumMatrix);
+		List<SparseIntArray> result = DeadlockTester.escalateRealToInt(spn, properties, timeout,
+				false /* no witness needed */, representative, pors, sumMatrix);
 
 		System.out.println("Result :" + result);
-		
+
 	}
-	
-	public static Expression rewriteAfterEffect (Expression expr, SparseIntArray t, boolean before) {
+
+	public static Expression rewriteAfterEffect(Expression expr, SparseIntArray t, boolean before) {
 		if (expr == null) {
 			return null;
 		} else if (expr instanceof VarRef) {
 			VarRef vref = (VarRef) expr;
-			int delta=t.get(vref.getValue());
+			int delta = t.get(vref.getValue());
 			if (delta != 0) {
 				if (before) {
 					delta = -delta;
@@ -255,13 +257,13 @@ public class ExclusiveImplicantsComputer {
 			}
 		} else if (expr instanceof AtomicPropRef) {
 			AtomicPropRef apr = (AtomicPropRef) expr;
-			return rewriteAfterEffect(apr.getAp().getExpression(),t,before) ;			
+			return rewriteAfterEffect(apr.getAp().getExpression(), t, before);
 		} else {
 			List<Expression> resc = new ArrayList<>();
 			boolean changed = false;
-			for (int i=0,ie=expr.nbChildren(); i < ie; i++) {
+			for (int i = 0, ie = expr.nbChildren(); i < ie; i++) {
 				Expression child = expr.childAt(i);
-				Expression nc = rewriteAfterEffect(child, t,before);
+				Expression nc = rewriteAfterEffect(child, t, before);
 				resc.add(nc);
 				if (nc != child) {
 					changed = true;
@@ -270,18 +272,18 @@ public class ExclusiveImplicantsComputer {
 			if (!changed) {
 				return expr;
 			}
-			return Expression.nop(expr.getOp(), resc);			
-		} 
+			return Expression.nop(expr.getOp(), resc);
+		}
 	}
 
 	public static void computeFeedCons(SparsePetriNet spn, SparseIntArray A, SparseIntArray feedA,
 			SparseIntArray consA) {
-		for (int tid=0,tide=spn.getTransitionCount();tid<tide;tid++) {
+		for (int tid = 0, tide = spn.getTransitionCount(); tid < tide; tid++) {
 			if (SparseIntArray.keysIntersect(spn.getFlowTP().getColumn(tid), A)) {
 				feedA.append(tid, 1);
 			}
 			if (SparseIntArray.keysIntersect(spn.getFlowPT().getColumn(tid), A)) {
-				consA.append(tid,1);
+				consA.append(tid, 1);
 			}
 		}
 	}
