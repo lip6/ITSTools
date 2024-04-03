@@ -24,10 +24,51 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class ExclusiveImplicantsComputer {
 
-	private static final String B_IMPLIES_A = "BimpliesA";
-	private static final String A_IMPLIES_B = "AimpliesB";
-	private static final String A_EXCLUSIVE_B = "AExclusiveB";
 
+	private static final int DEBUG = 0;
+
+	
+	public enum ProblemType {
+		B_IMPLIES_A,
+		A_IMPLIES_B,
+		A_EXCLUSIVE_B
+	}
+
+	
+	public static class Constraint {
+		private final ProblemType type;
+		private final SparseIntArray a;
+		private final SparseIntArray b;
+		
+		public Constraint(ProblemType type, SparseIntArray a, SparseIntArray b) {
+			this.type = type;
+			this.a = a;
+			this.b = b;
+		}
+		
+		public SparseIntArray getA() {
+			return a;
+		}
+		public SparseIntArray getB() {
+			return b;
+		}
+		public ProblemType getType() {
+			return type;
+		}
+		
+		public String printConstraint(SparsePetriNet spn) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(printPnames(a, spn.getPnames()));
+			switch (type) {
+			case A_IMPLIES_B : sb.append(" => "); break;
+			case B_IMPLIES_A : sb.append(" <= "); break;
+			case A_EXCLUSIVE_B : sb.append(" <> "); break;
+			}
+			sb.append(printPnames(b, spn.getPnames()));
+			return sb.toString();
+		}
+	}
+	
 	/**
 	 * Captures a drain problem : are all transitions in "setT" drain transitions of
 	 * "setA" ?
@@ -35,17 +76,16 @@ public class ExclusiveImplicantsComputer {
 	private static class DrainProblem {
 		private List<SparseIntArray> setsA = new ArrayList<>();
 		private List<SparseIntArray> setsT = new ArrayList<>();
-		String name;
-		Optional<Boolean> result = Optional.empty();
-
-		public DrainProblem(SparseIntArray setA, SparseIntArray setT, String name) {
+		private final Constraint constraint;
+		
+		public DrainProblem(SparseIntArray setA, SparseIntArray setT, ProblemType name, SparseIntArray a , SparseIntArray b) {
+			constraint = new Constraint(name, a, b);
 			this.setsA.add(setA);
 			this.setsT.add(setT);
-			this.name = name;
 		}
 
-		public DrainProblem(String name) {
-			this.name = name;
+		public DrainProblem(ProblemType name,SparseIntArray a, SparseIntArray b) {
+			constraint = new Constraint(name, a, b);
 		}
 
 		public void addProblem(SparseIntArray setA, SparseIntArray setT) {
@@ -123,8 +163,11 @@ public class ExclusiveImplicantsComputer {
 
 		@Override
 		public String toString() {
-			return "DrainProblem [" + ", setsA=" + setsA + ", setsT=" + setsT + ", name=" + name
-					+ ", result=" + result + "]";
+			return "DrainProblem [" + ", setsA=" + setsA + ", setsT=" + setsT + ", name=" + constraint.getType() + "]";
+		}
+				
+		public Constraint getConstraint() {
+			return constraint;
 		}
 	}
 
@@ -132,6 +175,9 @@ public class ExclusiveImplicantsComputer {
 
 		SparsePetriNet spn = reader.getSPN();
 
+		List<DrainProblem> problems = new ArrayList<>();
+		List<Constraint> constraints = new ArrayList<>();
+		
 		int nbp = spn.getPlaceCount();
 		for (int i = 0; i < nbp; i++) {
 			for (int j = i + 1; j < nbp; j++) {
@@ -139,13 +185,39 @@ public class ExclusiveImplicantsComputer {
 				SparseIntArray b = new SparseIntArray();
 				a.append(i, 1);
 				b.append(j, 1);
-				testInvariants(a, b, reader);
+				testInvariants(a, b, reader, problems, constraints);
 			}
+		}
+		
+		// This invocation prepares and then runs the SMT solver on the problems
+		// result is for each problem either a "witness" state if problem is SAT/unknown/timeout...,
+		// or null if the problem is UNSAT.
+		List<SparseIntArray> verdicts = solveDrainProblems(spn, problems);
+
+		for (int id = 0, ide = problems.size(); id < ide; id++) {
+			DrainProblem dp = problems.get(id);
+			if (verdicts.get(id) == null) {
+				// "null" reflects an UNSAT result for this problem.
+				if (DEBUG >= 1)
+					System.out.println("Problem " + dp.getConstraint().getType() + " is true.");
+				
+				constraints.add(dp.getConstraint());
+				// A="+printPnames(a, spn.getPnames())+ " B=" + printPnames(b, spn.getPnames()) + " T=" + printPnames(dp.setsT.get(0), spn.getTnames()) );
+			} else {
+				// any other reply is a SAT or unknown answer
+				if (DEBUG >= 1) 
+					System.out.println("Could not prove "+dp.getConstraint().printConstraint(spn));
+			
+			}
+		}
+
+		for (Constraint c : constraints) {
+			System.out.println("Proved that : " + c.printConstraint(spn));
 		}
 
 	}
 
-	private static void testInvariants(SparseIntArray a, SparseIntArray b, MccTranslator reader) {
+	private static void testInvariants(SparseIntArray a, SparseIntArray b, MccTranslator reader, List<DrainProblem> problems, List<Constraint> constraints) {
 
 		SparsePetriNet spn = reader.getSPN();
 
@@ -173,8 +245,6 @@ public class ExclusiveImplicantsComputer {
 			}
 		}
 
-		List<DrainProblem> problems = new ArrayList<>();
-
 		// compute relevant sets
 		{
 			// .A transitions feeding A
@@ -200,7 +270,7 @@ public class ExclusiveImplicantsComputer {
 					matchExclusive = false;
 				} else {
 
-					DrainProblem dp = new DrainProblem(A_EXCLUSIVE_B);
+					DrainProblem dp = new DrainProblem(ProblemType.A_EXCLUSIVE_B,a,b);
 					// add drain problems
 					if (feedNotConsB.size() > 0) {
 						dp.addProblem(a, feedNotConsB);
@@ -208,7 +278,12 @@ public class ExclusiveImplicantsComputer {
 					if (feedNotConsA.size() > 0) {
 						dp.addProblem(b, feedNotConsA);
 					}
-					problems.add(dp);
+					if (feedNotConsB.size() > 0 || feedNotConsA.size() > 0) {
+						problems.add(dp);
+					} else {
+						// Ok, we proved it without SMT.
+						constraints.add(new Constraint(ProblemType.A_EXCLUSIVE_B, a, b));
+					}
 				}
 			}
 
@@ -224,7 +299,10 @@ public class ExclusiveImplicantsComputer {
 					SparseIntArray consNotFeedB = SparseIntArray.removeAll(consB, feedB);
 					if (consNotFeedB.size() > 0) {
 						// must be drain transitions of A
-						problems.add(new DrainProblem(a, consNotFeedB, A_IMPLIES_B));
+						problems.add(new DrainProblem(a, consNotFeedB, ProblemType.A_IMPLIES_B, a, b));
+					} else {
+						// Ok, we proved it without SMT.
+						constraints.add(new Constraint(ProblemType.A_IMPLIES_B, a, b));
 					}
 				}
 			}
@@ -241,43 +319,15 @@ public class ExclusiveImplicantsComputer {
 					SparseIntArray consNotFeedA = SparseIntArray.removeAll(consA, feedA);
 					if (consNotFeedA.size() > 0) {
 						// must be drain transitions of B
-						problems.add(new DrainProblem(b, consNotFeedA, B_IMPLIES_A));
+						problems.add(new DrainProblem(b, consNotFeedA, ProblemType.B_IMPLIES_A, a, b));
+					} else {
+						// Ok, we proved it without SMT.
+						constraints.add(new Constraint(ProblemType.B_IMPLIES_A, a, b));
 					}
 				}
 			}
 		}
 
-		// This invocation prepares and then runs the SMT solver on the problems
-		// result is for each problem either a "witness" state if problem is SAT/unknown/timeout...,
-		// or null if the problem is UNSAT.
-		List<SparseIntArray> verdicts = solveDrainProblems(spn, problems);
-
-		for (int id = 0, ide = problems.size(); id < ide; id++) {
-			DrainProblem dp = problems.get(id);
-			if (verdicts.get(id) == null) {
-				// "null" reflects an UNSAT result for this problem.
-				System.out.println("Problem " + dp.name + " is true. A="+printPnames(a, spn.getPnames())+ " B=" + printPnames(b, spn.getPnames()) + " T=" + printPnames(dp.setsT.get(0), spn.getTnames()) );
-			} else {
-				// any other reply is a SAT or unknown answer
-				System.out.println("Could not prove "+dp.name+ " with A="+printPnames(a, spn.getPnames())+ " B=" + printPnames(b, spn.getPnames()));
-				switch (dp.name) {
-				case A_EXCLUSIVE_B : matchExclusive = false; break;
-				case A_IMPLIES_B : matchAimpliesB = false; break;
-				case B_IMPLIES_A : matchBimpliesA = false; break;
-				default : throw new IllegalArgumentException("Unknown problem name " + dp.name);
-				}				
-			}
-		}
-
-		if (matchAimpliesB) {
-			System.out.println("Proved that : " + printPnames(a, spn.getPnames()) + " => " + printPnames(b, spn.getPnames()));			
-		}
-		if (matchBimpliesA) {
-			System.out.println("Proved that : " + printPnames(b, spn.getPnames()) + " => " + printPnames(a, spn.getPnames()));			
-		}			
-		if (matchExclusive) {
-			System.out.println("Proved that : " + printPnames(b, spn.getPnames()) + " <> " + printPnames(a, spn.getPnames()));
-		}
 		
 	}
 
