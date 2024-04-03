@@ -24,110 +24,175 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class ExclusiveImplicantsComputer {
 
-
 	private static final int DEBUG = 0;
 
-	
 	public enum ProblemType {
-		B_IMPLIES_A,
-		A_IMPLIES_B,
-		A_EXCLUSIVE_B
+		B_IMPLIES_A, A_IMPLIES_B, A_EXCLUSIVE_B
 	}
 
-	
+	/**
+	 * A constraint, concerning two sets a and b. Constraints can be of three types
+	 * : A => B; B => A ; A <> B.
+	 */
 	public static class Constraint {
 		private final ProblemType type;
 		private final SparseIntArray a;
 		private final SparseIntArray b;
-		
+
 		public Constraint(ProblemType type, SparseIntArray a, SparseIntArray b) {
 			this.type = type;
 			this.a = a;
 			this.b = b;
 		}
-		
+
 		public SparseIntArray getA() {
 			return a;
 		}
+
 		public SparseIntArray getB() {
 			return b;
 		}
+
 		public ProblemType getType() {
 			return type;
 		}
-		
+
 		public String printConstraint(SparsePetriNet spn) {
 			StringBuilder sb = new StringBuilder();
 			sb.append(printPnames(a, spn.getPnames()));
 			switch (type) {
-			case A_IMPLIES_B : sb.append(" => "); break;
-			case B_IMPLIES_A : sb.append(" <= "); break;
-			case A_EXCLUSIVE_B : sb.append(" <> "); break;
+			case A_IMPLIES_B:
+				sb.append(" => ");
+				break;
+			case B_IMPLIES_A:
+				sb.append(" <= ");
+				break;
+			case A_EXCLUSIVE_B:
+				sb.append(" <> ");
+				break;
 			}
 			sb.append(printPnames(b, spn.getPnames()));
 			return sb.toString();
 		}
 	}
-	
+
 	/**
 	 * Captures a drain problem : are all transitions in "setT" drain transitions of
 	 * "setA" ?
 	 */
 	private static class DrainProblem {
+		// these lists are several queries in one : for every index i, are all
+		// transitions of setsT[i] drain wrt setsA[i].
+		// All queries must be satisfied to deduce the constraint is true.
 		private List<SparseIntArray> setsA = new ArrayList<>();
 		private List<SparseIntArray> setsT = new ArrayList<>();
+		/**
+		 * Resulting constraint is True if all transitions in setT are drain with
+		 * respect to setA
+		 */
 		private final Constraint constraint;
-		
-		public DrainProblem(SparseIntArray setA, SparseIntArray setT, ProblemType name, SparseIntArray a , SparseIntArray b) {
-			constraint = new Constraint(name, a, b);
+
+		/**
+		 * Mostly for Implicants, where we only have one setsT/setsA.
+		 * 
+		 * @param setA set of places
+		 * @param setT set of transitions that hopefully are drains of setA
+		 * @param type type of the resulting constraint
+		 * @param a    set of places
+		 * @param b    set of places
+		 */
+		public DrainProblem(SparseIntArray setA, SparseIntArray setT, ProblemType type, SparseIntArray a,
+				SparseIntArray b) {
+			constraint = new Constraint(type, a, b);
 			this.setsA.add(setA);
 			this.setsT.add(setT);
 		}
 
-		public DrainProblem(ProblemType name,SparseIntArray a, SparseIntArray b) {
-			constraint = new Constraint(name, a, b);
+		/**
+		 * Simpler version, simply initializing the constraint, used in exclusive case
+		 * where we might have up to two problems to solve.
+		 * 
+		 * @param type type of the resulting constraint
+		 * @param a    set of places
+		 * @param b    set of places
+		 */
+		public DrainProblem(ProblemType type, SparseIntArray a, SparseIntArray b) {
+			constraint = new Constraint(type, a, b);
 		}
 
+		/**
+		 * Adds an additional problem to solve (mostly exclusive case).
+		 * 
+		 * @param setA
+		 * @param setT
+		 */
 		public void addProblem(SparseIntArray setA, SparseIntArray setT) {
 			setsA.add(setA);
 			setsT.add(setT);
 		}
 
+		/**
+		 * Compute and combine elements to obtain a single Boolean expression that can
+		 * be asked to the SMT solver.
+		 * 
+		 * @param spn the net
+		 * @return an expression that if untrue in any reachable state means the
+		 *         constraint is true.
+		 */
 		public Expression computeDrainProblemCondition(SparsePetriNet spn) {
 			// A is not unmarked in M' and in M
 			List<Expression> toOr = new ArrayList<>();
+
+			// there might be several problems in one
 			for (int i = 0; i < setsA.size(); i++) {
 				SparseIntArray setA = setsA.get(i);
 				SparseIntArray setT = setsT.get(i);
-					
+
 				Expression totest = computeConstraintForOneSet(spn, setA, setT);
 				toOr.add(totest);
 			}
 
+			// if any of them is sat, we are sat (cannot prove constraint).
 			return Expression.nop(Op.OR, toOr);
 		}
 
+		/**
+		 * Focus on one set of places setA, and one set of transitions setT.
+		 * 
+		 * @param spn  the net
+		 * @param setA the places we consider
+		 * @param setT a set of transitions, that should be drain w.r.t. setA
+		 * @return an expression that if untrue in any reachable state indicates that
+		 *         setT are indeed drains wr.t. setA.
+		 */
 		public Expression computeConstraintForOneSet(SparsePetriNet spn, SparseIntArray setA, SparseIntArray setT) {
+
+			// Compute this expression once, it is used several times.
+			// It expresses that setA contains at leat one token.
 			Expression MpANonEmpty;
 			{
 				List<Expression> vars = new ArrayList<>();
 				for (int i = 0, ie = setA.size(); i < ie; i++) {
 					vars.add(Expression.var(setA.keyAt(i)));
 				}
+				// sum of markings of places of A >= 1
 				MpANonEmpty = Expression.op(Op.GEQ, Expression.nop(Op.ADD, vars), Expression.constant(1));
 			}
 
 			// Now add all the transitions to test
 			// If any of them is SAT, we cannot prove our invariant.
+			// We build one Expression per transition and add to this list.
 			List<Expression> drainExpressions = new ArrayList<>();
+
 			for (int i = 0, ie = setT.size(); i < ie; i++) {
 				// for each transition in the set; t must be a drain.
 				int tid = setT.keyAt(i);
-				// TODO : WIP
-				//
+
+				// effects of t; discards e.g. read arcs.
 				SparseIntArray teffect = SparseIntArray.sumProd(-1, spn.getFlowPT().getColumn(tid), 1,
 						spn.getFlowTP().getColumn(tid));
-				// false means *predecessor* must satisfy expression
+
+				// Returns an expression that says that setA was marked *before* we fired t.
 				Expression beforeT = rewriteAfterEffect(MpANonEmpty, teffect, true);
 
 				// T enabling conditions
@@ -152,6 +217,8 @@ public class ExclusiveImplicantsComputer {
 					tFeasiblyLast = Expression.nop(Op.AND, conditions);
 				}
 
+				// All these constraints must simultaneously hold so that we have a
+				// counter-example for t being drain for setA.
 				drainExpressions.add(Expression.nop(Op.AND, MpANonEmpty, beforeT, tEnabledBefore, tFeasiblyLast));
 			}
 
@@ -165,7 +232,7 @@ public class ExclusiveImplicantsComputer {
 		public String toString() {
 			return "DrainProblem [" + ", setsA=" + setsA + ", setsT=" + setsT + ", name=" + constraint.getType() + "]";
 		}
-				
+
 		public Constraint getConstraint() {
 			return constraint;
 		}
@@ -176,9 +243,12 @@ public class ExclusiveImplicantsComputer {
 		long time = System.currentTimeMillis();
 		SparsePetriNet spn = reader.getSPN();
 
+		// problems we need to check with SMT
 		List<DrainProblem> problems = new ArrayList<>();
+		// Constraints we have managed to prove
 		List<Constraint> constraints = new ArrayList<>();
-		
+
+		// Very basic : all pairs of places.
 		int nbp = spn.getPlaceCount();
 		for (int i = 0; i < nbp; i++) {
 			for (int j = i + 1; j < nbp; j++) {
@@ -186,12 +256,18 @@ public class ExclusiveImplicantsComputer {
 				SparseIntArray b = new SparseIntArray();
 				a.append(i, 1);
 				b.append(j, 1);
+
+				// this tests conditions for all three constraint between a and b.
+				// if trivial conditions are unmet, the constraint is discarded
+				// if trivial conditions hold, it adds a constraint to constraints
+				// else when we are unsure, it adds a problem to "problems" for the SMT step.
 				testInvariants(a, b, reader, problems, constraints);
 			}
 		}
-		
+
 		// This invocation prepares and then runs the SMT solver on the problems
-		// result is for each problem either a "witness" state if problem is SAT/unknown/timeout...,
+		// result is for each problem either a "witness" state if problem is
+		// SAT/unknown/timeout...,
 		// or null if the problem is UNSAT.
 		List<SparseIntArray> verdicts = solveDrainProblems(spn, problems);
 
@@ -201,29 +277,33 @@ public class ExclusiveImplicantsComputer {
 				// "null" reflects an UNSAT result for this problem.
 				if (DEBUG >= 1)
 					System.out.println("Problem " + dp.getConstraint().getType() + " is true.");
-				
+
 				constraints.add(dp.getConstraint());
-				// A="+printPnames(a, spn.getPnames())+ " B=" + printPnames(b, spn.getPnames()) + " T=" + printPnames(dp.setsT.get(0), spn.getTnames()) );
+				// A="+printPnames(a, spn.getPnames())+ " B=" + printPnames(b, spn.getPnames())
+				// + " T=" + printPnames(dp.setsT.get(0), spn.getTnames()) );
 			} else {
 				// any other reply is a SAT or unknown answer
-				if (DEBUG >= 1) 
-					System.out.println("Could not prove "+dp.getConstraint().printConstraint(spn));
-			
+				if (DEBUG >= 1)
+					System.out.println("Could not prove " + dp.getConstraint().printConstraint(spn));
+
 			}
 		}
 
+		// Print the constraints we managed to prove
 		for (Constraint c : constraints) {
 			System.out.println("Proved that : " + c.printConstraint(spn));
 		}
 
-		//reader.getSPN().getProperties().clear();
+		// reader.getSPN().getProperties().clear();
 		if (DEBUG >= 0)
 			FlowPrinter.drawNet(reader.getSPN(), reader.getSPN().getName());
-		 
-		System.out.println("In total, drain approach introduced "+constraints.size() + " constraints in "+(System.currentTimeMillis()-time) + " ms.");
+
+		System.out.println("In total, drain approach introduced " + constraints.size() + " constraints in "
+				+ (System.currentTimeMillis() - time) + " ms.");
 	}
 
-	private static void testInvariants(SparseIntArray a, SparseIntArray b, MccTranslator reader, List<DrainProblem> problems, List<Constraint> constraints) {
+	private static void testInvariants(SparseIntArray a, SparseIntArray b, MccTranslator reader,
+			List<DrainProblem> problems, List<Constraint> constraints) {
 
 		SparsePetriNet spn = reader.getSPN();
 
@@ -276,7 +356,7 @@ public class ExclusiveImplicantsComputer {
 					matchExclusive = false;
 				} else {
 
-					DrainProblem dp = new DrainProblem(ProblemType.A_EXCLUSIVE_B,a,b);
+					DrainProblem dp = new DrainProblem(ProblemType.A_EXCLUSIVE_B, a, b);
 					// add drain problems
 					if (feedNotConsB.size() > 0) {
 						dp.addProblem(a, feedNotConsB);
@@ -334,7 +414,6 @@ public class ExclusiveImplicantsComputer {
 			}
 		}
 
-		
 	}
 
 	private static List<SparseIntArray> solveDrainProblems(SparsePetriNet spn, List<DrainProblem> problems) {
@@ -360,8 +439,8 @@ public class ExclusiveImplicantsComputer {
 
 		List<SparseIntArray> pors = new ArrayList<>();
 		int timeout = 30; // in seconds
-		return DeadlockTester.escalateRealToInt(spn, properties, timeout,
-				false /* no witness needed */, representative, pors, sumMatrix);
+		return DeadlockTester.escalateRealToInt(spn, properties, timeout, false /* no witness needed */, representative,
+				pors, sumMatrix);
 
 	}
 
@@ -373,7 +452,7 @@ public class ExclusiveImplicantsComputer {
 			if (first)
 				first = false;
 			else
-				sb.append(", ");			
+				sb.append(", ");
 			sb.append(pnames.get(a.keyAt(i)));
 		}
 		sb.append("}");
