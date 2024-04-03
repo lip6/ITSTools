@@ -247,14 +247,19 @@ public class ExclusiveImplicantsComputer {
 			}
 		}
 
-		List<SparseIntArray> verdicts = solveDrainProblems(spn, problems, a, b);
+		// This invocation prepares and then runs the SMT solver on the problems
+		// result is for each problem either a "witness" state if problem is SAT/unknown/timeout...,
+		// or null if the problem is UNSAT.
+		List<SparseIntArray> verdicts = solveDrainProblems(spn, problems);
 
 		for (int id = 0, ide = problems.size(); id < ide; id++) {
 			DrainProblem dp = problems.get(id);
 			if (verdicts.get(id) == null) {
+				// "null" reflects an UNSAT result for this problem.
 				System.out.println("Problem " + dp.name + " is true. A="+printPnames(a, spn.getPnames())+ " B=" + printPnames(b, spn.getPnames()) + " T=" + printPnames(dp.setsT.get(0), spn.getTnames()) );
 			} else {
-				System.out.println("Could not prove "+dp);
+				// any other reply is a SAT or unknown answer
+				System.out.println("Could not prove "+dp.name+ " with A="+printPnames(a, spn.getPnames())+ " B=" + printPnames(b, spn.getPnames()));
 				switch (dp.name) {
 				case A_EXCLUSIVE_B : matchExclusive = false; break;
 				case A_IMPLIES_B : matchAimpliesB = false; break;
@@ -276,7 +281,7 @@ public class ExclusiveImplicantsComputer {
 		
 	}
 
-	private static List<SparseIntArray> solveDrainProblems(SparsePetriNet spn, List<DrainProblem> problems, SparseIntArray a, SparseIntArray b) {
+	private static List<SparseIntArray> solveDrainProblems(SparsePetriNet spn, List<DrainProblem> problems) {
 
 		int tcsize = problems.size();
 		if (problems.size() == 0)
