@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.application.solver;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,33 +24,124 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class ExclusiveImplicantsComputer {
 
+	private static final String B_IMPLIES_A = "BimpliesA";
+	private static final String A_IMPLIES_B = "AimpliesB";
+	private static final String A_EXCLUSIVE_B = "AExclusiveB";
+
 	/**
 	 * Captures a drain problem : are all transitions in "setT" drain transitions of
 	 * "setA" ?
 	 */
 	private static class DrainProblem {
-		SparseIntArray setA;
-		SparseIntArray setT;
+		private List<SparseIntArray> setsA = new ArrayList<>();
+		private List<SparseIntArray> setsT = new ArrayList<>();
 		String name;
 		Optional<Boolean> result = Optional.empty();
 
 		public DrainProblem(SparseIntArray setA, SparseIntArray setT, String name) {
-			this.setA = setA;
-			this.setT = setT;
+			this.setsA.add(setA);
+			this.setsT.add(setT);
 			this.name = name;
 		}
 
+		public DrainProblem(String name) {
+			this.name = name;
+		}
+
+		public void addProblem(SparseIntArray setA, SparseIntArray setT) {
+			setsA.add(setA);
+			setsT.add(setT);
+		}
+
+		public Expression computeDrainProblemCondition(SparsePetriNet spn) {
+			// A is not unmarked in M' and in M
+			List<Expression> toOr = new ArrayList<>();
+			for (int i = 0; i < setsA.size(); i++) {
+				SparseIntArray setA = setsA.get(i);
+				SparseIntArray setT = setsT.get(i);
+					
+				Expression totest = computeConstraintForOneSet(spn, setA, setT);
+				toOr.add(totest);
+			}
+
+			return Expression.nop(Op.OR, toOr);
+		}
+
+		public Expression computeConstraintForOneSet(SparsePetriNet spn, SparseIntArray setA, SparseIntArray setT) {
+			Expression MpANonEmpty;
+			{
+				List<Expression> vars = new ArrayList<>();
+				for (int i = 0, ie = setA.size(); i < ie; i++) {
+					vars.add(Expression.var(setA.keyAt(i)));
+				}
+				MpANonEmpty = Expression.op(Op.GEQ, Expression.nop(Op.ADD, vars), Expression.constant(1));
+			}
+
+			// Now add all the transitions to test
+			// If any of them is SAT, we cannot prove our invariant.
+			List<Expression> drainExpressions = new ArrayList<>();
+			for (int i = 0, ie = setT.size(); i < ie; i++) {
+				// for each transition in the set; t must be a drain.
+				int tid = setT.keyAt(i);
+				// TODO : WIP
+				//
+				SparseIntArray teffect = SparseIntArray.sumProd(-1, spn.getFlowPT().getColumn(tid), 1,
+						spn.getFlowTP().getColumn(tid));
+				// false means *predecessor* must satisfy expression
+				Expression beforeT = rewriteAfterEffect(MpANonEmpty, teffect, true);
+
+				// T enabling conditions
+				Expression tEnabled = Expression.nop(Op.ENABLED, Expression.trans(tid));
+				// replace with variable comparisons
+				tEnabled = spn.replacePredicates(tEnabled);
+				// take a step back : they hold in M
+				Expression tEnabledBefore = rewriteAfterEffect(tEnabled, teffect, true);
+
+				// T was feasibly fired last
+				Expression tFeasiblyLast;
+				{
+					List<Expression> conditions = new ArrayList<>();
+					SparseIntArray tp = spn.getFlowTP().getColumn(tid);
+					for (int j = 0, je = tp.size(); j < je; j++) {
+						int p = tp.keyAt(j);
+						int v = tp.valueAt(j);
+
+						// M(p) >= post(t)
+						conditions.add(Expression.nop(Op.GEQ, Expression.var(p), Expression.constant(v)));
+					}
+					tFeasiblyLast = Expression.nop(Op.AND, conditions);
+				}
+
+				drainExpressions.add(Expression.nop(Op.AND, MpANonEmpty, beforeT, tEnabledBefore, tFeasiblyLast));
+			}
+
+			// OR: if we can SAT this problem using any transition in setT, we cannot prove
+			// our constraint.
+			Expression totest = Expression.nop(Op.OR, drainExpressions);
+			return totest;
+		}
+
+		@Override
+		public String toString() {
+			return "DrainProblem [" + ", setsA=" + setsA + ", setsT=" + setsT + ", name=" + name
+					+ ", result=" + result + "]";
+		}
 	}
 
 	public static void studyImplicants(MccTranslator reader) {
 
-		SparseIntArray a = new SparseIntArray();
-		SparseIntArray b = new SparseIntArray();
+		SparsePetriNet spn = reader.getSPN();
 
-		a.append(0, 1);
-		b.append(1, 1);
-
-		testInvariants(a, b, reader);
+		int nbp = spn.getPlaceCount();
+		for (int i = 0; i < nbp; i++) {
+			for (int j = i + 1; j < nbp; j++) {
+				SparseIntArray a = new SparseIntArray();
+				SparseIntArray b = new SparseIntArray();
+				a.append(i, 1);
+				b.append(j, 1);
+				testInvariants(a, b, reader);
+			}
+		}
 
 	}
 
@@ -108,15 +200,15 @@ public class ExclusiveImplicantsComputer {
 					matchExclusive = false;
 				} else {
 
-					// TODO : A single problem, the OR of these two properties
-
+					DrainProblem dp = new DrainProblem(A_EXCLUSIVE_B);
 					// add drain problems
 					if (feedNotConsB.size() > 0) {
-						problems.add(new DrainProblem(a, feedNotConsB, "FeedNotConsBsubsetsDrainA"));
+						dp.addProblem(a, feedNotConsB);
 					}
 					if (feedNotConsA.size() > 0) {
-						problems.add(new DrainProblem(b, feedNotConsA, "FeedNotConsAsubsetsDrainB"));
+						dp.addProblem(b, feedNotConsA);
 					}
+					problems.add(dp);
 				}
 			}
 
@@ -132,7 +224,7 @@ public class ExclusiveImplicantsComputer {
 					SparseIntArray consNotFeedB = SparseIntArray.removeAll(consB, feedB);
 					if (consNotFeedB.size() > 0) {
 						// must be drain transitions of A
-						problems.add(new DrainProblem(a, consNotFeedB, "ConsNotFeedBsubsetsDrainA"));
+						problems.add(new DrainProblem(a, consNotFeedB, A_IMPLIES_B));
 					}
 				}
 			}
@@ -149,78 +241,51 @@ public class ExclusiveImplicantsComputer {
 					SparseIntArray consNotFeedA = SparseIntArray.removeAll(consA, feedA);
 					if (consNotFeedA.size() > 0) {
 						// must be drain transitions of B
-						problems.add(new DrainProblem(b, consNotFeedA, "ConsNotFeedAsubsetsDrainB"));
+						problems.add(new DrainProblem(b, consNotFeedA, B_IMPLIES_A));
 					}
 				}
 			}
 		}
 
-		solveDrainProblems(spn, problems);
+		List<SparseIntArray> verdicts = solveDrainProblems(spn, problems, a, b);
 
+		for (int id = 0, ide = problems.size(); id < ide; id++) {
+			DrainProblem dp = problems.get(id);
+			if (verdicts.get(id) == null) {
+				System.out.println("Problem " + dp.name + " is true. A="+printPnames(a, spn.getPnames())+ " B=" + printPnames(b, spn.getPnames()) + " T=" + printPnames(dp.setsT.get(0), spn.getTnames()) );
+			} else {
+				System.out.println("Could not prove "+dp);
+				switch (dp.name) {
+				case A_EXCLUSIVE_B : matchExclusive = false; break;
+				case A_IMPLIES_B : matchAimpliesB = false; break;
+				case B_IMPLIES_A : matchBimpliesA = false; break;
+				default : throw new IllegalArgumentException("Unknown problem name " + dp.name);
+				}				
+			}
+		}
+
+		if (matchAimpliesB) {
+			System.out.println("Proved that : " + printPnames(a, spn.getPnames()) + " => " + printPnames(b, spn.getPnames()));			
+		}
+		if (matchBimpliesA) {
+			System.out.println("Proved that : " + printPnames(b, spn.getPnames()) + " => " + printPnames(a, spn.getPnames()));			
+		}			
+		if (matchExclusive) {
+			System.out.println("Proved that : " + printPnames(b, spn.getPnames()) + " <> " + printPnames(a, spn.getPnames()));
+		}
+		
 	}
 
-	private static void solveDrainProblems(SparsePetriNet spn, List<DrainProblem> problems) {
+	private static List<SparseIntArray> solveDrainProblems(SparsePetriNet spn, List<DrainProblem> problems, SparseIntArray a, SparseIntArray b) {
 
 		int tcsize = problems.size();
+		if (problems.size() == 0)
+			return Collections.emptyList();
 		List<Script> properties = new ArrayList<>();
 
 		for (int probid = 0; probid < tcsize; probid++) {
 			DrainProblem dp = problems.get(probid);
-			// A is not unmarked in M' and in M
-
-			SparseIntArray setA = dp.setA;
-
-			Expression MpANonEmpty;
-			{
-				List<Expression> vars = new ArrayList<>();
-				for (int i = 0, ie = setA.size(); i < ie; i++) {
-					vars.add(Expression.var(setA.keyAt(i)));
-				}
-				MpANonEmpty = Expression.op(Op.GEQ, Expression.nop(Op.ADD, vars), Expression.constant(1));
-			}
-
-			// Now add all the transitions to test
-			// If any of them is SAT, we cannot prove our invariant.
-			List<Expression> drainExpressions = new ArrayList<>();
-			SparseIntArray setT = dp.setT;
-			for (int i = 0, ie = setT.size(); i < ie; i++) {
-				// for each transition in the set; t must be a drain.
-				int tid = setT.keyAt(i);
-				// TODO : WIP
-				//
-				SparseIntArray teffect = SparseIntArray.sumProd(-1, spn.getFlowPT().getColumn(tid), 1,
-						spn.getFlowTP().getColumn(tid));
-				// false means *predecessor* must satisfy expression
-				Expression beforeT = rewriteAfterEffect(MpANonEmpty, teffect, false);
-
-				// T enabling conditions
-				Expression tEnabled = Expression.nop(Op.ENABLED, Expression.trans(tid));
-				// replace with variable comparisons
-				tEnabled = spn.replacePredicates(tEnabled);
-				// take a step back : they hold in M
-				Expression tEnabledBefore = rewriteAfterEffect(tEnabled, teffect, false);
-
-				// T was feasibly fired last
-				Expression tFeasiblyLast;
-				{
-					List<Expression> conditions = new ArrayList<>();
-					SparseIntArray tp = spn.getFlowTP().getColumn(tid);
-					for (int j = 0, je = tp.size(); j < je; j++) {
-						int p = tp.keyAt(j);
-						int v = tp.valueAt(j);
-
-						// M(p) >= post(t)
-						conditions.add(Expression.nop(Op.GEQ, Expression.var(p), Expression.constant(v)));
-					}
-					tFeasiblyLast = Expression.nop(Op.AND, conditions);
-				}
-
-				drainExpressions.add(Expression.nop(Op.AND, MpANonEmpty, beforeT, tEnabledBefore, tFeasiblyLast));
-			}
-
-			// OR: if we can SAT this problem using any transition in setT, we cannot prove
-			// our constraint.
-			Expression totest = Expression.nop(Op.OR, drainExpressions);
+			Expression totest = dp.computeDrainProblemCondition(spn);
 
 			IExpr smtexpr = totest.accept(new ExprTranslator());
 			Script property = new Script();
@@ -234,11 +299,24 @@ public class ExclusiveImplicantsComputer {
 
 		List<SparseIntArray> pors = new ArrayList<>();
 		int timeout = 30; // in seconds
-		List<SparseIntArray> result = DeadlockTester.escalateRealToInt(spn, properties, timeout,
+		return DeadlockTester.escalateRealToInt(spn, properties, timeout,
 				false /* no witness needed */, representative, pors, sumMatrix);
 
-		System.out.println("Result :" + result);
+	}
 
+	private static String printPnames(SparseIntArray a, List<String> pnames) {
+		StringBuilder sb = new StringBuilder();
+		boolean first = true;
+		sb.append("{");
+		for (int i = 0, ie = a.size(); i < ie; i++) {
+			if (first)
+				first = false;
+			else
+				sb.append(", ");			
+			sb.append(pnames.get(a.keyAt(i)));
+		}
+		sb.append("}");
+		return sb.toString();
 	}
 
 	public static Expression rewriteAfterEffect(Expression expr, SparseIntArray t, boolean before) {
