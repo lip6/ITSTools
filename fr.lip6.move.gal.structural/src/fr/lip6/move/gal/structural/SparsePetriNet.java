@@ -139,7 +139,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		}
 	}
 
-	private Expression replacePredicates(Expression expr) {
+	public Expression replacePredicates(Expression expr) {
 		if (expr == null) {
 			return expr;
 		} else if (expr instanceof BinOp) {
