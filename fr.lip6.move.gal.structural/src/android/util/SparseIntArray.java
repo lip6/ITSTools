@@ -474,7 +474,7 @@ public class SparseIntArray implements Cloneable {
 		int s1sz = s1.size();
 		int s2sz = s2.size();
 		if (s1sz == 0 || s2sz == 0) {
-			return true;
+			return false;
 		}				
 		
 		for (int j = 0, i = 0  ; i < s1sz && j < s2sz ; ) {
