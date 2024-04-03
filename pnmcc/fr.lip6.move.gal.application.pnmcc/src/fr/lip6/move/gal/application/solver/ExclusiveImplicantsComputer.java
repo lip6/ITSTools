@@ -3,7 +3,6 @@ package fr.lip6.move.gal.application.solver;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
@@ -12,6 +11,7 @@ import org.smtlib.impl.Script;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
+import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.AtomicPropRef;
@@ -173,6 +173,7 @@ public class ExclusiveImplicantsComputer {
 
 	public static void studyImplicants(MccTranslator reader) {
 
+		long time = System.currentTimeMillis();
 		SparsePetriNet spn = reader.getSPN();
 
 		List<DrainProblem> problems = new ArrayList<>();
@@ -215,6 +216,11 @@ public class ExclusiveImplicantsComputer {
 			System.out.println("Proved that : " + c.printConstraint(spn));
 		}
 
+		//reader.getSPN().getProperties().clear();
+		if (DEBUG >= 0)
+			FlowPrinter.drawNet(reader.getSPN(), reader.getSPN().getName());
+		 
+		System.out.println("In total, drain approach introduced "+constraints.size() + " constraints in "+(System.currentTimeMillis()-time) + " ms.");
 	}
 
 	private static void testInvariants(SparseIntArray a, SparseIntArray b, MccTranslator reader, List<DrainProblem> problems, List<Constraint> constraints) {
