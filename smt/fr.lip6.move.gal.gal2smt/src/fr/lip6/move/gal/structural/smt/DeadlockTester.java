@@ -36,6 +36,7 @@ import org.smtlib.sexpr.ISexpr;
 import org.smtlib.sexpr.ISexpr.ISeq;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.gal2smt.options.SMTOptions;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
@@ -860,6 +861,11 @@ public class DeadlockTester {
 			List<Script> properties, boolean[] done, List<SparseIntArray> parikhs, List<SparseIntArray> pors,
 			List<String> verdicts, ISolver solver, boolean withWitness) {
 		
+		
+		if (SMTOptions.getInstance().isDisableTraps()) {
+			return false;
+		}
+		
 		int nbdone = 0;
 		
 		boolean hasTraps = true;
@@ -1373,6 +1379,11 @@ public class DeadlockTester {
 
 	private static String refineWithTraps(ISparsePetriNet sr, ISolver solver,
 			org.smtlib.SMT smt, Script traps) {
+		
+		if (SMTOptions.getInstance().isDisableTraps()) {
+			return "sat";
+		}
+		
 		long time = System.currentTimeMillis();		
 		List<Integer> trap ;
 		String textReply = "none";
