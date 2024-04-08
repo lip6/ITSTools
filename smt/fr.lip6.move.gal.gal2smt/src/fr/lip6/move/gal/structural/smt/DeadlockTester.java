@@ -820,8 +820,8 @@ public class DeadlockTester {
 //		}
 
 		// currently disabled due to high cost and low rewards
-		boolean minimizeTraces = true;
-		if (minimizeTraces){
+		boolean minimizeTraces = false;
+		if (minimizeTraces || minmax!=null){
 			long ttime = System.currentTimeMillis();
 			if (minmax == null) {
 				System.out.println("Attempting to minimize the solution found.");				
