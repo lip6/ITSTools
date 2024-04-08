@@ -203,23 +203,12 @@ public class ExclusiveImplicantsComputer {
 				Expression tEnabledBefore = rewriteAfterEffect(tEnabled, teffect, true);
 
 				// T was feasibly fired last
-				Expression tFeasiblyLast;
-				{
-					List<Expression> conditions = new ArrayList<>();
-					SparseIntArray tp = spn.getFlowTP().getColumn(tid);
-					for (int j = 0, je = tp.size(); j < je; j++) {
-						int p = tp.keyAt(j);
-						int v = tp.valueAt(j);
-
-						// M(p) >= post(t)
-						conditions.add(Expression.nop(Op.GEQ, Expression.var(p), Expression.constant(v)));
-					}
-					tFeasiblyLast = Expression.nop(Op.AND, conditions);
-				}
+				// This constraint is not useful; because by definition we are >= Post, and we apply -Post+Pre
+				// it must be the case that we are already superior to pre.
 
 				// All these constraints must simultaneously hold so that we have a
 				// counter-example for t being drain for setA.
-				drainExpressions.add(Expression.nop(Op.AND, MpANonEmpty, beforeT, tEnabledBefore, tFeasiblyLast));
+				drainExpressions.add(Expression.nop(Op.AND, MpANonEmpty, beforeT, tEnabledBefore));
 			}
 
 			// OR: if we can SAT this problem using any transition in setT, we cannot prove
