@@ -20,6 +20,7 @@
 	<modules>
 		<!--  third party -->
 		<module>../org.logicng</module>
+		<module>../java.picocli</module>
 		<!-- GAL language modules and editor -->
 		<module>../fr.lip6.move.gal</module>
 		<module>../fr.lip6.move.gal.structural</module>
