@@ -168,7 +168,7 @@ public class ExclusiveImplicantsComputer {
 		public Expression computeConstraintForOneSet(SparsePetriNet spn, SparseIntArray setA, SparseIntArray setT) {
 
 			// Compute this expression once, it is used several times.
-			// It expresses that setA contains at leat one token.
+			// It expresses that setA contains at least one token.
 			Expression MpANonEmpty;
 			{
 				List<Expression> vars = new ArrayList<>();
@@ -193,22 +193,31 @@ public class ExclusiveImplicantsComputer {
 						spn.getFlowTP().getColumn(tid));
 
 				// Returns an expression that says that setA was marked *before* we fired t.
-				Expression beforeT = rewriteAfterEffect(MpANonEmpty, teffect, true);
-
-				// T enabling conditions
-				Expression tEnabled = Expression.nop(Op.ENABLED, Expression.trans(tid));
-				// replace with variable comparisons
-				tEnabled = spn.replacePredicates(tEnabled);
-				// take a step back : they hold in M
-				Expression tEnabledBefore = rewriteAfterEffect(tEnabled, teffect, true);
+				Expression MAnotEmptyBefore = rewriteAfterEffect(MpANonEmpty, teffect, true);
 
 				// T was feasibly fired last
-				// This constraint is not useful; because by definition we are >= Post, and we apply -Post+Pre
+				Expression tFeasiblyLast;
+				{
+					List<Expression> conditions = new ArrayList<>();
+					SparseIntArray tp = spn.getFlowTP().getColumn(tid);
+					for (int j = 0, je = tp.size(); j < je; j++) {
+						int p = tp.keyAt(j);
+						int v = tp.valueAt(j);
+
+						// M(p) >= post(t)
+						conditions.add(Expression.nop(Op.GEQ, Expression.var(p), Expression.constant(v)));
+					}
+					tFeasiblyLast = Expression.nop(Op.AND, conditions);
+				}
+
+
+				// T was enabled conditions
+				// This constraint is not useful; because by definition of tFeasiblyLast we are >= Post, and we apply -Post+Pre
 				// it must be the case that we are already superior to pre.
 
 				// All these constraints must simultaneously hold so that we have a
 				// counter-example for t being drain for setA.
-				drainExpressions.add(Expression.nop(Op.AND, MpANonEmpty, beforeT, tEnabledBefore));
+				drainExpressions.add(Expression.nop(Op.AND, MpANonEmpty, MAnotEmptyBefore, tFeasiblyLast));
 			}
 
 			// OR: if we can SAT this problem using any transition in setT, we cannot prove
@@ -313,7 +322,7 @@ public class ExclusiveImplicantsComputer {
 				matchExclusive = false;
 			} else if (amarked && !bmarked) {
 				matchAimpliesB = false;
-			} else if (!amarked && bmarked) {
+			} else if (bmarked && !amarked) {
 				matchBimpliesA = false;
 			} else {
 				// both a and b are initially empty; no contradiction.
@@ -334,11 +343,12 @@ public class ExclusiveImplicantsComputer {
 			SparseIntArray consB = new SparseIntArray();
 			computeFeedCons(spn, b, feedB, consB);
 
+			// .A \ A.
+			SparseIntArray feedNotConsA = SparseIntArray.removeAll(feedA, consA);
+			// .B \ B.
+			SparseIntArray feedNotConsB = SparseIntArray.removeAll(feedB, consB);
+
 			if (matchExclusive) {
-				// .A \ A.
-				SparseIntArray feedNotConsA = SparseIntArray.removeAll(feedA, consA);
-				// .B \ B.
-				SparseIntArray feedNotConsB = SparseIntArray.removeAll(feedB, consB);
 
 				// Test empty intersection : .A \ A. inter .B \ B. = empty set
 				if (SparseIntArray.keysIntersect(feedNotConsA, feedNotConsB)) {
@@ -363,8 +373,6 @@ public class ExclusiveImplicantsComputer {
 			}
 
 			if (matchAimpliesB) {
-				// .A \ A.
-				SparseIntArray feedNotConsA = SparseIntArray.removeAll(feedA, consA);
 
 				// .A \ A. must be a subset of .B
 				if (!SparseIntArray.containsAllKeys(feedB, feedNotConsA)) {
@@ -383,8 +391,6 @@ public class ExclusiveImplicantsComputer {
 			}
 
 			if (matchBimpliesA) {
-				// .B \ B.
-				SparseIntArray feedNotConsB = SparseIntArray.removeAll(feedB, consB);
 
 				// .B \ B. must be a subset of .A
 				if (!SparseIntArray.containsAllKeys(feedA, feedNotConsB)) {
