@@ -39,69 +39,54 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class StructuralToGal {
 
-	
+	private static ComparisonOperators toComparisonOp(Op op) {
+		switch (op) {
+		case GEQ:
+			return ComparisonOperators.GE;
+		case GT:
+			return ComparisonOperators.GT;
+		case NEQ:
+			return ComparisonOperators.NE;
+		case EQ:
+			return ComparisonOperators.EQ;
+		case LT:
+			return ComparisonOperators.LT;
+		case LEQ:
+			return ComparisonOperators.LE;
+		default:
+		}
+		return null;
+	}
+
 	public static Property toGal(AtomicProp atom, EList<Variable> variables) {
 		Property img = GalFactory.eINSTANCE.createProperty();
 		img.setName(atom.getName());
 		fr.lip6.move.gal.AtomicProp aprop = GalFactory.eINSTANCE.createAtomicProp();
-		aprop.setPredicate(toGal(atom.getExpression(),variables));		
+		aprop.setPredicate(toGal(atom.getExpression(), variables));
 		img.setBody(aprop);
 		return img;
 	}
-
-	public static Property toGal(fr.lip6.move.gal.structural.Property prop, EList<Variable> variables) {
-		Property img = GalFactory.eINSTANCE.createProperty();
-		img.setName(prop.getName());
-		if (prop.getType() == PropertyType.INVARIANT) {	
-			if (prop.getBody().getOp() == Op.EF) {
-				ReachableProp rprop = GalFactory.eINSTANCE.createReachableProp();
-				rprop.setPredicate(toGal(((BinOp)prop.getBody()).left,variables));
-				img.setBody(rprop);
-			} else if (prop.getBody().getOp() == Op.AG) {
-				InvariantProp rprop = GalFactory.eINSTANCE.createInvariantProp();
-				rprop.setPredicate(toGal(((BinOp)prop.getBody()).left,variables));								
-				img.setBody(rprop);
-			} else if (prop.getBody().getOp() == Op.BOOLCONST) {
-				InvariantProp rprop = GalFactory.eINSTANCE.createInvariantProp();
-				rprop.setPredicate(toGal(prop.getBody(),variables));
-				img.setBody(rprop);
-			}
-		} else if (prop.getType() == PropertyType.CTL) {
-			CTLProp rprop = GalFactory.eINSTANCE.createCTLProp();
-			rprop.setPredicate(toGal(prop.getBody(),variables));
-			img.setBody(rprop);
-		} else if (prop.getType() == PropertyType.LTL) {
-			LTLProp rprop = GalFactory.eINSTANCE.createLTLProp();
-			rprop.setPredicate(toGal(prop.getBody(),variables));
-			img.setBody(rprop);
-		} else if (prop.getType() == PropertyType.BOUNDS) {
-			BoundsProp bp = GalFactory.eINSTANCE.createBoundsProp();
-			bp.setTarget(toGalInt(prop.getBody(), variables));
-			img.setBody(bp);
-		} else if (prop.getType() == PropertyType.DEADLOCK) {
-			CTLProp rprop = GalFactory.eINSTANCE.createCTLProp();
-			rprop.setPredicate(toGal(prop.getBody(),variables));
-			img.setBody(rprop);
-		}
-		return img;
-	}
-
 
 	public static BooleanExpression toGal(Expression expr, EList<Variable> variables) {
 		if (expr == null) {
 			return null;
 		} else if (expr instanceof BinOp) {
 			BinOp bin = (BinOp) expr;
-			
+
 			switch (bin.getOp()) {
-			case GEQ:case GT:case EQ:case NEQ:case LEQ:case LT: {
+			case GEQ:
+			case GT:
+			case EQ:
+			case NEQ:
+			case LEQ:
+			case LT: {
 				// int expression children
-				IntExpression il = toGalInt(bin.left,variables);
-				IntExpression ir = toGalInt(bin.right,variables);
+				IntExpression il = toGalInt(bin.left, variables);
+				IntExpression ir = toGalInt(bin.right, variables);
 				return GF2.createComparison(il, toComparisonOp(bin.getOp()), ir);
 			}
 			case NOT: {
-				return GF2.not(toGal(bin.left,variables));
+				return GF2.not(toGal(bin.left, variables));
 			}
 			// unary CTL temporal operators
 			case EF: {
@@ -163,73 +148,89 @@ public class StructuralToGal {
 				ef.setRight(toGal(bin.right, variables));
 				return ef;
 			}
-			case U : {
+			case U: {
 				LTLUntil ef = GalFactory.eINSTANCE.createLTLUntil();
 				ef.setLeft(toGal(bin.left, variables));
 				ef.setRight(toGal(bin.right, variables));
 				return ef;
 			}
-			default :
+			default:
 			}
 		} else if (expr instanceof NaryOp) {
 			NaryOp nop = (NaryOp) expr;
-			List<BooleanExpression> resc = new ArrayList<>(); 
-			for (int i=0; i < nop.nbChildren() ; i++) {
-				resc.add(toGal(nop.childAt(i), variables));	
+			List<BooleanExpression> resc = new ArrayList<>();
+			for (int i = 0; i < nop.nbChildren(); i++) {
+				resc.add(toGal(nop.childAt(i), variables));
 			}
-			
-			// avoid building unbalanced deep trees			
+
+			// avoid building unbalanced deep trees
 			while (resc.size() > 1) {
 				List<BooleanExpression> next = new ArrayList<>();
-				for (int i=0 ; i < resc.size() ; i+=2) {					
-					if (i == resc.size()-1) {
+				for (int i = 0; i < resc.size(); i += 2) {
+					if (i == resc.size() - 1) {
 						next.add(resc.get(i));
 					} else {
 						BooleanExpression l = resc.get(i);
-						BooleanExpression r = resc.get(i+1);
+						BooleanExpression r = resc.get(i + 1);
 						if (nop.getOp() == Op.AND) {
-							next.add( GF2.and(l,r));
+							next.add(GF2.and(l, r));
 						} else {
-							next.add( GF2.or(l,r));
+							next.add(GF2.or(l, r));
 						}
 					}
 				}
-				resc=next;
+				resc = next;
 			}
-			BooleanExpression sum = resc.get(0);			
+			BooleanExpression sum = resc.get(0);
 			return sum;
 		} else if (expr.getOp() == Op.BOOLCONST) {
-			if (expr.getValue()==1) {
+			if (expr.getValue() == 1) {
 				return GalFactory.eINSTANCE.createTrue();
 			} else {
 				return GalFactory.eINSTANCE.createFalse();
 			}
 		} else if (expr.getOp() == Op.APREF) {
-			return toGal(((AtomicPropRef)expr).getAp().getExpression(), variables);
+			return toGal(((AtomicPropRef) expr).getAp().getExpression(), variables);
 		}
 		throw new UnsupportedOperationException();
 	}
 
-
-	private static ComparisonOperators toComparisonOp(Op op) {
-		switch (op)  {
-		case GEQ :
-			return ComparisonOperators.GE;
-		case GT :
-			return ComparisonOperators.GT;
-		case NEQ :
-			return ComparisonOperators.NE;
-		case EQ :
-			return ComparisonOperators.EQ;
-		case LT :
-			return ComparisonOperators.LT;
-		case LEQ :
-			return ComparisonOperators.LE;
-		default :
-		}		
-		return null;
+	public static Property toGal(fr.lip6.move.gal.structural.Property prop, EList<Variable> variables) {
+		Property img = GalFactory.eINSTANCE.createProperty();
+		img.setName(prop.getName());
+		if (prop.getType() == PropertyType.INVARIANT) {
+			if (prop.getBody().getOp() == Op.EF) {
+				ReachableProp rprop = GalFactory.eINSTANCE.createReachableProp();
+				rprop.setPredicate(toGal(((BinOp) prop.getBody()).left, variables));
+				img.setBody(rprop);
+			} else if (prop.getBody().getOp() == Op.AG) {
+				InvariantProp rprop = GalFactory.eINSTANCE.createInvariantProp();
+				rprop.setPredicate(toGal(((BinOp) prop.getBody()).left, variables));
+				img.setBody(rprop);
+			} else if (prop.getBody().getOp() == Op.BOOLCONST) {
+				InvariantProp rprop = GalFactory.eINSTANCE.createInvariantProp();
+				rprop.setPredicate(toGal(prop.getBody(), variables));
+				img.setBody(rprop);
+			}
+		} else if (prop.getType() == PropertyType.CTL) {
+			CTLProp rprop = GalFactory.eINSTANCE.createCTLProp();
+			rprop.setPredicate(toGal(prop.getBody(), variables));
+			img.setBody(rprop);
+		} else if (prop.getType() == PropertyType.LTL) {
+			LTLProp rprop = GalFactory.eINSTANCE.createLTLProp();
+			rprop.setPredicate(toGal(prop.getBody(), variables));
+			img.setBody(rprop);
+		} else if (prop.getType() == PropertyType.BOUNDS) {
+			BoundsProp bp = GalFactory.eINSTANCE.createBoundsProp();
+			bp.setTarget(toGalInt(prop.getBody(), variables));
+			img.setBody(bp);
+		} else if (prop.getType() == PropertyType.DEADLOCK) {
+			CTLProp rprop = GalFactory.eINSTANCE.createCTLProp();
+			rprop.setPredicate(toGal(prop.getBody(), variables));
+			img.setBody(rprop);
+		}
+		return img;
 	}
-
 
 	private static IntExpression toGalInt(Expression expr, EList<Variable> variables) {
 		if (expr.getOp() == Op.CONST) {
@@ -237,37 +238,40 @@ public class StructuralToGal {
 		} else if (expr.getOp() == Op.PLACEREF) {
 			return GF2.createVariableRef(variables.get(expr.getValue()));
 		} else if (expr.getOp() == Op.ADD) {
-			List<IntExpression> resc = new ArrayList<>(); 
-			for (int i=0; i < expr.nbChildren() ; i++) {
-				resc.add(toGalInt(expr.childAt(i), variables));	
+			List<IntExpression> resc = new ArrayList<>();
+			for (int i = 0; i < expr.nbChildren(); i++) {
+				resc.add(toGalInt(expr.childAt(i), variables));
 			}
-			
-			// avoid building unbalanced deep trees			
+
+			// avoid building unbalanced deep trees
 			while (resc.size() > 1) {
-				List<IntExpression> next = new ArrayList<>();				
-				for (int i=0 ; i < resc.size() ; i+=2) {					
-					if (i == resc.size()-1) {
+				List<IntExpression> next = new ArrayList<>();
+				for (int i = 0; i < resc.size(); i += 2) {
+					if (i == resc.size() - 1) {
 						next.add(resc.get(i));
 					} else {
 						IntExpression l = resc.get(i);
-						IntExpression r = resc.get(i+1);
+						IntExpression r = resc.get(i + 1);
 						next.add(GF2.createBinaryIntExpression(l, "+", r));
 					}
 				}
-				resc=next;				
+				resc = next;
 			}
-			IntExpression sum = resc.get(0);			
+			IntExpression sum = resc.get(0);
 			return sum;
 		} else if (expr instanceof BinOp) {
 			BinOp bin = (BinOp) expr;
 			switch (bin.getOp()) {
-			case DIV :
-				return GF2.createBinaryIntExpression(toGalInt(bin.left, variables), "/", toGalInt(bin.right, variables));
-			case MOD :
-				return GF2.createBinaryIntExpression(toGalInt(bin.left, variables), "%", toGalInt(bin.right, variables));
-			case MINUS :
-				return GF2.createBinaryIntExpression(toGalInt(bin.left, variables), "-", toGalInt(bin.right, variables));				
-			}			
+			case DIV:
+				return GF2.createBinaryIntExpression(toGalInt(bin.left, variables), "/",
+						toGalInt(bin.right, variables));
+			case MOD:
+				return GF2.createBinaryIntExpression(toGalInt(bin.left, variables), "%",
+						toGalInt(bin.right, variables));
+			case MINUS:
+				return GF2.createBinaryIntExpression(toGalInt(bin.left, variables), "-",
+						toGalInt(bin.right, variables));
+			}
 		}
 		throw new UnsupportedOperationException();
 	}

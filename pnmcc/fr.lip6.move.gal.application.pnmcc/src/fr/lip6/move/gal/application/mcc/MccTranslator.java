@@ -4,65 +4,25 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Logger;
 
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.ltl.tgba.TGBA;
-import fr.lip6.move.gal.AF;
-import fr.lip6.move.gal.AG;
-import fr.lip6.move.gal.AU;
-import fr.lip6.move.gal.AX;
-import fr.lip6.move.gal.Abort;
-import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.AssignType;
-import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
-import fr.lip6.move.gal.BooleanExpression;
-import fr.lip6.move.gal.BoundsProp;
-import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.Comparison;
-import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
-import fr.lip6.move.gal.EF;
-import fr.lip6.move.gal.EG;
-import fr.lip6.move.gal.EU;
-import fr.lip6.move.gal.EX;
 import fr.lip6.move.gal.GALTypeDeclaration;
-import fr.lip6.move.gal.GF2;
-import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.IntExpression;
-import fr.lip6.move.gal.InvariantProp;
-import fr.lip6.move.gal.Ite;
-import fr.lip6.move.gal.LTLFuture;
 import fr.lip6.move.gal.Property;
-import fr.lip6.move.gal.ReachableProp;
-import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.Statement;
-import fr.lip6.move.gal.Transition;
-import fr.lip6.move.gal.VarDecl;
-import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.FusionBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.Instantiator;
-import fr.lip6.move.gal.instantiate.PropertySimplifier;
 import fr.lip6.move.gal.instantiate.Simplifier;
-import fr.lip6.move.gal.LTLGlobally;
-import fr.lip6.move.gal.LTLNext;
-import fr.lip6.move.gal.LTLProp;
-import fr.lip6.move.gal.LTLUntil;
 import fr.lip6.move.gal.louvain.GraphBuilder;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.order.CompositeGalOrder;
@@ -81,108 +41,36 @@ import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
-import fr.lip6.move.gal.structural.expr.AtomicPropRef;
-import fr.lip6.move.gal.structural.expr.BinOp;
-import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.structural.expr.NaryOp;
-import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.serialization.SerializationUtil;
 
 public class MccTranslator {
 
-	private Specification spec;
-	private IOrder order;
+	private static final int DEBUG = 0;
+	private static boolean withSeparation = false;
+	private boolean doITS = false;
+	private boolean doLTSMin = false;
 	private String folder;
-	private Support simplifiedVars = new Support();
-	private boolean useLouvain;
+	private SparseHLPetriNet hlpn;
 	private boolean isFlatten = false;
 	private boolean isHier = false;
-	private SparseHLPetriNet hlpn;
+	private int missingTokens = 0;
+	private IOrder order;
+	private Support simplifiedVars = new Support();
+	private Specification spec;
+
 	private SparsePetriNet spn;
-	private static boolean withSeparation = false;
-	private static final int DEBUG = 0;
+
 	private TGBA tgba = null;
-	
+
+	private boolean useLouvain;
+
 	public MccTranslator(String pwd, boolean useLouvain) {
 		this.folder = pwd;
 		this.useLouvain = useLouvain;
 	}
 
-	public void setSpn(SparsePetriNet spn, boolean reduce) {
-		this.spn = spn;
-		simplifySPN(reduce, reduce);
-	}
-
-	public void setTgba(TGBA tgba) {
-		this.tgba = tgba;
-	}
-	
-	public TGBA getTgba() {
-		return tgba;
-	}
-	
-	public Specification getSpec() {
-		return spec;
-	}
-	
-	public SparseHLPetriNet getHLPN() {
-		return hlpn;
-	}
-	public SparsePetriNet getSPN() {
-		return spn;
-	}
-	
-	/**
-	 * Sets the spec and order attributes, spec is set to result of PNML tranlsation and order is set to null if no nupn/computed order is available.
-	 * @param folder input folder absolute path, containing a model.pnml file
-	 * @param reversible set to true to add P >= 0 constraints in guards of transitions adding to P, ensuring predecessor relation is inverse to succ. 
-	 * @throws IOException if file can't be found
-	 */
-	public void transformPNML() throws IOException {
-		File ff = new File(folder+ "/"+ "model.pnml");
-		if (ff != null && ff.exists()) {
-			getLog().info("Parsing pnml file : " + ff.getAbsolutePath());
-
-//			PnmlToGalTransformer trans = new PnmlToGalTransformer();
-//			spec = trans.transform(ff.toURI());
-//			order = trans.getOrder();
-//			isSafeNet = trans.foundNupn();
-//			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
-//			if (spec.getMain() == null) {
-//				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
-//			}
-			
-			PnmlToStructuralTransformer transPN = new PnmlToStructuralTransformer();
-			spn = transPN.transformPT(ff.toURI());
-			if (spn == null) {
-				hlpn = transPN.transformHLPN(ff.toURI());
-			} 
-			order = transPN.getOrder();
-			
-		} else {
-			throw new IOException("Cannot open file "+ff.getAbsolutePath());
-		}
-	}
-	
-	public void loadGAL(String gal) throws IOException {
-		File ff = new File(folder+ "/"+ gal);
-		if (ff != null && ff.exists()) {
-			getLog().info("Parsing GAL file : " + ff.getAbsolutePath());
-
-			spec = SerializationUtil.fileToGalSystem(ff.getCanonicalPath());
-			order = null;
-			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
-			if (spec.getMain() == null) {
-				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
-			}
-		} else {
-			throw new IOException("Cannot open file "+ff.getAbsolutePath());
-		}
-	}
-	
-	
 	public boolean applyOrder(Support supp) {
 		if (hasStructure()) {
 			getLog().info("Applying decomposition ");
@@ -192,25 +80,25 @@ public class MccTranslator {
 			if (SumRewriter.rewriteConstantSums(spec)) {
 				Simplifier.simplifyProperties(spec);
 			}
-//			if ( ! spec.getProperties().isEmpty() && 
+//			if ( ! spec.getProperties().isEmpty() &&
 //					spec.getProperties().stream()
 //					.map(Property::getBody)
 //					.filter(p -> p instanceof BoolProp).map(p -> (BoolProp) p)
 //					.map(BoolProp::getPredicate).allMatch(p -> p instanceof True || p instanceof False)) {
 //				return true;
 //			}
-			if (done) { 						
+			if (done) {
 				simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));
 			}
 			Specification saved = EcoreUtil.copy(spec);
 
 			try {
-				if (useLouvain && order==null) {
-					
+				if (useLouvain && order == null) {
+
 					INextBuilder inb = INextBuilder.build(spec);
 					List<BitSet> constraints = new ArrayList<>();
 					for (Property p : spec.getProperties()) {
-						for (TreeIterator<EObject> it=p.eAllContents() ; it.hasNext() ;) {
+						for (TreeIterator<EObject> it = p.eAllContents(); it.hasNext();) {
 							EObject obj = it.next();
 							if (obj instanceof Comparison) {
 								Comparison cmp = (Comparison) obj;
@@ -223,7 +111,7 @@ public class MccTranslator {
 						}
 					}
 					try {
-						IOrder graph = GraphBuilder.computeLouvain(inb,true,constraints);
+						IOrder graph = GraphBuilder.computeLouvain(inb, true, constraints);
 						setOrder(graph);
 					} catch (OutOfMemoryError e) {
 						System.out.println("Louvain graph construction failed due to OOM.");
@@ -241,8 +129,9 @@ public class MccTranslator {
 				}
 
 				getLog().fine(order.toString());
-				supp.addAll(CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
-				if (! useLouvain) {
+				supp.addAll(CompositeBuilder.getInstance()
+						.decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
+				if (!useLouvain) {
 					CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 					patchOrderForArrays();
 				}
@@ -254,23 +143,82 @@ public class MccTranslator {
 			} catch (Exception e) {
 				getLog().warning("Could not apply decomposition. Using flat GAL structure.");
 				e.printStackTrace();
-				spec = saved ;
-				return false ;
+				spec = saved;
+				return false;
 			}
 			return true;
 		}
 		return false;
 	}
 
-	private static Logger getLog() {
-		return Logger.getLogger("fr.lip6.move.gal");
-		
+	private boolean canDecompose() {
+		boolean canDecompose = true;
+		for (Property prop : spec.getProperties()) {
+			if (containsAdditionOrComparison(prop)) {
+				canDecompose = false;
+				break;
+			}
+		}
+		return canDecompose;
 	}
 
-	public boolean hasStructure() {
-		return order != null || useLouvain;
+	private boolean containsAdditionOrComparison(Property prop) {
+		for (TreeIterator<EObject> it = prop.eAllContents(); it.hasNext();) {
+			EObject obj = it.next();
+			if (obj instanceof BinaryIntExpression) {
+				return true;
+			} else if (obj instanceof Comparison) {
+				Comparison cmp = (Comparison) obj;
+				if (!(cmp.getLeft() instanceof Constant || cmp.getRight() instanceof Constant)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
+	public MccTranslator copy() {
+		MccTranslator copy = new MccTranslator(folder, useLouvain);
+		copy.order = this.order;
+		copy.simplifiedVars = new Support(simplifiedVars);
+		copy.spec = EcoreUtil.copy(spec);
+		copy.useLouvain = useLouvain;
+		if (spn != null) {
+			copy.spn = new SparsePetriNet(spn);
+		}
+		copy.hlpn = this.hlpn;
+		copy.missingTokens = this.missingTokens;
+		copy.doITS = doITS;
+		copy.doLTSMin = doLTSMin;
+		return copy;
+	}
+
+	public int countMissingTokens() {
+		return this.missingTokens;
+	}
+
+	public void createSPN() {
+		createSPN(true, true);
+	}
+
+	public void createSPN(boolean redPlace, boolean redTrans) {
+		if (hlpn != null) {
+			hlpn.simplifyLogic();
+			if (!redPlace || !redTrans) {
+				spn = hlpn.unfold(ReductionType.STATESPACE);
+			} else {
+				spn = hlpn.unfold(ReductionType.REACHABILITY);
+			}
+			if (DEBUG >= 1) {
+				FlowPrinter.drawNet(new StructuralReduction(spn), "Unfolded");
+			}
+		}
+		if (DEBUG >= 1) {
+			System.out.println("initial properties :" + spn.getProperties());
+		}
+
+		simplifySPN(redPlace, redTrans);
+	}
 
 	public void flattenSpec(boolean withHierarchy) {
 		if (withHierarchy && !isHier) {
@@ -281,8 +229,8 @@ public class MccTranslator {
 		if (!isFlatten) {
 			simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));
 //			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
-			patchOrderForArrays();			
-			boolean done = SumRewriter.rewriteConstantSums(spec);	
+			patchOrderForArrays();
+			boolean done = SumRewriter.rewriteConstantSums(spec);
 			// done |= rewriteSums();
 			if (done) {
 				Simplifier.simplifyProperties(spec);
@@ -291,89 +239,12 @@ public class MccTranslator {
 		}
 	}
 
-	
-
-	private void patchOrderForArrays() {
-		if (order != null) {
-			order.accept(new IOrderVisitor<Void>() {
-
-				@Override
-				public Void visitComposite(CompositeGalOrder o) {
-					for (IOrder sub : o.getChildren()) {
-						sub.accept(this);
-					}
-					return null;
-				}
-
-				@Override
-				public Void visitVars(VarOrder varOrder) {
-					for (int i = 0 ; i < varOrder.getVars().size() ; i++) {
-						if (varOrder.getVars().get(i).contains("[")) {
-							varOrder.getVars().set(i, varOrder.getVars().get(i).replace('[', '_').replaceAll("]", ""));
-						}
-					}
-					return null;
-				}
-			});
-		}
+	public String getFolder() {
+		return folder;
 	}
 
-	/** Job : parse the property files into the Specification.
-	 * The examination determines what happens in here. 
-	 * @throws IOException */
-	public void loadProperties(String examination) throws IOException {
-		if (examination.equals("StateSpace")) {
-			return ;
-		} else {
-			long time = System.currentTimeMillis();
-			String propff = folder +"/" +  examination + ".xml";
-			int parsed = 0;
-			if (hlpn != null) {
-				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , hlpn, getPropertyType(examination));				 
-				hlpn.simplifyLogic();
-			} else {
-				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , spn, getPropertyType(examination));
-			}
-			System.out.println("Parsed " +parsed +" properties from file "+propff+" in "+ (System.currentTimeMillis() - time) + " ms.");			
-		}
-	}
-
-
-	public void createSPN (boolean redPlace, boolean redTrans) {
-		if (hlpn != null) {
-			hlpn.simplifyLogic();
-			if (!redPlace || !redTrans) {
-				spn = hlpn.unfold(ReductionType.STATESPACE);
-			} else {
-				spn = hlpn.unfold(ReductionType.REACHABILITY);
-			}
-			if (DEBUG >= 1) FlowPrinter.drawNet(new StructuralReduction(spn), "Unfolded");
-		} 
-		if (DEBUG >= 1) System.out.println("initial properties :" + spn.getProperties());
-		
-		simplifySPN(redPlace, redTrans);		
-	}
-
-	public void simplifySPN(boolean redPlace, boolean redTrans) {
-		spn.simplifyLogic();
-		spn.testInInitial();
-		spn.toPredicates();			
-				
-		if (redPlace)
-			spn.removeConstantPlaces();
-		if (redTrans)
-			spn.removeRedundantTransitions(false);
-		if (redPlace)
-			spn.removeConstantPlaces();
-		spn.simplifyLogic();
-		if (spn.isSafe()) {
-			spn.assumeOneSafe();
-		}
-		if (DEBUG >= 1) System.out.println("after syntactic reduction properties :" +spn.getProperties());
-	}
-	
-	public void createSPN() {
-		createSPN(true,true);
+	public SparseHLPetriNet getHLPN() {
+		return hlpn;
 	}
 
 	private PropertyType getPropertyType(String examination) {
@@ -392,131 +263,117 @@ public class MccTranslator {
 		}
 	}
 
-
-
-
-
-
-
-	private boolean canDecompose() {
-		boolean canDecompose = true;
-		for (Property prop : spec.getProperties()) {
-			if (containsAdditionOrComparison(prop)) {
-				canDecompose = false;
-				break;
-			}
-		}
-		return canDecompose;
+	public Specification getSpec() {
+		return spec;
 	}
-	
-	private boolean containsAdditionOrComparison(Property prop) {
-		for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ;  ) {
-			EObject obj = it.next();
-			if (obj instanceof BinaryIntExpression) {
-				return true; 
-			} else if (obj instanceof Comparison) {
-				Comparison cmp = (Comparison) obj;
-				if (! (cmp.getLeft() instanceof Constant || cmp.getRight() instanceof Constant)) {
-					return true;
+
+	public SparsePetriNet getSPN() {
+		return spn;
+	}
+
+	public TGBA getTgba() {
+		return tgba;
+	}
+
+	public boolean hasStructure() {
+		return order != null || useLouvain;
+	}
+
+	public boolean isDoITS() {
+		return doITS;
+	}
+
+	public boolean isDoLTSMin() {
+		return doLTSMin;
+	}
+
+	public void loadGAL(String gal) throws IOException {
+		File ff = new File(folder + "/" + gal);
+		if (ff != null && ff.exists()) {
+			getLog().info("Parsing GAL file : " + ff.getAbsolutePath());
+
+			spec = SerializationUtil.fileToGalSystem(ff.getCanonicalPath());
+			order = null;
+			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
+			if (spec.getMain() == null) {
+				spec.setMain(spec.getTypes().get(spec.getTypes().size() - 1));
+			}
+		} else {
+			throw new IOException("Cannot open file " + ff.getAbsolutePath());
+		}
+	}
+	/**
+	 * Job : parse the property files into the Specification. The examination
+	 * determines what happens in here.
+	 * 
+	 * @throws IOException
+	 */
+	public void loadProperties(String examination) throws IOException {
+		if (examination.equals("StateSpace")) {
+			return;
+		} else {
+			long time = System.currentTimeMillis();
+			String propff = folder + "/" + examination + ".xml";
+			int parsed = 0;
+			if (hlpn != null) {
+				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff, hlpn,
+						getPropertyType(examination));
+				hlpn.simplifyLogic();
+			} else {
+				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff, spn,
+						getPropertyType(examination));
+			}
+			System.out.println("Parsed " + parsed + " properties from file " + propff + " in "
+					+ (System.currentTimeMillis() - time) + " ms.");
+		}
+	}
+	private void patchOrderForArrays() {
+		if (order != null) {
+			order.accept(new IOrderVisitor<Void>() {
+
+				@Override
+				public Void visitComposite(CompositeGalOrder o) {
+					for (IOrder sub : o.getChildren()) {
+						sub.accept(this);
+					}
+					return null;
 				}
-			}
-		}
-		return false;
-	}
 
-
-	private	int missingTokens =0;
-	private boolean doITS=false;
-	private boolean doLTSMin=false;
-	
-	public void setMissingTokens(int val) {
-		this.missingTokens = val;
-	}
-	public int countMissingTokens() {
-		return this.missingTokens;
-	}
-
-
-
-
-	public String getFolder() {
-		return folder;
-	}
-
-	/** removes any properties with addition in them, CTL parser can't deal with them currently. */
-	public void removeAdditionProperties() {
-		spec.getProperties().removeIf(
-				prop ->
-				{
-					for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ;  ) {
-						EObject obj = it.next();
-						if (obj instanceof BinaryIntExpression) {
-							return true;
+				@Override
+				public Void visitVars(VarOrder varOrder) {
+					for (int i = 0; i < varOrder.getVars().size(); i++) {
+						if (varOrder.getVars().get(i).contains("[")) {
+							varOrder.getVars().set(i, varOrder.getVars().get(i).replace('[', '_').replaceAll("]", ""));
 						}
 					}
-					return false;
+					return null;
 				}
-				);
+			});
+		}
 	}
-
-
-	
-	public void setOrder(IOrder order) {
-		this.order = order;
-	}
-	
-	public void setSpec(Specification spec) {
-		this.spec = spec;
-		this.isFlatten = false;
-		if (spec != null)
-			this.isHier = spec.getTypes().size() > 1;
-	}
-
-
-	public MccTranslator copy() {		
-		MccTranslator copy = new MccTranslator(folder, useLouvain);
-		copy.order = this.order;
-		copy.simplifiedVars = new Support(simplifiedVars);
-		copy.spec = EcoreUtil.copy(spec);
-		copy.useLouvain = useLouvain;
-		if (spn != null)
-			copy.spn = new SparsePetriNet(spn);
-		copy.hlpn = this.hlpn;
-		copy.missingTokens = this.missingTokens;
-		copy.doITS = doITS;
-		copy.doLTSMin = doLTSMin;
-		return copy ;
-	}
-
-
-	public void setLouvain(boolean b) {
-		this.useLouvain = b;
-	}
-	
-
 
 	public void rebuildSpecification(DoneProperties doneProps) {
 		Specification reduced = SpecBuilder.rebuildSpecification(getSPN());
 		if (tgba != null) {
 			for (AtomicProp atom : tgba.getAPs()) {
-				reduced.getProperties().add(StructuralToGal.toGal(atom, ((GALTypeDeclaration)reduced.getMain()).getVariables()));
+				reduced.getProperties()
+						.add(StructuralToGal.toGal(atom, ((GALTypeDeclaration) reduced.getMain()).getVariables()));
 			}
 		}
 		for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
-			if (! doneProps.containsKey(prop.getName()))
-				reduced.getProperties().add(StructuralToGal.toGal(prop, ((GALTypeDeclaration)reduced.getMain()).getVariables()));
+			if (!doneProps.containsKey(prop.getName())) {
+				reduced.getProperties()
+						.add(StructuralToGal.toGal(prop, ((GALTypeDeclaration) reduced.getMain()).getVariables()));
+			}
 		}
 		Instantiator.normalizeProperties(reduced);
 		GALRewriter.flatten(reduced, withSeparation);
-		setSpec(reduced);		
+		setSpec(reduced);
 	}
-
-
-
 
 	public void rebuildSPN() {
 		INextBuilder nb = INextBuilder.build(getSpec());
-		IDeterministicNextBuilder dnb = IDeterministicNextBuilder.build(nb);			
+		IDeterministicNextBuilder dnb = IDeterministicNextBuilder.build(nb);
 		StructuralReduction sr = StructuralReductionBuilder.createStructuralReduction(dnb);
 		boolean isskel = spn.isSkeleton();
 		spn = new SparsePetriNet();
@@ -528,6 +385,22 @@ public class MccTranslator {
 		}
 	}
 
+	/**
+	 * removes any properties with addition in them, CTL parser can't deal with them
+	 * currently.
+	 */
+	public void removeAdditionProperties() {
+		spec.getProperties().removeIf(prop -> {
+			for (TreeIterator<EObject> it = prop.eAllContents(); it.hasNext();) {
+				EObject obj = it.next();
+				if (obj instanceof BinaryIntExpression) {
+					return true;
+				}
+			}
+			return false;
+		});
+	}
+
 	public void setHLPN(SparseHLPetriNet hlpn) {
 		this.hlpn = hlpn;
 	}
@@ -536,14 +409,100 @@ public class MccTranslator {
 		this.doITS = doITS;
 	}
 
+	public void setLouvain(boolean b) {
+		this.useLouvain = b;
+	}
+
 	public void setLTSMin(boolean doLTSmin) {
 		this.doLTSMin = doLTSmin;
 	}
-	
-	public boolean isDoITS() {
-		return doITS;
+
+	public void setMissingTokens(int val) {
+		this.missingTokens = val;
 	}
-	public boolean isDoLTSMin() {
-		return doLTSMin;
+
+	public void setOrder(IOrder order) {
+		this.order = order;
+	}
+
+	public void setSpec(Specification spec) {
+		this.spec = spec;
+		this.isFlatten = false;
+		if (spec != null) {
+			this.isHier = spec.getTypes().size() > 1;
+		}
+	}
+
+	public void setSpn(SparsePetriNet spn, boolean reduce) {
+		this.spn = spn;
+		simplifySPN(reduce, reduce);
+	}
+
+	public void setTgba(TGBA tgba) {
+		this.tgba = tgba;
+	}
+
+	public void simplifySPN(boolean redPlace, boolean redTrans) {
+		spn.simplifyLogic();
+		spn.testInInitial();
+		spn.toPredicates();
+
+		if (redPlace) {
+			spn.removeConstantPlaces();
+		}
+		if (redTrans) {
+			spn.removeRedundantTransitions(false);
+		}
+		if (redPlace) {
+			spn.removeConstantPlaces();
+		}
+		spn.simplifyLogic();
+		if (spn.isSafe()) {
+			spn.assumeOneSafe();
+		}
+		if (DEBUG >= 1) {
+			System.out.println("after syntactic reduction properties :" + spn.getProperties());
+		}
+	}
+
+	/**
+	 * Sets the spec and order attributes, spec is set to result of PNML tranlsation
+	 * and order is set to null if no nupn/computed order is available.
+	 * 
+	 * @param folder     input folder absolute path, containing a model.pnml file
+	 * @param reversible set to true to add P >= 0 constraints in guards of
+	 *                   transitions adding to P, ensuring predecessor relation is
+	 *                   inverse to succ.
+	 * @throws IOException if file can't be found
+	 */
+	public void transformPNML() throws IOException {
+		File ff = new File(folder + "/" + "model.pnml");
+		if (ff != null && ff.exists()) {
+			getLog().info("Parsing pnml file : " + ff.getAbsolutePath());
+
+//			PnmlToGalTransformer trans = new PnmlToGalTransformer();
+//			spec = trans.transform(ff.toURI());
+//			order = trans.getOrder();
+//			isSafeNet = trans.foundNupn();
+//			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
+//			if (spec.getMain() == null) {
+//				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
+//			}
+
+			PnmlToStructuralTransformer transPN = new PnmlToStructuralTransformer();
+			spn = transPN.transformPT(ff.toURI());
+			if (spn == null) {
+				hlpn = transPN.transformHLPN(ff.toURI());
+			}
+			order = transPN.getOrder();
+
+		} else {
+			throw new IOException("Cannot open file " + ff.getAbsolutePath());
+		}
+	}
+
+	private static Logger getLog() {
+		return Logger.getLogger("fr.lip6.move.gal");
+
 	}
 }
