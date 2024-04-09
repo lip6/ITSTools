@@ -151,6 +151,11 @@ public class MccTranslator {
 		return false;
 	}
 
+	/**
+	 * Check if the specification can be decomposed, i.e. if no properties contain 
+	 * addition or comparison of variables in different subcomponents.  
+	 * @return true if the specification can be decomposed and SDD can handle the operations
+	 */
 	private boolean canDecompose() {
 		boolean canDecompose = true;
 		for (Property prop : spec.getProperties()) {
