@@ -27,7 +27,7 @@ public class ExclusiveImplicantsComputer {
 	private static final int DEBUG = 0;
 
 	public enum ProblemType {
-		B_IMPLIES_A, A_IMPLIES_B, A_EXCLUSIVE_B
+		A_IMPLIES_B, A_EXCLUSIVE_B
 	}
 
 	/**
@@ -63,9 +63,6 @@ public class ExclusiveImplicantsComputer {
 			switch (type) {
 			case A_IMPLIES_B:
 				sb.append(" => ");
-				break;
-			case B_IMPLIES_A:
-				sb.append(" <= ");
 				break;
 			case A_EXCLUSIVE_B:
 				sb.append(" <> ");
@@ -400,10 +397,10 @@ public class ExclusiveImplicantsComputer {
 					SparseIntArray consNotFeedA = SparseIntArray.removeAll(consA, feedA);
 					if (consNotFeedA.size() > 0) {
 						// must be drain transitions of B
-						problems.add(new DrainProblem(b, consNotFeedA, ProblemType.B_IMPLIES_A, a, b));
+						problems.add(new DrainProblem(b, consNotFeedA, ProblemType.A_IMPLIES_B, b, a));
 					} else {
 						// Ok, we proved it without SMT.
-						constraints.add(new Constraint(ProblemType.B_IMPLIES_A, a, b));
+						constraints.add(new Constraint(ProblemType.A_IMPLIES_B, b, a));
 					}
 				}
 			}
