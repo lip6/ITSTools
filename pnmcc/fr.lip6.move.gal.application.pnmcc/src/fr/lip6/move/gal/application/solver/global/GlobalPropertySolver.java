@@ -764,7 +764,7 @@ public class GlobalPropertySolver {
 		//CTL is not for LTSmin
 		if (reader.isDoLTSMin())
 		if (! reader.getSPN().getProperties().isEmpty() && !examinationForITS.startsWith("CTL")) {
-			LTSminRunner ltsminRunner = new LTSminRunner(Solver.Z3, false, false, timeout, reader.getSPN().isSafe());
+			LTSminRunner ltsminRunner = new LTSminRunner(false, false, timeout, reader.getSPN().isSafe());
 			try {
 				ltsminRunner.configure(null, doneProps);
 				ltsminRunner.setNet(reader.getSPN());
