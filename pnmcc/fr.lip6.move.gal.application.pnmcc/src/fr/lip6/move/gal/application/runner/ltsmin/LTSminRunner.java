@@ -2,7 +2,6 @@ package fr.lip6.move.gal.application.runner.ltsmin;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,6 @@ import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.application.runner.AbstractRunner;
 import fr.lip6.move.gal.application.runner.Ender;
-import fr.lip6.move.gal.application.runner.IRunner;
 import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
@@ -35,15 +33,14 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 	private boolean doPOR;
 	private boolean onlyGal;
 	private File workFolder;
-	private Solver solver;
 	private long timeout;
 	private boolean isSafe;
 	private SparsePetriNet spn;
 	private TGBA tgba;
 	private String stateBasedHOA;
+	private boolean shouldRetry = true;
 
-	public LTSminRunner(Solver solver, boolean doPOR, boolean onlyGal, long timeout, boolean isSafe) {
-		this.solver = solver;
+	public LTSminRunner(boolean doPOR, boolean onlyGal, long timeout, boolean isSafe) {
 		this.doPOR = doPOR;
 		this.onlyGal = onlyGal;
 		try {
@@ -56,6 +53,10 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 		this.isSafe = isSafe;
 	}
 
+	
+	public void setShouldRetry(boolean b) {
+		shouldRetry = b;
+	}
 	
 	@Override
 	public void solve(Ender ender) {
@@ -71,7 +72,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 					if (spn == null) {
 						g2p = new Gal2PinsTransformerNext();
 
-						final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solver, timeout);
+						final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(Solver.Z3, timeout);
 						g2p.setSmtConfig(gsf);
 						g2p.initSolver();
 						g2p.transform(spec, workFolder.getCanonicalPath(), doPOR, isSafe);
@@ -115,7 +116,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 						checkProperty(tgba.getName(), stateBasedHOA, timeout, false, PropertyType.LTL);
 					}
 					todo.removeAll(doneProps.keySet());
-					if (! todo.isEmpty()) {
+					if (! todo.isEmpty() && shouldRetry) {
 						System.out.println("Retrying LTSmin with larger timeout "+(8*timeout)+ " s");
 						checkProperties(g2p, p2p, 8 * timeout, doneProps);
 					}
@@ -172,7 +173,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 							negateResult = false;
 						}
 						
-						checkProperty(prop.getName(),pbody,time,negateResult, prop.getType());
+						checkProperty(prop.getName(),pbody,time/spn.getProperties().size(),negateResult, prop.getType());
 					}
 				}
 			}
