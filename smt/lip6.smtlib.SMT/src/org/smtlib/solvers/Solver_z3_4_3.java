@@ -39,6 +39,7 @@ import org.smtlib.IExpr.IQualifiedIdentifier;
 import org.smtlib.IExpr.IStringLiteral;
 import org.smtlib.IParser.ParserException;
 import org.smtlib.IVisitor.VisitorException;
+import org.smtlib.command.C_check_sat_assuming;
 import org.smtlib.impl.Pos;
 import org.smtlib.sexpr.Printer;
 
@@ -60,7 +61,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 	protected String cmds[];
 	protected String cmds_win[] = new String[]{ "", "/smt2","/in","SMTLIB2_COMPLIANT=true"}; 
 	protected String cmds_mac[] = new String[]{ "", "-smt2","-in","SMTLIB2_COMPLIANT=true"}; 
-	protected String cmds_unix[] = new String[]{ "", "-smt2","-in"}; 
+	protected String cmds_unix[] = new String[]{ "", "parallel.enable=true", "parallel.threads.max=4", "-smt2","-in"}; 
 
 	/** The object that interacts with external processes */
 	protected SolverProcess solverProcess;
@@ -330,6 +331,32 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 		return res;
 	}
 
+	@Override
+	public IResponse check_sat_assuming(IExpr... exprs) {
+		IResponse res;
+		try {
+			if (!logicSet) {
+				return smtConfig.responseFactory.error("The logic must be set before a check-sat command is issued");
+			}
+			String s = solverProcess.sendAndListen(translate(new C_check_sat_assuming(exprs)) +"\n");
+			//smtConfig.log.logDiag("HEARD: " + s);  // FIXME - detect errors - parseResponse?
+			
+			if (solverProcess.isRunning(false)) {
+				if (s.contains("unsat")) res = smtConfig.responseFactory.unsat();
+				else if (s.contains("sat")) res = smtConfig.responseFactory.sat();
+				else res = smtConfig.responseFactory.unknown();
+			} else {
+				res = smtConfig.responseFactory.error("Solver has unexpectedly terminated");
+			}
+
+			checkSatStatus = res;
+		} catch (IOException | VisitorException e) {
+			res = smtConfig.responseFactory.error("Failed to check-sat");
+		}
+		return res;
+	}
+
+	
 	@Override
 	public IResponse pop(int number) {
 		if (!logicSet) {

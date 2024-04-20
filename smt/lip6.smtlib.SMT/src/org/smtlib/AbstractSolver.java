@@ -97,6 +97,13 @@ public class AbstractSolver implements ISolver {
 		throw new UnsupportedOperationException("AbstractSolver.check_sat");
 	}
 
+	/** @see org.smtlib.ISolver#check_sat_assuming()*/
+	@Override
+	public IResponse check_sat_assuming(IExpr ... exprs) {
+		throw new UnsupportedOperationException("AbstractSolver.check_sat_assuming");
+	}
+
+	
 	/** @see org.smtlib.ISolver#define_fun(ICommand.Idefine_fun)  */
 	@Override
 	public IResponse define_fun(Idefine_fun cmd) {

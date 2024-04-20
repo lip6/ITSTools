@@ -65,6 +65,11 @@ public interface ISolver {
 	 */
 	IResponse check_sat();
 	
+	/** Checks whether the current state is satisfiable in the current logic, under specified assumptions.
+	 * @return sat, unsat, unknown or error
+	 */
+	IResponse check_sat_assuming(IExpr...  exprs);
+	
 	/** Defines a new uninterpreted constant or function; returns success or error*/
 	IResponse declare_fun(Ideclare_fun cmd);
 	

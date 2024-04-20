@@ -118,6 +118,11 @@ public interface ICommand extends IAccept {
 	static public interface Icheck_sat extends ICommand {
 	}
 	
+	/** Interface to be implemented by all objects representing SMT-LIB check-sat-assuming commands. */
+	static public interface Icheck_sat_assuming extends ICommand {
+		List<IExpr> assumptions();
+	}
+	
 	/** Interface to be implemented by all objects representing SMT-LIB declare-fun commands. */
 	static public interface Ideclare_fun extends ICommand {
 		ISymbol symbol();

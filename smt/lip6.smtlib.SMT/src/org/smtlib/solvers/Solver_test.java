@@ -16,6 +16,7 @@ import org.smtlib.ICommand.Idefine_sort;
 import org.smtlib.*;
 import org.smtlib.IExpr.IAttribute;
 import org.smtlib.IExpr.IAttributeValue;
+import org.smtlib.IExpr.IFcnExpr;
 import org.smtlib.IExpr.IIdentifier;
 import org.smtlib.IExpr.IKeyword;
 import org.smtlib.IExpr.INumeral;
@@ -143,6 +144,38 @@ public class Solver_test implements ISolver {
 		if (!logicSet) {
 			return smtConfig.responseFactory.error("The logic must be set before a check-sat command is issued");
 		}
+		checkSatStatus = smtConfig.responseFactory.unknown();
+		return checkSatStatus;
+	}
+	
+	@Override
+	public IResponse check_sat_assuming(IExpr ... exprs) {
+		if (smtConfig.verbose != 0) smtConfig.log.logDiag("#check-sat-assuming");
+//		if (logicSet == null) {
+//			return smtConfig.responseFactory.error("The logic must be set before a check-sat-assuming command is issued");
+//		}
+		for (IExpr e: exprs) {
+			if (e instanceof IFcnExpr && ((IFcnExpr)e).args().size() != 0) {
+				IFcnExpr f = (IFcnExpr)e;
+				if (f.args().size() != 1 || !f.head().toString().equals("not")) {
+					return smtConfig.responseFactory.error("Each element of a check-sat-assuming command must be either p or (not p), where p is a Bool constant");
+				}
+				e = f.args().get(0);
+			}
+			if (!(e instanceof IIdentifier)) {
+				return smtConfig.responseFactory.error("Expected a simple identifier: " + e); // FIXME - use pretty printer?
+			}
+			List<IResponse> responses = TypeChecker.check(symTable, e);
+			if (!responses.isEmpty()) return responses.get(0); // FIXME - return all?
+			List<SymbolTable.Entry> entries = symTable.lookup((IIdentifier)e).get(0);
+			if (entries.size() != 1) {
+				return smtConfig.responseFactory.error("No zero-arity declaration of symbol " + e); // FIXME - use pretty printer?
+			}
+			if (!entries.get(0).sort.isBool()) {
+				return smtConfig.responseFactory.error("Expected a Bool symbol: " + e + " has sort " + entries.get(0).sort); // FIXME - use pretty printer?
+			}
+		}
+		
 		checkSatStatus = smtConfig.responseFactory.unknown();
 		return checkSatStatus;
 	}
