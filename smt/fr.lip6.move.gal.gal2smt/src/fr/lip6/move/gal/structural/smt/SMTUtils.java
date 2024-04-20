@@ -17,6 +17,8 @@ import org.smtlib.SMT;
 import org.smtlib.SMT.Configuration;
 import org.smtlib.Utils;
 import org.smtlib.command.C_assert;
+import org.smtlib.command.C_check_sat;
+import org.smtlib.command.C_check_sat_assuming;
 import org.smtlib.impl.Script;
 
 import fr.lip6.move.gal.gal2smt.Solver;
@@ -113,6 +115,7 @@ public class SMTUtils {
 		if (err.isError()) {
 			throw new RuntimeException("Could not set logic" + err);
 		}
+	//	System.out.println("Starting Z3 with timeout " + timeoutT + " and query timeout " + timeoutQ);
 		return solver;
 	}
 
@@ -136,7 +139,15 @@ public class SMTUtils {
 	}
 
 	public static String checkSat(ISolver solver, boolean retry) {
-		IResponse res = solver.check_sat();
+		return checkSat(solver, new C_check_sat(), retry);
+	}
+	
+	public static String checkSatAssuming(ISolver solver, IExpr... assumptions) {
+		return checkSat(solver, new C_check_sat_assuming(assumptions), false);
+	}
+	
+	public static String checkSat(ISolver solver, ICommand command, boolean retry) {
+		IResponse res = command.execute(solver);
 		IPrinter printer = smtConf.defaultPrinter;
 		String textReply = printer.toString(res);
 		if (DEBUG >= 2) {
