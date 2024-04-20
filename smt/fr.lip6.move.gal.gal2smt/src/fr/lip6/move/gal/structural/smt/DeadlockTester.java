@@ -2467,7 +2467,7 @@ public class DeadlockTester {
 		long time = System.currentTimeMillis();
 		Script invpos = new Script();
 		Script invneg = new Script();
-		int poscount = declareInvariants(invar,sr,invpos,invneg,smt);
+		int poscount = declareInvariants(invar,sr.getMarks(),invpos,invneg,smt);
 
 		String textReply = "sat";
 		// add the positive only for now
@@ -2496,7 +2496,7 @@ public class DeadlockTester {
 	 * @param smt solver access
 	 * @return number of positive flows
 	 */
-	private static int declareInvariants(Set<SparseIntArray> invar, ISparsePetriNet sr, Script invpos,
+	private static int declareInvariants(Set<SparseIntArray> invar, List<Integer> marks, Script invpos,
 			Script invneg, SMT smt) {
 		int posinv = 0;
 		// splitting posneg from pure positive
@@ -2511,12 +2511,12 @@ public class DeadlockTester {
 			}			
 			if (! hasNeg) {
 				posinv ++;
-				addInvariant(sr, efactory, invpos, invariant);
+				addInvariant(marks, efactory, invpos, invariant);
 				if (invpos.commands().size() %5 == 0) {
 					invpos.add(new C_check_sat());
 				}
 			} else {
-				addInvariant(sr, efactory, invneg, invariant);
+				addInvariant(marks, efactory, invneg, invariant);
 				if (invneg.commands().size() %5 == 0) {
 					invneg.add(new C_check_sat());
 				}
@@ -2572,7 +2572,7 @@ public class DeadlockTester {
 	}
 
 
-	private static void addInvariant(ISparsePetriNet sr, IFactory efactory, Script script,
+	private static void addInvariant(List<Integer> marks, IFactory efactory, Script script,
 			SparseIntArray invariant) {
 		long sum = 0;
 		// assert : cte = m0 * x0 + ... + m_n*x_n
@@ -2591,7 +2591,7 @@ public class DeadlockTester {
 					toadd.add(ss);
 				else
 					torem.add(ss);
-				sum  = Math.addExact(sum, Math.multiplyExact((long)val, sr.getMarks().get(v))) ; 
+				sum  = Math.addExact(sum, Math.multiplyExact((long)val, marks.get(v))) ; 
 			}
 		} catch (ArithmeticException e) {
 			System.err.println("Invariant declaration overflow for the constant !");
@@ -2652,7 +2652,7 @@ public class DeadlockTester {
 		long time = System.currentTimeMillis();
 		Script invpos = new Script();
 		Script invneg = new Script();
-		int poscount = declareInvariants(invar,sr,invpos,invneg,smt);
+		int poscount = declareInvariants(invar,sr.getMarks(),invpos,invneg,smt);
 
 		String textReply = "sat";
 		// add the positive only for now
