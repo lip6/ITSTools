@@ -350,7 +350,7 @@ public class LTLPropertySolver {
 	}
 	
 	private void verifyWithLTSmin (SparsePetriNet spn, DoneProperties doneProps, int timeout) {
-		LTSminRunner ltsminRunner = new LTSminRunner(Solver.Z3, false, false, timeout, spn.isSafe());
+		LTSminRunner ltsminRunner = new LTSminRunner(false, false, timeout, spn.isSafe());
 		
 		try {
 			ltsminRunner.configure(null, doneProps);
@@ -378,7 +378,7 @@ public class LTLPropertySolver {
 		
 		ILTSminRunner ltsminRunner ;
 		if (mode == ExportMode.LTSMINAP) {
-			ltsminRunner = new LTSminRunner(Solver.Z3, negProp.isStutterInvariant(), false, timeout, spn.isSafe());
+			ltsminRunner = new LTSminRunner(negProp.isStutterInvariant(), false, timeout, spn.isSafe());
 		} else {
 			ltsminRunner = new LTSminPNMLRunner(negProp.isStutterInvariant(), timeout, spn.isSafe());
 		}
