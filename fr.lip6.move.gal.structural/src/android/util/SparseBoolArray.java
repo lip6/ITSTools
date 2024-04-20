@@ -19,6 +19,7 @@ import com.android.internal.util.GrowingArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 
 import libcore.util.EmptyArray;
@@ -80,6 +81,19 @@ public class SparseBoolArray implements Cloneable {
     			append(i, v);    			
     		}
     	}    	
+	}
+    
+    // produce an entry for each set bit in the input
+    public SparseBoolArray(BitSet bs) {
+		// set capacity
+		this(bs.cardinality());
+
+		for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i + 1)) {
+			append(i,true);
+			if (i == Integer.MAX_VALUE) {
+				break; // or (i+1) would overflow
+			}
+		}
 	}
     
     public List<Boolean> toList (int size) {
@@ -362,6 +376,120 @@ public class SparseBoolArray implements Cloneable {
 		res.mSize = cur;
 		return res;
 	}
+	
+	
+	/**
+	 * Return an array c, such that c[i] if a[i] and !b[i].
+	 * @param a
+	 * @param b
+	 * @return c
+	 */
+	public static SparseBoolArray removeAll(SparseBoolArray a, SparseBoolArray b) {
+		SparseBoolArray c = new SparseBoolArray(a.size());
+
+		int asz = a.size();
+		int bsz = b.size();
+
+		int i = 0;
+		int j = 0;
+		while (i < asz || j < bsz) {
+			int ki;
+			if (i == asz)
+				break;
+			else
+				ki = a.keyAt(i);
+
+			int kj = j == bsz ? Integer.MAX_VALUE : b.keyAt(j);
+			if (ki == kj) {
+				// dropping value in a
+				i++;
+				j++;
+			} else if (ki < kj) {
+				c.append(ki, true);
+				i++;
+			} else if (kj < ki) {
+				j++;
+			}
+		}
+
+		return c;
+	}
+	
+	
+	/**
+	 * Test whether all keys in the second array are contained in the first array.
+	 * 
+	 * Returns true if for every key in s2, there is a corresponding key in s1.
+	 * 
+	 * @param s1 the array that should contain all keys from s2.
+	 * @param s2 the array whose keys need to be contained in s1.
+	 * @return true if all keys in s2 are contained in s1.
+	 */
+	public static boolean containsAll(SparseBoolArray s1, SparseBoolArray s2) {
+	    int ss1 = s1.size(), ss2 = s2.size();
+
+	    // If s2 has more entries than s1, s2 cannot be fully contained in s1
+	    if (ss2 > ss1) {
+	        return false;
+	    }
+	
+	    int i = 0, j = 0;
+	    for (; i < ss1 && j < ss2;) {
+	        int sk1 = s1.keyAt(i);
+	        int sk2 = s2.keyAt(j);
+
+	        if (sk1 == sk2) {
+	            // Move to the next key in both arrays
+	            i++;
+	            j++;
+	        } else if (sk1 < sk2) {
+	            // Use binary search to find the position in s1 that matches or exceeds sk2
+	            int ii = ContainerHelpers.binarySearch(s1.mKeys, sk2, i + 1, ss1 - 1);
+
+	            // If no such position is found, s1 cannot contain all keys from s2
+	            if (ii < 0) {
+	                return false;
+	            }
+
+	            // Update the index in s1 to the found position
+	            i = ii;
+
+	            // If there are not enough entries left in s1 to cover the rest of s2, return false
+	            if (ss1 - i < ss2 - j) {
+	                return false;
+	            }
+	        } else {
+	            // If sk2 > sk1 and the binary search didn't find a match, s1 doesn't contain all keys
+	            return false;
+	        }
+	    }
+
+	    // If we have gone through all of s2's keys, return true; otherwise, return false
+	    return j == ss2;
+	}
+	
+	
+    public static boolean intersects(SparseBoolArray s1, SparseBoolArray s2) {
+		int s1sz = s1.size();
+		int s2sz = s2.size();
+		if (s1sz == 0 || s2sz == 0) {
+			return false;
+		}				
+		
+		for (int j = 0, i = 0  ; i < s1sz && j < s2sz ; ) {
+			int sk1 = s1.keyAt(i); 
+			int sk2 = s2.keyAt(j); 
+			if (sk1 == sk2) {
+				return true;
+			} else if (sk1 > sk2) {
+				j++;
+			} else {
+				i++;
+			}
+		}
+		return false;
+	}
+
 	
 	public static void main(String[] args) {
 		SparseBoolArray a = new SparseBoolArray();
