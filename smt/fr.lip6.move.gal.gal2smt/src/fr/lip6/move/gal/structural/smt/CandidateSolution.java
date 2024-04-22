@@ -102,6 +102,14 @@ public class CandidateSolution {
 		}
 		return hasReals;
 	}
+	
+	public boolean hasWitness() {
+		return reply == SMTReply.SAT && parikh != null;
+	}
+	
+	public SparseIntArray getState() {
+		return state;
+	}
 
 	@Override
 	public String toString() {
