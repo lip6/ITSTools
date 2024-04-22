@@ -9,6 +9,5 @@ public interface IRefiner {
 	}
 	
 	int refine(SolverState solver, ProblemSet problems, RefinementMode mode, VarSet current, long timeout);
-	boolean isDone();
 	void reset();
 }
