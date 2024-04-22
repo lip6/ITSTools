@@ -10,7 +10,6 @@ public class SMTConstraint implements IConstraint {
 
 	private ICommand constraint;
 	private VarSet support;
-	private boolean done = false;
 	
 	public SMTConstraint(ICommand constraint, VarSet support) {
 		this.constraint = constraint;
@@ -24,15 +23,6 @@ public class SMTConstraint implements IConstraint {
 		return support;
 	}
 
-	@Override
-	public boolean isDone() {
-		return done ;
-	}
-
-	@Override
-	public void setDone(boolean b) {
-        done = b;
-    }
 
 	@Override
 	public String toString() {
