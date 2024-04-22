@@ -53,6 +53,7 @@ public class SMTBasedReachabilitySolver {
 		// also adds "t" variables for transitions
 		refiners.addAll(StateEquationRefinerBuilder.buildStateEquationRefiner(effects,spn.getMarks(), solver));
 
+		refiners.add(new TrapRefiner(spn));
 	
 		solve (refiners, problems, solver, timeout, withWitness);
 		if (!problems.isSolved() && problems.hasReal()) {
@@ -76,35 +77,31 @@ public class SMTBasedReachabilitySolver {
 		}
 		// quick check
 		problems.updateStatus(solver, false);
-		
+		int totalConstraints = 0;
 		int iteration =0;
-		while (!problems.isSolved() && !refiners.isEmpty()) {
-			RefinementMode mode ;
-			if (iteration % 2 == 0) {
-				mode = RefinementMode.INCLUDED_ONLY;
-			} else {
-				mode = RefinementMode.OVERLAPS;
-			}
-			VarSet current = solver.getDeclaredVars().clone();
-			int addedConstraints = 0;
-			Iterator<IRefiner> it = refiners.iterator();
-			while (it.hasNext()) {
-				IRefiner ref = it.next();
-				addedConstraints += ref.refine(solver, problems, mode, current, timeout);
-				if (ref.isDone()) {
-					System.out.println("Refiner " + ref + " is done.");
-					it.remove();
-				}
-				
-			}
-			problems.updateStatus(solver, withWitness);
-			int addedVars = solver.getDeclaredVars().size() - current.size();
-			System.out.println("At refinement iteration "+iteration+ "("+ mode +") "+ solver.getDeclaredVars().size() +" variables, added "+addedVars+ " vars and "+addedConstraints +"constraints problems are : "+problems);
-			iteration++;
-			if (addedConstraints == 0 && addedVars == 0) {
-				System.out.println("No progress, stopping.");
-				break;
-			}
+		while (!problems.isSolved()) {
+		    RefinementMode mode = (iteration % 2 == 0) ? RefinementMode.INCLUDED_ONLY : RefinementMode.OVERLAPS;
+		    VarSet current = solver.getDeclaredVars().clone();
+		    boolean anyRefinement = false;  // Track if any refinement occurs
+		    int addedConstraints = 0;
+		    for (IRefiner ref : refiners) {
+		         addedConstraints += ref.refine(solver, problems, mode, current, timeout);
+		         anyRefinement |= (addedConstraints > 0);
+		    }
+
+		    problems.updateStatus(solver, withWitness);
+		    int addedVars = solver.getDeclaredVars().size() - current.size();
+		    anyRefinement |= (addedVars > 0);
+		    totalConstraints += addedConstraints;
+		    System.out.println("At refinement iteration " + iteration + " (" + mode + ") " +
+		                       solver.getDeclaredVars().size() + " variables, added " + addedVars +
+		                       " vars and " + addedConstraints + "/" +totalConstraints+" constraints. Problems are: " + problems);
+
+		    if (!anyRefinement) {
+		        System.out.println("No progress, stopping.");
+		        break;
+		    }
+		    iteration++;
 		}
 		
 		solver.stop();
