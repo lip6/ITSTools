@@ -23,9 +23,9 @@ public class ProblemSet {
 	
 	public void updateStatus(SolverState solver, boolean withWitness) {
 		for (Problem p : unsolved) {
-			if (solver.getNumericType() == SolutionType.Real && p.getSolution().getReply() == SMTReply.REAL) {
+			if (p.getSolution().getReply() == SMTReply.UNKNOWN) {
 				continue;
-            }
+			}
 			p.updateStatus(solver, withWitness);
 		}
 		update();
@@ -40,9 +40,9 @@ public class ProblemSet {
 		return unsolved;
 	}
 
-	public boolean hasReal() {
+	public boolean hasType(SMTReply type) {
 		for (Problem p : unsolved) {
-			if (p.getSolution().getReply() == SMTReply.REAL) {
+			if (p.getSolution().getReply() == type) {
 				return true;
 			}
 		}
@@ -52,6 +52,7 @@ public class ProblemSet {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Problem set: " + solved.size() + " solved, " + unsolved.size() + " unsolved");
+		// sb.append(unsolved);
 		return sb.toString();
 	}
 }
