@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -431,7 +430,7 @@ public class DeadlockTester {
 			try {
 				// let's not go overboard, we haven't even started the solver yet.
 				if (sumMatrix.getColumnCount() < 20000) {
-					s = computePredConstraint(tocheck.get(i),sumMatrix,representative,sr);
+					s =  PredecessorConstraintRefiner.computePredConstraint(tocheck.get(i),sumMatrix,representative,sr);
 					s.add(new C_assert(smtexpr));
 				}
 			} catch (OutOfMemoryError err) {
@@ -516,85 +515,6 @@ public class DeadlockTester {
 				);
 	}
 
-	private static Script computePredConstraint(Expression ap, IntMatrixCol sumMatrix,
-			List<Integer> representative, ISparsePetriNet sr) {
-		
-		// we know that s satisfies ap
-		// we want to force existence of an immediate predecessor of s satisfying !ap
-		
-		// there must exist a transition t such that
-		// * the predecessor by t of s satisfies !ap; this depends only on the effect of t, not it's precise definition
-		// * t was feasibly the last fired transition, i.e. there is a transition t' that t represents such that s >= post(t')
-		// * t was selected in the Parikh solution to reach s; |t|>0
-		
-		// a map from index in reduced flow to set of transitions with this effect
-		Map<Integer, List<Integer>> revMap = computeImages(representative); 
-		
-		SparseIntArray supp = computeSupport(ap);
-		
-		
-		IFactory ef = new SMT().smtConfig.exprFactory;
-		
-		List<IExpr> allPotentialPred = new ArrayList<>();
-		
-		int selected = 0;
-		// scan transition *effects* in sumMatrix
-		for (int tid=0, tide=sumMatrix.getColumnCount() ; tid < tide ; tid++) {
-			SparseIntArray t = sumMatrix.getColumn(tid);
-			if (! SparseIntArray.keysIntersect(supp, t)) {
-				// guaranteed to stutter : this is not a candidate
-				continue;				
-			} else {
-				if (selected++ > 1000) {
-					// whatever...
-					return new Script();
-				}
-				// more subtle we do touch the target AP
-				// compute if firing t would go from !ap to ap
-				// * the predecessor by t of s satisfies !ap; this depends only on the effect of t, not it's precise definition
-				IExpr apFalseBeforeT = rewriteAfterEffect(Expression.not(ap),t,true).accept(new ExprTranslator());
-				
-				// * t was selected in the Parikh solution to reach s; |t|>0
-				IExpr tselected = ef.fcn(ef.symbol(">="), ef.symbol("t"+tid), ef.numeral(1));
-				
-				// * t was feasibly the last fired transition, i.e. there is a transition t' that t represents such that s >= post(t')
-				List<IExpr> alternatives = new ArrayList<>();
-				for (Integer ti : revMap.get(tid)) {
-					alternatives.add(buildFeasible(ef, sr.getFlowTP().getColumn(ti)));					
-				}
-				
-				// combine
-				List<IExpr> toAnd = new ArrayList<>();
-				toAnd.add(apFalseBeforeT);
-				toAnd.add(tselected);
-				toAnd.add(SMTUtils.makeOr(alternatives));
-				allPotentialPred.add(SMTUtils.makeAnd(toAnd));
-			}			
-		}
-		
-		Script script = new Script();
-		
-		// assert an OR of one of the candidates 
-		script.add(new C_assert(SMTUtils.makeOr(allPotentialPred)));
-				
-		return script;
-	}
-
-
-	private static IExpr buildFeasible(IFactory ef, SparseIntArray tp) {
-		List<IExpr> tojoin = new ArrayList<>();
-		for (int i=0,ie=tp.size();i<ie;i++) {
-			int pid = tp.keyAt(i);
-			int val = tp.valueAt(i);
-			
-			// must be that s is greater than tp
-			tojoin.add(ef.fcn(ef.symbol(">="), ef.symbol("s"+pid), ef.numeral(val)));
-		}
-		
-		return SMTUtils.makeAnd(tojoin);
-	}
-
-
 	public static boolean testEGap(Expression ap, ISparsePetriNet sr, int timeout) {
 
 		try {
@@ -602,7 +522,7 @@ public class DeadlockTester {
 			IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(sr, representative);
 
 			// a map from index in reduced flow to set of transitions with this effect
-			Map<Integer, List<Integer>> revMap = computeImages(representative);
+			Map<Integer, List<Integer>> revMap = SMTUtils.computeImages(representative);
 
 			SparseIntArray supp = computeSupport(ap);
 
@@ -678,54 +598,6 @@ public class DeadlockTester {
 		}
 		return false;
 	}
-
-
-	private static SparseIntArray computeSupport(Expression ap) {
-		// compute support of e
-		SparseIntArray supp;
-		{
-			BitSet suppbs = new BitSet();
-			SparsePetriNet.addSupport(ap,suppbs);
-			supp=new SparseIntArray(suppbs);
-		}
-		return supp;
-	}
-	
-	public static Expression rewriteAfterEffect (Expression expr, SparseIntArray t, boolean before) {
-		if (expr == null) {
-			return null;
-		} else if (expr instanceof VarRef) {
-			VarRef vref = (VarRef) expr;
-			int delta=t.get(vref.getValue());
-			if (delta != 0) {
-				if (before) {
-					delta = -delta;
-				}
-				return Expression.nop(Op.ADD, expr, Expression.constant(delta));
-			} else {
-				return expr;
-			}
-		} else if (expr instanceof AtomicPropRef) {
-			AtomicPropRef apr = (AtomicPropRef) expr;
-			return rewriteAfterEffect(apr.getAp().getExpression(),t,before) ;			
-		} else {
-			List<Expression> resc = new ArrayList<>();
-			boolean changed = false;
-			for (int i=0,ie=expr.nbChildren(); i < ie; i++) {
-				Expression child = expr.childAt(i);
-				Expression nc = rewriteAfterEffect(child, t,before);
-				resc.add(nc);
-				if (nc != child) {
-					changed = true;
-				}
-			}
-			if (!changed) {
-				return expr;
-			}
-			return Expression.nop(expr.getOp(), resc);			
-		} 
-	}
-	
 	
 	private static List<String> verifyPossible(ISparsePetriNet sr, List<Script> properties, List<Script> propertiesWithSE,
 			boolean isSafe, IntMatrixCol sumMatrix, Set<SparseIntArray> invar,
@@ -1071,7 +943,7 @@ public class DeadlockTester {
 	private static String refineWithCausalOrder(ISparsePetriNet sr, ISolver solver, IntMatrixCol sumMatrix,
 			boolean solveWithReals, List<Integer> representative, SMT smt) {
 		long time = System.currentTimeMillis();
-		Map<Integer,List<Integer>> images = computeImages(representative);
+		Map<Integer,List<Integer>> images = SMTUtils.computeImages(representative);
 		IFactory ef = smt.smtConfig.exprFactory;
 		// order of the transitions
 		if (useAbstractDataType == POType.Plunge) {
@@ -1278,13 +1150,6 @@ public class DeadlockTester {
 		return res;
 	}
 
-	private static Map<Integer, List<Integer>> computeImages(List<Integer> representative) {
-		Map<Integer, List<Integer>> images = new HashMap<>();
-		for (int i=0; i < representative.size() ; i++) {
-			images.computeIfAbsent(representative.get(i), k -> new ArrayList<>()).add(i);
-		}
-		return images;
-	}
 
 	static SparseIntArray lastState = null;
 	static SparseIntArray lastOrder = null;
@@ -1969,7 +1834,7 @@ public class DeadlockTester {
 		IFactory ef = new SMT().smtConfig.exprFactory;				 
 		int readConstraints = 0;
 		IntMatrixCol tsum = sumMatrix.transpose();
-		Map<Integer,List<Integer>> images = computeImages(representative);
+		Map<Integer,List<Integer>> images = SMTUtils.computeImages(representative);
 		
 		// now add read constraint : any transition reading from an initially unmarked place => p must be fed at some point			
 		for (int tid=0; tid < sumMatrix.getColumnCount() ; tid++) {
