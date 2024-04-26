@@ -23,15 +23,22 @@ public class TrapRefiner implements IRefiner {
 
     @Override
     public int refine(SolverState solver, ProblemSet problems, RefinementMode mode, VarSet current, long timeout) {
+        int totalConstraints =0;
+        
         int constraintsAdded = 0;
-        // we need witness to find traps
-        problems.updateStatus(solver, true);
-        for (Problem problem : problems.getUnsolved()) {
-            CandidateSolution candidate = problem.getSolution();
-            boolean newTrapFound = findTrap(net, candidate, knownTraps, solver);            
-        }
-        constraintsAdded += knownTraps.refine(solver, problems, mode, current, timeout);
-        return constraintsAdded;
+        do {
+        	constraintsAdded = 0;
+            // we need witness to find traps
+            problems.updateStatus(solver, true);
+            for (Problem problem : problems.getUnsolved()) {
+                CandidateSolution candidate = problem.getSolution();
+                boolean newTrapFound = findTrap(net, candidate, knownTraps, solver);            
+            }
+            constraintsAdded += knownTraps.refine(solver, problems, mode, current, timeout);
+            totalConstraints += constraintsAdded;        	        	
+        } while (constraintsAdded > 0);
+    	
+        return totalConstraints;
     }
 
     private boolean findTrap(ISparsePetriNet net, CandidateSolution candidate, StaticRefiner known, SolverState solver) {
@@ -64,5 +71,10 @@ public class TrapRefiner implements IRefiner {
     @Override
     public void reset() {
         knownTraps.reset();
+    }
+    
+    @Override
+    public String toString() {
+    	return knownTraps.toString();
     }
 }
