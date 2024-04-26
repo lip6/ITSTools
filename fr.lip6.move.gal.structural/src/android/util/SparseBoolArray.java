@@ -96,7 +96,13 @@ public class SparseBoolArray implements Cloneable {
 		}
 	}
     
-    public List<Boolean> toList (int size) {
+    public SparseBoolArray(int nbElements, boolean b) {
+		this(nbElements);
+		for (int i = 0; i < nbElements; i++) {
+			append(i, b);
+		}
+	}
+	public List<Boolean> toList (int size) {
     	List<Boolean> res = new ArrayList<> (size);
     	int  j = 0;
     	for (int i=0; i < size ; i++ ) {
