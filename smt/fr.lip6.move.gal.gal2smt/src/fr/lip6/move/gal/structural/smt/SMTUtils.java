@@ -1,8 +1,12 @@
 package fr.lip6.move.gal.structural.smt;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.smtlib.ICommand;
@@ -13,6 +17,9 @@ import org.smtlib.IExpr.ISymbol;
 import org.smtlib.IPrinter;
 import org.smtlib.IResponse;
 import org.smtlib.ISolver;
+import org.smtlib.IVisitor;
+import org.smtlib.IVisitor.TreeVisitor;
+import org.smtlib.IVisitor.VisitorException;
 import org.smtlib.SMT;
 import org.smtlib.SMT.Configuration;
 import org.smtlib.Utils;
@@ -21,7 +28,13 @@ import org.smtlib.command.C_check_sat;
 import org.smtlib.command.C_check_sat_assuming;
 import org.smtlib.impl.Script;
 
+import android.util.SparseIntArray;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.expr.AtomicPropRef;
+import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.structural.expr.VarRef;
 import fr.lip6.smt.z3.binaries.BinaryToolsPlugin;
 
 public class SMTUtils {
@@ -38,6 +51,49 @@ public class SMTUtils {
 
 	// utility class, don't instantiate
 	private SMTUtils() {
+	}
+
+	public static Expression rewriteAfterEffect (Expression expr, SparseIntArray t, boolean before) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof VarRef) {
+			VarRef vref = (VarRef) expr;
+			int delta=t.get(vref.getValue());
+			if (delta != 0) {
+				if (before) {
+					delta = -delta;
+				}
+				return Expression.nop(Op.ADD, expr, Expression.constant(delta));
+			} else {
+				return expr;
+			}
+		} else if (expr instanceof AtomicPropRef) {
+			AtomicPropRef apr = (AtomicPropRef) expr;
+			return rewriteAfterEffect(apr.getAp().getExpression(),t,before) ;			
+		} else {
+			List<Expression> resc = new ArrayList<>();
+			boolean changed = false;
+			for (int i=0,ie=expr.nbChildren(); i < ie; i++) {
+				Expression child = expr.childAt(i);
+				Expression nc = rewriteAfterEffect(child, t,before);
+				resc.add(nc);
+				if (nc != child) {
+					changed = true;
+				}
+			}
+			if (!changed) {
+				return expr;
+			}
+			return Expression.nop(expr.getOp(), resc);			
+		} 
+	}
+
+	public static Map<Integer, List<Integer>> computeImages(List<Integer> representative) {
+		Map<Integer, List<Integer>> images = new HashMap<>();
+		for (int i=0; i < representative.size() ; i++) {
+			images.computeIfAbsent(representative.get(i), k -> new ArrayList<>()).add(i);
+		}
+		return images;
 	}
 
 	public static IExpr makeAnd(List<IExpr> list) {
@@ -233,6 +289,41 @@ public class SMTUtils {
 				}
 			}
 		}
+	}
+	
+	public static SparseIntArray computeSupport(Expression ap) {
+		// compute support of e
+		SparseIntArray supp;
+		{
+			BitSet suppbs = new BitSet();
+			SparsePetriNet.addSupport(ap,suppbs);
+			supp=new SparseIntArray(suppbs);
+		}
+		return supp;
+	}
+
+	private static class VarCollector extends TreeVisitor<Void> implements IVisitor<Void> {
+		public VarSet support = new VarSet();
+		
+		@Override
+		public Void visit(ISymbol e) throws VisitorException {
+			char c = e.value().charAt(0);
+			if (c == 's' || c == 't') {
+				int index = Integer.parseInt(e.value().substring(1));
+				support.addVar(c+"", index);
+			}
+			return null;
+		}
+	}
+	
+	public static VarSet computeSupport(IExpr pred) {
+		VarCollector vc = new VarCollector();
+		try {
+			pred.accept(vc);
+		} catch (VisitorException e) {
+			e.printStackTrace();
+		}
+		return vc.support;
 	}
 
 }
