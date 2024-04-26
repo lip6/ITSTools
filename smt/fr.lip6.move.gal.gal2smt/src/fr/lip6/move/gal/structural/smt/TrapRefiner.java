@@ -31,6 +31,9 @@ public class TrapRefiner implements IRefiner {
             // we need witness to find traps
             problems.updateStatus(solver, true);
             for (Problem problem : problems.getUnsolved()) {
+            	if (problem.getSolution().getReply() != SMTReply.SAT) {
+            		continue;
+            	}
                 CandidateSolution candidate = problem.getSolution();
                 boolean newTrapFound = findTrap(net, candidate, knownTraps, solver);            
             }
