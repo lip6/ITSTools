@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -247,10 +246,13 @@ public class SMTTrapUtils {
 		// iterate reduction of unfeasible parts
 		{
 			int doneIter =0;
+			Set<Integer> todropP = new HashSet<>();
+			Set<Integer> todropT = new HashSet<>();
 			do {
 				doneIter =0;
-				Set<Integer> todropP = new TreeSet<>();
-				Set<Integer> todropT = new TreeSet<>();
+				
+				todropP.clear();
+				todropT.clear();
 
 				for (int tid=sr.getTnames().size()-1 ; tid >= 0 ; tid --) {
 					if (sr.getFlowPT().getColumn(tid).size()==0) {
@@ -282,8 +284,8 @@ public class SMTTrapUtils {
 		}
 		{
 			boolean ok = false;
-			for (int i=0; i < sr.getPnames().size() ; i++) {
-				if (sr.getMarks().get(i) >0 && solution.get(i)==0) {
+			for (int i=0, ie = sr.getPnames().size() ; i < ie ; i++) {
+				if (sr.getMarks().get(i)>0 && solution.get(i)==0) {
 					ok=true;
 					break;
 				}
