@@ -21,7 +21,7 @@ public class StateEquationRefinerBuilder {
 		solver.addVars(prefix, nbt, VarType.NUMERIC);		
 
 		
-		StaticRefiner doms = DomainRefinerBuilder.enforceMinBound(prefix, nbt, 0, solver);
+		StaticRefiner doms = DomainRefinerBuilder.enforceMinBound(prefix, nbt, 0);
 		
 		List<IRefiner> refiners = new ArrayList<>();
 		refiners.add(doms);
@@ -49,6 +49,8 @@ public class StateEquationRefinerBuilder {
 			steq.addConstraint(new SMTConstraint(c, vars));
 		}
 		refiners.add(steq);
+		
+		
 		
 		return refiners;
 	}
