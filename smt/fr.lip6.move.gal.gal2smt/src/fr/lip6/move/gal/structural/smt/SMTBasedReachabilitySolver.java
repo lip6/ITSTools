@@ -46,7 +46,7 @@ public class SMTBasedReachabilitySolver {
 		// add places "s" variables
 		solver.addVars("s", spn.getPlaceCount(), VarType.NUMERIC);
 		
-		refiners.add(DomainRefinerBuilder.enforceMinBound("s", spn.getPlaceCount(), 0, solver));
+		refiners.add(DomainRefinerBuilder.enforceMinBound("s", spn.getPlaceCount(), 0));
 		
 		refiners.addAll(InvariantRefinerBuilder.buildInvariantRefiners(effects, spn.getMarks()));
 		
@@ -54,9 +54,20 @@ public class SMTBasedReachabilitySolver {
 		refiners.addAll(StateEquationRefinerBuilder.buildStateEquationRefiner(effects,spn.getMarks(), solver));
 
 		refiners.add(new TrapRefiner(spn));
-	
+
+		// a bit expensive, so do it last
+		refiners.add(new PredecessorConstraintRefiner(spn, repr, effects, problems));
+
+		
 		solve (refiners, problems, solver, timeout, withWitness);
-		if (!problems.isSolved() && problems.hasReal()) {
+		if (!problems.isSolved() && (problems.hasType(SMTReply.REAL) || problems.hasType(SMTReply.UNKNOWN))) {
+			for (Problem p : problems.getUnsolved()) {
+				p.dropRefinement();
+				p.getSolution().setReply(SMTReply.SAT);
+			}
+			for (IRefiner ref : refiners) {
+				ref.reset();
+			}
 			System.out.println("Escalating to Integer solving :"+ problems);
 			solver.setNumericType(SolutionType.Int);
 			solve (refiners, problems, solver, timeout, withWitness);
@@ -64,11 +75,8 @@ public class SMTBasedReachabilitySolver {
 		System.out.println("After SMT, problems are : "+problems);
 	}
 
-	private static void solve(List<IRefiner> allRefiners, ProblemSet problems, SolverState solver, int timeout, boolean withWitness) {
-		List<IRefiner> refiners = new ArrayList<>(allRefiners);
-		for (IRefiner ref : refiners) {
-			ref.reset();
-		}
+	private static void solve(List<IRefiner> refiners, ProblemSet problems, SolverState solver, int timeout, boolean withWitness) {
+		
 		
 		long time = System.currentTimeMillis();
 		solver.start(timeout);
@@ -91,6 +99,18 @@ public class SMTBasedReachabilitySolver {
 			}
 
 			problems.updateStatus(solver, withWitness);
+			if (problems.isSolved()) {
+				break;
+			}
+			if (problems.getUnsolved().stream().allMatch(p -> p.getSolution().getReply() == SMTReply.UNKNOWN)) {
+				System.out.println("Solver is answering 'unknown', stopping.");
+				break;
+			}
+
+			if (iteration >= 3 && solver.getNumericType() == SolutionType.Real &&  problems.getUnsolved().stream().allMatch(p -> p.getSolution().getReply() == SMTReply.REAL)) {
+				System.out.println("All remaining problems are real, stopping.");
+				break;
+			}
 			int addedVars = solver.getDeclaredVars().size() - current.size();
 			anyRefinement |= (addedVars > 0);
 			totalConstraints += addedConstraints;
