@@ -104,4 +104,8 @@ public class SolverState {
 	public VarSet getDeclaredVars() {
 		return declaredVars;
 	}
+	
+	public VarSet getAllVars() {
+		return allVars;
+	}
 }
