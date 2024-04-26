@@ -86,6 +86,6 @@ public class StaticRefiner implements IRefiner {
     @Override
     public String toString() {
         long done = constraints.size() - unappliedConstraints.size();
-        return "Refiner " + name + ": " + done + "/" + constraints.size() + " constraints applied.";
+        return name + ": " + done + "/" + constraints.size() + " constraints";
     }
 }
