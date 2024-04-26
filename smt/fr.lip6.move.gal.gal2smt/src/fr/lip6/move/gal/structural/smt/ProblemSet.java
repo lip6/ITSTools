@@ -51,7 +51,7 @@ public class ProblemSet {
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Problem set: " + solved.size() + " solved, " + unsolved.size() + " unsolved\n");
+		sb.append("Problem set: " + solved.size() + " solved, " + unsolved.size() + " unsolved");
 		return sb.toString();
 	}
 }
