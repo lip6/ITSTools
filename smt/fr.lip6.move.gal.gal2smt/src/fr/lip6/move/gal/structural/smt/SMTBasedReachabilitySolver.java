@@ -61,7 +61,7 @@ public class SMTBasedReachabilitySolver {
 			solver.setNumericType(SolutionType.Int);
 			solve (refiners, problems, solver, timeout, withWitness);
 		}
-		System.out.println("After all constraints, problems are : "+problems);
+		System.out.println("After SMT, problems are : "+problems);
 	}
 
 	private static void solve(List<IRefiner> allRefiners, ProblemSet problems, SolverState solver, int timeout, boolean withWitness) {
@@ -70,6 +70,7 @@ public class SMTBasedReachabilitySolver {
 			ref.reset();
 		}
 		
+		long time = System.currentTimeMillis();
 		solver.start(timeout);
 		
 		for (Problem p : problems.getUnsolved()) {
@@ -78,32 +79,38 @@ public class SMTBasedReachabilitySolver {
 		// quick check
 		problems.updateStatus(solver, false);
 		int totalConstraints = 0;
-		int iteration =0;
+		int iteration = 0;
 		while (!problems.isSolved()) {
-		    RefinementMode mode = (iteration % 2 == 0) ? RefinementMode.INCLUDED_ONLY : RefinementMode.OVERLAPS;
-		    VarSet current = solver.getDeclaredVars().clone();
-		    boolean anyRefinement = false;  // Track if any refinement occurs
-		    int addedConstraints = 0;
-		    for (IRefiner ref : refiners) {
-		         addedConstraints += ref.refine(solver, problems, mode, current, timeout);
-		         anyRefinement |= (addedConstraints > 0);
-		    }
+			RefinementMode mode = (iteration % 2 == 0) ? RefinementMode.INCLUDED_ONLY : RefinementMode.OVERLAPS;
+			VarSet current = solver.getDeclaredVars().clone();
+			boolean anyRefinement = false; // Track if any refinement occurs
+			int addedConstraints = 0;
+			for (IRefiner ref : refiners) {
+				addedConstraints += ref.refine(solver, problems, mode, current, timeout);
+				anyRefinement |= (addedConstraints > 0);
+			}
 
-		    problems.updateStatus(solver, withWitness);
-		    int addedVars = solver.getDeclaredVars().size() - current.size();
-		    anyRefinement |= (addedVars > 0);
-		    totalConstraints += addedConstraints;
-		    System.out.println("At refinement iteration " + iteration + " (" + mode + ") " +
-		                       solver.getDeclaredVars().size() + " variables, added " + addedVars +
-		                       " vars and " + addedConstraints + "/" +totalConstraints+" constraints. Problems are: " + problems);
+			problems.updateStatus(solver, withWitness);
+			int addedVars = solver.getDeclaredVars().size() - current.size();
+			anyRefinement |= (addedVars > 0);
+			totalConstraints += addedConstraints;
+			System.out.println("At refinement iteration " + iteration + " (" + mode + ") " + addedVars + "/"
+					+ solver.getDeclaredVars().size() + " variables, " + addedConstraints + "/" + totalConstraints
+					+ " constraints. Problems are: " + problems);
 
-		    if (!anyRefinement) {
-		        System.out.println("No progress, stopping.");
-		        break;
-		    }
-		    iteration++;
+			if (!anyRefinement) {
+				System.out.println("No progress, stopping.");
+				break;
+			}
+			iteration++;
 		}
+
 		
+		System.out.println("After SMT solving in domain " + solver.getNumericType() + " declared "
+				+ solver.getDeclaredVars().size() + "/" + solver.getAllVars().size() + " variables, " + " and "
+				+ totalConstraints + " constraints, problems are : " + problems + " in "
+				+ (System.currentTimeMillis() - time) +" ms.");
+		System.out.println("Refiners :" +refiners);
 		solver.stop();
 	}
 }
