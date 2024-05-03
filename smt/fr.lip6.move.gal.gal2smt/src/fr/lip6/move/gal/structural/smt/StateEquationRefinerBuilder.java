@@ -20,12 +20,6 @@ public class StateEquationRefinerBuilder {
 		// declare a set of variables for holding Parikh count of the transition		
 		solver.addVars(prefix, nbt, VarType.NUMERIC);		
 
-		
-		StaticRefiner doms = DomainRefinerBuilder.enforceMinBound(prefix, nbt, 0);
-		
-		List<IRefiner> refiners = new ArrayList<>();
-		refiners.add(doms);
-
 		IFactory ef = solver.getSMT().smtConfig.exprFactory;
 
 		StaticRefiner steq = new StaticRefiner("State Equation");
@@ -37,7 +31,12 @@ public class StateEquationRefinerBuilder {
 			SparseIntArray line = mat.getColumn(varindex);
 			VarSet vars = new VarSet();
 			
-			IExpr constraint = ef.fcn(ef.symbol("+"), ef.numeral(marks.get(varindex)), buildRowConstraint(line, ef, vars));
+			IExpr constraint;
+			if (marks.get(varindex) != 0) {
+				constraint = ef.fcn(ef.symbol("+"), ef.numeral(marks.get(varindex)), buildRowConstraint(line, ef, vars));
+			} else {
+				constraint = buildRowConstraint(line, ef, vars);
+			}
 			
 			vars.addVar("s", varindex);
 			
@@ -48,9 +47,14 @@ public class StateEquationRefinerBuilder {
 									constraint));
 			steq.addConstraint(new SMTConstraint(c, vars));
 		}
+		
+		List<IRefiner> refiners = new ArrayList<>();
+		
 		refiners.add(steq);
 		
-		
+		StaticRefiner doms = DomainRefinerBuilder.enforceMinBound(prefix, nbt, 0);
+		refiners.add(doms);
+//		solver.addDomainRefiner(doms);
 		
 		return refiners;
 	}
