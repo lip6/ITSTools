@@ -3,10 +3,17 @@ package fr.lip6.move.gal.structural.smt;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
+
 public class ProblemSet {
 	private List<Problem> solved = new ArrayList<>();
 	private List<Problem> unsolved = new ArrayList<>();
+	private DoneProperties doneProps ;
 	
+	public ProblemSet(DoneProperties doneProps) {
+		this.doneProps = doneProps;
+	}
+
 	public void addProblem(Problem p) {
         unsolved.add(p);
     }
@@ -21,12 +28,12 @@ public class ProblemSet {
 		}
 	}
 	
-	public void updateStatus(SolverState solver, boolean withWitness) {
+	public void updateStatus(SolverState solver) {
 		for (Problem p : unsolved) {
 			if (p.getSolution().getReply() == SMTReply.UNKNOWN) {
 				continue;
 			}
-			p.updateStatus(solver, withWitness);
+			p.updateStatus(solver, doneProps);
 		}
 		update();
 	}
@@ -38,6 +45,10 @@ public class ProblemSet {
 	
 	public List<Problem> getUnsolved() {
 		return unsolved;
+	}
+	
+	public List<Problem> getSolved() {
+		return solved;
 	}
 
 	public boolean hasType(SMTReply type) {
@@ -54,5 +65,9 @@ public class ProblemSet {
 		sb.append("Problem set: " + solved.size() + " solved, " + unsolved.size() + " unsolved");
 		// sb.append(unsolved);
 		return sb.toString();
+	}
+	
+	public DoneProperties getDoneProps() {
+		return doneProps;
 	}
 }
