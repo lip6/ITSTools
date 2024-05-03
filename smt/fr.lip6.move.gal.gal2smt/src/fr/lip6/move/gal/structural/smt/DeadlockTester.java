@@ -2,7 +2,6 @@ package fr.lip6.move.gal.structural.smt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -348,6 +347,8 @@ public class DeadlockTester {
 			List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> orders) {
 		if (tocheck.isEmpty()) { return new ArrayList<>(); }
 		System.out.println("Running SMT prover for "+tocheck.size()+" properties.");
+				
+		
 		if (true || tocheck.size() >= 20 || sr.getPlaceCount() + sr.getTransitionCount() >= 8000) {
 			return testUnreachableWithSMTIncremental(tocheck, sr, representative, timeout, withWitness, orders);
 		}
@@ -426,12 +427,13 @@ public class DeadlockTester {
 			
 			// compute predecessor constraint
 			Script s=new Script();
+			Expression ap = tocheck.get(i);
+			
 			s.add(propAssert);
 			try {
 				// let's not go overboard, we haven't even started the solver yet.
 				if (sumMatrix.getColumnCount() < 20000) {
-					s =  PredecessorConstraintRefiner.computePredConstraint(tocheck.get(i),sumMatrix,representative,sr);
-					s.add(new C_assert(smtexpr));
+					s.add(new C_assert(PredecessorConstraintRefiner.computePredExpr(ap, sumMatrix, representative, sr)));
 				}
 			} catch (OutOfMemoryError err) {
 				System.out.println("Skipping predecessor constraint due to memory overflow.");
