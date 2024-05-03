@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.structural.smt;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -129,6 +130,17 @@ public class SMTUtils {
 	 * @return a started solver or throws a RuntimeEx
 	 */
 	public static ISolver initSolver(org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
+		if (DEBUG >= 1) {
+			String logfile;
+			try {
+				logfile = File.createTempFile("smtlog", ".smt2").getAbsolutePath();
+				System.out.println("Logging solver outputs to " + logfile);
+				smt.smtConfig.logfile = logfile;
+			} catch (IOException e) {
+				System.err.println("Failed to create log file");
+				e.printStackTrace();
+			}
+		}
 		if (useAbstractDataType == POType.Forall) {
 			return initSolver(smt, "AUFLIRA", timeoutQ, timeoutT);
 		} else if (useAbstractDataType == POType.Plunge) {
