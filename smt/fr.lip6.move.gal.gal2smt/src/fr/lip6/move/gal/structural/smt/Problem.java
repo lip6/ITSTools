@@ -12,6 +12,7 @@ import org.smtlib.SMT;
 import org.smtlib.command.C_define_fun;
 
 import android.util.SparseBoolArray;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.expr.Expression;
 
 public class Problem {
@@ -25,11 +26,16 @@ public class Problem {
 	private ISymbol refinedSymbol = null;
 	
 	private CandidateSolution solution = new CandidateSolution();
+	private boolean isEF;
 
-	public Problem(String name, int id, Expression predicate) {
+	public Problem(String name, boolean isEF, int id, Expression pred) {
 		this.name = name;
 		this.id = id;
-		this.predicate = predicate;
+		this.isEF = isEF;
+		this.predicate = pred;
+		if (!isEF) {
+			predicate = Expression.not(predicate);
+		}
 
 		SparseBoolArray s = VarSet.computeSupport(predicate);
 		this.support = new VarSet();
@@ -70,18 +76,25 @@ public class Problem {
 		return response.isOK();
 	}
 	
-	public void updateStatus(SolverState solver, boolean withWitness) {
-		String textReply = SMTUtils.checkSatAssuming(solver.getSolver(), symbol);
+	
+	public void updateWitness (SolverState solver, String prefix) {
+		solution.updateWitness(solver, prefix);
+	}
+	
+	public void updateStatus(SolverState solver, DoneProperties doneProps) {
+		ISymbol sym = refinedSymbol != null ? refinedSymbol : symbol;
+		String textReply = SMTUtils.checkSatAssuming(solver.getSolver(), sym);
 		
 		if ("unsat".equals(textReply)) {
 			System.out.println("Problem " + name + " is UNSAT");
 			solution.setReply(SMTReply.UNSAT);
+			if (isEF) {
+				doneProps.put(getName(), false, "SMT_REFINEMENT");
+			} else {
+				doneProps.put(getName(), true, "SMT_REFINEMENT");				
+			}
 		} else if ("sat".equals(textReply)) {
 			solution.setReply(SMTReply.SAT);
-			// have to do this to check for reals
-			if (withWitness || solver.getNumericType() == SolutionType.Real) {
-				solution.updateWitness(solver.getSolver());
-			}
 		} else {
 			solution.setReply(SMTReply.UNKNOWN);
 		}
@@ -89,7 +102,7 @@ public class Problem {
 	
 	
 	public boolean isSolved() {
-		return solution.getReply() == SMTReply.UNSAT;
+		return solution.getReply() == SMTReply.UNSAT || solution.getReply() == SMTReply.REACHABLE;
 	}
 	
 	public CandidateSolution getSolution() {
@@ -107,6 +120,10 @@ public class Problem {
 	
 	public Expression getPredicate() {
 		return predicate;
+	}
+	
+	public boolean isEF() {
+		return isEF;
 	}
 	
 	public void dropRefinement() {
