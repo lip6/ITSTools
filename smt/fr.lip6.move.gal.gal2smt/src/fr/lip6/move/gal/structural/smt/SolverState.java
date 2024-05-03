@@ -8,11 +8,16 @@ import java.util.Map;
 
 import org.smtlib.ISolver;
 import org.smtlib.SMT;
+import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.IExpr.ISymbol;
+import org.smtlib.IResponse;
 import org.smtlib.impl.Script;
+import org.smtlib.sexpr.ISexpr;
+import org.smtlib.sexpr.ISexpr.ISeq;
 
 import android.util.SparseBoolArray;
+import android.util.SparseIntArray;
 
 public class SolverState {
 
@@ -52,6 +57,10 @@ public class SolverState {
 		IFactory ef = smt.smtConfig.exprFactory;
 		
 		toDeclare = VarSet.removeAll(toDeclare, declaredVars);
+		
+		if (toDeclare.size() == 0) {
+			return;
+		}
 		
 		for (Map.Entry<String, SparseBoolArray> entry : toDeclare.getVars().entrySet()) {
             String prefix = entry.getKey();
@@ -99,6 +108,43 @@ public class SolverState {
 	public void stop() {
 		solver.exit();
 		declaredVars = new VarSet();
+	}
+	
+	public SparseIntArray getValues(String prefix) {
+		SparseBoolArray bvars = declaredVars.getVars().getOrDefault(prefix, new SparseBoolArray());
+		IExpr [] vars = new IExpr[bvars.size()];
+		for (int i=0, ie = bvars.size(); i < ie ; i++) {
+			vars[i] = smt.smtConfig.exprFactory.symbol(prefix + bvars.keyAt(i));
+		}
+		IResponse reply = solver.get_value(vars);
+		
+		if (reply.isError()) {
+			System.err.println("Error getting values : " + reply);
+			return new SparseIntArray();
+		}
+		
+		SparseIntArray result = new SparseIntArray(vars.length);
+		
+		if (reply instanceof ISeq) {
+			ISeq seq = (ISeq) reply;
+			for (ISexpr v : seq.sexprs()) {
+				if (v instanceof ISeq) {
+					ISeq vseq = (ISeq) v;
+					String var = vseq.sexprs().get(0).toString();
+					if (var.startsWith(prefix)) {
+						int tid = Integer.parseInt(var.substring(1));
+						int value ;
+						try { value = (int) Float.parseFloat( vseq.sexprs().get(vseq.sexprs().size()-1).toString() ); }
+						catch (NumberFormatException e) { 
+							return null;
+						}
+						if (value != 0) 
+							result.put(tid, value);
+					}
+				}
+			}
+		}
+		return result;
 	}
 	
 	public VarSet getDeclaredVars() {
