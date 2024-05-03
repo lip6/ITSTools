@@ -29,26 +29,39 @@ public class CandidateSolution {
 		}
 	}
 	
-	public void updateWitness(ISolver solver) {
+	public void updateWitness(SolverState solver, String prefix) {
 		if (reply != SMTReply.SAT) {
             return;
         }
-		SparseIntArray state = new SparseIntArray();
-		SparseIntArray parikh = new SparseIntArray();
-		SparseIntArray order = new SparseIntArray();
-		boolean hasReals = queryVariables(state, parikh, order, solver);
-		if (hasReals) {
-            reply = SMTReply.REAL;
-        } else {
-            this.parikh = parikh;
-            this.state = state;
-            this.por = order;
-        }
+		state = null;
+		parikh = null;
+		por = null;
+		
+		SparseIntArray values = solver.getValues(prefix);
+		
+		if (values == null) {
+			reply = SMTReply.REAL;
+			return;
+		}
+		
+		switch (prefix) {
+		case "s":
+			state = values;
+			break;
+		case "t":
+			parikh = values;
+			break;
+		case "o":
+			por = values;
+			break;
+		default : throw new IllegalArgumentException("Unknown prefix : " + prefix);
+		}
 	}
 	
 	private static boolean queryVariables(SparseIntArray state, SparseIntArray parikh, SparseIntArray order, ISolver solver) {
 		boolean hasReals = false;
 		IResponse r = new C_get_model().execute(solver);
+		//solver.get_value(null)
 		if (r.isError()) {
 			return true;
 		}
@@ -110,10 +123,18 @@ public class CandidateSolution {
 	public SparseIntArray getState() {
 		return state;
 	}
+	
+	public SparseIntArray getParikh() {
+		return parikh;
+	}
 
 	@Override
 	public String toString() {
 		return "[" + reply + (reply==SMTReply.SAT && parikh!=null?"witness":"nowitness")+ "]";
+	}
+
+	public SparseIntArray getOrder() {
+		return por;
 	}
 	
 	
