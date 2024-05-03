@@ -29,6 +29,10 @@ public class RandomExplorer {
 	private int[] computeEnabled(SparseIntArray state) {
 		return wu.computeEnabled(state);
 	}
+	
+	public ISparsePetriNet getNet() {
+		return wu.getNet();
+	}
 
 	public int[] runGuidedReachabilityDetection(long nbSteps, SparseIntArray parikhori, SparseIntArray porori,
 			List<Expression> exprs, List<Integer> repr, int timeout, boolean max) {
@@ -37,7 +41,8 @@ public class RandomExplorer {
 		Map<Integer, List<Integer>> repSet = InvariantCalculator.computeMap(repr);
 		SparseIntArray parikh = InvariantCalculator.transformParikh(parikhori, repSet);
 		parikhori = parikh.clone();
-		int[] por = InvariantCalculator.transformParikh(porori, repSet).toArray(wu.getNet().getTransitionCount());
+		int[] por = null;
+		if (porori != null) por = InvariantCalculator.transformParikh(porori, repSet).toArray(wu.getNet().getTransitionCount());
 
 		long time = System.currentTimeMillis();
 		SparseIntArray state = wu.getInitial();
@@ -55,6 +60,9 @@ public class RandomExplorer {
 
 		// mode : 0 = RAND, 1 = MAX, 2 = MIN
 		int mode = 0;
+		if (porori == null) {
+			mode = 1;
+		}
 
 		if (list[0] == 0) {
 			if (DEBUG >= 1) {
@@ -93,6 +101,9 @@ public class RandomExplorer {
 				list = initlist.clone();
 				parikh = parikhori.clone();
 				mode = (mode + 1) % 4;
+				if (porori == null && mode == 0) {
+					mode++;
+				}
 				continue;
 			}
 
