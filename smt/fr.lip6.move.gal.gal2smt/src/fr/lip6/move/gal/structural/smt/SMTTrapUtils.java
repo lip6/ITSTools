@@ -148,8 +148,6 @@ public class SMTTrapUtils {
 				return "sat";
 			}
 			trap = testTrapWithSMT(sr, state, null);
-			if (DEBUG >=1)
-				confirmTrap(sr,trap, state);
 			tested++;
 			if (!trap.isEmpty()) {
 				
@@ -408,6 +406,9 @@ public class SMTTrapUtils {
 			}
 			solver.exit();
 			Logger.getLogger("fr.lip6.move.gal").info("Deduced a trap "+ (DeadlockTester.DEBUG>=1 ? res : "")+"composed of "+tsz+" places in "+ (System.currentTimeMillis()-time) +" ms of which "+minitime+" ms to minimize.");
+			
+			if (DEBUG >= 1)
+				confirmTrap(srori,res, solution);
 			return res;
 		}
 
