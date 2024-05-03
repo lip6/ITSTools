@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.Application;
@@ -27,6 +28,10 @@ import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
+import fr.lip6.move.gal.structural.smt.Problem;
+import fr.lip6.move.gal.structural.smt.ProblemSet;
+import fr.lip6.move.gal.structural.smt.SMTBasedReachabilitySolver;
+import fr.lip6.move.gal.structural.smt.SMTReply;
 
 public class ReachabilitySolver {
 
@@ -90,19 +95,36 @@ public class ReachabilitySolver {
 				if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished())
 					break;
 
-					List<Integer> repr = new ArrayList<>();
-					List<SparseIntArray> orders = new ArrayList<>();
-					int smttime = iterations==0 ? 5:45;
-					if (timeout != -1) {
-						smttime = 5;
-					}
-					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, repr, smttime, true,orders);
+				List<Integer> repr = new ArrayList<>();
+				List<SparseIntArray> orders = new ArrayList<>();
+				int smttime = iterations==0 ? 5: iterations > 1 ? 60 : 45;
+				if (timeout != -1) {
+					smttime = 5;
+				}
 
+				boolean newMode = true;
+
+				if (newMode) {
+
+					ProblemSet problems = SMTBasedReachabilitySolver.prepareProblemSet(props, doneProps);
+					iter += SMTBasedReachabilitySolver.solveProblems(problems, spn, 10000, false, repr);
+					cleanupLists(props, doneProps, tocheck, tocheckIndexes);
+
+					int replayed = tryReplayParikh(problems, doneProps, repr, re, timeout);
+					if (replayed >0) {
+						iter++;
+						spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+					}
+
+				} else {
+					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, repr, smttime, true,orders);
 					iter += treatSMTVerdicts(props, doneProps, tocheck, tocheckIndexes, paths);
+
+
 					if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 						iter++;
-					long time = System.currentTimeMillis();
 
+					long time = System.currentTimeMillis();
 					Map<SparseIntArray,List<Integer>> indexMap = new LinkedHashMap<>();
 					for (int i=0 ; i < paths.size() ; i++) {
 						SparseIntArray val = paths.get(i);
@@ -124,69 +146,17 @@ public class ReachabilitySolver {
 							break;
 						}
 						SparseIntArray parikh = paths.get(v);
-						if (parikh != null) {
-							// we have a candidate, try a Parikh satisfaction run.
-							int sz = 0;
-							for (int i=0 ; i < parikh.size() ; i++) {
-								sz += parikh.valueAt(i);
-							}
-							if (sz != 0) {
-								SparseIntArray partialOrder = orders.get(v);
-								if (Application.DEBUG >= 1) {
-									System.out.println("SMT solver thinks a reachable witness state is likely to occur in "+sz +" steps.");
-									SparseIntArray init = new SparseIntArray();
-									for (int i=0 ; i < parikh.size() ; i++) {
-										System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+ "["+ partialOrder.get(parikh.keyAt(i)) +"], ");
-										init = SparseIntArray.sumProd(1, init, - parikh.valueAt(i), sr.getFlowPT().getColumn(parikh.keyAt(i)));
-										init = SparseIntArray.sumProd(1, init, + parikh.valueAt(i), sr.getFlowTP().getColumn(parikh.keyAt(i)));
-									}
-									System.out.println();
-									{
-										System.out.println("This Parikh overall has effect " + init);
-										SparseIntArray is = new SparseIntArray(sr.getMarks());
-										System.out.println("Initial state is " + is);
-										System.out.println("Reached state is " + SparseIntArray.sumProd(1, is, 1, init));
-									}
-								}
-								//							StringBuilder sb = new StringBuilder();
-								//							for (int i=0 ; i < parikh.size() ; i++) {
-								//								sb.append(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
-								//							}
-								//							sb.append(SerializationUtil.getText(reader.getSpec().getProperties().get(v).getBody(),false));
-								//							//sb.append(tocheck.get(v));
-								//							Set<Integer> toHL = new HashSet<>();
-								//							for (int i=0;i <consumed.size() ; i++) {
-								//								if (init.get(consumed.keyAt(i))==0 && sr.getMarks().get(consumed.keyAt(i)) ==0) {
-								//									toHL.add(consumed.keyAt(i));
-								//								}
-								//							}
-								//							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
-								int maxt = 30;
-								int maxsteps = 100*sz;
-								if (tocheck.size() >= 200) {
-									maxt = 1;
-									maxsteps = sz;
-								} else if (tocheck.size() >= 100) {
-									maxt = 2;
-									maxsteps = 5*sz;
-								} else if (tocheck.size() >= 16) {
-									maxt = 5;
-									maxsteps = 10*sz;
-								}
-								int [] verdicts = re.runGuidedReachabilityDetection(maxsteps, parikh, orders.get(v), tocheck,repr,maxt,false);
-								interpretWalkerVerdict(tocheck, props, doneProps, verdicts, "PARIKH");
-								if (tocheck.isEmpty()) {
-									break;
-								}
-							}
-						}
+						SparseIntArray partialOrder = orders.get(v);
+
+						tryParikhWalk(parikh, partialOrder, repr, re, props, tocheck, doneProps);
 					}
 					if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 						iter++;
 
 					int afterParikh = spn.getProperties().size();
 					System.out.println("Parikh walk visited "+(beforeParikh - afterParikh)+ " properties in "+ (System.currentTimeMillis() - timeParikh) + " ms.");
-				
+
+				}
 				ReachabilitySolver.checkInInitial(spn, doneProps);
 				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
@@ -331,6 +301,151 @@ public class ReachabilitySolver {
 		}
 	}
 
+	private static int tryReplayParikh(ProblemSet problems, DoneProperties doneProps, List<Integer> repr,
+			RandomExplorer re, int timeout) {
+		int replayed = 0;
+		long time = System.currentTimeMillis();
+		Map<SparseIntArray,List<Problem>> indexMap = new LinkedHashMap<>();
+		for (Problem p : problems.getUnsolved()) {
+			if (p.getSolution().hasWitness() && ! doneProps.containsKey(p.getName())) {
+				SparseIntArray parikh = p.getSolution().getParikh();
+				if (parikh != null) {
+					indexMap.computeIfAbsent(parikh, k -> new ArrayList<>()).add(p);
+				}
+			}
+		}
+		if (indexMap.isEmpty()) {
+			System.out.println("Skipping Parikh replay, no witness traces provided.");
+			return 0;
+		}
+		int nbToSolve = problems.getUnsolved().size();
+		int nbParikh = indexMap.size();
+		if (nbParikh < nbToSolve) {
+			System.out.println("Fused "+nbToSolve+" Parikh solutions to " + nbParikh +" different solutions.");
+		}
+		int maxTime = 100;
+		if (nbParikh >= 20 || timeout != -1) {
+			maxTime = 30;
+		}
+		long timeParikh = System.currentTimeMillis();
+		for (Entry<SparseIntArray, List<Problem>> ent:indexMap.entrySet()) {
+			Problem p = ent.getValue().get(0);
+			if (System.currentTimeMillis() - time >= maxTime * 1000) {
+				break;
+			}
+			SparseIntArray parikh = p.getSolution().getParikh();
+			SparseIntArray partialOrder = p.getSolution().getOrder();
+
+			replayed += tryParikhWalk(parikh, partialOrder, repr, re, problems, doneProps);
+		}
+		System.out.println("Parikh walk visited "+replayed+ " properties in "+ (System.currentTimeMillis() - timeParikh) + " ms.");
+		return replayed;
+	}
+
+	public static int tryParikhWalk(SparseIntArray parikh, SparseIntArray partialOrder, List<Integer> repr,
+			RandomExplorer re, ProblemSet problems, DoneProperties doneProps) {
+		int replayed = 0;
+		if (parikh != null && parikh.size() >0) {
+			List<Problem> remain = new ArrayList<>(problems.getUnsolved());
+			List<Expression> tocheck = remain.stream().map(p -> p.getPredicate()).collect(Collectors.toList());
+
+			int sz = 0;
+			for (int i=0 ; i < parikh.size() ; i++) {
+				sz += parikh.valueAt(i);
+			}
+
+			int maxt = 30;
+			int maxsteps = 100*sz;
+			if (tocheck.size() >= 200) {
+				maxt = 1;
+				maxsteps = sz;
+			} else if (tocheck.size() >= 100) {
+				maxt = 2;
+				maxsteps = 5*sz;
+			} else if (tocheck.size() >= 16) {
+				maxt = 5;
+				maxsteps = 10*sz;
+			}
+
+			int [] verdicts = re.runGuidedReachabilityDetection(maxsteps, parikh, partialOrder, tocheck,repr,maxt,false);
+			for (int v = verdicts.length-1 ; v >= 0 ; v--) {
+				if (verdicts[v] != 0) {
+					Problem p = remain.get(v);
+					if (p.isEF()) {
+						doneProps.put(p.getName(), true, "PARIKH_WALK");
+					} else {
+						doneProps.put(p.getName(), false, "PARIKH_WALK");
+					}
+					p.getSolution().setReply(SMTReply.REACHABLE);
+					replayed++;
+				}
+			}
+			problems.update();
+		}
+		return replayed;
+	}
+
+
+	public static void tryParikhWalk(SparseIntArray parikh, SparseIntArray partialOrder, List<Integer> repr,
+			RandomExplorer re, List<Property> props, List<Expression> tocheck, DoneProperties doneProps) {
+		if (parikh != null) {
+			// we have a candidate, try a Parikh satisfaction run.
+			int sz = 0;
+			for (int i=0 ; i < parikh.size() ; i++) {
+				sz += parikh.valueAt(i);
+			}
+			if (sz != 0) {
+
+				if (Application.DEBUG >= 1) {
+					System.out.println("SMT solver thinks a reachable witness state is likely to occur in "+sz +" steps.");
+					SparseIntArray init = new SparseIntArray();
+					for (int i=0 ; i < parikh.size() ; i++) {
+						System.out.print(re.getNet().getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+ "["+ partialOrder.get(parikh.keyAt(i)) +"], ");
+						init = SparseIntArray.sumProd(1, init, - parikh.valueAt(i), re.getNet().getFlowPT().getColumn(parikh.keyAt(i)));
+						init = SparseIntArray.sumProd(1, init, + parikh.valueAt(i), re.getNet().getFlowTP().getColumn(parikh.keyAt(i)));
+					}
+					System.out.println();
+					{
+						System.out.println("This Parikh overall has effect " + init);
+						SparseIntArray is = new SparseIntArray(re.getNet().getMarks());
+						System.out.println("Initial state is " + is);
+						System.out.println("Reached state is " + SparseIntArray.sumProd(1, is, 1, init));
+					}
+				}
+				//							StringBuilder sb = new StringBuilder();
+				//							for (int i=0 ; i < parikh.size() ; i++) {
+				//								sb.append(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+				//							}
+				//							sb.append(SerializationUtil.getText(reader.getSpec().getProperties().get(v).getBody(),false));
+				//							//sb.append(tocheck.get(v));
+				//							Set<Integer> toHL = new HashSet<>();
+				//							for (int i=0;i <consumed.size() ; i++) {
+				//								if (init.get(consumed.keyAt(i))==0 && sr.getMarks().get(consumed.keyAt(i)) ==0) {
+				//									toHL.add(consumed.keyAt(i));
+				//								}
+				//							}
+				//							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
+				int maxt = 30;
+				int maxsteps = 100*sz;
+				if (tocheck.size() >= 200) {
+					maxt = 1;
+					maxsteps = sz;
+				} else if (tocheck.size() >= 100) {
+					maxt = 2;
+					maxsteps = 5*sz;
+				} else if (tocheck.size() >= 16) {
+					maxt = 5;
+					maxsteps = 10*sz;
+				}
+				int [] verdicts = re.runGuidedReachabilityDetection(maxsteps, parikh, partialOrder, tocheck,repr,maxt,false);
+				interpretWalkerVerdict(tocheck, props, doneProps, verdicts, "PARIKH");
+				if (tocheck.isEmpty()) {
+					//break;
+				}
+			}
+		}
+	}
+
 	public static void computeToCheck(List<Property> props, List<Integer> tocheckIndexes, List<Expression> tocheck) {
 		for (fr.lip6.move.gal.structural.Property p : props) {
 			if (p.getBody().getOp() == Op.EF) {
@@ -345,6 +460,17 @@ public class ReachabilitySolver {
 	static int treatSMTVerdicts(List<Property> props, DoneProperties doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths) {
 		return treatSMTVerdicts(props, doneProps, tocheck, tocheckIndexes, paths, "");
+	}
+
+	static void cleanupLists(List<Property> props, DoneProperties doneProps, List<Expression> tocheck,
+			List<Integer> tocheckIndexes) {
+		for (int v = props.size() - 1; v >= 0; v--) {
+			if (doneProps.containsKey(props.get(v).getName())) {
+				tocheck.remove(v);
+				tocheckIndexes.remove(v);
+				props.remove(v);
+			}
+		}
 	}
 
 	static int treatSMTVerdicts(List<Property> props, DoneProperties doneProps, List<Expression> tocheck,
