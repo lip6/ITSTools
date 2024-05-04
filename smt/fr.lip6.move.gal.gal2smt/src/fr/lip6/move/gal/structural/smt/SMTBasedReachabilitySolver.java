@@ -44,9 +44,9 @@ public class SMTBasedReachabilitySolver {
 		int initial = problems.getSolved().size();
 		
 		// add places "s" variables
-		solver.addVars("s", spn.getPlaceCount(), VarType.NUMERIC);				
+		solver.addVars("s", spn.getPlaceCount(), VarType.NUMERIC);	
+		solver.setMinBounds("s", 0);
 		
-		refiners.add(DomainRefinerBuilder.enforceMinBound("s", spn.getPlaceCount(), 0));
 		
 		if (spn.isSafe()) {
 			refiners.add(DomainRefinerBuilder.enforceMaxBound("s", spn.getPlaceCount(), 1));			
@@ -104,6 +104,7 @@ public class SMTBasedReachabilitySolver {
 		int totalConstraints = 0;
 		int iteration = 0;
 		RefinementMode mode = RefinementMode.INCLUDED_ONLY;
+		boolean realSolutions = false;
 		while (!problems.isSolved()) {			
 			VarSet current = solver.getDeclaredVars().clone();
 						
@@ -125,13 +126,15 @@ public class SMTBasedReachabilitySolver {
 				break;
 			}
 
-			if (iteration >= 3 && solver.getNumericType() == SolutionType.Real) {
+			if (!realSolutions && iteration % 3 == 0 && solver.getNumericType() == SolutionType.Real) {
 				for (Problem p : problems.getUnsolved()) {
+					p.updateStatus(solver, problems.getDoneProps());
 					p.updateWitness(solver, "s");
                 }
 				if (problems.getUnsolved().stream().allMatch(p -> p.getSolution().getReply() == SMTReply.REAL)) {
-					System.out.println("All remaining problems are real, stopping.");
-					break;
+					System.out.println("All remaining problems are real, not stopping.");
+					realSolutions = true;
+					// break;
 				}	
 			}
 			int addedVars = solver.getDeclaredVars().size() - current.size();
@@ -153,7 +156,8 @@ public class SMTBasedReachabilitySolver {
 
 		for (Problem p : problems.getUnsolved()) {
 			p.updateStatus(solver, problems.getDoneProps());
-			p.updateWitness(solver, "t");
+			if (withWitness && !realSolutions)
+				p.updateWitness(solver, "t");
         }
 		
 		System.out.println("After SMT solving in domain " + solver.getNumericType() + " declared "
