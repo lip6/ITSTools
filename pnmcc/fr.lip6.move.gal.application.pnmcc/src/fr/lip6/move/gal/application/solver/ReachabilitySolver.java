@@ -107,7 +107,7 @@ public class ReachabilitySolver {
 				if (newMode) {
 
 					ProblemSet problems = SMTBasedReachabilitySolver.prepareProblemSet(props, doneProps);
-					iter += SMTBasedReachabilitySolver.solveProblems(problems, spn, 10000, false, repr);
+					iter += SMTBasedReachabilitySolver.solveProblems(problems, spn, 10000, true, repr);
 					cleanupLists(props, doneProps, tocheck, tocheckIndexes);
 
 					int replayed = tryReplayParikh(problems, doneProps, repr, re, timeout);
