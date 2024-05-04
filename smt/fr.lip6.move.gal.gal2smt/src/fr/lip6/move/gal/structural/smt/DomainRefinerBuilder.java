@@ -18,7 +18,7 @@ public class DomainRefinerBuilder {
 	
 	public static StaticRefiner enforceBound(String prefix, int nbvars, int bound, boolean isMin) {
 		IFactory ef =  new SMT().smtConfig.exprFactory;
-		StaticRefiner doms = new StaticRefiner("Domain("+prefix+")");
+		StaticRefiner doms = new StaticRefiner("Domain "+(isMin?"min":"max")+"("+prefix+")");
 		{			
 			for (int i = 0 ; i < nbvars ; i++) {
 				// t_i >= 0

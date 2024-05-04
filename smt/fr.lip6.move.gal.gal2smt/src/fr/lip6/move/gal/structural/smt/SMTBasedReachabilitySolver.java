@@ -48,6 +48,10 @@ public class SMTBasedReachabilitySolver {
 		
 		refiners.add(DomainRefinerBuilder.enforceMinBound("s", spn.getPlaceCount(), 0));
 		
+		if (spn.isSafe()) {
+			refiners.add(DomainRefinerBuilder.enforceMaxBound("s", spn.getPlaceCount(), 1));			
+		}
+		
 		refiners.addAll(InvariantRefinerBuilder.buildInvariantRefiners(effects, spn.getMarks()));
 		
 		// also adds "t" variables for transitions
