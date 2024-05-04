@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.smtlib.ISolver;
 import org.smtlib.SMT;
+import org.smtlib.command.C_assert;
+import org.smtlib.command.C_declare_fun;
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.IExpr.ISymbol;
@@ -27,8 +29,13 @@ public class SolverState {
 	private Map<String,VarType> varTypes = new HashMap<>();
 	private SMT smt = new SMT();
 	private SolutionType numericType = SolutionType.Real;
+	private Map<String,Integer> minBounds = new HashMap<>();
 	ISolver solver;
 	
+	
+	public void setMinBounds(String var, int min) {
+		minBounds.put(var, min);
+	}
 
 	public void addVars (String prefix, int nbVar, VarType type) {
 		SparseBoolArray all = new SparseBoolArray();
@@ -74,10 +81,15 @@ public class SolverState {
     			// use current numeric type : Real or Int
     			smtType = smt.smtConfig.sortFactory.createSortExpression(ef.symbol(numericType.toString()));
             
+    		Integer min = minBounds.get(prefix);
+    		
             for (int i = 0; i < values.size(); i++) {
             	int index = values.keyAt(i);
             	ISymbol si = ef.symbol(prefix + index);
-            	script.add(new org.smtlib.command.C_declare_fun(si, Collections.emptyList(), smtType));
+            	script.add(new C_declare_fun(si, Collections.emptyList(), smtType));
+            	if (min != null) {
+            		script.add(new C_assert(ef.fcn(ef.symbol(">="), si, ef.numeral(min))));
+            	}
             }            
         }
 		
@@ -112,8 +124,12 @@ public class SolverState {
 	
 	public SparseIntArray getValues(String prefix) {
 		SparseBoolArray bvars = declaredVars.getVars().getOrDefault(prefix, new SparseBoolArray());
-		IExpr [] vars = new IExpr[bvars.size()];
-		for (int i=0, ie = bvars.size(); i < ie ; i++) {
+		int nbVars = bvars.size();
+		if (nbVars==0) {
+			return new SparseIntArray();
+		}
+		IExpr [] vars = new IExpr[nbVars];
+		for (int i=0, ie = nbVars; i < ie ; i++) {
 			vars[i] = smt.smtConfig.exprFactory.symbol(prefix + bvars.keyAt(i));
 		}
 		IResponse reply = solver.get_value(vars);
