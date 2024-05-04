@@ -23,7 +23,6 @@ import android.util.SparseIntArray;
 
 public class SolverState {
 
-	private static final int DEBUG = 1;
 	private VarSet allVars = new VarSet();
 	private VarSet declaredVars = new VarSet();
 	private Map<String,VarType> varTypes = new HashMap<>();
@@ -103,17 +102,6 @@ public class SolverState {
 	}
 
 	public void start(int timeout) {
-		if (DEBUG >= 1) {
-			String logfile;
-			try {
-				logfile = File.createTempFile("smtlog", ".smt2").getAbsolutePath();
-				System.out.println("Logging solver outputs to " + logfile);
-				smt.smtConfig.logfile = logfile;
-			} catch (IOException e) {
-				System.err.println("Failed to create log file");
-				e.printStackTrace();
-			}
-		}
 		solver = SMTUtils.initSolver(smt, numericType==SolutionType.Real, timeout/5, timeout);
 	}
 	
