@@ -108,7 +108,7 @@ public class SolverProcess {
 	public String listen() throws IOException {
 		// FIXME - need to put the two reads in parallel, otherwise one might block on a full buffer, preventing the other from completing
 		String err = listenThru(errors,null);
-		String out = listenThru(fromProcess,endMarker);
+		String out = endMarker==null ? listenThruSExpr(fromProcess) :  listenThru(fromProcess,endMarker);
 		err = err + listenThru(errors,null);
 		if (log != null) {
 			if (!out.isEmpty()) { log.write(";OUT: "); log.write(out); log.write(eol); } // input usually ends with a prompt and no line terminator
@@ -210,6 +210,45 @@ public class SolverProcess {
 	 */
 	synchronized private static void putBuffer(char[] buf) {
 		bufferCollection.add(buf);
+	}
+	
+	/** Reads the given Reader until all the S parens are matched.
+	 * So this assumes we are reading an answer formatted as an S-expr, and that starts with an '(' char.
+	 * @param r the Reader to read characters from
+	 * @return the String read
+	 * @throws IOException if an IO failure occurs
+	 */
+	static public /*@NonNull*/String listenThruSExpr(/*@NonNull*/Reader r) throws IOException {
+		char[] buf = getBuffer();
+		try {
+			int openParens = 0;
+			int closeParens = 0;
+			int p = 0; // Number of characters read
+			while (true) {
+				//System.out.println("ABOUT TO READ " + p);
+				int i = r.read(buf,p,buf.length-p);
+				if (i == -1) break; // End of Input
+				for (int j = p; j < p + i; j++) {
+					if (buf[j] == '(')
+						openParens++;
+					if (buf[j] == ')')
+						closeParens++;
+				}
+				p += i;
+				//System.out.println("HEARD: " + new String(buf,0,p));
+				if (openParens == closeParens) {
+					break; // stopping string matched
+				}
+				if (p == buf.length) { // expand the buffer
+					char[] nbuf = new char[2*buf.length];
+					System.arraycopy(buf,0,nbuf,0,p);
+					buf = nbuf;
+				}
+			}
+			return new String(buf,0,p);
+		} finally {
+			putBuffer(buf);
+		}
 	}
 	
 	/** Reads the given Reader until the given String is read (or end of input is reached);

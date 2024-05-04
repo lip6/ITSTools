@@ -629,7 +629,11 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 			for (IExpr e: terms) {
 				solverProcess.sendNoListen(" ",translate(e));
 			}
+			// there is no guarantee of a empty line on invoking get-value
+			// force S-expr parsing instead.
+			solverProcess.setEndMarker(null);
 			String r = solverProcess.sendAndListen("))\n");
+			solverProcess.setEndMarker("\n");
 			IResponse response = parseResponse(r);
 //			if (response instanceof ISeq) {
 //				List<ISexpr> valueslist = new LinkedList<ISexpr>();
