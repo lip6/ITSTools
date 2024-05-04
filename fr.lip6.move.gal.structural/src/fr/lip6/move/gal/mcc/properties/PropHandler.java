@@ -235,13 +235,26 @@ public class PropHandler extends DefaultHandler {
 		}
 	}
 
+	private Map<String, Integer> pcache = null;
+
 	private int findPlace(String name) {
-		int index = spec.getPlaceIndex(normalizeName(name));
-		if (index < 0) {
-			System.out.println("Unknown place :\""+name+"\" in property !");
-			throw new IllegalArgumentException("Unknown place :\""+name+"\" in property !");
-		}
-		return index;
+	    if (spec instanceof ISparsePetriNet) {
+	        ISparsePetriNet spn = (ISparsePetriNet) spec;
+	        if (pcache == null) {
+	            // Initialize the cache with an appropriate initial capacity to optimize performance and minimize rehashing
+	            pcache = new HashMap<>((spn.getPnames().size() * 4 + 2) / 3);
+	            int i = 0;
+	            for (String pl : spn.getPnames()) {
+	                pcache.put(pl, i++);
+	            }
+	        }
+	    }
+	    Integer index = (pcache == null) ? spec.getPlaceIndex(normalizeName(name)) : pcache.get(normalizeName(name));
+	    if (index == null || index < 0) {
+	        System.out.println("Unknown place :\"" + name + "\" in property !");
+	        throw new IllegalArgumentException("Unknown place :\"" + name + "\" in property !");
+	    }
+	    return index;
 	}
 
 	public void popNary(Op op) {
