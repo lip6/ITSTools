@@ -18,7 +18,8 @@ public class StateEquationRefinerBuilder {
 		String prefix = "t";
 
 		// declare a set of variables for holding Parikh count of the transition		
-		solver.addVars(prefix, nbt, VarType.NUMERIC);		
+		solver.addVars(prefix, nbt, VarType.NUMERIC);	
+		solver.setMinBounds("t", 0);
 
 		IFactory ef = solver.getSMT().smtConfig.exprFactory;
 
@@ -51,10 +52,6 @@ public class StateEquationRefinerBuilder {
 		List<IRefiner> refiners = new ArrayList<>();
 		
 		refiners.add(steq);
-		
-		StaticRefiner doms = DomainRefinerBuilder.enforceMinBound(prefix, nbt, 0);
-		refiners.add(doms);
-//		solver.addDomainRefiner(doms);
 		
 		return refiners;
 	}
