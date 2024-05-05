@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.smtlib.ICommand;
@@ -33,16 +34,16 @@ import org.smtlib.sexpr.ISexpr;
 import org.smtlib.sexpr.ISexpr.ISeq;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
-import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.Property;
+import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
-import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
-import fr.lip6.move.gal.structural.expr.VarRef;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 import static fr.lip6.move.gal.structural.smt.SMTUtils.* ;
@@ -1216,7 +1217,45 @@ public class DeadlockTester {
 		return hasReals;
 	}
 
+	
 	public static List<Integer> testDeadTransitionWithSMT(StructuralReduction sr) {
+		List<Property> props = new ArrayList<>();
+		SparseIntArray initial = new SparseIntArray(sr.getMarks());
+		for (int tid=0; tid < sr.getTransitionCount() ; tid++) {
+			SparseIntArray pt = sr.getFlowPT().getColumn(tid);
+			if (! SparseIntArray.greaterOrEqual(initial, pt)) {
+				Property tisdead = new Property(
+						Expression.nop(Op.AG, 
+								Expression.nop(Op.NOT, Expression.nop(Op.ENABLED,Expression.trans(tid)))), PropertyType.INVARIANT, "TDEAD"+tid);
+				props.add(tisdead);
+			}
+		}
+		sr.toPredicates(props);
+		
+		long time = System.currentTimeMillis();
+		System.out.println("Running "+props.size()+" sub problems to find dead transitions.");
+		DoneProperties localDone = new ConcurrentHashDoneProperties();
+		int solved = 0;
+		ProblemSet problems = SMTBasedReachabilitySolver.prepareProblemSet(props, localDone);
+		
+		List<Integer> deadTrans = new ArrayList<Integer>();
+		if (! problems.getUnsolved().isEmpty()) {
+			List<Integer> repr = new ArrayList<>();
+			solved += SMTBasedReachabilitySolver.solveProblems(problems, sr, 60, false, repr);
+			if (solved > 0) {
+				for (Entry<String, Boolean> ent : localDone.entrySet()) {
+					if (ent.getValue()) {
+						int tid = Integer.parseInt(ent.getKey().substring(5));
+						deadTrans.add(tid);
+					}
+				}
+			}
+		}
+		System.out.println("Search for dead transitions found "+deadTrans.size()+ " dead transitions in " + (System.currentTimeMillis()-time) + "ms");
+		return deadTrans;
+	}
+	
+	public static List<Integer> testDeadTransitionWithSMT2(StructuralReduction sr) {
 		List<Integer> deadTrans =new ArrayList<>();
 		List<Integer> repr = new ArrayList<>();
 		long time = System.currentTimeMillis();
