@@ -42,13 +42,12 @@ public class TrapRefiner implements IRefiner {
         			if (problem.getSolution().getReply() != SMTReply.SAT) {
         				continue;
         			} else {
-        				problem.updateWitness(solver, "s");
+        				updateWitness(solver, problem);
         			}
         			if (solver.getNumericType() ==SolutionType.Real && problem.getSolution().getReply() == SMTReply.REAL) {
         				continue;
         			}
-                    CandidateSolution candidate = problem.getSolution();
-                    boolean newTrapFound = findTrap(net, candidate.getState(), knownTraps, solver);            
+                    boolean newTrapFound = findTrap(net, problem.getSolution(), knownTraps, solver);            
                 }
                 constraintsAdded += knownTraps.refine(solver, problems, mode, current, timeout);
                 totalConstraints += constraintsAdded;        	        	
@@ -73,11 +72,10 @@ public class TrapRefiner implements IRefiner {
         			if (problem.getSolution().getReply() != SMTReply.SAT) {
         				break;
         			} else {
-        				problem.updateWitness(solver, "s");
+        				updateWitness(solver, problem);
         			}
         			
-        			CandidateSolution candidate = problem.getSolution();
-        			boolean newTrapFound = findTrap(net, candidate.getState(), knownTraps, solver);
+        			boolean newTrapFound = findTrap(net, problem.getSolution(), knownTraps, solver);
         			if (newTrapFound) {
         				int added = knownTraps.refine(solver, problems, mode, current, timeout);
         				totalConstraints += added;
@@ -85,6 +83,10 @@ public class TrapRefiner implements IRefiner {
         			} else {
         				break;
         			}
+					if (totalConstraints >= 20) {
+						// let other refiners do some work
+						return totalConstraints;
+					}
         		}
             }
             problems.update();
@@ -94,9 +96,22 @@ public class TrapRefiner implements IRefiner {
         return totalConstraints;
     }
 
-    private boolean findTrap(ISparsePetriNet net, SparseIntArray state, StaticRefiner known, SolverState solver) {
+	public void updateWitness(SolverState solver, Problem problem) {
+		problem.updateWitness(solver, "s");
+	}
+
+    /**
+     * Look for a trap that contradicts the given state, create and add a constraint to the known traps if found.
+     * @param net the net
+     * @param state the solution on SAT of the problem
+     * @param known the known traps to add to
+     * @param solver the solver state
+     * @return true if a new trap was found
+     */
+    private boolean findTrap(ISparsePetriNet net, CandidateSolution solution, StaticRefiner known, SolverState solver) {
         boolean trapFound = false;
         
+        SparseIntArray state = solution.getState();
 		if (state == null || state.size() == 0) {
 			return false;
 		}
@@ -109,16 +124,22 @@ public class TrapRefiner implements IRefiner {
             IFactory ef = solver.getSMT().smtConfig.exprFactory;
             List<IExpr> vars = trap.stream().map(n -> ef.symbol("s"+n)).collect(Collectors.toList());
             IExpr sum = buildSum(vars);
-            ICommand constraint = new C_assert(ef.fcn(ef.symbol(">="), sum , ef.numeral(1)));
-            VarSet support = new VarSet();
-            for (Integer p : trap) {
-            	support.addVar("s", p);
-            }
+            IExpr trapPredicate = ef.fcn(ef.symbol(">="), sum , ef.numeral(1));
+            VarSet support = computeSupport(trap);
+            ICommand constraint = new C_assert(trapPredicate);            
             known.addConstraint(new SMTConstraint(constraint, support));
             trapFound = true;
         }
         return trapFound;
     }
+
+	public VarSet computeSupport(List<Integer> trap) {
+		VarSet support = new VarSet();
+		for (Integer p : trap) {
+			support.addVar("s", p);
+		}
+		return support;
+	}
 
 
     @Override
