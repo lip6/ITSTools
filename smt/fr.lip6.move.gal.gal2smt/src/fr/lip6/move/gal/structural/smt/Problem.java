@@ -18,7 +18,6 @@ import fr.lip6.move.gal.structural.expr.Expression;
 public class Problem {
 	private String name;
 	private ISymbol symbol;
-	private int id;
 	private Expression predicate;
 	private VarSet support;
 	private ICommand definition;
@@ -28,9 +27,8 @@ public class Problem {
 	private CandidateSolution solution = new CandidateSolution();
 	private boolean isEF;
 
-	public Problem(String name, boolean isEF, int id, Expression pred) {
+	public Problem(String name, boolean isEF, Expression pred) {
 		this.name = name;
-		this.id = id;
 		this.isEF = isEF;
 		this.predicate = pred;
 		if (!isEF) {
