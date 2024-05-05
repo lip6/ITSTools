@@ -17,7 +17,7 @@ public class SMTBasedReachabilitySolver {
 
 	public static ProblemSet prepareProblemSet(List<Property> props, DoneProperties doneProps) {
 		ProblemSet problems = new ProblemSet(doneProps);
-		for (fr.lip6.move.gal.structural.Property p : props) {
+		for (Property p : props) {
 			if (doneProps.containsKey(p.getName())) {
 				continue;
 			}
