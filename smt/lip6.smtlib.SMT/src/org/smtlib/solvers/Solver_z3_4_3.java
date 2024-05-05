@@ -61,8 +61,9 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 	protected String cmds[];
 	protected String cmds_win[] = new String[]{ "", "/smt2","/in","SMTLIB2_COMPLIANT=true"}; 
 	protected String cmds_mac[] = new String[]{ "", "-smt2","-in","SMTLIB2_COMPLIANT=true"}; 
-	protected String cmds_unix[] = new String[]{ "", "parallel.enable=true", "parallel.threads.max=4", "-smt2","-in"}; 
-
+	//protected String cmds_unix[] = new String[]{ "", "parallel.enable=true", "parallel.threads.max=4", "-smt2","-in"}; 
+	protected String cmds_unix[] = new String[]{ "", "-smt2","-in"};
+	
 	/** The object that interacts with external processes */
 	protected SolverProcess solverProcess;
 	
