@@ -164,7 +164,7 @@ public class SMTUtils {
 			throw new RuntimeException(e);
 		}
 
-		smt.smtConfig.timeout = timeoutQ;
+		smt.smtConfig.timeout = timeoutT * 100 ;
 		smt.smtConfig.timeoutTotal = timeoutT;
 		Solver engine = Solver.Z3;
 		ISolver solver = engine.getSolver(smt.smtConfig);
@@ -183,7 +183,7 @@ public class SMTUtils {
 		if (err.isError()) {
 			throw new RuntimeException("Could not set logic" + err);
 		}
-	//	System.out.println("Starting Z3 with timeout " + timeoutT + " and query timeout " + timeoutQ);
+	//	System.out.println("Starting Z3 with timeout " + smt.smtConfig.timeoutTotal + " s and query timeout " + smt.smtConfig.timeout + " ms");
 		return solver;
 	}
 
