@@ -17,8 +17,10 @@ public class SMTBasedReachabilitySolver {
 
 	public static ProblemSet prepareProblemSet(List<Property> props, DoneProperties doneProps) {
 		ProblemSet problems = new ProblemSet(doneProps);
-		int index = 0;
 		for (fr.lip6.move.gal.structural.Property p : props) {
+			if (doneProps.containsKey(p.getName())) {
+				continue;
+			}
 			if (p.getType() != PropertyType.INVARIANT) {
 				throw new IllegalArgumentException("Only invariants are supported for now.");
 			}
@@ -26,11 +28,10 @@ public class SMTBasedReachabilitySolver {
 			
 			Op op = p.getBody().getOp();
 			if (op == Op.EF|| op == Op.AG) {
-				problems.addProblem(new Problem(p.getName(), op == Op.EF, index, pred));
+				problems.addProblem(new Problem(p.getName(), op == Op.EF, pred));
 			} else {
 				throw new IllegalArgumentException("Only EF and AG properties should be roots of an INVARIANT.");
 			}
-			index++;
 		}
 		return problems;
 	}
