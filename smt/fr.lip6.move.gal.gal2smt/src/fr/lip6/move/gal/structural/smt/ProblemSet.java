@@ -21,7 +21,7 @@ public class ProblemSet {
 	public void update() {
 		for (int i = unsolved.size() - 1; i >= 0; i--) {
 			Problem p = unsolved.get(i);
-			if (p.isSolved()) {
+			if (p.isSolved() || doneProps.containsKey(p.getName())) {
 				unsolved.remove(i);
 				solved.add(p);
 			}
