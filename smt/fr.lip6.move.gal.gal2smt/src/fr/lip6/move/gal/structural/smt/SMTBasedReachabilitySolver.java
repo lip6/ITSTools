@@ -37,27 +37,28 @@ public class SMTBasedReachabilitySolver {
 	}
 	
 	public static int solveProblems(ProblemSet problems, ISparsePetriNet spn, int timeout, boolean withWitness, List<Integer> repr) {
+		long time = System.currentTimeMillis();
 		List<IRefiner> refiners = new ArrayList<>();
 		IntMatrixCol effects = InvariantCalculator.computeReducedFlow(spn, repr );
 
 		SolverState solver = new SolverState();
 
 		int initial = problems.getSolved().size();
-		
+
 		// add places "s" variables
 		solver.addVars("s", spn.getPlaceCount(), VarType.NUMERIC);	
 		solver.setMinBounds("s", 0);
-		
-		
+
+
 		if (spn.isSafe()) {
 			refiners.add(DomainRefinerBuilder.enforceMaxBound("s", spn.getPlaceCount(), 1));			
 		}
-		
+
 		refiners.addAll(InvariantRefinerBuilder.buildInvariantRefiners(effects, spn.getMarks()));
-		
+
 		// also adds "t" variables for transitions
 		refiners.addAll(StateEquationRefinerBuilder.buildStateEquationRefiner(effects,spn.getMarks(), solver));
-		
+
 		{
 			IRefiner ref = ReadFeedRefinerBuilder.buildReadFeedRefiner(spn, effects, repr, solver);
 			if (ref != null) {
@@ -68,26 +69,28 @@ public class SMTBasedReachabilitySolver {
 		// a bit expensive, so do it last
 		refiners.add(new PredecessorConstraintRefiner(spn, repr, effects, problems));
 
-		
+
 		refiners.add(new TrapRefiner(spn));
 
 
-		
-		solve (refiners, problems, solver, timeout, withWitness);
-		if (!problems.isSolved()) {
-			for (Problem p : problems.getUnsolved()) {
-				p.dropRefinement();
-				p.getSolution().setReply(SMTReply.SAT);
-			}
-			for (IRefiner ref : refiners) {
-				ref.reset();
-			}
-			System.out.println("Escalating to Integer solving :"+ problems);
-			solver.setNumericType(SolutionType.Int);
+		try {
 			solve (refiners, problems, solver, timeout, withWitness);
+			if (!problems.isSolved()) {
+				for (Problem p : problems.getUnsolved()) {
+					p.dropRefinement();
+					p.getSolution().setReply(SMTReply.SAT);
+				}
+				for (IRefiner ref : refiners) {
+					ref.reset();
+				}
+				System.out.println("Escalating to Integer solving :"+ problems);
+				solver.setNumericType(SolutionType.Int);
+				solve (refiners, problems, solver, timeout, withWitness);
+			}
+			System.out.println("After SMT, in "+(System.currentTimeMillis()-time)+"ms problems are : "+problems);
+		} catch (Exception e) {
+			System.out.println("SMT process timed out in "+(System.currentTimeMillis()-time)+"ms, After SMT, problems are : "+problems);
 		}
-		System.out.println("After SMT, problems are : "+problems);
-		
 		return problems.getSolved().size() - initial;
 	}
 
@@ -106,6 +109,7 @@ public class SMTBasedReachabilitySolver {
 		int iteration = 0;
 		RefinementMode mode = RefinementMode.INCLUDED_ONLY;
 		boolean realSolutions = false;
+		int nbCheckPoint = 0;
 		while (!problems.isSolved()) {			
 			VarSet current = solver.getDeclaredVars().clone();
 						
@@ -143,6 +147,17 @@ public class SMTBasedReachabilitySolver {
 			System.out.println("At refinement iteration " + iteration + " (" + mode + ") " + addedVars + "/"
 					+ solver.getDeclaredVars().size() + " variables, " + addedConstraints + "/" + totalConstraints
 					+ " constraints. Problems are: " + problems);
+			
+			long passed = System.currentTimeMillis() - time;
+			if (withWitness && passed > nbCheckPoint*5000) {
+				nbCheckPoint++;
+				// might soon timeout, grab traces
+				for (Problem p : problems.getUnsolved()) {
+					p.updateStatus(solver, problems.getDoneProps());
+					if (withWitness)
+						p.updateWitness(solver, "t");
+		        }
+			}
 
 			if (addedConstraints + addedVars == 0 && mode == RefinementMode.OVERLAPS) {
 				System.out.println("No progress, stopping.");
@@ -162,7 +177,7 @@ public class SMTBasedReachabilitySolver {
         }
 		
 		System.out.println("After SMT solving in domain " + solver.getNumericType() + " declared "
-				+ solver.getDeclaredVars().size() + "/" + solver.getAllVars().size() + " variables, " + " and "
+				+ solver.getDeclaredVars().size() + "/" + solver.getAllVars().size() + " variables, and "
 				+ totalConstraints + " constraints, problems are : " + problems + " in "
 				+ (System.currentTimeMillis() - time) +" ms.");
 		System.out.println("Refiners :" +refiners);
