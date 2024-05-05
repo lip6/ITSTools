@@ -1407,8 +1407,7 @@ t_1_0  [ x == 1 && y==0 ] {
 					return i;
 				}
 			}
-			getLog().info("Could not find partition element corresponding to array "+ ap.getName() + " in partition " + this);
-			return -1;
+			throw new RuntimeException("Could not find partition element corresponding to array "+ ap.getName() + " in partition " + this);
 		}
 
 		public Integer getIndex(Variable var) {
@@ -1419,8 +1418,7 @@ t_1_0  [ x == 1 && y==0 ] {
 					return i;
 				}
 			}
-			getLog().info("Could not find partition element corresponding to "+ var.getName() + " in partition " + this);
-			return -1;
+			throw new RuntimeException("Could not find partition element corresponding to "+ var.getName() + " in partition " + this);
 		}
 
 
