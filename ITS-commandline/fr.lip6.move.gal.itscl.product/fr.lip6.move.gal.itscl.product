@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="fr.lip6.move.gal.itscl.product" uid="fr.lip6.move.gal.itscl.product" id="fr.lip6.move.gal.itscl.product" application="fr.lip6.move.gal.itscl.application" version="1.0.0.qualifier" useFeatures="true" includeLaunchers="true">
-
+<product name="fr.lip6.move.gal.itscl.product" uid="fr.lip6.move.gal.itscl.product" id="fr.lip6.move.gal.itscl.product" application="fr.lip6.move.gal.itscl.application" version="1.0.0.qualifier" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <configIni use="default">
    </configIni>
@@ -10,7 +9,7 @@
    <launcherArgs>
       <programArgs>-data @none
       </programArgs>
-      <vmArgs>-Dosgi.locking=none -Declipse.stateSaveDelayInterval=-1 -Dosgi.configuration.area=@none -Xss128m -Xms40m -Xmx16384m
+      <vmArgs>-Dosgi.locking=none -Declipse.stateSaveDelayInterval=-1 -Dosgi.configuration.area=@none -Xss128m -Xms40m -Xmx16384m -Djdk.lang.Process.launchMechanism=vfork
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
@@ -25,10 +24,8 @@
       </win>
    </launcher>
 
-
    <vm>
    </vm>
-
 
    <plugins>
    </plugins>
@@ -38,7 +35,10 @@
    </features>
 
    <configurations>
+      <plugin id="fr.lip6.move.gal.application.pnmcc" autoStart="true" startLevel="1" />
+      <plugin id="fr.lip6.move.gal.itscl.application" autoStart="false" startLevel="2" />
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
+      <property name="osgi.bundlefile.limit" value="0" />
    </configurations>
 
    <preferencesInfo>
