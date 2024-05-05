@@ -97,17 +97,20 @@ public class ReachabilitySolver {
 
 				List<Integer> repr = new ArrayList<>();
 				List<SparseIntArray> orders = new ArrayList<>();
-				int smttime = iterations==0 ? 5: iterations > 1 ? 60 : 45;
-				if (timeout != -1) {
-					smttime = 5;
-				}
+				int smttime = iterations==0 ? 5: iterations > 1 ? 45+(15*iterations) : 45;
+//				if (timeout != -1) {
+//					smttime = 5;
+//				}
 
 				boolean newMode = true;
 
 				if (newMode) {
 
 					ProblemSet problems = SMTBasedReachabilitySolver.prepareProblemSet(props, doneProps);
-					iter += SMTBasedReachabilitySolver.solveProblems(problems, spn, 10000, true, repr);
+					if (problems.getUnsolved().isEmpty()) {
+						break;
+					}
+					iter += SMTBasedReachabilitySolver.solveProblems(problems, spn, smttime, true, repr);
 					cleanupLists(props, doneProps, tocheck, tocheckIndexes);
 
 					int replayed = tryReplayParikh(problems, doneProps, repr, re, timeout);
@@ -234,6 +237,7 @@ public class ReachabilitySolver {
 				}
 			} while ( (iterations<=1 || iter > 0) && ! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished());
 
+			reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 			if (! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished()) {
 				long time = System.currentTimeMillis();
 				int init = reader.getSPN().getProperties().size();
