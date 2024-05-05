@@ -102,7 +102,7 @@ public class SolverState {
 	}
 
 	public void start(int timeout) {
-		solver = SMTUtils.initSolver(smt, numericType==SolutionType.Real, timeout/5, timeout);
+		solver = SMTUtils.initSolver(smt, numericType==SolutionType.Real, timeout, timeout);
 	}
 	
 	public void stop() {
