@@ -703,7 +703,7 @@ public class ReachabilitySolver {
 		}
 		if (lastReduction != 4) {
 			if (lastReduction != 1 && (reduced == 0 || iteration==0)) {
-				List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr);
+				List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr,30);
 				if (! tokill.isEmpty()) {
 					System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
 					if (rt == ReductionType.LIVENESS) {
@@ -736,7 +736,7 @@ public class ReachabilitySolver {
 		}
 
 		if (hasGT1ArcValues) {
-			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr);
+			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr,20);
 			if (! tokill.isEmpty()) {
 				System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
 			}

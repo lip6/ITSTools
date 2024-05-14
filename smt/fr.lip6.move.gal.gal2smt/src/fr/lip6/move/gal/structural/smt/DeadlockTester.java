@@ -1218,7 +1218,7 @@ public class DeadlockTester {
 	}
 
 	
-	public static List<Integer> testDeadTransitionWithSMT(StructuralReduction sr) {
+	public static List<Integer> testDeadTransitionWithSMT(StructuralReduction sr, int timeout) {
 		List<Property> props = new ArrayList<>();
 		SparseIntArray initial = new SparseIntArray(sr.getMarks());
 		for (int tid=0; tid < sr.getTransitionCount() ; tid++) {
@@ -1241,7 +1241,7 @@ public class DeadlockTester {
 		List<Integer> deadTrans = new ArrayList<Integer>();
 		if (! problems.getUnsolved().isEmpty()) {
 			List<Integer> repr = new ArrayList<>();
-			solved += SMTBasedReachabilitySolver.solveProblems(problems, sr, 60, false, repr);
+			solved += SMTBasedReachabilitySolver.solveProblems(problems, sr, timeout, false, repr);
 			if (solved > 0) {
 				for (Entry<String, Boolean> ent : localDone.entrySet()) {
 					if (ent.getValue()) {
