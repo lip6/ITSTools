@@ -199,16 +199,16 @@ public class ITSRunner extends AbstractRunner {
 			this.ender = ender;
 		}
 
-		public void setInput(InputStream pin) {
-			this.in = new BufferedReader(new InputStreamReader(pin));
+		public void setInput(BufferedReader bufferedReader) {
+			this.in = bufferedReader;
 		}
 
 		@Override
 		public void run() {
 			int seenCounts = 0;
-
+			Thread.currentThread().setName("ITS Reader");
 			try {
-				for (String line = ""; line != null ; line=in.readLine() ) {
+				for (String line = ""; line != null ; in.ready(), line=in.readLine() ) {
 					// don't trace overlong lines e.g. formulas from COL to avoid swamping logs
 					if (line.length() > 155) {
 						System.out.println(line.substring(0, 155)+"..."+line.length());
@@ -447,7 +447,6 @@ public class ITSRunner extends AbstractRunner {
 		try {
 			final Process process = pb.start();	
 
-
 			Set<String> todoProps = reader.getSpec().getProperties().stream().map(p -> p.getName()).collect(Collectors.toSet());
 
 			runnerThread = new Thread (() -> {
@@ -466,7 +465,7 @@ public class ITSRunner extends AbstractRunner {
 			});
 
 			ITSInterpreter interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps, ender);
-			interp.setInput(process.getInputStream());
+			interp.setInput(process.inputReader());
 			itsReader = new Thread (interp);
 			itsReader.start();
 			runnerThread.start();
