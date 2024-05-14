@@ -236,7 +236,8 @@ public class LTLPropertySolver {
 				return;
 			
 			if (! noStutterTest) {
-				System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
+				System.out.println("Running random walk in product with property : " + propPN.getName());
+				if (DEBUG >= 2) { System.out.println(" automaton " + tgba); }
 				RandomProductWalker pw = new RandomProductWalker(spnForProp,tgba);
 				pw.runProduct(NBSTEPS, 10, false);
 				if (doneProps.containsKey(propPN.getName())) 
