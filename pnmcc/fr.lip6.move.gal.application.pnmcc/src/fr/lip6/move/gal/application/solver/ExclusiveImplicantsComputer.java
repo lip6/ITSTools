@@ -11,16 +11,17 @@ import org.smtlib.impl.Script;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
+import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.FlowPrinter;
-import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.VarRef;
-import fr.lip6.move.gal.structural.smt.DeadlockTester;
-import fr.lip6.move.gal.structural.smt.ExprTranslator;
-import fr.lip6.move.gal.util.IntMatrixCol;
+import fr.lip6.move.gal.structural.smt.Problem;
+import fr.lip6.move.gal.structural.smt.ProblemSet;
+import fr.lip6.move.gal.structural.smt.SMTBasedReachabilitySolver;
 
 public class ExclusiveImplicantsComputer {
 
@@ -233,7 +234,7 @@ public class ExclusiveImplicantsComputer {
 		}
 	}
 
-	public static void studyImplicants(MccTranslator reader) {
+	public static List<Constraint> studyImplicants(MccTranslator reader) {
 
 		long time = System.currentTimeMillis();
 		SparsePetriNet spn = reader.getSPN();
@@ -260,41 +261,38 @@ public class ExclusiveImplicantsComputer {
 			}
 		}
 
-		// This invocation prepares and then runs the SMT solver on the problems
-		// result is for each problem either a "witness" state if problem is
-		// SAT/unknown/timeout...,
-		// or null if the problem is UNSAT.
-		List<SparseIntArray> verdicts = solveDrainProblems(spn, problems);
-
-		for (int id = 0, ide = problems.size(); id < ide; id++) {
-			DrainProblem dp = problems.get(id);
-			if (verdicts.get(id) == null) {
-				// "null" reflects an UNSAT result for this problem.
-				if (DEBUG >= 1)
-					System.out.println("Problem " + dp.getConstraint().getType() + " is true.");
-
-				constraints.add(dp.getConstraint());
-				// A="+printPnames(a, spn.getPnames())+ " B=" + printPnames(b, spn.getPnames())
-				// + " T=" + printPnames(dp.setsT.get(0), spn.getTnames()) );
-			} else {
-				// any other reply is a SAT or unknown answer
-				if (DEBUG >= 1)
-					System.out.println("Could not prove " + dp.getConstraint().printConstraint(spn));
-
-			}
+		if (constraints.size() > 0) {
+			System.out.println("Proved "+constraints.size()+" constraints trivially:");
+			if (DEBUG >= 1)
+				for (Constraint c : constraints) {
+					System.out.println(c.printConstraint(spn));
+				}
 		}
 
+		// This invocation prepares and then runs the SMT solver on the problems
+		// result is for each problem either "unsolved" if problem is
+		// SAT/unknown/timeout...,
+		// or "solved" if the problem is UNSAT.
+		List<Constraint> solved = solveDrainProblems(spn, problems);
+
+
 		// Print the constraints we managed to prove
-		for (Constraint c : constraints) {
-			System.out.println("Proved that : " + c.printConstraint(spn));
+		if (solved.size() > 0) {
+			System.out.println("Proved "+constraints.size()+" constraints with SMT :");
+			if (DEBUG >= 1)
+				for (Constraint c : solved) {
+					System.out.println(c.printConstraint(spn));
+				}
 		}
 
 		// reader.getSPN().getProperties().clear();
 		if (DEBUG >= 0)
 			FlowPrinter.drawNet(reader.getSPN(), reader.getSPN().getName());
 
-		System.out.println("In total, drain approach introduced " + constraints.size() + " constraints in "
+		System.out.println("In total, drain approach introduced " + constraints.size() + " trivial constraints and "+ solved.size() + " constraints requiring SMT in "
 				+ (System.currentTimeMillis() - time) + " ms.");
+		constraints.addAll(solved);
+		return constraints;
 	}
 
 	private static void testInvariants(SparseIntArray a, SparseIntArray b, MccTranslator reader,
@@ -408,32 +406,43 @@ public class ExclusiveImplicantsComputer {
 
 	}
 
-	private static List<SparseIntArray> solveDrainProblems(SparsePetriNet spn, List<DrainProblem> problems) {
+	private static List<Constraint> solveDrainProblems(SparsePetriNet spn, List<DrainProblem> problems) {
 
 		int tcsize = problems.size();
 		if (problems.size() == 0)
 			return Collections.emptyList();
-		List<Script> properties = new ArrayList<>();
+		
+		DoneProperties done = new ConcurrentHashDoneProperties();
+		ProblemSet ps = new ProblemSet(done);
+		int i = 0;
+		for (DrainProblem p : problems) {
+			Problem pp = new Problem("p"+(i++),true,p.computeDrainProblemCondition(spn));
+			ps.addProblem(pp);
+		}
+		
+		List<Integer> repr = new ArrayList<>();
+		int timeout = 30; // in seconds
+		int solved = SMTBasedReachabilitySolver.solveProblems(ps, spn, timeout, false /* don't negate*/, repr);
 
-		for (int probid = 0; probid < tcsize; probid++) {
-			DrainProblem dp = problems.get(probid);
-			Expression totest = dp.computeDrainProblemCondition(spn);
-
-			IExpr smtexpr = totest.accept(new ExprTranslator());
-			Script property = new Script();
-			ICommand propAssert = new C_assert(smtexpr);
-			property.add(propAssert);
-			properties.add(property);
+		System.out.println("Solved "+solved+" problems out of "+tcsize + " drain problems.");
+		
+		
+		List<Constraint> constraints = new ArrayList<>();
+		for (Problem p : ps.getSolved()) {
+			int id = Integer.parseInt(p.getName().substring(1));
+			DrainProblem dp = problems.get(id);
+			constraints .add(dp.getConstraint());
 		}
 
-		List<Integer> representative = new ArrayList<>();
-		IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(spn, representative);
-
-		List<SparseIntArray> pors = new ArrayList<>();
-		int timeout = 30; // in seconds
-		return DeadlockTester.escalateRealToInt(spn, properties, timeout, false /* no witness needed */, representative,
-				pors, sumMatrix);
-
+		if (DEBUG >= 1) {
+			for (Problem p : ps.getSolved()) {
+				int id = Integer.parseInt(p.getName().substring(1));
+				DrainProblem dp = problems.get(id);
+				System.out.println("Could not prove " + dp.getConstraint().printConstraint(spn));
+			}
+		}
+		
+		return constraints;
 	}
 
 	private static String printPnames(SparseIntArray a, List<String> pnames) {
