@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFactory;
+import org.smtlib.SMT;
 import org.smtlib.command.C_assert;
 
 import android.util.SparseIntArray;
@@ -97,6 +98,7 @@ public class TrapRefiner implements IRefiner {
     }
 
 	public void updateWitness(SolverState solver, Problem problem) {
+		//grab the reached state
 		problem.updateWitness(solver, "s");
 	}
 
@@ -108,7 +110,7 @@ public class TrapRefiner implements IRefiner {
      * @param solver the solver state
      * @return true if a new trap was found
      */
-    private boolean findTrap(ISparsePetriNet net, CandidateSolution solution, StaticRefiner known, SolverState solver) {
+    protected boolean findTrap(ISparsePetriNet net, CandidateSolution solution, StaticRefiner known, SolverState solver) {
         boolean trapFound = false;
         
         SparseIntArray state = solution.getState();
@@ -121,10 +123,7 @@ public class TrapRefiner implements IRefiner {
         List<Integer> trap = SMTTrapUtils.testTrapWithSMT(net, state, solver.getDeclaredVars().getVars().get("s"));
         
         if (!trap.isEmpty()) {
-            IFactory ef = solver.getSMT().smtConfig.exprFactory;
-            List<IExpr> vars = trap.stream().map(n -> ef.symbol("s"+n)).collect(Collectors.toList());
-            IExpr sum = buildSum(vars);
-            IExpr trapPredicate = ef.fcn(ef.symbol(">="), sum , ef.numeral(1));
+            IExpr trapPredicate = buildTrapExpression(trap);
             VarSet support = computeSupport(trap);
             ICommand constraint = new C_assert(trapPredicate);            
             known.addConstraint(new SMTConstraint(constraint, support));
@@ -132,6 +131,14 @@ public class TrapRefiner implements IRefiner {
         }
         return trapFound;
     }
+
+	public static IExpr buildTrapExpression(List<Integer> trap) {
+		IFactory ef = new SMT().smtConfig.exprFactory;
+		List<IExpr> vars = trap.stream().map(n -> ef.symbol("s"+n)).collect(Collectors.toList());
+		IExpr sum = buildSum(vars);
+		IExpr trapPredicate = ef.fcn(ef.symbol(">="), sum , ef.numeral(1));
+		return trapPredicate;
+	}
 
 	public VarSet computeSupport(List<Integer> trap) {
 		VarSet support = new VarSet();

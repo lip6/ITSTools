@@ -217,80 +217,24 @@ public class SMTTrapUtils {
 		StructuralReduction sr = new StructuralReduction(srori);			
 
 		// step 1 : reduce net by removing finally marked places entirely from the picture
-		{
-			List<Integer> todrop = new ArrayList<>(solution.size());
-
-			for (int i=solution.size()-1 ; i >= 0 ; i --) {
-				todrop.add(solution.keyAt(i));
-			}
-			if (declaredVars != null) {
-				int pid = 0;
-				for (int i = 0, ie = declaredVars.size(); i < ie; i++) {
-					int p = declaredVars.keyAt(i);
-					for (; pid < p; pid++) {
-						todrop.add(pid);
-					}
-					pid = p+1;
-				}
-				if (pid < sr.getPlaceCount()) {
-					for (; pid < sr.getPlaceCount(); pid++) {
-						todrop.add(pid);
-					}
-				}
-			}
-			todrop = new ArrayList<>(new HashSet<>(todrop));
-			sr.dropPlaces(todrop, false, false,"");
-		}
+		dropIrrelevantPlaces(sr, solution, declaredVars);
+		
 		// iterate reduction of unfeasible parts
-		{
-			int doneIter =0;
-			Set<Integer> todropP = new HashSet<>();
-			Set<Integer> todropT = new HashSet<>();
-			do {
-				doneIter =0;
-				
-				todropP.clear();
-				todropT.clear();
-
-				for (int tid=sr.getTnames().size()-1 ; tid >= 0 ; tid --) {
-					if (sr.getFlowPT().getColumn(tid).size()==0) {
-						// discard this transition, it cannot induce any additional constraints
-						todropT.add(tid);
-						doneIter++;
-					} else if (sr.getFlowTP().getColumn(tid).size()==0) {
-						SparseIntArray pt = sr.getFlowPT().getColumn(tid);
-						// discard the transition, but also it's whole pre set
-						for (int i=0, e = pt.size() ; i < e ; i++) {
-							todropP.add(pt.keyAt(i));							
-						}
-						doneIter++;
-						todropT.add(tid);
-					}
-				}
-				if (!todropT.isEmpty()) {
-					sr.dropTransitions(new ArrayList<>(todropT), false,"");
-				}
-				if (!todropP.isEmpty()) {
-					sr.dropPlaces(new ArrayList<>(todropP), false, false,"");
-				}
-			} while (doneIter >0);
-		}
+		iterateReductions(sr);
 
 		if (sr.getPnames().isEmpty()) {
 			// fail
 			return new ArrayList<>();
 		}
+		
+		
+		// make sure some remaining places at least are initially marked and now empty 
 		{
-			boolean ok = false;
-			for (int i=0, ie = sr.getPnames().size() ; i < ie ; i++) {
-				if (sr.getMarks().get(i)>0 && solution.get(i)==0) {
-					ok=true;
-					break;
-				}
-			}
-			if (!ok)
+			if (trapsStillFeasible(sr, solution))
 				return new ArrayList<>();
 		}
+		
+		
 		if (DEBUG >=1)
 			Logger.getLogger("fr.lip6.move.gal").info("Computed a system of "+sr.getPnames().size()+"/"+ srori.getPnames().size() + " places and "+sr.getTnames().size()+"/"+ srori.getTnames().size() + " transitions for Trap test. " + (System.currentTimeMillis()-time) +" ms");
 
@@ -413,6 +357,79 @@ public class SMTTrapUtils {
 		}
 
 		return new ArrayList<>();
+	}
+
+
+	public static boolean trapsStillFeasible(StructuralReduction sr, SparseIntArray solution) {
+		boolean ok = false;
+		for (int i=0, ie = sr.getPnames().size() ; i < ie ; i++) {
+			if (sr.getMarks().get(i)>0 && solution.get(i)==0) {
+				ok=true;
+				break;
+			}
+		}
+		return ok;
+	}
+
+
+	public static void iterateReductions(StructuralReduction sr) {
+		int doneIter =0;
+		Set<Integer> todropP = new HashSet<>();
+		Set<Integer> todropT = new HashSet<>();
+		do {
+			doneIter =0;
+			
+			todropP.clear();
+			todropT.clear();
+
+			for (int tid=sr.getTnames().size()-1 ; tid >= 0 ; tid --) {
+				if (sr.getFlowPT().getColumn(tid).size()==0) {
+					// discard this transition, it cannot induce any additional constraints
+					todropT.add(tid);
+					doneIter++;
+				} else if (sr.getFlowTP().getColumn(tid).size()==0) {
+					SparseIntArray pt = sr.getFlowPT().getColumn(tid);
+					// discard the transition, but also it's whole pre set
+					for (int i=0, e = pt.size() ; i < e ; i++) {
+						todropP.add(pt.keyAt(i));							
+					}
+					doneIter++;
+					todropT.add(tid);
+				}
+			}
+			if (!todropT.isEmpty()) {
+				sr.dropTransitions(new ArrayList<>(todropT), false,"");
+			}
+			if (!todropP.isEmpty()) {
+				sr.dropPlaces(new ArrayList<>(todropP), false, false,"");
+			}
+		} while (doneIter >0);
+	}
+
+
+	public static void dropIrrelevantPlaces(StructuralReduction sr, SparseIntArray solution,
+			SparseBoolArray declaredVars) {
+		List<Integer> todrop = new ArrayList<>(solution.size());
+		for (int i=solution.size()-1 ; i >= 0 ; i --) {
+			todrop.add(solution.keyAt(i));
+		}
+		if (declaredVars != null) {
+			int pid = 0;
+			for (int i = 0, ie = declaredVars.size(); i < ie; i++) {
+				int p = declaredVars.keyAt(i);
+				for (; pid < p; pid++) {
+					todrop.add(pid);
+				}
+				pid = p+1;
+			}
+			if (pid < sr.getPlaceCount()) {
+				for (; pid < sr.getPlaceCount(); pid++) {
+					todrop.add(pid);
+				}
+			}
+		}
+		todrop = new ArrayList<>(new HashSet<>(todrop));
+		sr.dropPlaces(todrop, false, false,"");
 	}
 
 	
