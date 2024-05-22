@@ -29,5 +29,4 @@ public class SMTConstraint implements IConstraint {
 		return constraint.toString();
 	}
 	
-	
 }
