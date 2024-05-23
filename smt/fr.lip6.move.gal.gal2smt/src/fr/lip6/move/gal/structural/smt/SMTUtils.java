@@ -98,7 +98,7 @@ public class SMTUtils {
 	}
 
 	public static IExpr makeAnd(List<IExpr> list) {
-		IFactory ef = new SMT().smtConfig.exprFactory;
+		IFactory ef = SMT.instance.smtConfig.exprFactory;
 		list.removeIf(e -> e instanceof ISymbol && "true".equals(((ISymbol) e).value()));
 		if (list.isEmpty()) {
 			return ef.symbol("true");
@@ -110,7 +110,7 @@ public class SMTUtils {
 	}
 
 	public static IExpr makeOr(List<IExpr> list) {
-		IFactory ef = new SMT().smtConfig.exprFactory;
+		IFactory ef = SMT.instance.smtConfig.exprFactory;
 		list.removeIf(e -> e instanceof ISymbol && "false".equals(((ISymbol) e).value()));
 		if (list.isEmpty()) {
 			return ef.symbol("false");
@@ -183,12 +183,12 @@ public class SMTUtils {
 		if (err.isError()) {
 			throw new RuntimeException("Could not set logic" + err);
 		}
-	//	System.out.println("Starting Z3 with timeout " + smt.smtConfig.timeoutTotal + " s and query timeout " + smt.smtConfig.timeout + " ms");
+		System.out.println("Starting Z3 with timeout " + smt.smtConfig.timeoutTotal + " s and query timeout " + smt.smtConfig.timeout + " ms");
 		return solver;
 	}
 
 	public static IExpr buildSum(List<IExpr> torem) {
-		IFactory ef = new SMT().smtConfig.exprFactory;
+		IFactory ef = SMT.instance.smtConfig.exprFactory;
 		IExpr lhs;
 		if (torem.isEmpty()) {
 			lhs = ef.numeral(0);
