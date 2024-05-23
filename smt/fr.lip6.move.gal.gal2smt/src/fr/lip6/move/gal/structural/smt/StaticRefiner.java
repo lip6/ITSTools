@@ -21,6 +21,10 @@ public class StaticRefiner implements IRefiner {
         this.name = name;
     }
 
+    public int unappliedCount() {
+    	return unappliedConstraints.size();
+    }
+    
     @Override
     public int refine(SolverState solver, ProblemSet problems, RefinementMode mode, VarSet current, long timeout) {
         int total = 0;
