@@ -178,7 +178,7 @@ public class DeadlockTester {
 
 	
 	public static SparseIntArray findPositiveTsemiflow(IntMatrixCol sumMatrix, int positivePlace) {
-		org.smtlib.SMT smt = new SMT();
+		org.smtlib.SMT smt = SMT.instance;
 		
 		ISolver solver = initSolver(smt, false, 4000, 6000);
 		
@@ -535,7 +535,7 @@ public class DeadlockTester {
 			cantStutter.add(new C_assert(ap.accept(new ExprTranslator())));
 			cantStutter.add(new C_check_sat());
 
-			IFactory ef = new SMT().smtConfig.exprFactory;
+			IFactory ef = SMT.instance.smtConfig.exprFactory;
 			List<IExpr> globalEnable = new ArrayList<>();
 			// assert that all transitions that stutter (because of support of effects not
 			// intersecting AP) are disabled
@@ -1872,7 +1872,7 @@ public class DeadlockTester {
 
 	public static Script addReadFeedConstraints(ISparsePetriNet sr, IntMatrixCol sumMatrix, List<Integer> representative) {
 		Script script = new Script();
-		IFactory ef = new SMT().smtConfig.exprFactory;				 
+		IFactory ef = SMT.instance.smtConfig.exprFactory;				 
 		int readConstraints = 0;
 		IntMatrixCol tsum = sumMatrix.transpose();
 		Map<Integer,List<Integer>> images = SMTUtils.computeImages(representative);
@@ -2038,7 +2038,7 @@ public class DeadlockTester {
 		Script scriptAssertDead = new Script();
 		// deliberate block to help gc.
 		{			
-			IFactory ef = new SMT().smtConfig.exprFactory;
+			IFactory ef = SMT.instance.smtConfig.exprFactory;
 			Set<SparseIntArray> preconds = new HashSet<>();
 			for (int i = 0; i < sr.getFlowPT().getColumnCount() ; i++)
 				preconds.add(sr.getFlowPT().getColumn(i));
