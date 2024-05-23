@@ -197,6 +197,108 @@ public class SMTTrapUtils {
 		return testTrapWithSMT(srori, solution, null);
 	}
 
+	
+	// computes a list of integers corresponding to a subset of places, of which at least one should be marked, and that contradicts the solution provided
+	// NB: this version is "along path" so we just need to have marked the trap at one point
+	// the empty set => traps cannot contradict the solution.
+	public static List<Integer> testTrapAlongPathWithSMT(ISparsePetriNet srori, SparseIntArray parikh, SparseIntArray solution, SparseIntArray max, SparseBoolArray declaredVars) {
+		long time = System.currentTimeMillis();
+		
+		// step 0 : make sure there are finally empty places that were initially marked
+		boolean feasible = false;
+		for (int p=0, e= srori.getPnames().size(); p < e ; p++) {
+			// declared, initially and finally empty, but was marked along the path at some point
+			if (isDeclared(p,declaredVars) && srori.getMarks().get(p) == 0 && solution.get(p) == 0 && max.get(p) > 0) {
+				feasible = true;
+				break;
+			}
+		}
+		if (!feasible) {
+			return new ArrayList<>();
+		}
+		
+		StructuralReduction sr = new StructuralReduction(srori);
+		
+		// step 1 : reduce net by removing initially or finally marked places entirely from the
+		// picture
+		{
+			Set<Integer> todrop = new HashSet<>(solution.size());
+			// drop places that are finally marked
+			addKeysToSet(todrop, solution);
+			// drop places that are initially marked
+			addKeysToSet(todrop, new SparseIntArray(srori.getMarks()));
+			// drop places that are not marked in max
+			addIfNotPresent(todrop, max, sr.getPlaceCount());
+			// drop places that are not declared
+			addIfNotPresent(todrop, declaredVars, sr.getPlaceCount());
+			sr.dropPlaces(new ArrayList<>(todrop), false, false, "");
+		}
+		
+		// iterate reduction of unfeasible parts
+		iterateReductions(sr);
+
+		// make sure some remaining places at least are initially and finally empty and marked in max 
+		{
+			if (sr.getPnames().isEmpty()) {
+				// fail
+				return new ArrayList<>();
+			}
+			boolean ok = false;
+			for (int i = 0, ie = sr.getPnames().size(); i < ie; i++) {
+				if (sr.getMarks().get(i) == 0 && solution.get(i) == 0 && max.get(i) > 0) {
+					ok = true;
+					break;
+				}
+			}
+			if (!ok)
+				return new ArrayList<>();
+		}		
+		
+		if (DEBUG >=1)
+			Logger.getLogger("fr.lip6.move.gal").info("Computed a system of "+sr.getPnames().size()+"/"+ srori.getPnames().size() + " places and "+sr.getTnames().size()+"/"+ srori.getTnames().size() + " transitions for Trap along path test. " + (System.currentTimeMillis()-time) +" ms");
+
+		
+		// okay so we have some candidate places that could form a trap here
+
+		// init a solver
+		SMT smt = new SMT();
+		IFactory ef = smt.smtConfig.exprFactory;
+		ISolver solver = initSolver(smt, "QF_UF", 50, 120);
+		Script script = declareBoolVariables(sr.getPnames().size(), "s", smt);
+		execAndCheckResult(script, solver);
+
+		// now feed constraints in
+
+		// solution should be a non empty set, containing at least one initially and finally empty place that was marked in max
+		{
+			List<IExpr> oring = new ArrayList<>();
+			for (int i=0; i < sr.getPnames().size() ; i++) {
+				if (sr.getMarks().get(i) == 0 && solution.get(i) == 0 && max.get(i) > 0)
+					oring.add(ef.symbol("s"+i));
+			}
+
+			if (oring.isEmpty()) {
+				// failed
+				solver.exit();
+				return new ArrayList<>();
+			}
+			IExpr or = SMTUtils.makeOr(oring);
+			Script s = new Script();
+			s.add(new C_assert(or));
+			execAndCheckResult(s, solver);
+		}
+
+		if (!addTransitionConstraints(solver, sr, ef))
+			return new ArrayList<>();
+
+		// try to minimize the trap
+		List<Integer> res = minimizeTrap(sr, srori, time, solver, ef, true);
+		
+		if (DEBUG >= 1)
+			confirmTrap(srori, res, solution,true);
+		return res;
+	}
+	
 
 	// computes a list of integers corresponding to a subset of places, of which at least one should be marked, and that contradicts the solution provided
 	// the empty set => traps cannot contradict the solution.
@@ -216,24 +318,36 @@ public class SMTTrapUtils {
 
 		StructuralReduction sr = new StructuralReduction(srori);			
 
-		// step 1 : reduce net by removing finally marked places entirely from the picture
-		dropIrrelevantPlaces(sr, solution, declaredVars);
+		// step 1 : reduce net by removing finally marked places entirely from the
+		// picture
+		{
+			Set<Integer> todrop = new HashSet<>(solution.size());
+			// drop places that are finally marked
+			addKeysToSet(todrop, solution);
+			// drop places that are not declared
+			addIfNotPresent(todrop, declaredVars, sr.getPlaceCount());
+			sr.dropPlaces(new ArrayList<>(todrop), false, false, "");
+		}
 		
 		// iterate reduction of unfeasible parts
 		iterateReductions(sr);
 
-		if (sr.getPnames().isEmpty()) {
-			// fail
-			return new ArrayList<>();
-		}
-		
-		
 		// make sure some remaining places at least are initially marked and now empty 
 		{
-			if (trapsStillFeasible(sr, solution))
+			if (sr.getPnames().isEmpty()) {
+				// fail
 				return new ArrayList<>();
-		}
-		
+			}
+			boolean ok = false;
+			for (int i = 0, ie = sr.getPnames().size(); i < ie; i++) {
+				if (sr.getMarks().get(i) > 0 && solution.get(i) == 0) {
+					ok = true;
+					break;
+				}
+			}
+			if (!ok)
+				return new ArrayList<>();
+		}		
 		
 		if (DEBUG >=1)
 			Logger.getLogger("fr.lip6.move.gal").info("Computed a system of "+sr.getPnames().size()+"/"+ srori.getPnames().size() + " places and "+sr.getTnames().size()+"/"+ srori.getTnames().size() + " transitions for Trap test. " + (System.currentTimeMillis()-time) +" ms");
@@ -269,90 +383,15 @@ public class SMTTrapUtils {
 				execAndCheckResult(s, solver);
 			}
 
-			// transition constraints now
-			IntMatrixCol tflowPT = sr.getFlowPT().transpose();
-			// for each place p
-			for (int  pid = 0 ; pid < sr.getPnames().size() ; pid++)  {
-
-
-				//   for each transition t feeding from p
-				SparseIntArray tpt = tflowPT.getColumn(pid);
-
-				Script sc = new Script();
-
-				for (int i=0, e=tpt.size(); i < e ; i++ ) {
-					//        one place fed by t is in the set
-					int tid = tpt.keyAt(i);
-					SparseIntArray outs = sr.getFlowTP().getColumn(tid);
-					List<IExpr> toass = new ArrayList<>();
-
-					if (outs.size() == 0) {
-						// this is bad : this place cannot be in any trap
-						// just break out
-						sc.commands().clear();
-						IExpr constraint = ef.fcn(ef.symbol("not"), ef.symbol("s"+pid));
-						sc.add(new C_assert(constraint));
-						break;
-					} else if (outs.get(pid) > 0) {
-						// transition feeds back into p, this constraint is trivially satisfied, just remove it
-						continue;
-					} else {
-						for (int j=0, ee=outs.size() ; j < ee ; j++) {
-							// one of these places must be in the trap
-							int ppid = outs.keyAt(j);
-							toass.add(ef.symbol("s"+ ppid));						
-						}
-					}
-					IExpr or = SMTUtils.makeOr(toass); 
-
-					// assert the constraint for this transition
-					IExpr constraint = ef.fcn(ef.symbol("=>"), ef.symbol("s"+pid), or);
-					//					if (toass.isEmpty()) {
-					//						// this can happen if only transitions take and put in the place
-					//						constraint = ef.fcn(ef.symbol("not"), ef.symbol("s"+pid));
-					//					}
-					sc.add(new C_assert(constraint));
-				}
-
-				execAndCheckResult(sc, solver);
-				String res = checkSat(solver);
-				if ("unsat".equals(res)) {
-					// meh, we (already) cannot build a trap
-					solver.exit();
-					return new ArrayList<>();
-				}
-			}
+			if (!addTransitionConstraints(solver, sr, ef))
+				return new ArrayList<>();
 			// looks real good, we have not obtained UNSAT yet
 
 			// try to minimize the trap
-			long ttime = System.currentTimeMillis();
-			List<IExpr> tosum = new ArrayList<>(sr.getPnames().size());
-			for (int i=0, e=sr.getPnames().size(); i < e; i++ ) {
-				IExpr ss = ef.symbol("s"+i);
-				tosum.add(ss);
-			}
-			solver.minimize(ef.fcn(ef.symbol("+"), tosum));
-			checkSat(solver,  false);
-			long minitime = (System.currentTimeMillis() - ttime);	
-
-			List<Boolean> trap = new ArrayList<>(sr.getPnames().size());
-			for (int i=0, e=sr.getPnames().size(); i < e; i++ ) {
-				trap.add(false);
-			}
-			queryBoolVariables(trap,solver);
-			List<Integer> res = new ArrayList<>();
-			int tsz = 0;
-			for (int i=0 ; i < trap.size() ; i++) {
-				if (trap.get(i)) {
-					res.add(srori.getPnames().indexOf(sr.getPnames().get(i)));
-					tsz++;
-				}
-			}
-			solver.exit();
-			Logger.getLogger("fr.lip6.move.gal").info("Deduced a trap "+ (DeadlockTester.DEBUG>=1 ? res : "")+"composed of "+tsz+" places in "+ (System.currentTimeMillis()-time) +" ms of which "+minitime+" ms to minimize.");
+			List<Integer> res = minimizeTrap(sr, srori, time, solver, ef, false);
 			
 			if (DEBUG >= 1)
-				confirmTrap(srori,res, solution);
+				confirmTrap(srori,res, solution,false);
 			return res;
 		}
 
@@ -360,16 +399,99 @@ public class SMTTrapUtils {
 	}
 
 
-	public static boolean trapsStillFeasible(StructuralReduction sr, SparseIntArray solution) {
-		boolean ok = false;
-		for (int i=0, ie = sr.getPnames().size() ; i < ie ; i++) {
-			if (sr.getMarks().get(i)>0 && solution.get(i)==0) {
-				ok=true;
-				break;
+	public static List<Integer> minimizeTrap(StructuralReduction sr, ISparsePetriNet srori, long time, ISolver solver,
+	IFactory ef) {
+		return minimizeTrap(sr, srori, time, solver, ef, false);
+	}
+
+
+	public static List<Integer> minimizeTrap(StructuralReduction sr, ISparsePetriNet srori, long time, ISolver solver,
+			IFactory ef, boolean alongPath) {
+		long ttime = System.currentTimeMillis();
+		List<IExpr> tosum = new ArrayList<>(sr.getPnames().size());
+		for (int i=0, e=sr.getPnames().size(); i < e; i++ ) {
+			IExpr ss = ef.symbol("s"+i);
+			tosum.add(ss);
+		}
+		solver.minimize(ef.fcn(ef.symbol("+"), tosum));
+		checkSat(solver,  false);
+		long minitime = (System.currentTimeMillis() - ttime);	
+
+		List<Boolean> trap = new ArrayList<>(sr.getPnames().size());
+		for (int i=0, e=sr.getPnames().size(); i < e; i++ ) {
+			trap.add(false);
+		}
+		queryBoolVariables(trap,solver);
+		List<Integer> res = new ArrayList<>();
+		int tsz = 0;
+		for (int i=0 ; i < trap.size() ; i++) {
+			if (trap.get(i)) {
+				res.add(srori.getPnames().indexOf(sr.getPnames().get(i)));
+				tsz++;
 			}
 		}
-		return ok;
+		solver.exit();
+		Logger.getLogger("fr.lip6.move.gal").info("Deduced a trap "+(alongPath?" along path ":"")+ (DEBUG>=1 ? res : "")+"composed of "+tsz+" places in "+ (System.currentTimeMillis()-time) +" ms of which "+minitime+" ms to minimize.");
+		return res;
 	}
+
+
+	public static boolean addTransitionConstraints(ISolver solver, StructuralReduction sr, IFactory ef) {
+		// transition constraints now
+		IntMatrixCol tflowPT = sr.getFlowPT().transpose();
+		// for each place p
+		for (int  pid = 0 ; pid < sr.getPnames().size() ; pid++)  {
+
+			//   for each transition t feeding from p
+			SparseIntArray tpt = tflowPT.getColumn(pid);
+
+			Script sc = new Script();
+
+			for (int i=0, e=tpt.size(); i < e ; i++ ) {
+				//        one place fed by t is in the set
+				int tid = tpt.keyAt(i);
+				SparseIntArray outs = sr.getFlowTP().getColumn(tid);
+				List<IExpr> toass = new ArrayList<>();
+
+				if (outs.size() == 0) {
+					// this is bad : this place cannot be in any trap
+					// just break out
+					sc.commands().clear();
+					IExpr constraint = ef.fcn(ef.symbol("not"), ef.symbol("s"+pid));
+					sc.add(new C_assert(constraint));
+					break;
+				} else if (outs.get(pid) > 0) {
+					// transition feeds back into p, this constraint is trivially satisfied, just remove it
+					continue;
+				} else {
+					for (int j=0, ee=outs.size() ; j < ee ; j++) {
+						// one of these places must be in the trap
+						int ppid = outs.keyAt(j);
+						toass.add(ef.symbol("s"+ ppid));						
+					}
+				}
+				IExpr or = SMTUtils.makeOr(toass); 
+
+				// assert the constraint for this transition
+				IExpr constraint = ef.fcn(ef.symbol("=>"), ef.symbol("s"+pid), or);
+				//					if (toass.isEmpty()) {
+				//						// this can happen if only transitions take and put in the place
+				//						constraint = ef.fcn(ef.symbol("not"), ef.symbol("s"+pid));
+				//					}
+				sc.add(new C_assert(constraint));
+			}
+
+			execAndCheckResult(sc, solver);
+			String res = checkSat(solver);
+			if ("unsat".equals(res)) {
+				// meh, we (already) cannot build a trap
+				solver.exit();
+				return false;
+			}
+		}
+		return true;
+	}
+
 
 
 	public static void iterateReductions(StructuralReduction sr) {
@@ -407,29 +529,44 @@ public class SMTTrapUtils {
 	}
 
 
-	public static void dropIrrelevantPlaces(StructuralReduction sr, SparseIntArray solution,
-			SparseBoolArray declaredVars) {
-		List<Integer> todrop = new ArrayList<>(solution.size());
-		for (int i=solution.size()-1 ; i >= 0 ; i --) {
-			todrop.add(solution.keyAt(i));
-		}
-		if (declaredVars != null) {
+	private static void addIfNotPresent(Set<Integer> set, SparseIntArray present, int sz) {
+		if (present != null) {
 			int pid = 0;
-			for (int i = 0, ie = declaredVars.size(); i < ie; i++) {
-				int p = declaredVars.keyAt(i);
+			for (int i = 0, ie = present.size(); i < ie; i++) {
+				int p = present.keyAt(i);
 				for (; pid < p; pid++) {
-					todrop.add(pid);
+					set.add(pid);
 				}
 				pid = p+1;
 			}
-			if (pid < sr.getPlaceCount()) {
-				for (; pid < sr.getPlaceCount(); pid++) {
-					todrop.add(pid);
-				}
+			for (; pid < sz; pid++) {
+				set.add(pid);
 			}
 		}
-		todrop = new ArrayList<>(new HashSet<>(todrop));
-		sr.dropPlaces(todrop, false, false,"");
+	}
+
+	
+	private static void addIfNotPresent(Set<Integer> set, SparseBoolArray present, int sz) {
+		if (present != null) {
+			int pid = 0;
+			for (int i = 0, ie = present.size(); i < ie; i++) {
+				int p = present.keyAt(i);
+				for (; pid < p; pid++) {
+					set.add(pid);
+				}
+				pid = p+1;
+			}
+			for (; pid < sz; pid++) {
+				set.add(pid);
+			}
+		}
+	}
+
+
+	public static void addKeysToSet(Set<Integer> set, SparseIntArray array) {
+		for (int i=array.size()-1 ; i >= 0 ; i --) {
+			set.add(array.keyAt(i));
+		}
 	}
 
 	
@@ -438,7 +575,7 @@ public class SMTTrapUtils {
 	}
 
 
-	private static void confirmTrap(ISparsePetriNet sr, List<Integer> trap, SparseIntArray state) {
+	private static void confirmTrap(ISparsePetriNet sr, List<Integer> trap, SparseIntArray state, boolean alongPath) {
 		if (trap.isEmpty())
 			return;
 		Set<Integer> targets = new HashSet<>(trap);
@@ -472,6 +609,14 @@ public class SMTTrapUtils {
 				System.err.println("This trap is already marked !");
 				return;
 			}
+		}
+		if (alongPath) {
+			for (int i : trap) {
+				if (sr.getMarks().get(i) > 0) {
+					System.err.println("This trap is initially marked !");
+					return;
+				}
+			}	
 		}
 		System.err.println("Trap OK");
 	}
