@@ -40,15 +40,14 @@ public class Problem {
 		support.addVars("s", s);
 
 		IExpr smt = predicate.accept(new ExprTranslator());
-		IFactory ef = new SMT().smtConfig.exprFactory;
+		IFactory ef = SMT.instance.smtConfig.exprFactory;
 		symbol = ef.symbol(name);
 		definition = declareBoolFunc(symbol, smt);
 	}
 
 	public static ICommand declareBoolFunc(ISymbol name, IExpr body) {
-		SMT fac = new SMT();
-		IFactory ef = fac.smtConfig.exprFactory;
-		org.smtlib.ISort.IApplication bools = fac.smtConfig.sortFactory.createSortExpression(ef.symbol("Bool"));		
+		IFactory ef = SMT.instance.smtConfig.exprFactory;
+		org.smtlib.ISort.IApplication bools = SMT.instance.smtConfig.sortFactory.createSortExpression(ef.symbol("Bool"));		
 		C_define_fun def = new org.smtlib.command.C_define_fun(name, // name
 				Collections.emptyList(), // parameters
 				bools, // return type
@@ -61,7 +60,7 @@ public class Problem {
 		if (refinedSymbol != null) {
 			throw new IllegalStateException("Refinement already done.");
 		}
-		IFactory ef = new SMT().smtConfig.exprFactory;
+		IFactory ef = SMT.instance.smtConfig.exprFactory;
 		this.refinedSymbol = ef.symbol(name + "_refined");
 		IExpr refinedBody = SMTUtils.makeAnd(Arrays.asList(symbol, additionalConstraint));
 		ICommand def = declareBoolFunc(refinedSymbol, refinedBody);
