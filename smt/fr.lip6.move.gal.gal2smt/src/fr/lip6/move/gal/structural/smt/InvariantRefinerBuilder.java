@@ -24,7 +24,7 @@ public class InvariantRefinerBuilder {
 	public static List<IRefiner> buildInvariantRefiners(IntMatrixCol effects, List<Integer> marks) {
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(effects);
 		// splitting posneg from pure positive
-		IFactory efactory = new SMT().smtConfig.exprFactory;
+		IFactory efactory = SMT.instance.smtConfig.exprFactory;
 		StaticRefiner invpos = new StaticRefiner("Positive P Invariants (semi-flows)");
 		StaticRefiner invneg = new StaticRefiner("Generalized P Invariants (flows)");
 		for (SparseIntArray invariant : invar) {
