@@ -19,10 +19,14 @@ public class TrapRefiner implements IRefiner {
     private ISparsePetriNet net;
 
     public TrapRefiner(ISparsePetriNet net) {
-        this.net = net;
-        this.knownTraps = new StaticRefiner("Known Traps");
+        this(net,"Known Traps");
     }
 
+    protected TrapRefiner(ISparsePetriNet net, String name) {
+        this.net = net;
+        this.knownTraps = new StaticRefiner(name);
+    }
+    
     @Override
     public int refine(SolverState solver, ProblemSet problems, RefinementMode mode, VarSet current, long timeout) {
         int totalConstraints =0;
@@ -63,6 +67,11 @@ public class TrapRefiner implements IRefiner {
             	totalConstraints += constraintsAdded;
             	return totalConstraints;
             }
+            if (knownTraps.unappliedCount() > 0) {
+            	// let's not compute more traps, those we have are not in scope of declared vars
+            	return 0;
+            }
+            	
         	for (Problem problem : problems.getUnsolved()) {
         		while (true) {
         			// we need witness to find traps
@@ -81,6 +90,8 @@ public class TrapRefiner implements IRefiner {
         				int added = knownTraps.refine(solver, problems, mode, current, timeout);
         				totalConstraints += added;
         				constraintsAdded += added;
+        				if (added == 0)
+        					break;
         			} else {
         				break;
         			}
@@ -133,7 +144,7 @@ public class TrapRefiner implements IRefiner {
     }
 
 	public static IExpr buildTrapExpression(List<Integer> trap) {
-		IFactory ef = new SMT().smtConfig.exprFactory;
+		IFactory ef = SMT.instance.smtConfig.exprFactory;
 		List<IExpr> vars = trap.stream().map(n -> ef.symbol("s"+n)).collect(Collectors.toList());
 		IExpr sum = buildSum(vars);
 		IExpr trapPredicate = ef.fcn(ef.symbol(">="), sum , ef.numeral(1));
