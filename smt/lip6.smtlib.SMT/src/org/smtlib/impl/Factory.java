@@ -177,9 +177,10 @@ public class Factory implements IExpr.IFactory, ISort.IFactory {
 		return new HexLiteral(v);
 	}
 
+	private UniqueTable<Symbol> symbols = new UniqueTable<>();
 	@Override
 	public ISymbol symbol(String v) {
-		return new Symbol(v);
+		return symbols.canonical(new Symbol(v));
 	}
 
 	@Override
