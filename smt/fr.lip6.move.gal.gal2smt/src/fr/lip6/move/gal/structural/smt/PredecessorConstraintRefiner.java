@@ -107,7 +107,7 @@ public class PredecessorConstraintRefiner implements IRefiner {
 		SparseIntArray supp = SMTUtils.computeSupport(ap);
 
 
-		IFactory ef = new SMT().smtConfig.exprFactory;
+		IFactory ef = SMT.instance.smtConfig.exprFactory;
 
 		List<IExpr> allPotentialPred = new ArrayList<>();
 
