@@ -43,6 +43,8 @@ import org.smtlib.activator.SMTActivator;
  */
 public class SMT {
 	
+	public static final SMT instance = new SMT();
+	
 	public Properties props;
 	
 	static public interface IConfiguration {} // FIXME - do we need this?
