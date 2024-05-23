@@ -72,6 +72,7 @@ public class SMTBasedReachabilitySolver {
 
 		refiners.add(new TrapRefiner(spn));
 
+		refiners.add(new TrapAlongPathRefiner(spn, effects, repr));
 
 		try {
 			solve (refiners, problems, solver, timeout, withWitness);
@@ -89,6 +90,7 @@ public class SMTBasedReachabilitySolver {
 			}
 			System.out.println("After SMT, in "+(System.currentTimeMillis()-time)+"ms problems are : "+problems);
 		} catch (Exception e) {
+			problems.update();
 			System.out.println("SMT process timed out in "+(System.currentTimeMillis()-time)+"ms, After SMT, problems are : "+problems);
 		}
 		return problems.getSolved().size() - initial;
