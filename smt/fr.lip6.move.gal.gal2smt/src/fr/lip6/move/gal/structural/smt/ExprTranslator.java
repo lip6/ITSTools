@@ -20,7 +20,7 @@ import fr.lip6.move.gal.structural.expr.TransRef;
 import fr.lip6.move.gal.structural.expr.VarRef;
 
 public class ExprTranslator implements ExprVisitor<IExpr> {
-	private IFactory ef= new SMT().smtConfig.exprFactory;
+	private IFactory ef= SMT.instance.smtConfig.exprFactory;
 
 	@Override
 	public IExpr visit(VarRef varRef) {
