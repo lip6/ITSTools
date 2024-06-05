@@ -5,12 +5,16 @@
  */
 package org.smtlib.solvers;
 
+import java.io.BufferedReader;
+import java.io.File;
+
 // Items not implemented:
 //   attributed expressions
 //   get-values get-assignment get-proof get-unsat-core
 //   some error detection and handling
 
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
@@ -170,6 +174,21 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 		} catch (IOException e) {
 			return smtConfig.responseFactory.error("Error writing to Z3 solver: " + e);
 		}
+	}
+	
+	@Override
+	public IResponse readFile(File file) throws IOException {
+		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+			String line;
+			IResponse response = smtConfig.responseFactory.success();
+			while ((line = reader.readLine()) != null) {				
+				//solverProcess.sendNoListen(line);
+				response = sendCommand(line+"\n");
+				if (response.isError())
+					return response;
+			}
+			return response;
+		}		
 	}
 
 	/** Translates an S-expression into Z3 syntax */

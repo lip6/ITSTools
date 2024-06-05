@@ -5,6 +5,9 @@
  */
 package org.smtlib;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.smtlib.ICommand.Ideclare_fun;
 import org.smtlib.ICommand.Ideclare_sort;
 import org.smtlib.ICommand.Idefine_fun;
@@ -146,6 +149,8 @@ public interface ISolver {
 	IResponse get_info(IKeyword option);
 
 	IResponse get_model();
+	
+	default IResponse readFile(File file) throws IOException { return smt().responseFactory.error("Read file : Unimplemented for this solver."); }
 	
 	default IResponse maximize(IExpr expr) { return smt().responseFactory.error("Maximize : Unimplemented for this solver."); }
 	default IResponse minimize(IExpr expr) { return smt().responseFactory.error("Minimize : Unimplemented for this solver."); }
