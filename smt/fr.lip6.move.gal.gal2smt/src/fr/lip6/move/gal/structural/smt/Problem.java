@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.structural.smt;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -26,6 +28,7 @@ public class Problem {
 	
 	private CandidateSolution solution = new CandidateSolution();
 	private boolean isEF;
+	private String smtFile;
 
 	public Problem(String name, boolean isEF, Expression pred) {
 		this.name = name;
@@ -43,6 +46,17 @@ public class Problem {
 		IFactory ef = SMT.instance.smtConfig.exprFactory;
 		symbol = ef.symbol(name);
 		definition = declareBoolFunc(symbol, smt);
+	}
+
+	public Problem(String name, String smtFile, ISymbol symbol, VarSet support) {
+		this.name = name;
+		this.symbol = symbol;
+		this.predicate = null;
+		this.support = support;
+		this.definition = null;
+		this.refinedSymbol = null;
+		this.isEF = true;
+		this.smtFile = smtFile;
 	}
 
 	public static ICommand declareBoolFunc(ISymbol name, IExpr body) {
@@ -69,8 +83,21 @@ public class Problem {
 	
 	public boolean declareProblem(SolverState solver) {
 		solver.declareVars(support);
-		IResponse response = definition.execute(solver.getSolver());
-		return response.isOK();
+		if (definition == null) {
+			if (smtFile != null) {
+				try {
+					return solver.getSolver().readFile(new File(smtFile)).isOK();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				throw new IllegalStateException("No definition for problem " + name);
+			}
+		} else {
+			IResponse response = definition.execute(solver.getSolver());
+			return response.isOK();
+		}
+		return false;
 	}
 	
 	
