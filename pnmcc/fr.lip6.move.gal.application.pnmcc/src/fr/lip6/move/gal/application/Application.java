@@ -48,9 +48,11 @@ import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;
 import fr.lip6.move.gal.application.runner.smt.SMTRunner;
 import fr.lip6.move.gal.application.runner.spot.SpotLTLRunner;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
+import fr.lip6.move.gal.application.solver.ExclusiveImplicantsComputer;
 import fr.lip6.move.gal.application.solver.GALSolver;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.application.solver.UpperBoundsSolver;
+import fr.lip6.move.gal.application.solver.ExclusiveImplicantsComputer.Constraint;
 import fr.lip6.move.gal.application.solver.global.DeadlockSolver;
 import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.application.solver.logic.AtomicReducerSR;
@@ -88,6 +90,7 @@ import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.serialization.SerializationUtil;
+import smtanalysis.SMTAnalyzer;
 
 /**
  * This class controls all aspects of the application's execution
@@ -150,7 +153,8 @@ public class Application implements IApplication, Ender {
 	private static final String PSEMIFLOW="--Psemiflows";
 	private static final String TFLOW="--Tflows";
 	private static final String TSEMIFLOW="--Tsemiflows";
-
+	private static final String STUDYSMT="--studySMT";
+	
 	private List<IRunner> runners = new ArrayList<>();
 
 	private static Logger logger = Logger.getLogger("fr.lip6.move.gal");
@@ -239,6 +243,7 @@ public class Application implements IApplication, Ender {
 		boolean genDeadTransitions = false;
 		boolean genDeadPlaces = false;
 
+		boolean studySMT = false;
 		boolean noSLCLtest = false;
 
 		boolean analyzeSensitivity = false;
@@ -318,6 +323,8 @@ public class Application implements IApplication, Ender {
 			} else if (SKELETON.equals(args[i])) {
 				unfold = true;
 				skeleton = true;
+			} else if (STUDYSMT.equals(args[i])) {
+				studySMT = true;
 			} else if (NOSIMPLIFICATION.equals(args[i])) {
 				nosimplifications = true;
 			} else if (APPLYSR.equals(args[i])) {
@@ -398,11 +405,21 @@ public class Application implements IApplication, Ender {
 			return null;
 		}
 
+		if (studySMT) {
+			SMTAnalyzer analyzer = new SMTAnalyzer();
+			analyzer.analyze(reader, pwd);
+			return IApplication.EXIT_OK;
+		}
+		
 		if (analyzeSensitivity) {
 			SpotRunner spot = new SpotRunner(10);
 			LTLLengthSensitivityAnalyzer.doSensitivityAnalysis(reader,spot,pwd,examination,"");
 			return IApplication.EXIT_OK;
 		}
+		
+//		for (Constraint c : ExclusiveImplicantsComputer.studyImplicants(reader)) {
+//			System.out.println(c.printConstraint(reader.getSPN()));
+//		}
 
 		if (invariants) {
 			reader.createSPN(false,false);
