@@ -32,16 +32,20 @@ public class PredecessorConstraintRefiner implements IRefiner {
 		}
 		for (Problem p : problems.getUnsolved()) {
 			Expression ap = p.getPredicate();
-			try {
-				IExpr pred = computePredExpr(ap, effects, repr, spn);
-				if (pred != null) {
-					definitions.put(p.getName(), pred);
-					VarSet s = SMTUtils.computeSupport(pred);
-					support.put(p.getName(), s);
-					doneProblems.add(p.getName());
+			if (ap == null) {
+				doneProblems.add(p.getName());
+			} else {
+				try {
+					IExpr pred = computePredExpr(ap, effects, repr, spn);
+					if (pred != null) {
+						definitions.put(p.getName(), pred);
+						VarSet s = SMTUtils.computeSupport(pred);
+						support.put(p.getName(), s);
+						doneProblems.add(p.getName());
+					}
+				} catch (OutOfMemoryError e) {
+					System.out.println("Out of memory, skipping this problem.");
 				}
-			} catch (OutOfMemoryError e) {
-				System.out.println("Out of memory, skipping this problem.");
 			}
 		}
 	}
