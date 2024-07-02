@@ -3,22 +3,28 @@ package fr.lip6.mist.io;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import fr.lip6.mist.io.lola.LolaImporter;
 import fr.lip6.mist.io.lola.LolaTaskImporter;
 import fr.lip6.mist.io.pnet.PnetImporter;
+import fr.lip6.mist.io.properties.PropertiesImporter;
+import fr.lip6.mist.io.properties.PropertiesToPNML;
 import fr.lip6.mist.io.selt.SeltTaskImporter;
 import fr.lip6.mist.io.spec.SpecImporter;
 import fr.lip6.mist.io.tpn.TpnImporter;
 import fr.lip6.move.gal.mcc.properties.MCCExporter;
 import fr.lip6.move.gal.pnml.togal.PnmlToStructuralTransformer;
 import fr.lip6.move.gal.structural.FlowPrinter;
+import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 
 public class ConverterMain {
 
 	private static final String CONVERT_FLAG = "-convert";
+	private static final String FORMULA_FLAG = "-formula";
 	private static final String OUT_FOLDER = "-o";
 	private static final String DOT_OUT = "-dot";
 	private static final String SELT_FLAG = "-selt";
@@ -33,10 +39,14 @@ public class ConverterMain {
 		String ff = null;
 		String folder = ".";
 		boolean doDotOutput=false;
+		boolean isFormula = false;
 		int firstSelt = -1;
 		for (int i=0; i < args.length ; i++) {
 			if (CONVERT_FLAG.equals(args[i])) {
 				ff = args[++i];
+			} else if (FORMULA_FLAG.equals(args[i])) {
+				ff = args[++i];
+				isFormula = true;
 			} else if (OUT_FOLDER.equals(args[i])) {
 				folder = args[++i];
 			} else if (DOT_OUT.equals(args[i])) {
@@ -50,7 +60,7 @@ public class ConverterMain {
 		// argument validity checks
 		{
 			if (ff == null) {
-				System.err.println("Please provide input file after -convert option");
+				System.err.println("Please provide input file after -convert/-formula option");
 				return ;
 			}
 
@@ -63,6 +73,20 @@ public class ConverterMain {
 		}
 		System.out.println("Transforming source file at : " + ff + " to folder " + folder);
 
+		if (isFormula) {
+			
+			try {
+				PropertiesImporter pi = new PropertiesImporter();
+				Map<String, Integer> vars = new HashMap<>();
+				List<Property> props = pi.parseFile(ff, vars);
+				System.out.println("Parsed properties :" + props);
+				PropertiesToPNML.transform(props, vars, folder + "/properties.xml");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return;
+		}
+		
 		try {
 			SparsePetriNet pn = null;
 			if (ff.endsWith(".spec")) {
