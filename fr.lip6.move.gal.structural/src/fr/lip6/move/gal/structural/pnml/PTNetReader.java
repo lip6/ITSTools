@@ -3,6 +3,9 @@
  */
 package fr.lip6.move.gal.structural.pnml;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;
@@ -22,6 +25,13 @@ public final class PTNetReader {
 	private static final Logger LOGGER = Logger.getLogger("fr.lip6.move.gal"); //$NON-NLS-1$
 	private SparsePetriNet net = null;
 
+	public SparsePetriNet loadFromXML(File ff) throws IOException,IllegalArgumentException {
+		try (BufferedInputStream fis = new BufferedInputStream(new FileInputStream(ff))) {
+			return loadFromXML(fis);
+		} 
+	}
+		
+	
 	/**
 	 * @param stringBuffer URI du fichier XML contenant le modèle à charger
 	 * @param formalism formalism read
