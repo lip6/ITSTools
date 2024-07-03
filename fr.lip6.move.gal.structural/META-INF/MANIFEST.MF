@@ -11,5 +11,6 @@ Export-Package: android.util,
  fr.lip6.move.gal.structural,
  fr.lip6.move.gal.structural.expr,
  fr.lip6.move.gal.structural.hlpn,
+ fr.lip6.move.gal.structural.pnml,
  fr.lip6.move.gal.util
 Bundle-Vendor: LIP6
