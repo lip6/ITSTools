@@ -16,10 +16,10 @@ import fr.lip6.mist.io.selt.SeltTaskImporter;
 import fr.lip6.mist.io.spec.SpecImporter;
 import fr.lip6.mist.io.tpn.TpnImporter;
 import fr.lip6.move.gal.mcc.properties.MCCExporter;
-import fr.lip6.move.gal.pnml.togal.PnmlToStructuralTransformer;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.pnml.PTNetReader;
 
 public class ConverterMain {
 
@@ -101,8 +101,8 @@ public class ConverterMain {
 				pn = readLolaTaskFile(ff, folder);
 			} else if (ff.endsWith(".pnml")) {
 				File fff = new File(ff);
-				PnmlToStructuralTransformer transPN = new PnmlToStructuralTransformer();
-				pn = transPN.transformPT(fff.toURI());
+				PTNetReader reader = new PTNetReader();
+				pn = reader.loadFromXML( fff);
 				if (pn == null) {
 					System.err.println("PNML file at "+ff+ " contains a Colored net. Please ask us if you'd like support for unfolding in such cases.");
 					throw new IOException("Cannot parse colored pnml file "+fff.getAbsolutePath());
