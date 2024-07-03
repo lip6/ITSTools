@@ -1,4 +1,4 @@
-package fr.lip6.mist.io;
+package fr.lip6.converter;
 
 import java.io.File;
 import java.io.IOException;

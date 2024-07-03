@@ -7,4 +7,9 @@ Automatic-Module-Name: fr.lip6.lola
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: fr.lip6.move.gal.structural,
  org.antlr.antlr4-runtime;bundle-version="4.13.1"
-Export-Package: fr.lip6.mist.io
+Export-Package: fr.lip6.mist.io.lola,
+ fr.lip6.mist.io.pnet,
+ fr.lip6.mist.io.properties,
+ fr.lip6.mist.io.selt,
+ fr.lip6.mist.io.spec,
+ fr.lip6.mist.io.tpn
