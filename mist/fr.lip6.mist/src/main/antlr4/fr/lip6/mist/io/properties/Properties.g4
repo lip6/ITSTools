@@ -5,7 +5,7 @@ grammar Properties;
 property "ReachabilityProperty1" [reachable] : "P1" + P2 <= 5;
 property "InvariantProperty1" [invariant] : P1 + P2 > 5;
 property "AP1" [atom] : P1 <= P2;
-property "RefAtom" [reachable] : AP1;
+property "RefAtom" [reachable] : @ AP1;
 property "CTLProperty1" [ctl] : AG(P1 <= 10 && P2 > 3);
 property "CTLProperty2" [ctl] : E (P1 <= 10) U (P2 > 3);
 property "LTLProperty1" [ltl] : G(P1 <= 10);
@@ -62,7 +62,7 @@ ctlProp
     ;
 
 ltlProp
-    : '[' 'ltl' ']' ':' predicate=ltlUntil
+    : '[' 'ltl' ']' ':' predicate=ltlImply
     ;
 
 /* =====   Arithmetic expressions ===== */
@@ -163,7 +163,8 @@ ltlUntil
     ;
 
 ltlFutGen
-    : op=('F'|'G')? left=ltlNext
+    : (op=('F'|'G') left=ltlFutGen)
+    | ltlNext
     ;
 
 ltlNext
