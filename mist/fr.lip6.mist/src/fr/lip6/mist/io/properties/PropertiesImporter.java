@@ -359,7 +359,7 @@ public class PropertiesImporter {
 		@Override
 		public Expression visitLtlFutGen(LtlFutGenContext ctx) {
 			if (ctx.op == null) {
-				return ctx.left.accept(this);
+				return super.visitLtlFutGen(ctx);
 			} else {
 				Op op = readOp(ctx.op.getText());
 				return Expression.nop(op, ctx.left.accept(this));
