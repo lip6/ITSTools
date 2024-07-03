@@ -19,7 +19,6 @@ import fr.lip6.mist.io.selt.SeltParser.ConstantContext;
 import fr.lip6.mist.io.selt.SeltParser.CtlContext;
 import fr.lip6.mist.io.selt.SeltParser.ExprContext;
 import fr.lip6.mist.io.selt.SeltParser.PlacerefContext;
-import fr.lip6.move.gal.pnml.togal.utils.Utils;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -29,6 +28,16 @@ import fr.lip6.move.gal.structural.expr.Op;
 public class SeltTaskImporter {
 
 	Map<String,Integer> pmap = new HashMap<>();
+	
+	public static String normalizeName(String text) {
+		String res = text.replace(' ', '_');
+		res = res.replace('-', '_');
+		res = res.replace('/', '_');
+		res = res.replace('*', 'x');
+		res = res.replace('=', '_');
+		
+		return res;
+	}
 	
 	public boolean loadSeltTask (String path, SparsePetriNet pn) throws IOException {
 		long time = System.currentTimeMillis();
@@ -69,7 +78,7 @@ public class SeltTaskImporter {
 			String pname = ctx.name.getText();
 			if (pname.startsWith("{") && pname.endsWith("}")) {
 				pname = pname.substring(1,pname.length()-1);
-				pname = Utils.normalizeName(pname);
+				pname = normalizeName(pname);
 			}
 			
 			Integer ppid = pmap.get(pname);
