@@ -9,7 +9,6 @@ import java.util.List;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
-import fr.lip6.mist.io.ConverterMain;
 import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.LTLProp;
 import fr.lip6.move.gal.Property;
@@ -43,9 +42,6 @@ public class Application implements IApplication {
 		List<String> listArgs = Arrays.asList(args);
 		if (listArgs.contains("-pnfolder")) {
 			return new fr.lip6.move.gal.application.Application().start(context);
-		} else if (listArgs.contains("-convert")) {
-			ConverterMain.main(args);
-			return IApplication.EXIT_OK;
 		}
 		String inputff = null;
 		String inputType = null;
