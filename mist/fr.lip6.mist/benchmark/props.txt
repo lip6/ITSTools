@@ -1,3 +1,4 @@
+property fair [ltl] : G F ("A">=1) && G F ("B">=1 );
 property "ReachabilityProperty1" [reachable] : "P1" + P2 <= 5;
 property "InvariantProperty1" [invariant] : P1 + P2 > 5 || false;
 property "AP1" [atom] : P1 <= P2;
