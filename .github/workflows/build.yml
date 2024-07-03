@@ -59,6 +59,8 @@ jobs:
         cd ..
     - name: Clean up temporary files
       run: rm -rf website/temp
+    - name: Build converter jar
+      run: cd mist/fr.lip6.converter && mvn install ; cp target/*.jar ../../website/ ; ls ../../website/
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@v4.5.0
       with:
