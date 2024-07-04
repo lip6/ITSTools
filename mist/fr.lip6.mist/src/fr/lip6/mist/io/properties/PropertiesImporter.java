@@ -47,11 +47,18 @@ public class PropertiesImporter {
 	}
 	
 	
-	class PropertiesVisitor extends PropertiesBaseVisitor<Expression> {
+	private static class PropertiesVisitor extends PropertiesBaseVisitor<Expression> {
 
 		private List<Property> list;
 		private Map<String,Expression> atoms = new HashMap<>();
+		private Map<String,Property> propMap = new HashMap<>();
+		
 		private Map<String, Integer> variables;
+		
+		private static enum ContextType {
+			CTL, LTL, BOUNDS, INVARIANT
+		}
+		private ContextType context;
 
 		public PropertiesVisitor(List<Property> list, Map<String, Integer> vars) {
 			this.list = list;
@@ -73,12 +80,14 @@ public class PropertiesImporter {
 				LogicPropContext logic = prop.logicProp();
 				if (logic.boundsProp() != null) {
 					type = PropertyType.BOUNDS;
+					context = ContextType.BOUNDS;
 					expr = logic.boundsProp().target.accept(this);
                 } else {
                 	BoolPropContext boolProp = logic.boolProp();
 
                 	if (boolProp.reachableProp() != null) {
                 		type = PropertyType.INVARIANT;
+                		context = ContextType.INVARIANT;
                 		ReachablePropContext rp = boolProp.reachableProp();
 						if ("EF".equals(rp.op.getText())) {
 							expr = Expression.nop(Op.EF, rp.predicate.accept(this));
@@ -87,12 +96,15 @@ public class PropertiesImporter {
 						}
                 	} else if (boolProp.ctlProp() != null) {
                 		type = PropertyType.CTL;
+                		context = ContextType.CTL;
                 		expr = boolProp.ctlProp().predicate.accept(this);
                 	} else if (boolProp.ltlProp() != null) {
                 		type = PropertyType.LTL;
+                		context = ContextType.LTL;
                 		expr = boolProp.ltlProp().predicate.accept(this);
                 	} else if (boolProp.atomicProp() != null) {
-                		// special case                			
+                		// special case
+                		context = ContextType.INVARIANT;
                 		expr = boolProp.atomicProp().predicate.accept(this);
                 		atoms.put(name, expr);
                 		// next property
@@ -104,6 +116,7 @@ public class PropertiesImporter {
 				
 				Property newprop = new Property(expr, type, name);				
 				list.add(newprop);
+				propMap.put(name, newprop);
 			}
 			return super.visitProperties(ctx);
 		}
@@ -166,7 +179,18 @@ public class PropertiesImporter {
 			String name = ctx.name.getText();
 			Expression expr = atoms.get(name);
 			if (expr == null) {
-				throw new IllegalArgumentException("Unknown atomic property " + name);
+				Property refd = propMap.get(name);
+				if (refd != null) {
+					if (refd.getType() == PropertyType.LTL && context == ContextType.LTL) {
+						return refd.getBody();
+					} else if ( (refd.getType() == PropertyType.CTL || refd.getType() == PropertyType.INVARIANT) && context == ContextType.CTL) {
+						return refd.getBody();
+					} else {
+						throw new IllegalArgumentException("Cannot refer to property "+ name+ " with type " + refd.getType() + " from the context of " + context);
+					}
+				} else {
+					throw new IllegalArgumentException("Unknown property reference @" + name);
+				}
 			} else {
 				return expr;
 			}
