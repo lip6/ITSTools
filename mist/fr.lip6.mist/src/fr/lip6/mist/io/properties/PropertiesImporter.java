@@ -77,13 +77,14 @@ public class PropertiesImporter {
                 } else {
                 	BoolPropContext boolProp = logic.boolProp();
 
-                	if (boolProp.safetyProp() != null) {
+                	if (boolProp.reachableProp() != null) {
                 		type = PropertyType.INVARIANT;
-                		if (boolProp.safetyProp().reachableProp() != null) {
-                			expr = Expression.nop(Op.EF, boolProp.safetyProp().reachableProp().predicate.accept(this));
-                		} else {
-                			expr = Expression.nop(Op.AG, boolProp.safetyProp().invariantProp().predicate.accept(this));
-                		}
+                		ReachablePropContext rp = boolProp.reachableProp();
+						if ("EF".equals(rp.op.getText())) {
+							expr = Expression.nop(Op.EF, rp.predicate.accept(this));
+						} else {
+							expr = Expression.nop(Op.AG, rp.predicate.accept(this));
+						}
                 	} else if (boolProp.ctlProp() != null) {
                 		type = PropertyType.CTL;
                 		expr = boolProp.ctlProp().predicate.accept(this);
