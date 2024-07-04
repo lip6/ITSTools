@@ -18,6 +18,7 @@ import fr.lip6.mist.io.tpn.TpnImporter;
 import fr.lip6.move.gal.mcc.properties.MCCExporter;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.Property;
+import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.pnml.PTNetReader;
 
@@ -25,6 +26,7 @@ public class ConverterMain {
 
 	private static final String CONVERT_FLAG = "-convert";
 	private static final String FORMULA_FLAG = "-formula";
+	private static final String EXAMINATION_FLAG = "-examination";
 	private static final String OUT_FOLDER = "-o";
 	private static final String DOT_OUT = "-dot";
 	private static final String SELT_FLAG = "-selt";
@@ -41,12 +43,15 @@ public class ConverterMain {
 		boolean doDotOutput=false;
 		boolean isFormula = false;
 		int firstSelt = -1;
+		String exam = null;
 		for (int i=0; i < args.length ; i++) {
 			if (CONVERT_FLAG.equals(args[i])) {
 				ff = args[++i];
 			} else if (FORMULA_FLAG.equals(args[i])) {
 				ff = args[++i];
 				isFormula = true;
+			} else if (EXAMINATION_FLAG.equals(args[i])) {
+				exam = args[++i];
 			} else if (OUT_FOLDER.equals(args[i])) {
 				folder = args[++i];
 			} else if (DOT_OUT.equals(args[i])) {
@@ -80,6 +85,19 @@ public class ConverterMain {
 				Map<String, Integer> vars = new HashMap<>();
 				List<Property> props = pi.parseFile(ff, vars);
 				System.out.println("Parsed properties :" + props);
+				if (exam != null) {
+					if (exam.startsWith("UpperBounds")) {
+						props.removeIf(p -> p.getType() != PropertyType.BOUNDS);
+					} else if (exam.startsWith("Reachability")) {
+						props.removeIf(p -> p.getType() != PropertyType.INVARIANT);
+					} else if (exam.startsWith("CTL")) {
+						props.removeIf(p -> p.getType() != PropertyType.CTL);
+					} else if (exam.startsWith("LTL")) {
+						props.removeIf(p -> p.getType() != PropertyType.LTL);
+					} else {
+						System.err.println("Unknown examination type "+exam + " not filtering formulas.");
+					}
+				}
 				PropertiesToPNML.transform(props, vars, folder + "/properties.xml");
 			} catch (IOException e) {
 				e.printStackTrace();
