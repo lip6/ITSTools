@@ -2,10 +2,10 @@ grammar Properties;
 
 
 /**
-property "ReachabilityProperty1" [reachable] : "P1" + P2 <= 5;
-property "InvariantProperty1" [invariant] : P1 + P2 > 5;
+property "ReachabilityProperty1" [reach] : EF "P1" + P2 <= 5;
+property "InvariantProperty1" [reach] : AG (P1 + P2 > 5);
 property "AP1" [atom] : P1 <= P2;
-property "RefAtom" [reachable] : @ AP1;
+property "RefAtom" [reach] : EF @AP1;
 property "CTLProperty1" [ctl] : AG(P1 <= 10 && P2 > 3);
 property "CTLProperty2" [ctl] : E (P1 <= 10) U (P2 > 3);
 property "LTLProperty1" [ltl] : G(P1 <= 10);
@@ -30,15 +30,10 @@ logicProp
     ;
 
 boolProp
-    : safetyProp
+    : reachableProp
     | ctlProp
     | ltlProp
     | atomicProp
-    ;
-
-safetyProp
-    : reachableProp
-    | invariantProp
     ;
 
 boundsProp
@@ -46,11 +41,7 @@ boundsProp
     ;
 
 reachableProp
-    : '[' 'reachable' ']' ':' predicate=pOr
-    ;
-
-invariantProp
-    : '[' 'invariant' ']' ':' predicate=pOr
+    : '[' 'reach' ']' ':' op=('AG'|'EF') predicate=pOr
     ;
 
 atomicProp
