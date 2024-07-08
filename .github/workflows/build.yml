@@ -62,7 +62,7 @@ jobs:
     - name: Build converter jar
       run: cd mist/fr.lip6.converter && mvn install ; cp target/*.jar ../../website/ ; ls ../../website/
     - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@v4.5.0
+      uses: JamesIves/github-pages-deploy-action@v4.6.3
       with:
           branch: gh-pages # The branch the action should deploy to.
           folder: website/ # The folder the action should deploy.
