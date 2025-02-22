@@ -1,23 +1,6 @@
-/**
- * Copyright (c) 2006-2010 MoVe - Laboratoire d'Informatique de Paris 6 (LIP6).
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *   Jean-Baptiste VORON (LIP6) - Project Head / Initial contributor
- *   Clément DÉMOULINS (LIP6) - Project Manager
- *   Yann THIERRY-MIEG (LIP6)
- *
- * Official contacts:
- *   coloane@lip6.fr
- *   http://coloane.lip6.fr
- */
 package fr.lip6.move.gal.structural.pnml;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,9 +57,9 @@ public class PTNetHandler extends DefaultHandler {
 
 	private String lastseen = null;
 	private boolean readtext = false;
-
 	private Long lastint = null;
 	private boolean readint = false;
+	private StringBuilder textBuffer = new StringBuilder(); // Added for text accumulation
 
 	// private NupnHandler nupnHandler;
 
@@ -89,14 +72,8 @@ public class PTNetHandler extends DefaultHandler {
 	public void characters(char[] chars, int beg, int length) throws SAXException {
 		if (inOpaqueToolSpecific) {
 			return;
-		} else if (doIt) {
-			if (readtext) {
-				String laststr = new String(Arrays.copyOfRange(chars, beg, beg + length));
-				lastseen = laststr;
-			} else if (readint) {
-				String laststr = new String(Arrays.copyOfRange(chars, beg, beg + length));
-				lastint = Long.parseLong(laststr);
-			}
+		} else if (doIt && (readtext || readint)) {
+			textBuffer.append(chars, beg, length); // Accumulate text
 		}
 	}
 
@@ -116,7 +93,7 @@ public class PTNetHandler extends DefaultHandler {
 			stack.push(net);
 		} else if ("name".equals(baliseName)) {
 			readtext = true;
-
+			textBuffer.setLength(0); // Clear buffer
 		} else if ("page".equals(baliseName)) {
 			// ignore pages
 		} else if ("place".equals(baliseName)) {
@@ -127,8 +104,10 @@ public class PTNetHandler extends DefaultHandler {
 			stack.push(place);
 		} else if ("initialMarking".equals(baliseName)) {
 			readint = true;
+			textBuffer.setLength(0); // Clear buffer
 		} else if ("inscription".equals(baliseName)) {
 			readint = true;
+			textBuffer.setLength(0); // Clear buffer
 		} else if ("transition".equals(baliseName)) {
 			String id = normalizeName(attributes.getValue("id"));
 			int tindex = net.addTransition(id);
@@ -180,6 +159,7 @@ public class PTNetHandler extends DefaultHandler {
 			assert (stack.isEmpty());
 		} else if ("name".equals(baliseName)) { //$NON-NLS-1$
 			Object context = stack.peek();
+			lastseen = textBuffer.toString().trim();
 			if (context instanceof SparsePetriNet spn) {
 				spn.setName(lastseen);
 			} else if (context instanceof Node node) {
@@ -196,6 +176,7 @@ public class PTNetHandler extends DefaultHandler {
 			}
 			readtext = false;
 			lastseen = null;
+			textBuffer.setLength(0);
 		} else if ("page".equals(baliseName)) { //$NON-NLS-1$
 		} else if ("place".equals(baliseName)) {
 			stack.pop();
@@ -207,14 +188,18 @@ public class PTNetHandler extends DefaultHandler {
 			doIt = false;
 		} else if ("initialMarking".equals(baliseName)) {
 			Node p = (Node) stack.peek();
+			lastint = Long.parseLong(textBuffer.toString().trim());
 			net.getMarks().set(p.index, Math.toIntExact(lastint));
 			readint = false;
 			lastint = null;
+			textBuffer.setLength(0);
 		} else if ("inscription".equals(baliseName)) {
 			Arc p = (Arc) stack.peek();
+			lastint = Long.parseLong(textBuffer.toString().trim());
 			p.value = Math.toIntExact(lastint);
 			readint = false;
 			lastint = null;
+			textBuffer.setLength(0);
 		} else if ("graphics".equals(baliseName) || "offset".equals(baliseName) || "position".equals(baliseName)
 				|| "fill".equals(baliseName) || "line".equals(baliseName) || "dimension".equals(baliseName)) {
 			// skip
