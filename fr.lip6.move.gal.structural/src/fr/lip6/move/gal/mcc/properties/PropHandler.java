@@ -1,7 +1,6 @@
 package fr.lip6.move.gal.mcc.properties;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,8 @@ public class PropHandler extends DefaultHandler {
 
 	private boolean dotext = false;
 	private boolean isLTL = false;
-	
+	private StringBuilder textBuffer = new StringBuilder(); // Added for text accumulation
+
 	private PetriNet spec;
 
 	public PropHandler(PetriNet spn, boolean isLTL) {
@@ -34,8 +34,8 @@ public class PropHandler extends DefaultHandler {
 	}
 
 	@Override
-	public final void startElement(String uri, String localName,
-			String baliseName, Attributes attributes) throws SAXException {
+	public final void startElement(String uri, String localName, String baliseName, Attributes attributes)
+			throws SAXException {
 		if ("property".equals(baliseName)) { //$NON-NLS-1$
 			Property pdesc = new Property();
 			stack.push(pdesc);
@@ -91,46 +91,34 @@ public class PropHandler extends DefaultHandler {
 			// NOTHING
 		} else if ("next".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
-		} else if ("description".equals(baliseName)) { //$NON-NLS-1$
+		} else if ("description".equals(baliseName) || "place".equals(baliseName)
+				|| "integer-constant".equals(baliseName) || "id".equals(baliseName)
+				|| "transition".equals(baliseName)) { //$NON-NLS-1$
 			dotext = true;
-		} else if ("place".equals(baliseName)) { //$NON-NLS-1$
-			dotext = true;
-		} else if ("integer-constant".equals(baliseName)) { //$NON-NLS-1$
-			dotext = true;
-		} else if ("id".equals(baliseName)) { //$NON-NLS-1$
-			dotext = true;
-		} else if ("transition".equals(baliseName)) { //$NON-NLS-1$
-			dotext = true;
+			textBuffer.setLength(0); // Clear buffer at start of text elements
 		} else if ("globally".equals(baliseName)) { //$NON-NLS-1$
-			// NOTHING			
+			// NOTHING
 		} else {
 			getLog().warning("Unexpected XML tag in property file :" + baliseName);
 		}
 	}
 
 	@Override
-	public void characters(char[] chars, int beg, int length)
-			throws SAXException {
+	public void characters(char[] chars, int beg, int length) throws SAXException {
 		if (dotext) {
-			String name = new String(Arrays.copyOfRange(chars, beg, beg
-					+ length));
-			stack.push(name);
-			
+			textBuffer.append(chars, beg, length); // Accumulate text
 		}
 	}
 
 	@Override
-	public void endElement(String uri, String localName, String baliseName)
-			throws SAXException {
-		if ("property".equals(baliseName)) { //$NON-NLS-1$			
+	public void endElement(String uri, String localName, String baliseName) throws SAXException {
+		if ("property".equals(baliseName)) { //$NON-NLS-1$
 			spec.getProperties().add((Property) stack.pop());
-			
 			// reset to null ?
 		} else if ("formula".equals(baliseName)) { //$NON-NLS-1$
 			Expression child = (Expression) stack.pop();
 			Property pdesc = (Property) stack.peek();
 			pdesc.setBody(child);
-			
 		} else if ("integer-le".equals(baliseName)) { //$NON-NLS-1$
 			popBinary(Op.LEQ);
 		} else if ("integer-lt".equals(baliseName)) { //$NON-NLS-1$
@@ -146,34 +134,34 @@ public class PropHandler extends DefaultHandler {
 		} else if ("negation".equals(baliseName)) { //$NON-NLS-1$
 			stack.push(Expression.not((Expression) stack.pop()));
 		} else if ("is-fireable".equals(baliseName)) { //$NON-NLS-1$
-
+			// No-op
 		} else if ("tokens-count".equals(baliseName)) { //$NON-NLS-1$
-
+			// No-op
 		} else if ("deadlock".equals(baliseName)) {
 			stack.push(Expression.op(Op.DEAD, null, null));
 		} else if ("description".equals(baliseName)) { //$NON-NLS-1$
-			String name = (String) stack.pop();
+			String name = textBuffer.toString().trim();
 			Property prop = (Property) stack.peek();
 			// prop.setComment(name);
 			dotext = false;
-			
-		} else if ("place".equals(baliseName)) {			
-			String name = (String) stack.pop();
+			textBuffer.setLength(0);
+		} else if ("place".equals(baliseName)) {
+			String name = textBuffer.toString().trim();
 			NaryOp context = (NaryOp) stack.peek();
 			context.addChild(Expression.var(findPlace(name)));
 			dotext = false;
-			
+			textBuffer.setLength(0);
 		} else if ("integer-constant".equals(baliseName)) {
-			String name = (String) stack.pop();
+			String name = textBuffer.toString().trim();
 			stack.push(Expression.constant(Integer.parseInt(name)));
 			dotext = false;
-			
+			textBuffer.setLength(0);
 		} else if ("id".equals(baliseName)) { //$NON-NLS-1$
-			String name = (String) stack.pop();
+			String name = textBuffer.toString().trim();
 			Property prop = (Property) stack.peek();
-			prop.setName(name);	
+			prop.setName(name);
 			dotext = false;
-			
+			textBuffer.setLength(0);
 		} else if ("disjunction".equals(baliseName)) { //$NON-NLS-1$
 			popNary(Op.OR);
 		} else if ("conjunction".equals(baliseName)) { //$NON-NLS-1$
@@ -182,18 +170,20 @@ public class PropHandler extends DefaultHandler {
 			popNary(Op.MULT);
 		} else if ("sum".equals(baliseName)) { //$NON-NLS-1$
 			popNary(Op.ADD);
- 		} else if ("transition".equals(baliseName)) {
-			String name = (String) stack.pop();
+		} else if ("transition".equals(baliseName)) {
+			String name = textBuffer.toString().trim();
 			NaryOp enab = (NaryOp) stack.peek();
-			enab.addChild(Expression.trans(findTransition(name)));			
-			dotext = false;			
+			enab.addChild(Expression.trans(findTransition(name)));
+			dotext = false;
+			textBuffer.setLength(0);
 		} else if ("before".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
 		} else if ("reach".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
- 		} else if (! isLTL) {
-			// temporal operator handling for CTL properties 
-			if ( ("globally".equals(baliseName) || "finally".equals(baliseName) || "next".equals(baliseName) || "until".equals(baliseName) ) ) {
+		} else if (!isLTL) {
+			// temporal operator handling for CTL properties
+			if (("globally".equals(baliseName) || "finally".equals(baliseName) || "next".equals(baliseName)
+					|| "until".equals(baliseName))) {
 				stack.push(baliseName);
 			} else if ("all-paths".equals(baliseName)) { //$NON-NLS-1$
 				String childbalise = (String) stack.pop();
@@ -220,8 +210,8 @@ public class PropHandler extends DefaultHandler {
 			}
 		} else {
 			// temporal operator handling for LTL properties
-			if ("all-paths".equals(baliseName)) { 
-				// only as first node 
+			if ("all-paths".equals(baliseName)) {
+				// only as first node
 				// hence leave stack alone and skip this node
 			} else if ("globally".equals(baliseName)) {
 				stack.push(Expression.op(Op.G, (Expression) stack.pop(), null));
@@ -238,23 +228,24 @@ public class PropHandler extends DefaultHandler {
 	private Map<String, Integer> pcache = null;
 
 	private int findPlace(String name) {
-	    if (spec instanceof ISparsePetriNet) {
-	        ISparsePetriNet spn = (ISparsePetriNet) spec;
-	        if (pcache == null) {
-	            // Initialize the cache with an appropriate initial capacity to optimize performance and minimize rehashing
-	            pcache = new HashMap<>((spn.getPnames().size() * 4 + 2) / 3);
-	            int i = 0;
-	            for (String pl : spn.getPnames()) {
-	                pcache.put(pl, i++);
-	            }
-	        }
-	    }
-	    Integer index = (pcache == null) ? spec.getPlaceIndex(normalizeName(name)) : pcache.get(normalizeName(name));
-	    if (index == null || index < 0) {
-	        System.out.println("Unknown place :\"" + name + "\" in property !");
-	        throw new IllegalArgumentException("Unknown place :\"" + name + "\" in property !");
-	    }
-	    return index;
+		if (spec instanceof ISparsePetriNet) {
+			ISparsePetriNet spn = (ISparsePetriNet) spec;
+			if (pcache == null) {
+				// Initialize the cache with an appropriate initial capacity to optimize
+				// performance and minimize rehashing
+				pcache = new HashMap<>((spn.getPnames().size() * 4 + 2) / 3);
+				int i = 0;
+				for (String pl : spn.getPnames()) {
+					pcache.put(pl, i++);
+				}
+			}
+		}
+		Integer index = (pcache == null) ? spec.getPlaceIndex(normalizeName(name)) : pcache.get(normalizeName(name));
+		if (index == null || index < 0) {
+			System.out.println("Unknown place :\"" + name + "\" in property !");
+			throw new IllegalArgumentException("Unknown place :\"" + name + "\" in property !");
+		}
+		return index;
 	}
 
 	public void popNary(Op op) {
@@ -268,25 +259,26 @@ public class PropHandler extends DefaultHandler {
 		stack.push(Expression.nop(op, operands));
 	}
 
-	
 	public void popBinary(Op op) {
 		Expression r = (Expression) stack.pop();
 		Expression l = (Expression) stack.pop();
 		stack.push(Expression.op(op, l, r));
 	}
 
-	private Map<String,Integer> tcache = null;
+	private Map<String, Integer> tcache = null;
+
 	private int findTransition(String name) {
 		if (spec instanceof ISparsePetriNet) {
 			ISparsePetriNet spn = (ISparsePetriNet) spec;
 			if (tcache == null) {
-				// no reindex https://stackoverflow.com/questions/434989/hashmap-initialization-parameters-load-initialcapacity
-				tcache = new HashMap<> ( (spn.getTnames().size() *4+2)/3 );
-				int i=0;				
+				// no reindex
+				// https://stackoverflow.com/questions/434989/hashmap-initialization-parameters-load-initialcapacity
+				tcache = new HashMap<>((spn.getTnames().size() * 4 + 2) / 3);
+				int i = 0;
 				for (String tr : spn.getTnames()) {
 					tcache.put(tr, i++);
 				}
-			}			
+			}
 		}
 		int index;
 		if (tcache == null)
@@ -294,8 +286,8 @@ public class PropHandler extends DefaultHandler {
 		else
 			index = tcache.get(normalizeName(name));
 		if (index < 0) {
-			System.out.println("Unknown transition named :\""+name+"\""+" in property.");
-			throw new IllegalArgumentException("Unknown transition named :\""+name+"\""+" in property.");
+			System.out.println("Unknown transition named :\"" + name + "\"" + " in property.");
+			throw new IllegalArgumentException("Unknown transition named :\"" + name + "\"" + " in property.");
 		}
 		return index;
 	}
@@ -306,12 +298,11 @@ public class PropHandler extends DefaultHandler {
 		res = res.replace('/', '_');
 		res = res.replace('*', 'x');
 		res = res.replace('=', '_');
-		
+
 		return res;
 	}
-	
+
 	private Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
-
 }
