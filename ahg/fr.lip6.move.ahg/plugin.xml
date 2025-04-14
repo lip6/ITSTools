@@ -5,9 +5,9 @@
 
   <extension point="org.eclipse.emf.ecore.generated_package">
     <package 
-       uri = "http://www.lip6.fr/move/Gal" 
-       class = "fr.lip6.move.gal.GalPackage"
-       genModel = "fr/lip6/move/Gal.genmodel" /> 
+       uri = "http://www.lip6.fr/move/Ahg" 
+       class = "fr.lip6.move.ahg.AhgPackage"
+       genModel = "fr/lip6/move/Ahg.genmodel" /> 
 	
   </extension>
 
