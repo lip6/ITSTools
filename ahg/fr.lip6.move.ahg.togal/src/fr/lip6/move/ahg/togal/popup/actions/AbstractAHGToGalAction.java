@@ -22,10 +22,10 @@ import org.eclipse.ui.IActionDelegate;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-import lip6.move.ahg.aHG.AttackHyperGraph;
-import lip6.move.ahg.serialization.SerializationUtil;
+import fr.lip6.move.ahg.AttackHyperGraph;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
+import fr.lip6.move.serialization.AHGSerializationUtil;
 
 public abstract class AbstractAHGToGalAction implements IObjectActionDelegate {
 
@@ -68,7 +68,7 @@ public abstract class AbstractAHGToGalAction implements IObjectActionDelegate {
 				final String galName = file.getName().replace(".ahg", "").replace(".", "_").replace(" ", "_");
 				try {
 					// Parsage du fichier promela
-					final AttackHyperGraph s = SerializationUtil.fileToAttackHyperGraph(file.getRawLocationURI().getPath());
+					final AttackHyperGraph s = AHGSerializationUtil.fileToAttackHyperGraph(file.getRawLocationURI().getPath());
 
 
 					// Transformation de AHG vers Gal

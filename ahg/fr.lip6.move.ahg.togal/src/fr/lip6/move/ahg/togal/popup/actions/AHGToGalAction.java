@@ -1,8 +1,8 @@
 package fr.lip6.move.ahg.togal.popup.actions;
 
+import fr.lip6.move.ahg.AttackHyperGraph;
 import fr.lip6.move.ahg.togal.transform.AHGToGALTransformer;
 import fr.lip6.move.gal.Specification;
-import lip6.move.ahg.aHG.AttackHyperGraph;
 
 public class AHGToGalAction extends AbstractAHGToGalAction {
 

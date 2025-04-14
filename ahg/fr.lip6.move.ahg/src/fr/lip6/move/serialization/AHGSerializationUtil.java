@@ -22,7 +22,7 @@ import fr.lip6.move.ahg.AttackHyperGraph;
 /**
  * Utility class for serialization of gal system
  */
-public class SerializationUtil  {
+public class AHGSerializationUtil  {
 	
 	
 	/**

@@ -7,23 +7,21 @@ import java.util.Map;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.ahg.Attack;
+import fr.lip6.move.ahg.AttackHyperGraph;
+import fr.lip6.move.ahg.Edge;
+import fr.lip6.move.ahg.Node;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.InvariantProp;
-import fr.lip6.move.gal.LogicProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
-import lip6.move.ahg.aHG.Attack;
-import lip6.move.ahg.aHG.AttackHyperGraph;
-import lip6.move.ahg.aHG.Edge;
-import lip6.move.ahg.aHG.Node;
 
 
 
