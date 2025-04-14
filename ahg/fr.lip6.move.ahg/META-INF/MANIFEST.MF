@@ -19,11 +19,11 @@ Export-Package: fr.lip6.move.ahg,
  fr.lip6.move.ahg,
  fr.lip6.move.ahg.impl,
  fr.lip6.move.ahg.util,
- fr.lip6.move.ahg.parser.antlr,
- fr.lip6.move.ahg.parser.antlr.internal,
- fr.lip6.move.ahg.scoping,
- fr.lip6.move.ahg.serialization,
- fr.lip6.move.ahg.serializer,
- fr.lip6.move.ahg.services,
- fr.lip6.move.ahg.validation
+ fr.lip6.move.parser.antlr,
+ fr.lip6.move.parser.antlr.internal,
+ fr.lip6.move.scoping,
+ fr.lip6.move.serialization,
+ fr.lip6.move.serializer,
+ fr.lip6.move.services,
+ fr.lip6.move.validation
 
