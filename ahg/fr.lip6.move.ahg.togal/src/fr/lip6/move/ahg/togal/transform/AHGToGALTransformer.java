@@ -27,7 +27,7 @@ import fr.lip6.move.gal.Variable;
 
 public class AHGToGALTransformer {
 
-	public Specification transformToGAL(AttackHyperGraph ahg, String name) {
+	public static Specification transformToGAL(AttackHyperGraph ahg, String name) {
 
 		GalFactory GF = GalFactory.eINSTANCE;
 		GALTypeDeclaration gal = GF.createGALTypeDeclaration();

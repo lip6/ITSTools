@@ -9,8 +9,7 @@ public class AHGToGalAction extends AbstractAHGToGalAction {
 	@Override
 	public Specification doTransformation(AttackHyperGraph s, String galName) 
 	{
-		AHGToGALTransformer trans = new AHGToGALTransformer();
-		Specification spec = trans.transformToGAL (s,galName);
+		Specification spec = AHGToGALTransformer.transformToGAL (s,galName);
 		return spec;
 	}
 	
