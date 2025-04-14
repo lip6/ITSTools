@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: fr.lip6.move.ahg
+Bundle-Vendor: LIP6, Sorbonne Université/CNRS
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: fr.lip6.move.ahg; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.equinox.common,
+ org.eclipse.emf.ecore;visibility:=reexport,
+ org.antlr.runtime;bundle-version="[3.2.0,3.2.1)",
+ org.eclipse.xtext.util,
+ org.eclipse.emf.common;visibility:=reexport,
+ org.eclipse.xtext.xbase.lib,
+ org.eclipse.xtend.lib,
+ org.eclipse.xtext
+Import-Package: org.apache.log4j
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Export-Package: fr.lip6.move.ahg,
+ fr.lip6.move.ahg,
+ fr.lip6.move.ahg.impl,
+ fr.lip6.move.ahg.util,
+ fr.lip6.move.ahg.parser.antlr,
+ fr.lip6.move.ahg.parser.antlr.internal,
+ fr.lip6.move.ahg.scoping,
+ fr.lip6.move.ahg.serialization,
+ fr.lip6.move.ahg.serializer,
+ fr.lip6.move.ahg.services,
+ fr.lip6.move.ahg.validation
+

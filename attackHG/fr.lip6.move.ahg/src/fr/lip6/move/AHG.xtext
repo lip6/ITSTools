@@ -1,0 +1,28 @@
+grammar fr.lip6.move.AHG with org.eclipse.xtext.common.Terminals
+
+generate ahg "http://www.lip6.fr/move/Ahg"
+
+AttackHyperGraph:
+  'AHG' '{'
+  'States' nodes+=Node ( ',' nodes+=Node)* ';' 
+	'Edges'
+	(edges+=Edge)*
+	'}'
+  attack=Attack
+	;
+
+
+Node: name=ID;
+
+Edge: name=ID '{'  
+    'pre' ':' pre+=[Node] ( ',' pre+=[Node])* ';'
+    'post' ':' post+=[Node] ( ',' post+=[Node])* ';'
+  '}'
+;
+	
+Attack :
+  'attack' name=ID '{'
+    'init' ':'  init+=[Node] ( ',' init+=[Node])* ';'
+    'goal' ':'  goal+=[Node] ( ',' goal+=[Node])* ';'  
+  '}'
+;
