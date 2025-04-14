@@ -76,6 +76,12 @@
 		<module>../cegar/fr.lip6.move.gal.cegar</module>
 		<module>../cegar/fr.lip6.move.gal.cegar.ui</module>
 		<module>../cegar/fr.lip6.move.gal.cegar.feature</module>
+		<!-- AHG support -->
+		<module>../ahg/fr.lip6.move.ahg</module>
+		<module>../ahg/fr.lip6.move.ahg.ide</module>
+		<module>../ahg/fr.lip6.move.ahg.ui</module>
+		<module>../ahg/fr.lip6.move.ahg.togal</module>
+		<module>../ahg/fr.lip6.move.ahg.feature</module>
 		<!-- SMT support and conversion -->
 		<module>../smt/lip6.smtlib.SMT</module>
 		<module>../smt/lip6.smtlib.plugin.SMTPlugin</module>
