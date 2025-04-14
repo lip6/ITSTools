@@ -17,6 +17,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import fr.lip6.move.AhgRuntimeModule;
+import fr.lip6.move.AhgStandaloneSetup;
 import fr.lip6.move.ahg.AttackHyperGraph;
 
 /**
@@ -24,6 +25,11 @@ import fr.lip6.move.ahg.AttackHyperGraph;
  */
 public class AHGSerializationUtil  {
 	
+	private static boolean isStandalone = false;
+	
+	public static void setStandalone(boolean isStandalone) {
+		AHGSerializationUtil.isStandalone = isStandalone;
+	}
 	
 	/**
 	 * Create a new file and return a Resource from this file.
@@ -46,14 +52,17 @@ public class AHGSerializationUtil  {
 			return null ;
 		}
 	}
-
 	private static Injector createInjector() {
-		return Guice.createInjector(new AhgRuntimeModule());
+		if (isStandalone) {
+			AhgStandaloneSetup gs = new AhgStandaloneSetup();
+			return gs.createInjectorAndDoEMFRegistration();
+		} else { 
+			return Guice.createInjector(new AhgRuntimeModule());
+		}
 	}
-
 	
 	/**
-	 * This method serialize a Divine System in the file {@code filename} 
+	 * This method serialize a AHG System in the file {@code filename} 
 	 * @param system The root of Gal system
 	 * @param filename The output filename.
 	 */

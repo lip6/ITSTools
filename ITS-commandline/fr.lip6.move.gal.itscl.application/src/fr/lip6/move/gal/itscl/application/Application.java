@@ -102,6 +102,7 @@ public class Application implements IApplication {
 			spec = SerializationUtil.fileToGalSystem(inputff);		
 			System.out.println("Successfully read input file : " + inputff +" in " + (time - System.currentTimeMillis()) + " ms.");
 		} else if (ff.getName().endsWith(".ahg")) {
+			AHGSerializationUtil.setStandalone(true);
 			AttackHyperGraph ahg = AHGSerializationUtil.fileToAttackHyperGraph(inputff);
 			spec = AHGToGALTransformer.transformToGAL(ahg, modelName);
 			System.out.println("Successfully read input file : " + inputff + " and translated to GAL in "
