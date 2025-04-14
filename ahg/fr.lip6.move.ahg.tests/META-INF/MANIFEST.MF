@@ -13,7 +13,10 @@ Require-Bundle: fr.lip6.move.ahg,
  org.eclipse.xtext.ui.junit,
  org.junit4,
  org.eclipse.ui.workbench;resolution:=optional,
- org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional
+ org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
+ org.eclipse.xtext.xbase.testing,
+ org.eclipse.xtext.testing
 Import-Package: org.apache.log4j,
  org.apache.commons.logging,
  org.junit.runner;version="4.5.0",
@@ -23,4 +26,5 @@ Import-Package: org.apache.log4j,
  org.junit.runners.model;version="4.5.0",
  org.hamcrest.core
 Bundle-RequiredExecutionEnvironment: JavaSE-17
-Export-Package: fr.lip6.move
+Export-Package: fr.lip6.move,
+ fr.lip6.move.tests;x-internal=true

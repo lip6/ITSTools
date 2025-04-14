@@ -17,7 +17,7 @@ Require-Bundle: fr.lip6.move.ahg,
  org.eclipse.xtext.builder
 Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-17
-Export-Package: fr.lip6.move.ahg.ui.quickfix,
+Export-Package: fr.lip6.move.ui.quickfix,
  fr.lip6.move.ahg.ui.internal,
- fr.lip6.move.ahg.ui.contentassist
+ fr.lip6.move.ui.contentassist
 Bundle-Activator: fr.lip6.move.ahg.ui.internal.AhgActivator

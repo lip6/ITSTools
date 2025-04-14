@@ -8,7 +8,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 /**
  * Use this class to register components to be used within the Eclipse IDE.
  */
-public class AhgUiModule extends AbstractAHGUiModule {
+public class AhgUiModule extends AbstractAhgUiModule {
 
 	public AhgUiModule(AbstractUIPlugin plugin) {
 		super(plugin);
