@@ -2,16 +2,15 @@ package fr.lip6.move.gal.itscl.application;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
-
+import fr.lip6.move.ahg.AttackHyperGraph;
+import fr.lip6.move.ahg.togal.transform.AHGToGALTransformer;
 import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.LTLProp;
-import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
@@ -19,6 +18,7 @@ import fr.lip6.move.gal.itstools.CommandLineBuilder;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
+import fr.lip6.move.serialization.AHGSerializationUtil;
 import fr.lip6.move.serialization.SerializationUtil;
 
 public class Application implements IApplication {
@@ -96,8 +96,27 @@ public class Application implements IApplication {
 		SerializationUtil.setStandalone(true);
 		
 		long time = System.currentTimeMillis();
-		Specification spec = SerializationUtil.fileToGalSystem(inputff);		
-		System.out.println("Successfully read input file : " + inputff +" in " + (time - System.currentTimeMillis()) + " ms.");
+		Specification spec = null;
+		
+		if (ff.getName().endsWith(".gal")) {
+			spec = SerializationUtil.fileToGalSystem(inputff);		
+			System.out.println("Successfully read input file : " + inputff +" in " + (time - System.currentTimeMillis()) + " ms.");
+		} else if (ff.getName().endsWith(".ahg")) {
+			AttackHyperGraph ahg = AHGSerializationUtil.fileToAttackHyperGraph(inputff);
+			spec = AHGToGALTransformer.transformToGAL(ahg, modelName);
+			System.out.println("Successfully read input file : " + inputff + " and translated to GAL in "
+					+ (time - System.currentTimeMillis()) + " ms.");
+			String [] nitsflags = new String[itsflags.length+2] ;
+			for (int i = 0; i < itsflags.length; i++) {
+				nitsflags[i] = itsflags[i];
+			}			
+			nitsflags[nitsflags.length-2] = "--shortestAttacks";
+			nitsflags[nitsflags.length-1] = ff.getCanonicalPath()+".att";
+			itsflags = nitsflags;
+		} else {
+			System.err.println("Input file must be a .gal or .ahg file");
+			return null;
+		}
 		
 		String cwd = pwd + "/work";
 		File fcwd = new File(cwd);
