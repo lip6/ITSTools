@@ -16,8 +16,8 @@ import org.eclipse.xtext.resource.XtextResourceSet;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import lip6.move.ahg.AHGRuntimeModule;
-import lip6.move.ahg.aHG.AttackHyperGraph;
+import fr.lip6.move.AhgRuntimeModule;
+import fr.lip6.move.ahg.AttackHyperGraph;
 
 /**
  * Utility class for serialization of gal system
@@ -48,7 +48,7 @@ public class SerializationUtil  {
 	}
 
 	private static Injector createInjector() {
-		return Guice.createInjector(new AHGRuntimeModule());
+		return Guice.createInjector(new AhgRuntimeModule());
 	}
 
 	

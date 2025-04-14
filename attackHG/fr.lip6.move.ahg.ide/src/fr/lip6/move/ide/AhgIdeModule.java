@@ -7,5 +7,5 @@ package fr.lip6.move.ide;
 /**
  * Use this class to register ide components.
  */
-public class AhgIdeModule extends AbstractAHGIdeModule {
+public class AhgIdeModule extends AbstractAhgIdeModule {
 }

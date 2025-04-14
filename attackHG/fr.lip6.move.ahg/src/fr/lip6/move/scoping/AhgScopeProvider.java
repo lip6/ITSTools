@@ -10,6 +10,6 @@ package fr.lip6.move.scoping;
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#scoping
  * on how and when to use it.
  */
-public class AHGScopeProvider extends AbstractAHGScopeProvider {
+public class AhgScopeProvider extends AbstractAhgScopeProvider {
 
 }

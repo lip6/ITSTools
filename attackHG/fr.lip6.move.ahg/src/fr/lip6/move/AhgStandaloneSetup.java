@@ -7,9 +7,9 @@ package fr.lip6.move;
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
  */
-public class AHGStandaloneSetup extends AHGStandaloneSetupGenerated {
+public class AhgStandaloneSetup extends AhgStandaloneSetupGenerated {
 
 	public static void doSetup() {
-		new AHGStandaloneSetup().createInjectorAndDoEMFRegistration();
+		new AhgStandaloneSetup().createInjectorAndDoEMFRegistration();
 	}
 }

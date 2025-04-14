@@ -7,5 +7,5 @@ package fr.lip6.move;
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
-public class AHGRuntimeModule extends AbstractAHGRuntimeModule {
+public class AhgRuntimeModule extends AbstractAhgRuntimeModule {
 }

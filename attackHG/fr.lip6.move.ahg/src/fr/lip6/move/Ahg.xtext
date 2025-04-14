@@ -1,4 +1,4 @@
-grammar fr.lip6.move.AHG with org.eclipse.xtext.common.Terminals
+grammar fr.lip6.move.Ahg with org.eclipse.xtext.common.Terminals
 
 generate ahg "http://www.lip6.fr/move/Ahg"
 

@@ -5,18 +5,18 @@ package fr.lip6.move.ide;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import fr.lip6.move.AHGRuntimeModule;
-import fr.lip6.move.AHGStandaloneSetup;
+import fr.lip6.move.AhgRuntimeModule;
+import fr.lip6.move.AhgStandaloneSetup;
 import org.eclipse.xtext.util.Modules2;
 
 /**
  * Initialization support for running Xtext languages as language servers.
  */
-public class AHGIdeSetup extends AHGStandaloneSetup {
+public class AhgIdeSetup extends AhgStandaloneSetup {
 
 	@Override
 	public Injector createInjector() {
-		return Guice.createInjector(Modules2.mixin(new AHGRuntimeModule(), new AHGIdeModule()));
+		return Guice.createInjector(Modules2.mixin(new AhgRuntimeModule(), new AhgIdeModule()));
 	}
 	
 }

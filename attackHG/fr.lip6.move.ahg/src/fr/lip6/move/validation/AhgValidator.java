@@ -9,7 +9,7 @@ package fr.lip6.move.validation;
  *
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
  */
-public class AHGValidator extends AbstractAHGValidator {
+public class AhgValidator extends AbstractAhgValidator {
 	
 //	public static final String INVALID_NAME = "invalidName";
 //
