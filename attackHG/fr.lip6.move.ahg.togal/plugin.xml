@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         name="transform"
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="fr.lip6.move.AHG.togal.contribution1"
+            nameFilter="*"
+            objectClass="org.eclipse.core.resources.IResource">
+         <menu
+               label="AHG to GAL"
+               path="additions"
+               id="fr.lip6.move.AHG.togal.menu1">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Transform to GAL"
+               class="fr.lip6.move.ahg.togal.popup.actions.AHGToGalAction"
+               menubarPath="fr.lip6.move.AHG.togal.menu1/group1"
+               enablesFor="+"
+               id="fr.lip6.move.AHG.togal.newAction">
+         </action>
+      </objectContribution>
+   </extension>
+
+</plugin>
