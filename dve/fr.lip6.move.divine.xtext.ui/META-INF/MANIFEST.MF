@@ -15,10 +15,10 @@ Require-Bundle: fr.lip6.move.divine.xtext;visibility:=reexport,
  org.eclipse.ui,
  org.eclipse.compare,
  org.eclipse.xtext.builder,
- org.eclipse.xtend.lib;resolution:=optional,
- org.eclipse.xtext.xbase.lib
+ org.eclipse.xtend.lib;bundle-version="2.38.0";resolution:=optional,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.38.0"
 Import-Package: org.apache.log4j
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: fr.lip6.move.divine.ui,
  fr.lip6.move.divine.ui.contentassist,
  fr.lip6.move.divine.ui.labeling,

@@ -26,6 +26,7 @@ import fr.lip6.move.ahg.AttackHyperGraph;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.serialization.AHGSerializationUtil;
+import fr.lip6.move.serialization.SerializationUtil;
 
 public abstract class AbstractAHGToGalAction implements IObjectActionDelegate {
 
@@ -141,7 +142,7 @@ public abstract class AbstractAHGToGalAction implements IObjectActionDelegate {
 		out.write(0);
 		out.close();
 
-		fr.lip6.move.serialization.SerializationUtil.systemToFile(galSpec, outPath,true);
+		SerializationUtil.systemToFile(galSpec, outPath,true);
 		java.lang.System.err.println("GAL model written to file: " + outPath);
 	}
 

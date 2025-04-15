@@ -18,7 +18,7 @@ Require-Bundle: fr.lip6.move.ahg,
  fr.lip6.move.gal,
  fr.lip6.move.ahg.togal
 Import-Package: org.apache.log4j
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: fr.lip6.move.ui.quickfix,
  fr.lip6.move.ahg.ui.internal,
  fr.lip6.move.ui.contentassist

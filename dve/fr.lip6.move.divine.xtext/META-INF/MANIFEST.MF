@@ -15,7 +15,7 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtext.common.types,
  org.antlr.runtime;bundle-version="[3.2.0,3.2.1)"
 Import-Package: org.apache.log4j
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: fr.lip6.move.divine,
  fr.lip6.move.divine.divine,
  fr.lip6.move.divine.divine.impl,

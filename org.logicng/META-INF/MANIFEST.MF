@@ -39,6 +39,6 @@ Export-Package: org.logicng.backbones,
  org.logicng.transformations.qe,
  org.logicng.transformations.qmc,
  org.logicng.util
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ClassPath: lib/logicng-j11.jar
 Require-Bundle: org.antlr.antlr4-runtime;bundle-version="4.13.1"

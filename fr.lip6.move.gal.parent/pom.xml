@@ -146,14 +146,14 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<junit-version>4.8.1</junit-version>
 		<eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
-		<platform-version-name>2023-12</platform-version-name>
-		<tycho-version>4.0.4</tycho-version>
+		<platform-version-name>2025-03</platform-version-name>
+		<tycho-version>4.0.12</tycho-version>
 		<sonar.exclusions>**/Messages.java</sonar.exclusions>
-		<xtextVersion>2.33.0</xtextVersion>
-		<xtendVersion>2.33.0</xtendVersion>
-		<mwe2Version>2.16.0</mwe2Version>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<xtextVersion>2.38.0</xtextVersion>
+		<xtendVersion>2.38.0</xtendVersion>
+		<mwe2Version>2.21.0</mwe2Version>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 	</properties>
 
 
@@ -199,7 +199,7 @@
 				<version>${tycho-version}</version>
 				<configuration>
 					<pomDependencies>consider</pomDependencies>
-					<executionEnvironment>JavaSE-17</executionEnvironment>
+					<executionEnvironment>JavaSE-21</executionEnvironment>
 					<environments>
 						<environment>
 							<os>win32</os>

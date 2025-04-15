@@ -17,12 +17,12 @@ jobs:
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
-        java-version: 17
+        java-version: 21
         distribution: 'temurin'
     - name: Setup Maven
       uses: stCarolas/setup-maven@v5
       with:
-        maven-version: 3.9.6
+        maven-version: 3.9.9
     - name: Build with Maven
       run: cd fr.lip6.move.gal.parent && mvn -B -e install && cd -
     - name: copy update site to website
@@ -62,7 +62,7 @@ jobs:
     - name: Build converter jar
       run: cd mist/fr.lip6.converter && mvn install ; cp target/*.jar ../../website/ ; ls ../../website/
     - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@v4.5.0
+      uses: JamesIves/github-pages-deploy-action@v4
       with:
           branch: gh-pages # The branch the action should deploy to.
           folder: website/ # The folder the action should deploy.
