@@ -339,5 +339,23 @@ public class SMTUtils {
 		}
 		return vc.support;
 	}
+	
+	// Helper method to compute syntactic weight of an IExpr
+	public static int computeWeight(IExpr expr) {
+		if (expr == null) {
+			return 0;
+		}
+		if (expr instanceof IExpr.ISymbol || expr instanceof IExpr.INumeral) {
+			return 1; // Leaf node
+		} else if (expr instanceof IExpr.IFcnExpr) {
+			IExpr.IFcnExpr fcn = (IExpr.IFcnExpr) expr;
+			int weight = 1; // Count the function itself
+			for (IExpr arg : fcn.args()) {
+				weight += computeWeight(arg); // Recursively count arguments
+			}
+			return weight;
+		}
+		return 1; // Default for unhandled types
+	}
 
 }

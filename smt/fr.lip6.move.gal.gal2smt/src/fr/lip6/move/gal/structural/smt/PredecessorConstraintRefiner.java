@@ -140,8 +140,10 @@ public class PredecessorConstraintRefiner implements IRefiner {
 		doneProblems.clear();
 	}
 
-	public static IExpr computePredExpr(Expression ap, IntMatrixCol sumMatrix, List<Integer> representative,
-			ISparsePetriNet sr) {
+	public static IExpr computePredExpr(Expression ap, IntMatrixCol sumMatrix, List<Integer> representative, ISparsePetriNet sr) {
+	    // Constants for explosion detection
+	    final int MAX_TOTAL_WEIGHT = 10000;  // Maximum allowed cumulative weight
+
 		// we know that s satisfies ap
 		// we want to force existence of an immediate predecessor of s satisfying !ap
 
@@ -153,55 +155,67 @@ public class PredecessorConstraintRefiner implements IRefiner {
 		// * t was selected in the Parikh solution to reach s; |t|>0
 
 		// a map from index in reduced flow to set of transitions with this effect
-		Map<Integer, List<Integer>> revMap = SMTUtils.computeImages(representative);
+	    Map<Integer, List<Integer>> revMap = SMTUtils.computeImages(representative);
+	    SparseIntArray supp = SMTUtils.computeSupport(ap);
+	    IFactory ef = SMT.instance.smtConfig.exprFactory;
 
-		SparseIntArray supp = SMTUtils.computeSupport(ap);
+	    List<IExpr> allPotentialPred = new ArrayList<>();
+	    int cumulativeWeight = 0;  // Track total weight of the expression tree
 
-		IFactory ef = SMT.instance.smtConfig.exprFactory;
+	    // scan transition *effects* in sumMatrix
+	    for (int tid = 0, tide = sumMatrix.getColumnCount(); tid < tide; tid++) {
+	        SparseIntArray t = sumMatrix.getColumn(tid);
+	        if (!SparseIntArray.keysIntersect(supp, t)) {
+	        	// guaranteed to stutter : this is not a candidate
+	        	continue;
+	        }
+	        // more subtle we do touch the target AP
+			// compute if firing t would go from !ap to ap
+			// * the predecessor by t of s satisfies !ap; this depends only on the effect of
+			// t, not it's precise definition
+	        // Compute predecessor condition
+	        IExpr apFalseBeforeT = SMTUtils.rewriteAfterEffect(Expression.not(ap), t, true).accept(new ExprTranslator());
+	        cumulativeWeight += SMTUtils.computeWeight(apFalseBeforeT);
+	        // Check if cumulative weight exceeds threshold
+	        if (cumulativeWeight > MAX_TOTAL_WEIGHT) {
+	            System.err.println("Excessive predecessor constraint size, skipping predecessor.");
+	            return null;  // Bail out completely
+	        }
+	        
+	        // * t was selected in the Parikh solution to reach s; |t|>0
+			IExpr tselected = ef.fcn(ef.symbol(">="), ef.symbol("t" + tid), ef.numeral(1));
 
-		List<IExpr> allPotentialPred = new ArrayList<>();
+			// * t was feasibly the last fired transition, i.e. there is a transition t'
+			// that t represents such that s >= post(t')
+	        List<IExpr> alternatives = new ArrayList<>();
+	        for (Integer ti : revMap.get(tid)) {
+	            IExpr elt = buildFeasible(ef, sr.getFlowTP().getColumn(ti));
+	            cumulativeWeight += SMTUtils.computeWeight(elt);
+	            // Check if cumulative weight exceeds threshold
+		        if (cumulativeWeight > MAX_TOTAL_WEIGHT) {
+		            System.err.println("Excessive predecessor constraint size, skipping predecessor.");
+		            return null;  // Bail out completely
+		        }
+				alternatives.add(elt);
+	        }
+	        IExpr alternativesOr = SMTUtils.makeOr(alternatives);
 
-		int selected = 0;
-		// scan transition *effects* in sumMatrix
-		for (int tid = 0, tide = sumMatrix.getColumnCount(); tid < tide; tid++) {
-			SparseIntArray t = sumMatrix.getColumn(tid);
-			if (!SparseIntArray.keysIntersect(supp, t)) {
-				// guaranteed to stutter : this is not a candidate
-				continue;
-			} else {
-				if (selected++ > 1000) {
-					// whatever...
-					return null;
-				}
-				// more subtle we do touch the target AP
-				// compute if firing t would go from !ap to ap
-				// * the predecessor by t of s satisfies !ap; this depends only on the effect of
-				// t, not it's precise definition
-				IExpr apFalseBeforeT = SMTUtils.rewriteAfterEffect(Expression.not(ap), t, true)
-						.accept(new ExprTranslator());
+	        // Combine into AND expression
+	        List<IExpr> toAnd = new ArrayList<>();
+	        toAnd.add(apFalseBeforeT);
+	        toAnd.add(tselected);
+	        toAnd.add(alternativesOr);
+	        IExpr conjunct = SMTUtils.makeAnd(toAnd);
+	       
+	        // Add the conjunct to the list
+	        allPotentialPred.add(conjunct);
+	    }
 
-				// * t was selected in the Parikh solution to reach s; |t|>0
-				IExpr tselected = ef.fcn(ef.symbol(">="), ef.symbol("t" + tid), ef.numeral(1));
-
-				// * t was feasibly the last fired transition, i.e. there is a transition t'
-				// that t represents such that s >= post(t')
-				List<IExpr> alternatives = new ArrayList<>();
-				for (Integer ti : revMap.get(tid)) {
-					alternatives.add(buildFeasible(ef, sr.getFlowTP().getColumn(ti)));
-				}
-
-				// combine
-				List<IExpr> toAnd = new ArrayList<>();
-				toAnd.add(apFalseBeforeT);
-				toAnd.add(tselected);
-				toAnd.add(SMTUtils.makeOr(alternatives));
-				allPotentialPred.add(SMTUtils.makeAnd(toAnd));
-			}
-		}
-		// assert an OR of one of the candidates
-		IExpr predicate = SMTUtils.makeOr(allPotentialPred);
-		return predicate;
+	    // assert an OR of one of the candidates
+	    IExpr predicate = SMTUtils.makeOr(allPotentialPred);
+	    return predicate;
 	}
+	
 
 	private static IExpr buildFeasible(IFactory ef, SparseIntArray tp) {
 		List<IExpr> tojoin = new ArrayList<>();
