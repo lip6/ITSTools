@@ -406,22 +406,23 @@ public class SparseIntArray implements Cloneable {
     	 
     	int i = 0;
     	int j = 0; 
+    	int ki, kj, val;
     	while (i < asz || j < bsz) {					
-    		int ki = i==asz ? Integer.MAX_VALUE : ta.keyAt(i);
-    		int kj = j==bsz ? Integer.MAX_VALUE : tb.keyAt(j);
+    		ki = i==asz ? Integer.MAX_VALUE : ta.keyAt(i);
+    		kj = j==bsz ? Integer.MAX_VALUE : tb.keyAt(j);
     		if (ki == kj) {
-    			int val = alpha * ta.valueAt(i)+ beta* tb.valueAt(j);
+    			val = alpha * ta.valueAt(i)+ beta* tb.valueAt(j);
     			if (val != 0 && ki != except) {
     				flow.append(ki, val);
     			}
     			i++;
     			j++;
     		} else if (ki < kj) {
-    			int val = alpha * ta.valueAt(i);
+    			val = alpha * ta.valueAt(i);
     			if (val != 0 && ki != except) flow.append(ki, val);
     			i++;
     		} else if (kj < ki) {
-    			int val = beta * tb.valueAt(j);
+    			val = beta * tb.valueAt(j);
     			if (val != 0 && kj != except) flow.append(kj, val);
     			j++;
     		}
@@ -588,10 +589,10 @@ public class SparseIntArray implements Cloneable {
 			return true;
 		}
 				
-		
+		int sk1,sk2;
 		for (int j = 0, i = 0 , ss1 =  s1.size() , ss2 = s2.size() ; i < ss1 && j < ss2 ; ) {
-			int sk1 = s1.keyAt(i); 
-			int sk2 = s2.keyAt(j); 
+			sk1 = s1.keyAt(i); 
+			sk2 = s2.keyAt(j); 
 			if (sk1 == sk2) {
 				if (s1.valueAt(i) < s2.valueAt(j)) {
 					return false;
