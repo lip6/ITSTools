@@ -358,7 +358,7 @@ public class SMTTrapUtils {
 			// init a solver
 			SMT smt = new SMT();
 			IFactory ef = smt.smtConfig.exprFactory;
-			ISolver solver = initSolver(smt, "QF_UF", 50, 120);
+			ISolver solver = initSolver(smt, "QF_LIA", 50, 120);
 			Script script = declareBoolVariables(sr.getPnames().size(), "s", smt);
 			execAndCheckResult(script, solver);
 
