@@ -109,6 +109,9 @@ public class Lexer {
 	/** The Matcher used to do lexical scanning */
 	final protected Matcher matcher;
 	
+	/** Any comment text found before the current token */
+	public String prefixCommentText;
+	
 	/** The source of input used in this lexer; typically a different
 	 * lexer object will be used for each source (e.g. different file, string,
 	 * port, etc.) of input data.
@@ -189,7 +192,7 @@ public class Lexer {
 	 * scan the string by hand and adjust the matcher position afterwards.
 	 */
 	public static Pattern combined = Pattern.compile(
-			"(" + rgxWhiteSpace + "|" + rgxComment + ")*((" // first skip all whitespace and comments
+			"((?:" + rgxWhiteSpace + "|" + rgxComment + ")*)((" // first skip all whitespace and comments
 				+ "\\(" + ")|("        	// group 3: left parenthesis
 				+ "\\)" + ")|("			// group 4: right parenthesis
 				+ rgxNumeral + ")" + trailer + "|("	// group 5: numeral
@@ -255,7 +258,7 @@ public class Lexer {
 		public boolean isError() { return false; }
 	}
 
-	private static class LexError extends org.smtlib.impl.SMTExpr.Error implements ILexToken, ISexpr.IToken<String> {
+	private class LexError extends org.smtlib.impl.SMTExpr.Error implements ILexToken, ISexpr.IToken<String> {
 		public LexError(String n) { super(n); }
 
 		@Override
@@ -266,7 +269,7 @@ public class Lexer {
 		
 		/** For debugging only - not general printing */
 		@Override
-		public String toString() { return "Error: " + Utils.quote(value()); }
+		public String toString() { return "Error: " + smtConfig.utils.quote(value()); }
 	}
 
 	/** A static helper method that sets the position of an AST node, but returns the same type */
@@ -368,6 +371,12 @@ public class Lexer {
 	protected ILexToken getToken(Matcher matcher) throws ParserException {
 		ILexToken token = null;
 		if (matcher.lookingAt()) {
+			prefixCommentText = null;
+			if (matcher.groupCount() >= 1 && matcher.end(1) != matcher.start(1)) {
+				prefixCommentText = matcher.group(1);
+				if (prefixCommentText.startsWith("\n")) prefixCommentText = prefixCommentText.substring(1);
+				else if (prefixCommentText.startsWith("\r\n")) prefixCommentText = prefixCommentText.substring(2);
+			}
 			int end = matcher.end(2);
 			//			System.out.println("MATCHED RANGE " + matcher.start() + " " + matcher.end() + " !" + matcher.group() + "!");
 			//			for (int i=3; i<=matcher.groupCount(); i++) {
@@ -400,39 +409,72 @@ public class Lexer {
 				int begin = matcher.start(k); // position of the initial quote
 				int p = begin;
 				try {
-					while (true) {
-						p++;
-						int c = csr.charAt(p);
-						if (c == '\\') {
-							c = csr.charAt(++p);
-							// \\ is translated to \ and \" to "
-							// \x for anything else is just \x
-//							if (c == '\\' || c == '"') {
-//								continue;
-//							} else {
-//								smtConfig.log.logError(smtConfig.responseFactory.error("Invalid escape sequence " + (char)c + " (decimal ASCII = " + (int)c + ")",
-//										pos(p,p+1)));
-//							}
-						} else if (c == '"') {
-							end = p+1;
-							matched = csr.subSequence(begin,end).toString();
-							pos = pos(begin,end);
-							token = setPos(new LexStringLiteral(matched,true),pos);
-							break;
-						} else {
-							if (c >= ' ' && c <= '~') continue;
-							if (c == '\t' || c == '\r' || c == '\n') continue;
-							if (c == 25) {
-								end = p;
+					if (true  /*smtConfig.isVersion(SMT.Configuration.SMTLIB.V25) */ ) { // Version 2.5ff
+						while (true) {
+							p++;
+							char c = csr.charAt(p);
+							if (c == '"') {
+								if (p+1 < csr.length() && csr.charAt(p+1) == '"') {
+									p++;
+								} else {
+									end = p+1;
+									matched = csr.subSequence(begin,end).toString();
+									pos = pos(begin,end);
+									token = setPos(new LexStringLiteral(matched,true),pos);
+									break;
+								}
+							} else {
+								if (c >= ' ' && c <= '~') continue;
+								if (c == '\t' || c == '\r' || c == '\n') continue;
+								if (c >= 128) continue; // Version 2.5, but only within comments, string literals, quoted symbols
+								if (c == 25) {
+									end = p;
+									matched = csr.subSequence(begin,end).toString();
+									pos = pos(begin,end);
+									smtConfig.log.logError(smtConfig.responseFactory.error("String literal is not terminated: " + matched,pos));
+									token = setPos(new LexError(matched),pos);
+									break; // End of data - no closing right paren
+								}
+								smtConfig.log.logError(smtConfig.responseFactory.error("Invalid character: ASCII(decimal) = " + (int)c,
+										pos(p,p+1)));
+								continue;
+							}
+						}
+					} else if (false /*SMT.Configuration.SMTLIB.V20.toString().equals(Configuration.smtlib)*/) { // Version 2.0
+						while (true) {
+							p++;
+							char c = csr.charAt(p);
+							if (c == '\\') {
+								c = csr.charAt(++p);
+								// \\ is translated to \ and \" to "
+								// \x for anything else is just \x
+								//								if (c == '\\' || c == '"') {
+								//									continue;
+								//								} else {
+								//									smtConfig.log.logError(smtConfig.responseFactory.error("Invalid escape sequence " + (char)c + " (decimal ASCII = " + (int)c + ")",
+								//											pos(p,p+1)));
+								//								}
+							} else if (c == '"') {
+								end = p+1;
 								matched = csr.subSequence(begin,end).toString();
 								pos = pos(begin,end);
-								smtConfig.log.logError(smtConfig.responseFactory.error("String literal is not terminated: " + matched,pos));
-								token = setPos(new LexError(matched),pos);
-								break; // End of data - no closing right paren
+								token = setPos(new LexStringLiteral(matched,true),pos);
+								break;
+							} else {
+								if (c >= ' ' && c <= '~') continue;
+								if (c == '\t' || c == '\r' || c == '\n') continue;
+								if (c == 25) {
+									end = p;
+									matched = csr.subSequence(begin,end).toString();
+									pos = pos(begin,end);
+									smtConfig.log.logError(smtConfig.responseFactory.error("String literal is not terminated: " + matched,pos));
+									token = setPos(new LexError(matched),pos);
+									break; // End of data - no closing right paren
+								}
+								smtConfig.log.logError(smtConfig.responseFactory.error("Invalid character: ASCII(decimal) = " + (int)c,
+										pos(p,p+1)));
+								continue;
 							}
-							smtConfig.log.logError(smtConfig.responseFactory.error("Invalid character: ASCII(decimal) = " + (int)c,
-									pos(p,p+1)));
-							continue;
 						}
 					}
 				} catch (IndexOutOfBoundsException e) {
