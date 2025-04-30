@@ -434,7 +434,10 @@ public class DeadlockTester {
 			try {
 				// let's not go overboard, we haven't even started the solver yet.
 				if (sumMatrix.getColumnCount() < 20000) {
-					s.add(new C_assert(PredecessorConstraintRefiner.computePredExpr(ap, sumMatrix, representative, sr)));
+					IExpr expr = PredecessorConstraintRefiner.computePredExpr(ap, sumMatrix, representative, sr);
+					if (expr != null) {
+						s.add(new C_assert(expr));
+					}
 				}
 			} catch (OutOfMemoryError err) {
 				System.out.println("Skipping predecessor constraint due to memory overflow.");
