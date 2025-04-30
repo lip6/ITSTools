@@ -20,6 +20,7 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class PredecessorConstraintRefiner implements IRefiner {
 
+	private static boolean firstError = true;
 	private Set<String> doneProblems = new HashSet<>();
 	private Map<String, IExpr> definitions = new HashMap<>();
 	private Map<String, VarSet> support = new HashMap<>();
@@ -178,7 +179,10 @@ public class PredecessorConstraintRefiner implements IRefiner {
 	        cumulativeWeight += SMTUtils.computeWeight(apFalseBeforeT);
 	        // Check if cumulative weight exceeds threshold
 	        if (cumulativeWeight > MAX_TOTAL_WEIGHT) {
-	            System.err.println("Excessive predecessor constraint size, skipping predecessor.");
+	        	if (firstError) {
+	        		firstError = false;
+	        		System.err.println("Excessive predecessor constraint size, skipping predecessor.");
+	        	}
 	            return null;  // Bail out completely
 	        }
 	        
