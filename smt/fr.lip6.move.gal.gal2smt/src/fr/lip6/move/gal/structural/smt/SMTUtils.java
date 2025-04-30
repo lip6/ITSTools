@@ -129,18 +129,7 @@ public class SMTUtils {
 	 * @param solveWithReals
 	 * @return a started solver or throws a RuntimeEx
 	 */
-	public static ISolver initSolver(org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
-		if (DEBUG >= 1) {
-			String logfile;
-			try {
-				logfile = File.createTempFile("smtlog", ".smt2").getAbsolutePath();
-				System.out.println("Logging solver outputs to " + logfile);
-				smt.smtConfig.logfile = logfile;
-			} catch (IOException e) {
-				System.err.println("Failed to create log file");
-				e.printStackTrace();
-			}
-		}
+	public static ISolver initSolver(org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {		
 		if (useAbstractDataType == POType.Forall) {
 			return initSolver(smt, "AUFLIRA", timeoutQ, timeoutT);
 		} else if (useAbstractDataType == POType.Plunge) {
@@ -166,6 +155,19 @@ public class SMTUtils {
 
 		smt.smtConfig.timeout = timeoutT * 100 ;
 		smt.smtConfig.timeoutTotal = timeoutT;
+		
+		if (DEBUG >= 1) {
+			String logfile;
+			try {
+				logfile = File.createTempFile("smtlog", ".smt2").getAbsolutePath();
+				System.out.println("Logging solver outputs to " + logfile);
+				smt.smtConfig.logfile = logfile;
+			} catch (IOException e) {
+				System.err.println("Failed to create log file");
+				e.printStackTrace();
+			}
+		}
+		
 		Solver engine = Solver.Z3;
 		ISolver solver = engine.getSolver(smt.smtConfig);
 		// start the solver
