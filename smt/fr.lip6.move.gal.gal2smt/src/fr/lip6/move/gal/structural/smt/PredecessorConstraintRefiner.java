@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.smtlib.IExpr;
-import org.smtlib.SMT;
 import org.smtlib.IExpr.IFactory;
+import org.smtlib.SMT;
 import org.smtlib.command.C_assert;
 import org.smtlib.impl.Script;
 
@@ -19,11 +19,11 @@ import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class PredecessorConstraintRefiner implements IRefiner {
-	
+
 	private Set<String> doneProblems = new HashSet<>();
 	private Map<String, IExpr> definitions = new HashMap<>();
 	private Map<String, VarSet> support = new HashMap<>();
-	
+
 	public PredecessorConstraintRefiner(ISparsePetriNet spn, List<Integer> repr, IntMatrixCol effects,
 			ProblemSet problems) {
 		if (effects.getColumnCount() == 0) {
@@ -61,15 +61,15 @@ public class PredecessorConstraintRefiner implements IRefiner {
 		}
 	}
 
-
-
-	private static IExpr computeFeasibleLast(IntMatrixCol sumMatrix, List<Integer> representative, ISparsePetriNet spn) {
+	private static IExpr computeFeasibleLast(IntMatrixCol sumMatrix, List<Integer> representative,
+			ISparsePetriNet spn) {
 		// there must exist a transition t such that
-		// * t was feasibly the last fired transition, i.e. there is a transition t' that t represents such that s >= post(t')
+		// * t was feasibly the last fired transition, i.e. there is a transition t'
+		// that t represents such that s >= post(t')
 		// * t was selected in the Parikh solution to reach s; |t|>0
 
 		// a map from index in reduced flow to set of transitions with this effect
-		Map<Integer, List<Integer>> revMap = SMTUtils.computeImages(representative); 
+		Map<Integer, List<Integer>> revMap = SMTUtils.computeImages(representative);
 
 		SparseIntArray supp = new SparseIntArray();
 
@@ -77,15 +77,16 @@ public class PredecessorConstraintRefiner implements IRefiner {
 
 		List<IExpr> allPotentialPred = new ArrayList<>();
 		// scan transition *effects* in sumMatrix
-		for (int tid=0, tide=sumMatrix.getColumnCount() ; tid < tide ; tid++) {
+		for (int tid = 0, tide = sumMatrix.getColumnCount(); tid < tide; tid++) {
 			SparseIntArray t = sumMatrix.getColumn(tid);
 			// * t was selected in the Parikh solution to reach s; |t|>0
-			IExpr tselected = ef.fcn(ef.symbol(">="), ef.symbol("t"+tid), ef.numeral(1));
+			IExpr tselected = ef.fcn(ef.symbol(">="), ef.symbol("t" + tid), ef.numeral(1));
 
-			// * t was feasibly the last fired transition, i.e. there is a transition t' that t represents such that s >= post(t')
+			// * t was feasibly the last fired transition, i.e. there is a transition t'
+			// that t represents such that s >= post(t')
 			List<IExpr> alternatives = new ArrayList<>();
 			for (Integer ti : revMap.get(tid)) {
-				alternatives.add(buildFeasible(ef, spn.getFlowTP().getColumn(ti)));					
+				alternatives.add(buildFeasible(ef, spn.getFlowTP().getColumn(ti)));
 			}
 			// combine
 			List<IExpr> toAnd = new ArrayList<>();
@@ -93,24 +94,22 @@ public class PredecessorConstraintRefiner implements IRefiner {
 			toAnd.add(SMTUtils.makeOr(alternatives));
 			allPotentialPred.add(SMTUtils.makeAnd(toAnd));
 		}
-		// assert an OR of one of the candidates 		
+		// assert an OR of one of the candidates
 		IExpr predicate = SMTUtils.makeOr(allPotentialPred);
 		return predicate;
 	}
 
-
-
 	@Override
 	public int refine(SolverState solver, ProblemSet problems, RefinementMode mode, VarSet current, long timeout) {
 		int total = 0;
-		
+
 		for (Problem p : problems.getUnsolved()) {
-			if (! doneProblems.contains(p.getName())) {
+			if (!doneProblems.contains(p.getName())) {
 				IExpr pred = definitions.get(p.getName());
 				if (pred == null) {
 					doneProblems.add(p.getName());
 					continue;
-				}				
+				}
 				if (canApplyConstraint(p.getName(), current, mode)) {
 					solver.declareVars(support.get(p.getName()));
 					p.refineDefinition(pred, solver);
@@ -119,24 +118,22 @@ public class PredecessorConstraintRefiner implements IRefiner {
 				}
 			}
 		}
-				
+
 		return total;
 	}
 
-
-	
-    private boolean canApplyConstraint(String constraint, VarSet current, RefinementMode mode) {    	
-        switch (mode) {
-            case INCLUDED_ONLY:
-                return current.containsAll(support.get(constraint));
-            case OVERLAPS:
-                return VarSet.intersects(current, support.get(constraint));
-            case ALL:
-                return true;
-            default:
-                return false;
-        }
-    }
+	private boolean canApplyConstraint(String constraint, VarSet current, RefinementMode mode) {
+		switch (mode) {
+		case INCLUDED_ONLY:
+			return current.containsAll(support.get(constraint));
+		case OVERLAPS:
+			return VarSet.intersects(current, support.get(constraint));
+		case ALL:
+			return true;
+		default:
+			return false;
+		}
+	}
 
 	@Override
 	public void reset() {
@@ -149,15 +146,16 @@ public class PredecessorConstraintRefiner implements IRefiner {
 		// we want to force existence of an immediate predecessor of s satisfying !ap
 
 		// there must exist a transition t such that
-		// * the predecessor by t of s satisfies !ap; this depends only on the effect of t, not it's precise definition
-		// * t was feasibly the last fired transition, i.e. there is a transition t' that t represents such that s >= post(t')
+		// * the predecessor by t of s satisfies !ap; this depends only on the effect of
+		// t, not it's precise definition
+		// * t was feasibly the last fired transition, i.e. there is a transition t'
+		// that t represents such that s >= post(t')
 		// * t was selected in the Parikh solution to reach s; |t|>0
 
 		// a map from index in reduced flow to set of transitions with this effect
-		Map<Integer, List<Integer>> revMap = SMTUtils.computeImages(representative); 
+		Map<Integer, List<Integer>> revMap = SMTUtils.computeImages(representative);
 
 		SparseIntArray supp = SMTUtils.computeSupport(ap);
-
 
 		IFactory ef = SMT.instance.smtConfig.exprFactory;
 
@@ -165,11 +163,11 @@ public class PredecessorConstraintRefiner implements IRefiner {
 
 		int selected = 0;
 		// scan transition *effects* in sumMatrix
-		for (int tid=0, tide=sumMatrix.getColumnCount() ; tid < tide ; tid++) {
+		for (int tid = 0, tide = sumMatrix.getColumnCount(); tid < tide; tid++) {
 			SparseIntArray t = sumMatrix.getColumn(tid);
-			if (! SparseIntArray.keysIntersect(supp, t)) {
+			if (!SparseIntArray.keysIntersect(supp, t)) {
 				// guaranteed to stutter : this is not a candidate
-				continue;				
+				continue;
 			} else {
 				if (selected++ > 1000) {
 					// whatever...
@@ -177,16 +175,19 @@ public class PredecessorConstraintRefiner implements IRefiner {
 				}
 				// more subtle we do touch the target AP
 				// compute if firing t would go from !ap to ap
-				// * the predecessor by t of s satisfies !ap; this depends only on the effect of t, not it's precise definition
-				IExpr apFalseBeforeT = SMTUtils.rewriteAfterEffect(Expression.not(ap),t,true).accept(new ExprTranslator());
+				// * the predecessor by t of s satisfies !ap; this depends only on the effect of
+				// t, not it's precise definition
+				IExpr apFalseBeforeT = SMTUtils.rewriteAfterEffect(Expression.not(ap), t, true)
+						.accept(new ExprTranslator());
 
 				// * t was selected in the Parikh solution to reach s; |t|>0
-				IExpr tselected = ef.fcn(ef.symbol(">="), ef.symbol("t"+tid), ef.numeral(1));
+				IExpr tselected = ef.fcn(ef.symbol(">="), ef.symbol("t" + tid), ef.numeral(1));
 
-				// * t was feasibly the last fired transition, i.e. there is a transition t' that t represents such that s >= post(t')
+				// * t was feasibly the last fired transition, i.e. there is a transition t'
+				// that t represents such that s >= post(t')
 				List<IExpr> alternatives = new ArrayList<>();
 				for (Integer ti : revMap.get(tid)) {
-					alternatives.add(buildFeasible(ef, sr.getFlowTP().getColumn(ti)));					
+					alternatives.add(buildFeasible(ef, sr.getFlowTP().getColumn(ti)));
 				}
 
 				// combine
@@ -195,50 +196,49 @@ public class PredecessorConstraintRefiner implements IRefiner {
 				toAnd.add(tselected);
 				toAnd.add(SMTUtils.makeOr(alternatives));
 				allPotentialPred.add(SMTUtils.makeAnd(toAnd));
-			}			
+			}
 		}
-		// assert an OR of one of the candidates 		
+		// assert an OR of one of the candidates
 		IExpr predicate = SMTUtils.makeOr(allPotentialPred);
 		return predicate;
 	}
 
 	private static IExpr buildFeasible(IFactory ef, SparseIntArray tp) {
 		List<IExpr> tojoin = new ArrayList<>();
-		for (int i=0,ie=tp.size();i<ie;i++) {
+		for (int i = 0, ie = tp.size(); i < ie; i++) {
 			int pid = tp.keyAt(i);
 			int val = tp.valueAt(i);
 
 			// must be that s is greater than tp
-			tojoin.add(ef.fcn(ef.symbol(">="), ef.symbol("s"+pid), ef.numeral(val)));
+			tojoin.add(ef.fcn(ef.symbol(">="), ef.symbol("s" + pid), ef.numeral(val)));
 		}
 
 		return SMTUtils.makeAnd(tojoin);
 	}
-	
-	
+
 	/**
 	 * Historical API, building a Script.
+	 *
 	 * @param ap
 	 * @param sumMatrix
 	 * @param representative
 	 * @param sr
 	 * @return
 	 */
-	public static Script computePredConstraint(Expression ap, IntMatrixCol sumMatrix,
-			List<Integer> representative, ISparsePetriNet sr) {
+	public static Script computePredConstraint(Expression ap, IntMatrixCol sumMatrix, List<Integer> representative,
+			ISparsePetriNet sr) {
 
 		IExpr predicate = computePredExpr(ap, sumMatrix, representative, sr);
-		Script script = new Script();		
+		Script script = new Script();
 		if (predicate != null) {
 			script.add(new C_assert(predicate));
 		}
 		return script;
 	}
 
-	
 	@Override
-    public String toString() {
-        return "PredecessorRefiner: " + doneProblems.size() + "/" + definitions.size() + " constraints";
-    }
+	public String toString() {
+		return "PredecessorRefiner: " + doneProblems.size() + "/" + definitions.size() + " constraints";
+	}
 
 }
