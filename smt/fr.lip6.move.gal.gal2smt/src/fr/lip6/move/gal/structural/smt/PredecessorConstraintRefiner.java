@@ -33,7 +33,18 @@ public class PredecessorConstraintRefiner implements IRefiner {
 		for (Problem p : problems.getUnsolved()) {
 			Expression ap = p.getPredicate();
 			if (ap == null) {
-				doneProblems.add(p.getName());
+				System.out.println("No predicate, testing for feasible last transition.");
+				try {
+					IExpr pred = computeFeasibleLast(effects, repr, spn);
+					if (pred != null) {
+						definitions.put(p.getName(), pred);
+						VarSet s = SMTUtils.computeSupport(pred);
+						support.put(p.getName(), s);
+						doneProblems.add(p.getName());
+					}
+				} catch (OutOfMemoryError e) {
+					System.out.println("Out of memory, skipping this problem.");
+				}
 			} else {
 				try {
 					IExpr pred = computePredExpr(ap, effects, repr, spn);
@@ -48,6 +59,43 @@ public class PredecessorConstraintRefiner implements IRefiner {
 				}
 			}
 		}
+	}
+
+
+
+	private static IExpr computeFeasibleLast(IntMatrixCol sumMatrix, List<Integer> representative, ISparsePetriNet spn) {
+		// there must exist a transition t such that
+		// * t was feasibly the last fired transition, i.e. there is a transition t' that t represents such that s >= post(t')
+		// * t was selected in the Parikh solution to reach s; |t|>0
+
+		// a map from index in reduced flow to set of transitions with this effect
+		Map<Integer, List<Integer>> revMap = SMTUtils.computeImages(representative); 
+
+		SparseIntArray supp = new SparseIntArray();
+
+		IFactory ef = SMT.instance.smtConfig.exprFactory;
+
+		List<IExpr> allPotentialPred = new ArrayList<>();
+		// scan transition *effects* in sumMatrix
+		for (int tid=0, tide=sumMatrix.getColumnCount() ; tid < tide ; tid++) {
+			SparseIntArray t = sumMatrix.getColumn(tid);
+			// * t was selected in the Parikh solution to reach s; |t|>0
+			IExpr tselected = ef.fcn(ef.symbol(">="), ef.symbol("t"+tid), ef.numeral(1));
+
+			// * t was feasibly the last fired transition, i.e. there is a transition t' that t represents such that s >= post(t')
+			List<IExpr> alternatives = new ArrayList<>();
+			for (Integer ti : revMap.get(tid)) {
+				alternatives.add(buildFeasible(ef, spn.getFlowTP().getColumn(ti)));					
+			}
+			// combine
+			List<IExpr> toAnd = new ArrayList<>();
+			toAnd.add(tselected);
+			toAnd.add(SMTUtils.makeOr(alternatives));
+			allPotentialPred.add(SMTUtils.makeAnd(toAnd));
+		}
+		// assert an OR of one of the candidates 		
+		IExpr predicate = SMTUtils.makeOr(allPotentialPred);
+		return predicate;
 	}
 
 
