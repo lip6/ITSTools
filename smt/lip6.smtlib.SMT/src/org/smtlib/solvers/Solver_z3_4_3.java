@@ -227,7 +227,10 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 				// Z3 returns an s-expr (always?)
 				// FIXME - (1) the {Print} also needs {Space}; (2) err_getValueTypes.tst returns a non-error s-expr and then an error s-expr - this fails for that case
 				//Pattern p = Pattern.compile("\\p{Space}*\\(\\p{Blank}*error\\p{Blank}+\"(([\\p{Space}\\p{Print}^[\\\"\\\\]]|\\\\\")*)\"\\p{Blank}*\\)\\p{Space}*");
-				Pattern p = Pattern.compile("\\p{Space}*\\(\\p{Blank}*error\\p{Blank}+\"(([\\p{Print}\\p{Space}&&[^\"\\\\]]|\\\\\")*)\"\\p{Blank}*\\)");
+				
+				// original pattern : could even stack overflow
+				// Pattern p = Pattern.compile("\\p{Space}*\\(\\p{Blank}*error\\p{Blank}+\"(([\\p{Print}\\p{Space}&&[^\"\\\\]]|\\\\\")*)\"\\p{Blank}*\\)");
+				Pattern  p = Pattern.compile("\\s*\\(\\s*error\\s+\"([^\"\\\\]*(?:\\\\.[^\"\\\\]*)*)\"\\s*\\)");
 				Matcher m = p.matcher(response);
 				String concat = "";
 				while (m.lookingAt()) {
