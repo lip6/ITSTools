@@ -30,6 +30,7 @@ public class Application implements IApplication {
 	private static final String LTL_EXAM = "-ltl";
 	private static final String ITS_FLAGS = "-itsflags";
 	private static final String TIMEOUT = "-timeout";
+	private static final String OUTPUT_FILE = "-o";
 	
 	
 	/* (non-Javadoc)
@@ -44,6 +45,7 @@ public class Application implements IApplication {
 			return new fr.lip6.move.gal.application.Application().start(context);
 		}
 		String inputff = null;
+		String outputff = null;
 		String inputType = null;
 		
 		Tool tool = Tool.reach;
@@ -55,6 +57,8 @@ public class Application implements IApplication {
 				itsflags = args[++i].split("\\s+");
 			} else if (INPUT_FILE.equals(args[i])) {
 				inputff = args[++i];
+			} else if (OUTPUT_FILE.equals(args[i])) {
+				outputff = args[++i];
 			} else if (TIMEOUT.equals(args[i])) {
 				timeout = Integer.parseInt(args[++i]);
 			} else if (INPUT_TYPE.equals(args[i])) {
@@ -110,9 +114,14 @@ public class Application implements IApplication {
 			String [] nitsflags = new String[itsflags.length+2] ;
 			for (int i = 0; i < itsflags.length; i++) {
 				nitsflags[i] = itsflags[i];
-			}			
-			nitsflags[nitsflags.length-2] = "--shortestAttacks";
-			nitsflags[nitsflags.length-1] = ff.getCanonicalPath()+".att";
+			}
+			nitsflags[nitsflags.length-2] = "--shortestAttacks";			
+			if (outputff == null) {
+				nitsflags[nitsflags.length-1] = ff.getCanonicalPath()+".att";
+			} else {
+				File foutput = new File(outputff);
+				nitsflags[nitsflags.length-1] = foutput.getCanonicalPath();				
+			}
 			itsflags = nitsflags;
 		} else {
 			System.err.println("Input file must be a .gal or .ahg file");
