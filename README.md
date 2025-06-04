@@ -1,5 +1,5 @@
 # ITSTools
-A multi-formalism, multi-solution model-checker centered on the language GAL
+A multi-formalism, multi-solution model-checker centered on the language GAL.
 
 See our main homepage for details : http://ddd.lip6.fr
 
