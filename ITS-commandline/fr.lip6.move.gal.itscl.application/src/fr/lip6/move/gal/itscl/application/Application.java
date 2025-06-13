@@ -37,13 +37,16 @@ public class Application implements IApplication {
 	 * @see org.eclipse.equinox.app.IApplication#start(org.eclipse.equinox.app.IApplicationContext)
 	 */
 	public Object start(IApplicationContext context) throws Exception {
-		
 		String [] args = (String[]) context.getArguments().get(APPARGS);
 		
 		List<String> listArgs = Arrays.asList(args);
 		if (listArgs.contains("-pnfolder")) {
 			return new fr.lip6.move.gal.application.Application().start(context);
 		}
+		
+		long startTime = System.currentTimeMillis();
+		
+		
 		String inputff = null;
 		String outputff = null;
 		String inputType = null;
@@ -177,6 +180,8 @@ public class Application implements IApplication {
 		System.out.println("Built GAL and property files in "+ (time - System.currentTimeMillis()) + " ms.");
 		
 		Runner.runTool(timeout, cl);
+		
+		System.out.println("Total execution time : " + (System.currentTimeMillis() - startTime) + " ms.");
 		
 		return IApplication.EXIT_OK;
 	}
