@@ -197,7 +197,10 @@ public class PredecessorConstraintRefiner implements IRefiner {
 	            cumulativeWeight += SMTUtils.computeWeight(elt);
 	            // Check if cumulative weight exceeds threshold
 		        if (cumulativeWeight > MAX_TOTAL_WEIGHT) {
-		            System.err.println("Excessive predecessor constraint size, skipping predecessor.");
+		        	if (firstError) {
+		        		firstError = false;
+		        		System.err.println("Excessive predecessor constraint size, skipping predecessor.");
+		        	}
 		            return null;  // Bail out completely
 		        }
 				alternatives.add(elt);
