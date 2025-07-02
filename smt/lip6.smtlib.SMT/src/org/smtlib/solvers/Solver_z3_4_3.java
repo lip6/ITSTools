@@ -212,6 +212,12 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 		try {
 			if (response.startsWith("stderr")) response = response.replace("stderr", "\"stderr\"");
 			else if (response.startsWith("stdout")) response = response.replace("stdout", "\"stdout\"");
+			
+			// check if we have timeout within last 50 char of the response
+			if (response.substring(Math.max(0, response.length()-50)).contains("timeout")) {
+				return smtConfig.responseFactory.error("Timeout of Z3 solver reached");
+			}
+			
 			Pattern oldbv = Pattern.compile("bv([0-9]+)\\[([0-9]+)\\]");
 			Matcher mm = oldbv.matcher(response);
 			while (mm.find()) {
