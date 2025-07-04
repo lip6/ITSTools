@@ -14,6 +14,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.graph.Kosaraju;
+import fr.lip6.move.gal.graph.Tarjan;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.IntMatrixCol;
@@ -2691,7 +2693,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		if (rt == ReductionType.SI_LTL || rt == ReductionType.SI_CTL || rt == ReductionType.LI_LTL
 				|| rt == ReductionType.DEADLOCK) {
 
-			List<List<Integer>> sccs = kosarajuSCC(graph);
+			List<List<Integer>> sccs = Tarjan.searchForSCC(graph);
 
 			// remove elementary SCC that are not actually their own successor
 			sccs.removeIf(scc -> scc.size() == 1 && graph.get(scc.get(0), scc.get(0)) == 0);
@@ -2789,7 +2791,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			}
 		}
 
-		List<List<Integer>> sccs = kosarajuSCC(graph);
+		List<List<Integer>> sccs = Tarjan.searchForSCC(graph);
 		sccs.removeIf(s -> s.size() == 1);
 
 		if (sccs.isEmpty()) {
@@ -2849,79 +2851,6 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					"After Free SCC fused " + sccs.size() + " scc, discarding " + prem.size() + " places.");
 		}
 		return true;
-	}
-
-	private static List<List<Integer>> kosarajuSCC(IntMatrixCol graph) {
-		// This part implements Kosaraju to find SCC
-		// not the best time complexity algo for that, but enough for us.
-		Stack<Integer> stack = new Stack<>();
-		Set<Integer> visited = new HashSet<>();
-
-		// recursive version, implicit stack is java's call stack
-		// for (int p = 0 ; p < nbP ; p++) {
-		// visitNode(graph, stack, p, visited);
-		// }
-
-		// derecursed version uses a todo stack
-		Stack<Integer> todo = new Stack<>();
-		for (int p = 0; p < graph.getColumnCount(); p++) {
-			todo.add(p);
-		}
-		while (!todo.isEmpty()) {
-			int p = todo.pop();
-			if (p == -1) {
-				stack.push(todo.pop());
-				continue;
-			}
-			SparseIntArray col = graph.getColumn(p);
-			if (col.size() > 0) {
-				if (!visited.add(p)) {
-					continue;
-				}
-				todo.push(p);
-				todo.push(-1);
-				for (int i = 0; i < col.size(); i++) {
-					todo.push(col.keyAt(i));
-				}
-			}
-		}
-
-		List<List<Integer>> sccs = new ArrayList<>();
-		List<Integer> curScc = new ArrayList<>();
-		visited.clear();
-		graph = graph.transpose();
-		while (!stack.isEmpty()) {
-			int cur = stack.pop();
-			visitNodeBis(graph, curScc, cur, visited);
-			if (!curScc.isEmpty()) {
-				sccs.add(curScc);
-				curScc = new ArrayList<>();
-			}
-		}
-		return sccs;
-	}
-
-	private static void visitNodeBis(IntMatrixCol graph, List<Integer> curScc, int cur, Set<Integer> visited) {
-		if (visited.add(cur)) {
-			curScc.add(cur);
-			SparseIntArray col = graph.getColumn(cur);
-			for (int i = 0; i < col.size(); i++) {
-				visitNodeBis(graph, curScc, col.keyAt(i), visited);
-			}
-		}
-	}
-
-	private void visitNode(IntMatrixCol graph, Stack<Integer> stack, int p, Set<Integer> visited) {
-		SparseIntArray col = graph.getColumn(p);
-		if (col.size() > 0) {
-			if (!visited.add(p)) {
-				return;
-			}
-			for (int i = 0; i < col.size(); i++) {
-				visitNode(graph, stack, col.keyAt(i), visited);
-			}
-			stack.push(p);
-		}
 	}
 
 	private boolean isDivergentFree(int hid) {
