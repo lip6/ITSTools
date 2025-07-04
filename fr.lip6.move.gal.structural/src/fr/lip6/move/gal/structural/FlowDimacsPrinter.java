@@ -14,15 +14,15 @@ public class FlowDimacsPrinter {
 	public static String drawNet (StructuralReduction sr) {
 		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames());
 	}
-	
+
 	public static String drawNet (IntMatrixCol flowPT, IntMatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames) {
 		try {
-			long time = System.currentTimeMillis();		
+			long time = System.currentTimeMillis();
 			Path out = Files.createTempFile("petri", ".sym");
 			PrintWriter pw = new PrintWriter(out.toFile());
 			String outff = out.toAbsolutePath().toString();
 			// compute problem size = number of nodes and edges
-			
+
 			// each arc with weight > 1 is encoded with an intermediate node colored by weight
 			long nontrivialarc = countNonTrivial(flowPT);
 			nontrivialarc += countNonTrivial(flowTP);
@@ -30,30 +30,30 @@ public class FlowDimacsPrinter {
 			long markedPlaces =  marks.stream().filter(i -> i>0).count();
 			// each place and transition gives rise to a node
 			long nbnode = pnames.size() + tnames.size() + markedPlaces + nontrivialarc;
-			
+
 			// each arc gives one edge
 			long totalArcs = flowPT.getColumns().stream().map(col -> col.size()).reduce(0, Integer::sum);
 			totalArcs += flowTP.getColumns().stream().map(col -> col.size()).reduce(0, Integer::sum);
-			
+
 			// besides these "normal" edges, marked places give an extra edge and non trivial arcs cost an extra edge.
 			long nbedge = totalArcs + markedPlaces + nontrivialarc ;
-			
+
 			// some comments
 			pw.println("c from net with "+ pnames.size() + " places and " + tnames.size() + " transitions.");
-			
+
 			// first line of file = problem definition
 			pw.println("p edge "+ nbnode + " " + nbedge);
-			
+
 			// places have color 0, transitions have color = 1, special marking/arc annotations have color the value of the function/initial >= 2
 			// places have their own index
 			// transitions start from tstart = places.size()
 			int tstart = pnames.size()+1;
 			// marking/function elements start from vstart = places.size() + trans.size()
 			int vstart = tstart + tnames.size();
-			
+
 			// let places have color 1
-			for (int pindex = 0 ; pindex < pnames.size() ; pindex++) {				
-				pw.println("n "+ (pindex+1) + " 1");		
+			for (int pindex = 0 ; pindex < pnames.size() ; pindex++) {
+				pw.println("n "+ (pindex+1) + " 1");
 			}
 			// declare transition nodes as having color 0
 			// this is implicitly already the case.
@@ -68,7 +68,7 @@ public class FlowDimacsPrinter {
 					extra++;
 				}
 			}
-			
+
 			// add values of edges, in transition order.
 			for (int t = 0; t < tnames.size() ; t++) {
 				SparseIntArray sa = flowPT.getColumn(t);
@@ -86,7 +86,7 @@ public class FlowDimacsPrinter {
 					}
 				}
 			}
-			
+
 			// OK, time to export the edges
 			// deal with markings
 			// any marked place points to a node whose color gives it's marking.
@@ -94,9 +94,9 @@ public class FlowDimacsPrinter {
 			for (int p=0; p < pnames.size() ; p++) {
 				int m = marks.get(p);
 				if (m >0) {
-					pw.println("e "+ (p+1) + " "+ extra);				
+					pw.println("e "+ (p+1) + " "+ extra);
 					extra++;
-				}				
+				}
 			}
 			// Deal with transitions now
 			for (int t = 0; t < tnames.size() ; t++) {
@@ -104,7 +104,7 @@ public class FlowDimacsPrinter {
 				for (int i=0;i<sa.size(); i++) {
 					if (sa.valueAt(i)==1) {
 						// simpler case, just put an edge between place and transition
-						pw.println("e "+ (sa.keyAt(i)+1) + " "+ (t+tstart));							
+						pw.println("e "+ (sa.keyAt(i)+1) + " "+ (t+tstart));
 					} else {
 						// value on arc > 1
 						// link to the appropriate "extra" arc node
@@ -117,7 +117,7 @@ public class FlowDimacsPrinter {
 				for (int i=0;i<sa.size(); i++) {
 					if (sa.valueAt(i)==1) {
 						// simpler case, just put an edge between place and transition
-						pw.println("e "+ (t+tstart) + " "+ (sa.keyAt(i)+1));							
+						pw.println("e "+ (t+tstart) + " "+ (sa.keyAt(i)+1));
 					} else {
 						// value on arc > 1
 						// link to the appropriate "extra" arc node

@@ -13,16 +13,16 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class CoverWalker {
 
-	
+
 	private static final int DEBUG = 0;
 	private CoverWalkUtils wu;
 
 	public CoverWalker(ISparsePetriNet sr) {
-		this.wu = new CoverWalkUtils(sr);
+		wu = new CoverWalkUtils(sr);
 	}
 
 	private static final int omega  = Integer.MAX_VALUE;
-	
+
 	private void updateMaxVerdicts(List<Expression> exprs, SparseIntArray state, int[] verdicts) {
 		for (int v = 0; v < verdicts.length; v++) {
 			if (verdicts[v] == omega) {
@@ -53,8 +53,8 @@ public class CoverWalker {
 			}
 		}
 	}
-	
-	
+
+
 	public int[] runRandomReachabilityDetection(long nbSteps, List<Expression> exprs, int timeout, int bestFirst,
 			boolean max, SparseIntArray maxReached) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
@@ -70,13 +70,13 @@ public class CoverWalker {
 		long nbresets = 0;
 
 		int[] verdicts = new int[exprs.size()];
-		
+
 		int STACKLIMIT = 20;
 		int initialTotalTokens = initstate.sumValues();
 		int totalTokens = initialTotalTokens;
 		int totalOmega = 0;
 		LinkedHashSet<SparseIntArray> stack = new LinkedHashSet<>();
-		
+
 		int i = 0;
 		for (; i < nbSteps; i++) {
 			long dur = System.currentTimeMillis() - time + 1;
@@ -93,7 +93,7 @@ public class CoverWalker {
 				return verdicts;
 			}
 			boolean skipVerdict = false;
-			
+
 			int newTotalTokens = state.sumValuesOmega();
 			if (newTotalTokens > totalTokens) {
 				int addedOmega = addOmega(state, stack);
@@ -134,7 +134,7 @@ public class CoverWalker {
 				SparseIntArray newstate = wu.fire(tfired, state);
 				// NB : discards empty events
 				wu.updateEnabled(newstate, list, tfired);
-				
+
 				last = tfired;
 				state = newstate;
 			} else {
@@ -194,68 +194,68 @@ public class CoverWalker {
 						if (state.valueAt(i) != omega && old.get(state.keyAt(i)) < state.valueAt(i)) {
 							state.setValueAt(i, omega);
 							added ++;
-							localAdded ++;							
+							localAdded ++;
 							repeat = true;
 						}
 					}
-					
+
 					if (localAdded > 0) {
 						it.remove();
 						break;
 					}
-					
+
 				}
 			}
 		} while (repeat);
 		return added;
 	}
-	
-	
+
+
 	// another implementation
-    public static boolean compareAndUpdateIfDominates(SparseIntArray cur, SparseIntArray past) {
-        // Determine the sizes outside the loop since they are fixed.
-        int ss1 = cur.size();
-        int ss2 = past.size();
+	public static boolean compareAndUpdateIfDominates(SparseIntArray cur, SparseIntArray past) {
+		// Determine the sizes outside the loop since they are fixed.
+		int ss1 = cur.size();
+		int ss2 = past.size();
 
-        // Step 1: Check if cur strictly covers past.
-        if (!SparseIntArray.coversStrictly(cur, past)) {
-            return false;
-        }
+		// Step 1: Check if cur strictly covers past.
+		if (!SparseIntArray.coversStrictly(cur, past)) {
+			return false;
+		}
 
-        // Step 2: Iterate a second time to update dominant entries.
-        int i = 0, j = 0;
-        for ( ; i < ss1 && j < ss2; ) {
-            int sk1 = cur.keyAt(i);
-            int sk2 = past.keyAt(j);
+		// Step 2: Iterate a second time to update dominant entries.
+		int i = 0, j = 0;
+		for ( ; i < ss1 && j < ss2; ) {
+			int sk1 = cur.keyAt(i);
+			int sk2 = past.keyAt(j);
 
-            if (sk1 == sk2) {
-                // Update to omega if cur's value is strictly greater.
-                if (cur.valueAt(i) > past.valueAt(j)) {
-                    cur.setValueAt(i, omega);
-                }
-                i++;
-                j++;
-            } else if (sk1 > sk2) {
-                // If there's a key in past not present in cur, move forward in past.
-                throw new RuntimeException("current should dominate past !");
-            } else {
-                // If cur has a key not in past, update to omega and move forward in cur.
-                cur.setValueAt(i, omega);
-                i++;
-            }
-       
-        }
-        if (i < ss1 && j >= ss2) {
-        	for (;i<ss1;i++) {
-        		cur.setValueAt(i, omega);
-        	}
-        }
+			if (sk1 == sk2) {
+				// Update to omega if cur's value is strictly greater.
+				if (cur.valueAt(i) > past.valueAt(j)) {
+					cur.setValueAt(i, omega);
+				}
+				i++;
+				j++;
+			} else if (sk1 > sk2) {
+				// If there's a key in past not present in cur, move forward in past.
+				throw new RuntimeException("current should dominate past !");
+			} else {
+				// If cur has a key not in past, update to omega and move forward in cur.
+				cur.setValueAt(i, omega);
+				i++;
+			}
 
-        return true;
-    }
-    
-	
+		}
+		if (i < ss1 && j >= ss2) {
+			for (;i<ss1;i++) {
+				cur.setValueAt(i, omega);
+			}
+		}
 
-	
-	
+		return true;
+	}
+
+
+
+
+
 }

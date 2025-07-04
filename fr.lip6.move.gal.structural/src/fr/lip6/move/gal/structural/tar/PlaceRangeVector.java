@@ -129,6 +129,7 @@ public class PlaceRangeVector {
         }
         return false;
 	}
+	
 	public boolean isTrue() {
 		return ranges.isEmpty();
 	}

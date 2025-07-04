@@ -10,22 +10,22 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class WalkUtils {
 
-    // Constants and member variables
-    private int behaviorCount; // The number of unique effect sets.
-    private int[] behaviorMap; // Maps transitions to their corresponding behavior indices.
-    private int[][] behaviors; // Stores transitions grouped by their effects.
-    private IntMatrixCol combFlow; // Combined flow matrix representing the net's dynamics.
-    private ISparsePetriNet net; // The Petri net instance.
-    private IntMatrixCol tFlowPT; // Transposed flow matrix from places to transitions.
-    private int emptyEffect = -1; // Index for the behavior with no effect (empty set).
-    private int[] initialEnabling; // Cache for the initially enabled transitions.
+	// Constants and member variables
+	private int behaviorCount; // The number of unique effect sets.
+	private int[] behaviorMap; // Maps transitions to their corresponding behavior indices.
+	private int[][] behaviors; // Stores transitions grouped by their effects.
+	private IntMatrixCol combFlow; // Combined flow matrix representing the net's dynamics.
+	private ISparsePetriNet net; // The Petri net instance.
+	private IntMatrixCol tFlowPT; // Transposed flow matrix from places to transitions.
+	private int emptyEffect = -1; // Index for the behavior with no effect (empty set).
+	private int[] initialEnabling; // Cache for the initially enabled transitions.
 
-    /**
-     * Constructs a WalkUtils instance for a given sparse Petri net.
-     * @param sr The sparse Petri net to be used.
-     */
-    public WalkUtils(ISparsePetriNet sr) {
-		this.net = sr;
+	/**
+	 * Constructs a WalkUtils instance for a given sparse Petri net.
+	 * @param sr The sparse Petri net to be used.
+	 */
+	public WalkUtils(ISparsePetriNet sr) {
+		net = sr;
 
 		LinkedHashMap<SparseIntArray, List<Integer>> effects = new LinkedHashMap<>();
 		combFlow = new IntMatrixCol(net.getPlaceCount(), 0);
@@ -55,16 +55,16 @@ public class WalkUtils {
 		tFlowPT = net.getFlowPT().transpose();
 	}
 
-    /**
-     * Computes the enabled transitions for a given state in the Petri net.
-     * @param state The current state of the Petri net.
-     * @return An array of enabled transitions.
-     */
+	/**
+	 * Computes the enabled transitions for a given state in the Petri net.
+	 * @param state The current state of the Petri net.
+	 * @return An array of enabled transitions.
+	 */
 	public int[] computeEnabled(SparseIntArray state) {
 		int[] list = new int[net.getTransitionCount() + 1];
 		// to clear any similar effects
 		boolean[] seenEffects = new boolean[behaviorCount];
-		
+
 		int li = 1;
 		for (int t = 0, e = net.getTransitionCount(); t < e; t++) {
 			if (seenEffects[behaviorMap[t]]) {
@@ -75,14 +75,14 @@ public class WalkUtils {
 				seenEffects[behaviorMap[t]] = true;
 			}
 		}
-		list[0] = li - 1;					
+		list[0] = li - 1;
 		return list;
 	}
-    /**
-     * Checks if the net can stutter, i.e., if there are enabled transitions that don't change the state.
-     * @param enabled An array of enabled transitions.
-     * @return True if the net can stutter, false otherwise.
-     */
+	/**
+	 * Checks if the net can stutter, i.e., if there are enabled transitions that don't change the state.
+	 * @param enabled An array of enabled transitions.
+	 * @return True if the net can stutter, false otherwise.
+	 */
 	public boolean canStutter (int [] enabled) {
 		for (int i = enabled[0]; i >= 1; i--) {
 			int t = enabled[i];
@@ -136,7 +136,7 @@ public class WalkUtils {
 	public void updateEnabled(SparseIntArray state, int[] enabled, int tfired) {
 		updateEnabled(state, enabled, tfired, true);
 	}
-	
+
 	// we just reached "state" by firing tfired
 	public void updateEnabled(SparseIntArray state, int[] enabled, int tfired, boolean dropEmptyEffects) {
 		if (combFlow.getColumn(tfired).size() == 0) {
@@ -174,10 +174,7 @@ public class WalkUtils {
 				SparseIntArray col = tFlowPT.getColumn(p);
 				for (int i = 0; i < col.size(); i++) {
 					int t = col.keyAt(i);
-					if (seen[t] || seenEffects[behaviorMap[t]])
-						continue;
-
-					if (dropEmptyEffects && combFlow.getColumn(t).size() == 0) {
+					if (seen[t] || seenEffects[behaviorMap[t]] || (dropEmptyEffects && combFlow.getColumn(t).size() == 0)) {
 						continue;
 					}
 
@@ -189,7 +186,7 @@ public class WalkUtils {
 				}
 			}
 		}
-		
+
 		// make sure there are no illegitimately disabled effects
 		for (int i=0,ie=disabledEffects.size() ; i < ie ; i++) {
 			int effect = disabledEffects.keyAt(i);
@@ -221,7 +218,7 @@ public class WalkUtils {
 		}
 		enabled[0]--;
 	}
-	
+
 	public ISparsePetriNet getNet() {
 		return net;
 	}

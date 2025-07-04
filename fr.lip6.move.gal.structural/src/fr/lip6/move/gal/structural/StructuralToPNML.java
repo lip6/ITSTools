@@ -10,12 +10,12 @@ import android.util.SparseIntArray;
 public class StructuralToPNML {
 
 	private static Logger log = Logger.getLogger("fr.lip6.move.gal");
-	
+
 	private static Logger getLog() {
 		return log ;
 	}
 
-	
+
 	public static void transform(SparsePetriNet sr, String path) throws IOException {
 		long time = System.currentTimeMillis();
 		PrintWriter pw = new PrintWriter(new File(path));
@@ -23,11 +23,11 @@ public class StructuralToPNML {
 		pw.append("<pnml xmlns=\"http://www.pnml.org/version-2009/grammar/pnml\">\n");
 		pw.append("<net id=\""+sr.getName()+"\" type=\"http://www.pnml.org/version-2009/grammar/ptnet\">\n");
 		pw.append("<page id=\"page0\"><name><text>DefaultPage</text></name>\n");
-		
+
 		int nbplaces=0;
 		for (int p = 0 ; p < sr.getPnames().size() ; p++) {
 			pw.append("<place id=\"p"+p+"\">");
-			pw.append("<name><text>"+sr.getPnames().get(p)+"</text></name>");			
+			pw.append("<name><text>"+sr.getPnames().get(p)+"</text></name>");
 			Integer mark = sr.getMarks().get(p);
 			if (mark != 0) {
 				pw.append("<initialMarking><text>" + mark + "</text></initialMarking>");

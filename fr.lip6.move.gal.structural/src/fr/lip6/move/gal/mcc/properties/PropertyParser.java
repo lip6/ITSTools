@@ -10,7 +10,7 @@ import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 
 public class PropertyParser {
-	
+
 	public static int  fileToProperties(String path, PetriNet ptnet, PropertyType propertyType) throws IOException {
 		File ff = new File(path);
 		if (ff.exists()) {
@@ -20,7 +20,7 @@ public class PropertyParser {
 			}
 		} else {
 			if (propertyType == PropertyType.DEADLOCK) {
-				fr.lip6.move.gal.structural.Property deadlockProp = 
+				fr.lip6.move.gal.structural.Property deadlockProp =
 						new fr.lip6.move.gal.structural.Property(Expression.op(Op.EF,Expression.op(Op.DEAD, null, null),null), propertyType ,"ReachabilityDeadlock");
 				ptnet.getProperties().add(deadlockProp);
 			} else {

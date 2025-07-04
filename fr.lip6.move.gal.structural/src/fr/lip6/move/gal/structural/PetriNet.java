@@ -36,7 +36,7 @@ public abstract class PetriNet {
 
 	public abstract int getTransitionIndex(String name);
 	public abstract int getPlaceIndex(String name);
-	
+
 	public BitSet computeSupport() {
 		BitSet supp = new BitSet();
 		for (Property p : getProperties()) {
@@ -44,15 +44,13 @@ public abstract class PetriNet {
 		}
 		return supp;
 	}
-	
+
 	public static Void addSupport(Expression expr, BitSet supp) {
 		if (expr == null) {
 			return null;
-		} else if (expr instanceof BinOp) {
-			BinOp bin = (BinOp) expr;
-			bin.forEachChild(c -> addSupport(c, supp));			
-		} else if (expr instanceof NaryOp) {
-			NaryOp nop = (NaryOp) expr;
+		} else if (expr instanceof BinOp bin) {
+			bin.forEachChild(c -> addSupport(c, supp));
+		} else if (expr instanceof NaryOp nop) {
 			nop.forEachChild(c -> addSupport(c, supp));
 		} else if (expr instanceof VarRef) {
 			supp.set(expr.getValue());
@@ -61,8 +59,8 @@ public abstract class PetriNet {
 		}
 		return null;
 	}
-	
-	
+
+
 	public void testAliasing(DoneProperties doneProps) {
 		int init = getProperties().size();
 		Map<Expression,String> alias = new HashMap<>();

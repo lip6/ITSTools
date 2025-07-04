@@ -27,13 +27,13 @@ import fr.lip6.move.gal.structural.expr.VarRef;
 public class PropertiesToPNML {
 
 	static Logger log = Logger.getLogger("fr.lip6.move.gal");
-	
+
 	private static Logger getLog() {
 		return log ;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param spn
 	 * @param path
 	 * @param doneProps
@@ -44,31 +44,31 @@ public class PropertiesToPNML {
 		long time = System.currentTimeMillis();
 		PrintWriter pw = new PrintWriter(new File(path));
 		pw.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-		
+
 		pw.append("<property-set xmlns=\"http://mcc.lip6.fr/\">\n");
 		List<Integer> usedConstants = new ArrayList<>();
 		int exported=0;
 		for (Property prop : spn.getProperties()) {
 			if (! doneProps.containsKey(prop.getName())) {
-				pw.append("<property>\n" + 
-						"<id>"+ prop.getName() +"</id>\n" + 
-						"<description>Automatically generated</description>\n" + 
+				pw.append("<property>\n" +
+						"<id>"+ prop.getName() +"</id>\n" +
+						"<description>Automatically generated</description>\n" +
 						"<formula>\n");
 				exportProperty(pw, prop.getBody(), prop.getType(), spn, usedConstants);
-				pw.append("</formula>\n" + 
-						"</property>\n" + 
+				pw.append("</formula>\n" +
+						"</property>\n" +
 						"");
 				exported++;
 			} else {
 				continue;
 				// This block would output trivially true/false properties.
-//				if (res) {
-//					// true => 0 <= 0
-//					pw.append("<integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le>\n");						
-//				} else {
-//					// false => 1 <= 0
-//					pw.append("<integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le>\n");														
-//				}
+				//				if (res) {
+				//					// true => 0 <= 0
+				//					pw.append("<integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le>\n");
+				//				} else {
+				//					// false => 1 <= 0
+				//					pw.append("<integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le>\n");
+				//				}
 			}
 		}
 		pw.append("</property-set>\n");
@@ -95,24 +95,24 @@ public class PropertiesToPNML {
 			for (int i=0; i < body.getValue(); i++) {
 				pw.append("<place>p"+spn.getPlaceCount()+"</place>");
 			}
-			pw.append("</place-bound>\n");			
-			return ;			
+			pw.append("</place-bound>\n");
+			return ;
 		} else if (type == PropertyType.INVARIANT && body.getOp() == Op.BOOLCONST) {
 			if (body.getValue() == 1) {
 				// simplest true formula we can think of, true directly in initial state in particular
 				pw.append("<exists-path><finally><integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le></finally></exists-path>");
 			} else {
 				// simplest false formula we can think of, false directly in initial state in particular
-				pw.append("<all-paths><globally><integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le></globally></all-paths> ");				
+				pw.append("<all-paths><globally><integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le></globally></all-paths> ");
 			}
-			return ;			
+			return ;
 		} else {
 			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount(),usedConstants);
 			body.accept(v);
 			return ;
 		}
 	}
-		
+
 }
 
 class PrintVisitor implements ExprVisitor<Void> {
@@ -132,12 +132,12 @@ class PrintVisitor implements ExprVisitor<Void> {
 	@Override
 	public Void visit(VarRef varRef) {
 		if (type == PropertyType.BOUNDS) {
-			pw.append("<place-bound>") 
-			.append("<place>p"+ varRef.index+"</place>") 
-			.append("</place-bound>\n");		
+			pw.append("<place-bound>")
+			.append("<place>p"+ varRef.index+"</place>")
+			.append("</place-bound>\n");
 		} else {
-			pw.append("<tokens-count>") 
-			.append("<place>p"+ varRef.index+"</place>") 
+			pw.append("<tokens-count>")
+			.append("<place>p"+ varRef.index+"</place>")
 			.append("</tokens-count>\n");
 		}
 		return null;
@@ -249,58 +249,58 @@ class PrintVisitor implements ExprVisitor<Void> {
 			pw.append("</reach></until>");
 			break;
 		}
-		case LEQ : 
+		case LEQ :
 		{
 			// MCC format actually only supports <= : integer-le
-			pw.append("<integer-le>\n");			
+			pw.append("<integer-le>\n");
 			binOp.left.accept(this);
 			binOp.right.accept(this);
 			pw.append("</integer-le>\n");
-			break;			
+			break;
 		}
-		case GT : 
+		case GT :
 		{
 			// a > b => ! a <= b
-			pw.append("<negation><integer-le>\n");			
+			pw.append("<negation><integer-le>\n");
 			binOp.left.accept(this);
 			binOp.right.accept(this);
 			pw.append("</integer-le></negation>\n");
 			break;
 		}
-		case GEQ : 
+		case GEQ :
 		{
 			// a >= b => b <= a
-			pw.append("<integer-le>\n");			
+			pw.append("<integer-le>\n");
 			binOp.right.accept(this);
 			binOp.left.accept(this);
 			pw.append("</integer-le>\n");
 			break;
 		}
-		case EQ : 
+		case EQ :
 		{
 			// a == b => a <= b && b <= a
 			pw.append("<conjunction>\n");
-			pw.append("<integer-le>\n");			
+			pw.append("<integer-le>\n");
 			binOp.left.accept(this);
 			binOp.right.accept(this);
 			pw.append("</integer-le>\n");
-			pw.append("<integer-le>\n");			
+			pw.append("<integer-le>\n");
 			binOp.right.accept(this);
 			binOp.left.accept(this);
 			pw.append("</integer-le>\n");
 			pw.append("</conjunction>\n");
 			break;
 		}
-		case NEQ : 
+		case NEQ :
 		{
 			// a != b => ! (a <= b && b <= a)
 			pw.append("<negation>");
 			pw.append("<conjunction>\n");
-			pw.append("<integer-le>\n");			
+			pw.append("<integer-le>\n");
 			binOp.left.accept(this);
 			binOp.right.accept(this);
 			pw.append("</integer-le>\n");
-			pw.append("<integer-le>\n");			
+			pw.append("<integer-le>\n");
 			binOp.right.accept(this);
 			binOp.left.accept(this);
 			pw.append("</integer-le>\n");
@@ -312,26 +312,26 @@ class PrintVisitor implements ExprVisitor<Void> {
 		{
 			if (binOp.right.getOp() == Op.CONST) {
 				// x < K  =>  x <= K-1
-				pw.append("<integer-le>\n");			
+				pw.append("<integer-le>\n");
 				binOp.left.accept(this);
-				pw.append("<integer-constant>"+(binOp.right.getValue()-1)+"</integer-constant>\n");				
-				pw.append("</integer-le>\n");				
+				pw.append("<integer-constant>"+(binOp.right.getValue()-1)+"</integer-constant>\n");
+				pw.append("</integer-le>\n");
 			} else {
 				// a < b => a <= b && ! b <= a
 				pw.append("<conjunction>\n");
-				pw.append("<integer-le>\n");			
+				pw.append("<integer-le>\n");
 				binOp.left.accept(this);
 				binOp.right.accept(this);
 				pw.append("</integer-le>\n");
 				pw.append("<negation>");
-				pw.append("<integer-le>\n");			
+				pw.append("<integer-le>\n");
 				binOp.right.accept(this);
 				binOp.left.accept(this);
 				pw.append("</integer-le>\n");
 				pw.append("</negation>\n");
 				pw.append("</conjunction>\n");
 			}
-			break;			
+			break;
 		}
 		default :
 		{
@@ -346,10 +346,10 @@ class PrintVisitor implements ExprVisitor<Void> {
 	public Void visitBool(BoolConstant boolConstant) {
 		if (boolConstant.value) {
 			// true => 0 <= 0
-			pw.append("<integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le>\n");						
+			pw.append("<integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le>\n");
 		} else {
 			// false => 1 <= 0
-			pw.append("<integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le>\n");									
+			pw.append("<integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le>\n");
 		}
 		return null;
 	}
@@ -382,13 +382,13 @@ class PrintVisitor implements ExprVisitor<Void> {
 			operands.get(0).accept(this);
 		} else {
 			int mid = sz / 2;
-			pw.append("<"+ operator+">\n");			
+			pw.append("<"+ operator+">\n");
 			combine(operator,operands.subList(0, mid));
 			combine(operator,operands.subList(mid, sz));
 			pw.append("</"+operator +">\n");
 		}
 	}
-	
+
 	@Override
 	public Void visit(NaryOp naryOp) {
 		switch (naryOp.getOp()) {
@@ -402,50 +402,13 @@ class PrintVisitor implements ExprVisitor<Void> {
 			combine("disjunction", naryOp.getChildren());
 			break;
 		}
-		case ADD : 
+		case ADD :
 		{
 			if (type == PropertyType.BOUNDS) {
 				pw.append("<place-bound>");
 			} else {
-				pw.append("<tokens-count>"); 
+				pw.append("<tokens-count>");
 			}
-			for (Expression child : naryOp.getChildren()) {
-				if (child.getOp() == Op.PLACEREF) {
-					pw.append("<place>p"+ child.getValue()+"</place>");
-				} else if (child.getOp() == Op.CONST) {
-					// do we already have such a place ?
-					int val = child.getValue();
-					int ind = usedConstants.indexOf(val);
-					if (ind == -1) {
-						ind = usedConstants.size();
-						usedConstants.add(val);
-					}
-					pw.append("<place>p"+(placeCount+ind)+"</place>");					
-				}
-			}
-			if (type == PropertyType.BOUNDS) {
-				pw.append("</place-bound>\n"); 
-			} else {
-				pw.append("</tokens-count>\n"); 
-			}
-			break;
-		}
-		case ENABLED:
-		{
-			pw.append("<is-fireable>"); 
-			for (Expression child : naryOp.getChildren()) {
-				if (child.getOp() == Op.TRANSREF) {
-					pw.append("<transition>t"+ child.getValue()+"</transition>");
-				} else {
-					throw new IllegalArgumentException("Unexpected child of enabled should be a transition.");
-				}
-			}
-			pw.append("</is-fireable>\n"); 
-			break;
-		}
-		case CARD:
-		{
-			pw.append("<tokens-count>"); 
 			for (Expression child : naryOp.getChildren()) {
 				if (child.getOp() == Op.PLACEREF) {
 					pw.append("<place>p"+ child.getValue()+"</place>");
@@ -460,7 +423,44 @@ class PrintVisitor implements ExprVisitor<Void> {
 					pw.append("<place>p"+(placeCount+ind)+"</place>");
 				}
 			}
-			pw.append("</tokens-count>\n"); 
+			if (type == PropertyType.BOUNDS) {
+				pw.append("</place-bound>\n");
+			} else {
+				pw.append("</tokens-count>\n");
+			}
+			break;
+		}
+		case ENABLED:
+		{
+			pw.append("<is-fireable>");
+			for (Expression child : naryOp.getChildren()) {
+				if (child.getOp() == Op.TRANSREF) {
+					pw.append("<transition>t"+ child.getValue()+"</transition>");
+				} else {
+					throw new IllegalArgumentException("Unexpected child of enabled should be a transition.");
+				}
+			}
+			pw.append("</is-fireable>\n");
+			break;
+		}
+		case CARD:
+		{
+			pw.append("<tokens-count>");
+			for (Expression child : naryOp.getChildren()) {
+				if (child.getOp() == Op.PLACEREF) {
+					pw.append("<place>p"+ child.getValue()+"</place>");
+				} else if (child.getOp() == Op.CONST) {
+					// do we already have such a place ?
+					int val = child.getValue();
+					int ind = usedConstants.indexOf(val);
+					if (ind == -1) {
+						ind = usedConstants.size();
+						usedConstants.add(val);
+					}
+					pw.append("<place>p"+(placeCount+ind)+"</place>");
+				}
+			}
+			pw.append("</tokens-count>\n");
 		}
 		default :
 		{
@@ -471,7 +471,7 @@ class PrintVisitor implements ExprVisitor<Void> {
 	}
 
 	@Override
-	public Void visit(AtomicPropRef apRef) {		
+	public Void visit(AtomicPropRef apRef) {
 		return apRef.getAp().getExpression().accept(this);
 	}
 }

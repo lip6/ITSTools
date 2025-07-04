@@ -4,16 +4,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import fr.lip6.move.gal.structural.PetriNet;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import java.util.logging.Logger;
-
 import org.xml.sax.SAXException;
+
+import fr.lip6.move.gal.structural.PetriNet;
 
 public final class PropReader {
 
@@ -29,7 +28,7 @@ public final class PropReader {
 			SAXParser saxParser = factory.newSAXParser();
 			PropHandler handler = new PropHandler(ptnet, isLTL);
 			long debut = System.currentTimeMillis();
-			saxParser.parse(in, handler);			
+			saxParser.parse(in, handler);
 			//LOGGER.info("Load time of PNML: " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 

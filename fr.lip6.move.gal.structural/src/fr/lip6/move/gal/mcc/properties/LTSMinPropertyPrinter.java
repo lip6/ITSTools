@@ -11,12 +11,12 @@ public class LTSMinPropertyPrinter extends PropertyPrinter {
 	public LTSMinPropertyPrinter(PrintWriter pw) {
 		super(pw, "p", false);
 	}
-	
+
 	@Override
 	public Void visit(AtomicPropRef apRef) {
-		return apRef.getAp().getExpression().accept(this);		
+		return apRef.getAp().getExpression().accept(this);
 	}
-	
+
 
 	@Override
 	public Void visit(TransRef transRef) {
@@ -29,5 +29,5 @@ public class LTSMinPropertyPrinter extends PropertyPrinter {
 		pw.append("p").append(Integer.toString(varRef.getValue()));
 		return null;
 	}
-	
+
 }

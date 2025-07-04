@@ -23,13 +23,13 @@ public class RandomExplorer {
 	private WalkUtils wu;
 
 	public RandomExplorer(ISparsePetriNet sr) {
-		this.wu = new WalkUtils(sr);
+		wu = new WalkUtils(sr);
 	}
 
 	private int[] computeEnabled(SparseIntArray state) {
 		return wu.computeEnabled(state);
 	}
-	
+
 	public ISparsePetriNet getNet() {
 		return wu.getNet();
 	}
@@ -42,7 +42,9 @@ public class RandomExplorer {
 		SparseIntArray parikh = InvariantCalculator.transformParikh(parikhori, repSet);
 		parikhori = parikh.clone();
 		int[] por = null;
-		if (porori != null) por = InvariantCalculator.transformParikh(porori, repSet).toArray(wu.getNet().getTransitionCount());
+		if (porori != null) {
+			por = InvariantCalculator.transformParikh(porori, repSet).toArray(wu.getNet().getTransitionCount());
+		}
 
 		long time = System.currentTimeMillis();
 		SparseIntArray state = wu.getInitial();
@@ -210,9 +212,9 @@ public class RandomExplorer {
 				long dur = System.currentTimeMillis() - time + 1;
 				if (dur > 1000 * timeout) {
 					System.out
-							.println("Interrupted probabilistic random walk after " + i + "  steps, run timeout after "
-									+ dur + " ms. (steps per millisecond=" + (i / dur) + " )" + " properties seen :"
-									+ Arrays.stream(verdicts).filter(x -> x > 0).count() + " out of " + exprs.size());
+					.println("Interrupted probabilistic random walk after " + i + "  steps, run timeout after "
+							+ dur + " ms. (steps per millisecond=" + (i / dur) + " )" + " properties seen :"
+							+ Arrays.stream(verdicts).filter(x -> x > 0).count() + " out of " + exprs.size());
 					break;
 				}
 				SparseIntArray state = todo.remove(todo.size() - 1);
@@ -328,34 +330,35 @@ public class RandomExplorer {
 		System.out.println(ws + " remains " + remaining + "/" + exprs.size() + " properties");
 		return finalverdict;
 	}
-	
+
 	public enum WalkType {
 		RANDOM, BEST_FIRST, PARIKH, MAX, PROBABILISTIC, EXHAUSTIVE
 	}
-	
+
 	public static class WalkStats {
 		WalkType type;
 		int steps;
 		long resets;
 		long duration;
 		int states=-1;
-		
+
 		public WalkStats(WalkType wt) {
 			type = wt;
 		}
-		
+
 		public synchronized void addStats(int steps, long resets, long duration) {
 			this.steps += steps;
 			this.resets += resets;
 			this.duration += duration;
 		}
-		
+
 		public synchronized void setStates(int states) {
 			this.states = states;
 		}
-		
+
+		@Override
 		public String toString() {
-			return type +" walk for " + steps + " steps ("+resets +" resets) in " + duration + " ms. (" + (steps/(duration+1)) + " steps per ms)" + (states>0 ? " saw "+states + " states" :""); 
+			return type +" walk for " + steps + " steps ("+resets +" resets) in " + duration + " ms. (" + (steps/(duration+1)) + " steps per ms)" + (states>0 ? " saw "+states + " states" :"");
 		}
 	}
 
@@ -739,9 +742,9 @@ public class RandomExplorer {
 				long dur = System.currentTimeMillis() - time + 1;
 				if (dur > 1000 * timeout) {
 					System.out
-							.println("Interrupted probabilistic random walk after " + i + "  steps, run timeout after "
-									+ dur + " ms. (steps per millisecond=" + (i / dur) + " )" + " properties seen :"
-									+ Arrays.stream(verdicts).filter(x -> x > 0).count() + " out of " + exprs.size());
+					.println("Interrupted probabilistic random walk after " + i + "  steps, run timeout after "
+							+ dur + " ms. (steps per millisecond=" + (i / dur) + " )" + " properties seen :"
+							+ Arrays.stream(verdicts).filter(x -> x > 0).count() + " out of " + exprs.size());
 					break;
 				}
 				SparseIntArray state;

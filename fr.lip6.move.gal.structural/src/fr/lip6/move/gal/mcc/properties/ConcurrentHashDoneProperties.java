@@ -13,7 +13,7 @@ public class ConcurrentHashDoneProperties implements DoneProperties {
 	private static final int DEBUG = 0;
 	private Map<String,Boolean> map = new ConcurrentHashMap<>();
 	protected Map<String,List<String>> alias = new HashMap<>();
-	
+
 	@Override
 	public boolean containsKey(Object arg0) {
 		return map.containsKey(arg0);
@@ -36,9 +36,9 @@ public class ConcurrentHashDoneProperties implements DoneProperties {
 			}
 		}
 		return b;
-		
+
 	}
-	
+
 	@Override
 	public Boolean put(String prop, Integer value, String techniques) {
 		Boolean b = map.put(prop, true);
@@ -59,7 +59,8 @@ public class ConcurrentHashDoneProperties implements DoneProperties {
 	public int size() {
 		return map.size();
 	}
-	
+
+	@Override
 	public Boolean getValue(String prop) {
 		return map.get(prop);
 	}
@@ -71,10 +72,11 @@ public class ConcurrentHashDoneProperties implements DoneProperties {
 
 	@Override
 	public void addAlias(String propToCheck, String aka) {
-		alias.compute(propToCheck, (k,v) -> 
+		alias.compute(propToCheck, (k,v) ->
 		{
-			if (v==null) 
+			if (v==null) {
 				v = new ArrayList<>();
+			}
 			v.add(aka);
 			return v;
 		});

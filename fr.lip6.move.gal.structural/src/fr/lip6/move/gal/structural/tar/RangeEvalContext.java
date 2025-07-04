@@ -6,27 +6,29 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class RangeEvalContext {
 
+	// current state description as ranges for some places
 	private PlaceRangeVector ranges;
+	// computing the subset of sufficient conditions for evaluation
 	private PlaceRangeVector sufficient = new PlaceRangeVector();
+	// the net
 	private ISparsePetriNet net;
+	// a counter for usefulness of each place
 	private int[] use_count;
-	private boolean negated;
+	// did the last visit edit some ranges (false),
+	// or was it impossible to decide with just ranges (true)
 	private boolean bool_result;
 
 	public RangeEvalContext(PlaceRangeVector prv, ISparsePetriNet net, int[] use_count) {
 		ranges = prv;
 		this.net = net;
 		this.use_count = use_count;
-		this.negated = false;
 	}
 
 	public void visit(Expression e) {
 		if (e==null) {
 			return;
 		} else if (e.getOp() == Op.NOT) {
-			negated = !negated;
-			visit(e.childAt(0));
-			negated = !negated;			
+			throw new IllegalArgumentException("Please push negations before using Range eval context.");
 		} else if (e.getOp() == Op.AND) {
 			PlaceRangeVector cursuff = new PlaceRangeVector(); 
 			cursuff.copy(sufficient);
@@ -48,7 +50,13 @@ public class RangeEvalContext {
 			} else {
 				sufficient.copy(cursuff);
 			}
+			bool_result = !found; // true on TOS
+		} else if (e.getOp() == Op.OR) {
 			
+			PlaceRangeVector tmpsuff = new PlaceRangeVector();
+			tmpsuff.copy(sufficient);
+			
+		//	for ()
 			
 		}
 	}

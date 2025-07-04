@@ -20,7 +20,7 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class PropHandler extends DefaultHandler {
 	// context stack
-	private Stack<Object> stack = new Stack<Object>();
+	private Stack<Object> stack = new Stack<>();
 
 	private boolean dotext = false;
 	private boolean isLTL = false;
@@ -29,7 +29,7 @@ public class PropHandler extends DefaultHandler {
 	private PetriNet spec;
 
 	public PropHandler(PetriNet spn, boolean isLTL) {
-		this.spec = spn;
+		spec = spn;
 		this.isLTL = isLTL;
 	}
 
@@ -228,8 +228,7 @@ public class PropHandler extends DefaultHandler {
 	private Map<String, Integer> pcache = null;
 
 	private int findPlace(String name) {
-		if (spec instanceof ISparsePetriNet) {
-			ISparsePetriNet spn = (ISparsePetriNet) spec;
+		if (spec instanceof ISparsePetriNet spn) {
 			if (pcache == null) {
 				// Initialize the cache with an appropriate initial capacity to optimize
 				// performance and minimize rehashing
@@ -268,8 +267,7 @@ public class PropHandler extends DefaultHandler {
 	private Map<String, Integer> tcache = null;
 
 	private int findTransition(String name) {
-		if (spec instanceof ISparsePetriNet) {
-			ISparsePetriNet spn = (ISparsePetriNet) spec;
+		if (spec instanceof ISparsePetriNet spn) {
 			if (tcache == null) {
 				// no reindex
 				// https://stackoverflow.com/questions/434989/hashmap-initialization-parameters-load-initialcapacity
@@ -281,10 +279,11 @@ public class PropHandler extends DefaultHandler {
 			}
 		}
 		int index;
-		if (tcache == null)
+		if (tcache == null) {
 			index = spec.getTransitionIndex(normalizeName(name));
-		else
+		} else {
 			index = tcache.get(normalizeName(name));
+		}
 		if (index < 0) {
 			System.out.println("Unknown transition named :\"" + name + "\"" + " in property.");
 			throw new IllegalArgumentException("Unknown transition named :\"" + name + "\"" + " in property.");

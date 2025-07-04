@@ -21,59 +21,59 @@ public class SpotPropertyPrinter extends CExpressionPrinter {
 		pw.append(pnames.get(varRef.getValue())); // are quotes useful "\""
 		return null;
 	}
-	
+
 	@Override
 	public Void visit(BinOp binOp) {
-			switch (binOp.getOp()) {
-			case F:
-				pw.print("F(");
-				binOp.left.accept(this);
-				pw.print(")");
-				break;
-			case G:
-				pw.print("G(");
-				binOp.left.accept(this);
-				pw.print(")");
-				break;
-			case X:
-				pw.print("X(");
-				binOp.left.accept(this);
-				pw.print(")");
-				break;
-			case U:
-				infix(binOp, " U ");
-				break;
-			case EQ:
-				quoteInfix(binOp, "==");
-				break;
-			case NEQ :
-			{
-				quoteInfix(binOp, "!=");
-				break;			
-			}
-			case LT :
-			{
-				quoteInfix(binOp, "<");
-				break;			
-			}
-			case LEQ :
-			{
-				quoteInfix(binOp, "<=");
-				break;			
-			}
-			case GEQ :
-			{
-				quoteInfix(binOp, ">=");
-				break;			
-			}
-			case GT :
-			{
-				quoteInfix(binOp, ">");
-				break;			
-			}
-			default:
-				super.visit(binOp);
-			}
+		switch (binOp.getOp()) {
+		case F:
+			pw.print("F(");
+			binOp.left.accept(this);
+			pw.print(")");
+			break;
+		case G:
+			pw.print("G(");
+			binOp.left.accept(this);
+			pw.print(")");
+			break;
+		case X:
+			pw.print("X(");
+			binOp.left.accept(this);
+			pw.print(")");
+			break;
+		case U:
+			infix(binOp, " U ");
+			break;
+		case EQ:
+			quoteInfix(binOp, "==");
+			break;
+		case NEQ :
+		{
+			quoteInfix(binOp, "!=");
+			break;
+		}
+		case LT :
+		{
+			quoteInfix(binOp, "<");
+			break;
+		}
+		case LEQ :
+		{
+			quoteInfix(binOp, "<=");
+			break;
+		}
+		case GEQ :
+		{
+			quoteInfix(binOp, ">=");
+			break;
+		}
+		case GT :
+		{
+			quoteInfix(binOp, ">");
+			break;
+		}
+		default:
+			super.visit(binOp);
+		}
 		return null;
 	}
 
@@ -82,7 +82,7 @@ public class SpotPropertyPrinter extends CExpressionPrinter {
 		binOp.left.accept(this);
 		pw.append(op);
 		binOp.right.accept(this);
-		pw.append("\"");		
+		pw.append("\"");
 	}
 
 }

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.expr.BinOp;
@@ -29,13 +28,14 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	private boolean isSafe=false;
 	private static final int DEBUG = 0;
 	private boolean isSkeleton=false;
-	
+
 	public SparsePetriNet() {
 	}
-	
+
 	public SparsePetriNet(SparsePetriNet spn) {
-		for (Property p : spn.getProperties())
+		for (Property p : spn.getProperties()) {
 			super.getProperties().add(p.copy());
+		}
 		marks = new ArrayList<>(spn.marks);
 		flowPT = new IntMatrixCol(spn.flowPT);
 		flowTP = new IntMatrixCol(spn.flowTP);
@@ -49,11 +49,11 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	public void setSkeleton(boolean isSkeleton) {
 		this.isSkeleton = isSkeleton;
 	}
-	
+
 	public boolean isSkeleton() {
 		return isSkeleton;
 	}
-	
+
 	@Override
 	public void setSafe(boolean isSafe) {
 		this.isSafe = isSafe;
@@ -62,14 +62,14 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	public boolean isSafe() {
 		return isSafe;
 	}
-	
+
 	public int addTransition (String tname) {
 		flowPT.appendColumn(new SparseIntArray());
 		flowTP.appendColumn(new SparseIntArray());
 		tnames.add(tname);
 		return tnames.size()-1;
 	}
-	
+
 	public int addPlace (String pname, int init) {
 		flowPT.addRow();
 		flowTP.addRow();
@@ -84,7 +84,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	}
 
 	public void addPostArc (int p, int t, int val) {
-		flowTP.getColumn(t).put(p,val);		
+		flowTP.getColumn(t).put(p,val);
 		maxArcValue = Math.max(maxArcValue, val);
 	}
 
@@ -92,16 +92,18 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	public int getTransitionCount() {
 		return tnames.size();
 	}
-	
+
 	@Override
 	public int getPlaceCount() {
 		return pnames.size();
 	}
-	
+
+	@Override
 	public List<String> getTnames() {
 		return tnames;
 	}
-	
+
+	@Override
 	public List<String> getPnames() {
 		return pnames;
 	}
@@ -110,7 +112,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	public int getTransitionIndex(String name) {
 		return tnames.indexOf(name);
 	}
-	
+
 	@Override
 	public IntMatrixCol getFlowPT() {
 		return flowPT;
@@ -119,6 +121,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	public IntMatrixCol getFlowTP() {
 		return flowTP;
 	}
+	@Override
 	public int getMaxArcValue() {
 		return maxArcValue;
 	}
@@ -127,7 +130,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	public List<Integer> getMarks() {
 		return marks;
 	}
-	
+
 	@Override
 	public int getPlaceIndex(String name) {
 		return pnames.indexOf(name);
@@ -142,15 +145,14 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		return LogicSimplifier.simplifyWithInitial(getProperties(),spinit, this);
 	}
 
-	public int testInDeadlock() {		
+	public int testInDeadlock() {
 		return LogicSimplifier.simplifyWithDead(getProperties());
 	}
 
 	private Expression simplifyConstants(Expression expr, int[] perm) {
 		if (expr == null) {
 			return null;
-		} else if (expr instanceof BinOp) {
-			BinOp bin = (BinOp) expr;
+		} else if (expr instanceof BinOp bin) {
 			Expression l = simplifyConstants(bin.left, perm);
 			Expression r = simplifyConstants(bin.right, perm);
 			if (l != bin.left || r != bin.right) {
@@ -158,8 +160,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 			} else {
 				return expr;
 			}
-		} else if (expr instanceof NaryOp) {
-			NaryOp nop = (NaryOp) expr;
+		} else if (expr instanceof NaryOp nop) {
 			List<Expression> resc = new ArrayList<>(nop.getChildren().size());
 			boolean changed = false;
 			for (Expression child : nop.getChildren()) {
@@ -173,9 +174,8 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 				return expr;
 			} else {
 				return Expression.nop(nop.getOp(), resc);
-			}			
-		} else if (expr instanceof VarRef) {
-			VarRef vref = (VarRef) expr;
+			}
+		} else if (expr instanceof VarRef vref) {
 			int img = perm[vref.getValue()];
 			if (img == -1) {
 				return Expression.constant(marks.get(vref.getValue()));
@@ -199,9 +199,9 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 			}
 		}
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Returns the total tokens that lived in the constant places removed.
 	 * @return
@@ -224,7 +224,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		Set<Integer> syphon = SiphonComputer.computeEmptySyphon(flowPT,flowTP,marks);
 		// now scan for isomorphic/redundant/useless/constant places
 		for (int pid = 0 , pe = pnames.size() ; pid < pe ; pid++) {
-			
+
 			SparseIntArray from = tflowPT.getColumn(pid);
 			SparseIntArray to = tflowTP.getColumn(pid);
 			if (syphon.contains(pid) || from.equals(to) || (to.size()==0 && marks.get(pid)==0)) {
@@ -273,7 +273,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 			for (int tid : todelTrans) {
 				flowPT.deleteColumn(tid);
 				flowTP.deleteColumn(tid);
-				trem.add(tnames.remove(tid));				
+				trem.add(tnames.remove(tid));
 			}
 		}
 		if (totalp>0 || !todelTrans.isEmpty()) {
@@ -283,23 +283,21 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 
 		return totaltok;
 	}
-	
+
 	public boolean rewriteConstantSums () {
 		Map<Set<Integer>,Integer> constantSums = new HashMap<>();
 		Set<Set<Integer>> varSums = new HashSet<>();
-		for (int pind=0,pe=getProperties().size() ; pind < pe ; pind++) {
-			Property p = getProperties().get(pind);
+		for (Property p : getProperties()) {
 			p.setBody(findAndTestSums(p.getBody(),constantSums,varSums));
 		}
 		return ! constantSums.isEmpty();
 	}
-	
+
 	private Expression findAndTestSums(Expression expr, Map<Set<Integer>,Integer> constantSums,
 			Set<Set<Integer>> varSums) {
 		if (expr == null) {
 			return null;
-		} else if (expr instanceof BinOp) {
-			BinOp bin = (BinOp) expr;
+		} else if (expr instanceof BinOp bin) {
 			Expression l = findAndTestSums(bin.left, constantSums, varSums);
 			Expression r = findAndTestSums(bin.right, constantSums, varSums);
 			if (l != bin.left || r != bin.right) {
@@ -307,8 +305,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 			} else {
 				return expr;
 			}
-		} else if (expr instanceof NaryOp) {
-			NaryOp nop = (NaryOp) expr;
+		} else if (expr instanceof NaryOp nop) {
 			if (nop.getOp() == Op.ADD) {
 				Set<Integer> vars = new HashSet<>();
 				for (Expression child : nop.getChildren()) {
@@ -358,7 +355,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 				}
 				return Expression.nop(nop.getOp(), resc);
 			}
-		} 
+		}
 		return expr;
 	}
 
@@ -394,19 +391,19 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		}
 		rewriteConstantSums();
 	}
-	
+
 	public void readFrom(StructuralReduction sr) {
 		readFrom(sr,null);
 	}
 
 	public List<Expression> readFrom(StructuralReduction sr, List<Expression> original) {
-		this.flowPT = sr.getFlowPT();
-		this.flowTP = sr.getFlowTP();
-		this.marks = new ArrayList<>(sr.getMarks());
-		this.maxArcValue = sr.getMaxArcValue();
-		this.tnames = sr.getTnames();
+		flowPT = sr.getFlowPT();
+		flowTP = sr.getFlowTP();
+		marks = new ArrayList<>(sr.getMarks());
+		maxArcValue = sr.getMaxArcValue();
+		tnames = sr.getTnames();
 		int [] perm = new int [pnames.size()];
-		this.isSafe = sr.isSafe();
+		isSafe = sr.isSafe();
 		Map<String,Integer> indexes = new HashMap<>();
 		for (int i=0,ie=pnames.size(); i < ie; i++) {
 			indexes.put(pnames.get(i), i);
@@ -423,12 +420,13 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 				perm[i] = newind;
 			}
 		}
-		this.pnames = sr.getPnames();
+		pnames = sr.getPnames();
 		for (Property prop : getProperties()) {
 			prop.setBody(simplifyConstants(prop.getBody(), perm));
 		}
-		if (original == null)
+		if (original == null) {
 			return null;
+		}
 		List<Expression> mapped = new ArrayList<>(original.size());
 		for (Expression e : original) {
 			mapped.add(simplifyConstants(e, perm));
@@ -444,9 +442,9 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 			for (int i = tnames.size()-1 ;  i >= 0 ; i--) {
 				if (flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
 					todrop.add(i);
-				} 
+				}
 			}
-			if (! todrop.isEmpty()) {				
+			if (! todrop.isEmpty()) {
 				reduced += todrop.size();
 				for (int tid : todrop) {
 					flowPT.deleteColumn(tid);
@@ -455,25 +453,25 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 				}
 			}
 		}
-		reduced += ensureUnique(flowPT, flowTP, tnames); 
+		reduced += ensureUnique(flowPT, flowTP, tnames);
 		if (reduced > 0) {
 			System.out.println("Reduce redundant transitions removed "+ reduced +" transitions.");
 		}
 	}
-	
+
 	private int ensureUnique(IntMatrixCol mPT, IntMatrixCol mTP, List<String> names) {
 		Map<SparseIntArray, Map<SparseIntArray,Integer>> seen = new HashMap<>();
 		List<Integer> todel = new ArrayList<>();
-			
-			// plain iteration order to collect decreasing tokill indexes
-			for (int trid=mPT.getColumnCount()-1 ; trid >= 0 ; trid--) {
-				SparseIntArray tcolPT = mPT.getColumn(trid);
-				SparseIntArray tcolTP = mTP.getColumn(trid);
-				Integer b = seen.computeIfAbsent(tcolPT, k -> new HashMap<>()).put(tcolTP, trid);
-				if (b != null) {
-					todel.add(trid);
-				}
-			}								
+
+		// plain iteration order to collect decreasing tokill indexes
+		for (int trid=mPT.getColumnCount()-1 ; trid >= 0 ; trid--) {
+			SparseIntArray tcolPT = mPT.getColumn(trid);
+			SparseIntArray tcolTP = mTP.getColumn(trid);
+			Integer b = seen.computeIfAbsent(tcolPT, k -> new HashMap<>()).put(tcolTP, trid);
+			if (b != null) {
+				todel.add(trid);
+			}
+		}
 		List<String> rem = new ArrayList<>();
 		for (int td : todel) {
 			rem.add(names.remove(td));
@@ -487,7 +485,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	}
 
 	public int getArcCount() {
-		return (this.getFlowPT().getColumns().stream().mapToInt(c->c.size()).sum() + this.getFlowTP().getColumns().stream().mapToInt(c->c.size()).sum());
+		return (getFlowPT().getColumns().stream().mapToInt(c->c.size()).sum() + getFlowTP().getColumns().stream().mapToInt(c->c.size()).sum());
 	}
 
 	/**

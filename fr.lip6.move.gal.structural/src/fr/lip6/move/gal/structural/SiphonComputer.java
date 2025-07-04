@@ -15,12 +15,14 @@ public class SiphonComputer {
 		Set<Integer> keepP = new HashSet<>();
 		Set<Integer> keepT = new HashSet<>();
 		for (int i=0,ie=marks.size(); i < ie ; i++) {
-			if (marks.get(i) == 0)
+			if (marks.get(i) == 0) {
 				keepP.add(i);
+			}
 		}
 		for (int i=0,ie=flowTP.getColumnCount(); i < ie ; i++) {
-			if (flowTP.getColumn(i).size()>0)
-					keepT.add(i);
+			if (flowTP.getColumn(i).size()>0) {
+				keepT.add(i);
+			}
 		}
 		// iterate reduction of unfeasible parts
 		{
@@ -59,7 +61,7 @@ public class SiphonComputer {
 							SparseIntArray tp = flowTP.getColumn(tid);
 							// discard the transition, but also it's whole post set
 							for (int i=0, e = tp.size() ; i < e ; i++) {
-								keepP.remove(tp.keyAt(i));							
+								keepP.remove(tp.keyAt(i));
 							}
 							doneIter++;
 							keepT.remove(tid);

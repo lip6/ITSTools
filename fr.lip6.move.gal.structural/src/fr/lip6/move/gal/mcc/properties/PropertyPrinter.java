@@ -41,7 +41,7 @@ public class PropertyPrinter extends CExpressionPrinter {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public Void visit(AtomicPropRef apRef) {
 		if (forSpot) {

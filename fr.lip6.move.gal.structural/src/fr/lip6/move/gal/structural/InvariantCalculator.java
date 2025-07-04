@@ -20,9 +20,9 @@ import uniol.apt.analysis.invariants.InvariantCalculator.InvariantAlgorithm;
 
 /**
  * A front-end for functionality computing invariants. Underlying code is
- * adapted from CvO-Theory group's APT : https://github.com/CvO-Theory/apt 
+ * adapted from CvO-Theory group's APT : https://github.com/CvO-Theory/apt
  * See also uniol.apt package and classes.
- * 
+ *
  * @author ythierry
  *
  */
@@ -32,7 +32,7 @@ public class InvariantCalculator {
 	/**
 	 * Guaranteed polynomial runtime, returns flows (with positive AND negative
 	 * coefficients)
-	 * 
+	 *
 	 * @param pn representing the Petri net approximation
 	 * @return a set of invariants, i.e. coeffs for each variable such that the sum
 	 *         is constant in all markings/states.
@@ -49,7 +49,7 @@ public class InvariantCalculator {
 		} catch (ArithmeticException e) {
 			invar = new HashSet<>();
 			Logger.getLogger("fr.lip6.move.gal")
-					.info("Invariants computation overflowed in " + (System.currentTimeMillis() - time) + " ms");
+			.info("Invariants computation overflowed in " + (System.currentTimeMillis() - time) + " ms");
 		}
 		return invar;
 	}
@@ -59,7 +59,7 @@ public class InvariantCalculator {
 		for (SparseIntArray rv : invariants) {
 			StringBuilder sb = new StringBuilder();
 			try {
-				long sum = printEquation(rv, initial, pnames, sb);			
+				long sum = printEquation(rv, initial, pnames, sb);
 				out.println("inv : " + sb.toString() + " = " + sum);
 			} catch (ArithmeticException e) {
 				System.err.println("Overflow of 'long' when computing constant for invariant.");
@@ -100,7 +100,7 @@ public class InvariantCalculator {
 					sb.append(pnames.get(k));
 				}
 				if (initial != null) {
-					sum = Math.addExact(sum, (Math.multiplyExact((long)v, initial.get(k))));					
+					sum = Math.addExact(sum, (Math.multiplyExact((long)v, initial.get(k))));
 				}
 			}
 		}
@@ -121,7 +121,7 @@ public class InvariantCalculator {
 		} catch (Exception e) {
 			task.cancel(true);
 			Logger.getLogger("fr.lip6.move.gal")
-					.warning("Invariant computation timed out after " + timeout + " seconds.");
+			.warning("Invariant computation timed out after " + timeout + " seconds.");
 		}
 		return new HashSet<>();
 	}
@@ -152,8 +152,9 @@ public class InvariantCalculator {
 
 		if (DEBUG >= 1 && invarT != null) {
 			List<Integer> empty = new ArrayList<>(sr.getTransitionCount());
-			for (int i = 0; i < sr.getTransitionCount(); i++)
+			for (int i = 0; i < sr.getTransitionCount(); i++) {
 				empty.add(0);
+			}
 			InvariantCalculator.printInvariant(invarT, sr.getTnames(), empty);
 		}
 		// so we have T invariants, using the reduced flow matrix
@@ -208,11 +209,11 @@ public class InvariantCalculator {
 			cache(pn, invar);
 			// InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 			Logger.getLogger("fr.lip6.move.gal")
-					.info("Computed " + invar.size() + " invariants in " + (System.currentTimeMillis() - time) + " ms");
+			.info("Computed " + invar.size() + " invariants in " + (System.currentTimeMillis() - time) + " ms");
 		} catch (ArithmeticException e) {
 			invar = new HashSet<>();
 			Logger.getLogger("fr.lip6.move.gal")
-					.info("Invariants computation overflowed in " + (System.currentTimeMillis() - time) + " ms");
+			.info("Invariants computation overflowed in " + (System.currentTimeMillis() - time) + " ms");
 		}
 		return invar;
 	}
@@ -220,7 +221,7 @@ public class InvariantCalculator {
 	/**
 	 * Worst case exponential (time and memory), returns semi-flows (with positive
 	 * coefficients only) which are reputed easier to interpret.
-	 * 
+	 *
 	 * @param pn representing the Petri net approximation
 	 * @return a set of invariants, i.e. coeffs for each variable such that the sum
 	 *         is constant in all markings/states.
@@ -239,7 +240,7 @@ public class InvariantCalculator {
 	 * tnames that is supposed to initially be empty to set the names of the
 	 * transitions that were kept. This is so we can reinterpret appropriately the
 	 * Parikh vectors f so desired.
-	 * 
+	 *
 	 * @param sr             our Petri net
 	 * @param representative the mapping from original transition index to their new
 	 *                       representative (many to one/surjection)
@@ -266,7 +267,7 @@ public class InvariantCalculator {
 			}
 			if (discarded > 0) {
 				Logger.getLogger("fr.lip6.move.gal").info("Flow matrix only has " + sumMatrix.getColumnCount()
-						+ " transitions (discarded " + discarded + " similar events)");
+				+ " transitions (discarded " + discarded + " similar events)");
 			}
 		}
 		return sumMatrix;

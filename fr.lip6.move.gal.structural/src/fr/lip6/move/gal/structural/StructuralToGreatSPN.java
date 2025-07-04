@@ -15,20 +15,20 @@ public class StructuralToGreatSPN {
 
 	private static Logger log = Logger.getLogger("fr.lip6.move.gal");
 	private List<String> order = new ArrayList<>();
-	
+
 	private static Logger getLog() {
 		return log ;
 	}
 
-	
+
 	public void transform(StructuralReduction sr, String path) throws IOException {
-		
+
 		PrintWriter pwdef = new PrintWriter(new File(path+".def"));
 		PrintWriter pwnet = new PrintWriter(new File(path+".net"));
-		handlePage(sr, pwdef, pwnet);		
+		handlePage(sr, pwdef, pwnet);
 		pwnet.close();
 		pwdef.close();
-		
+
 	}
 
 	public static String normalizeName(String text) {
@@ -37,18 +37,18 @@ public class StructuralToGreatSPN {
 		res = res.replace('/', '_');
 		res = res.replace('*', 'x');
 		res = res.replace('=', '_');
-		
+
 		return res;
 	}
 
 	private void handlePage(StructuralReduction sr, PrintWriter pwdef, PrintWriter pwnet) {
 		Map<Integer, Integer> placeMap = new HashMap<>();
-		
+
 		pwdef.println("|256\n%\n|\n") ; // header for def files
-		
+
 		pwnet.append("|0|\n|\nf 0 ") ; // number of marking parameters
-		
-		long nbplaces = sr.getPnames().size(); 
+
+		long nbplaces = sr.getPnames().size();
 		pwnet.append(nbplaces+" ");
 		pwnet.append("0 "); // number of rate parameters
 		long nbtrans = sr.getTnames().size();
@@ -56,21 +56,21 @@ public class StructuralToGreatSPN {
 		pwnet.append("0 "); // number of groups
 		pwnet.append("0 "); // free 0 !!! gratos !! "&@`#  GSPN
 		pwnet.append("0\n"); // number of layers seems to be optional
-		
+
 		int nb = 1;
 		for (int pid = 0 ; pid < sr.getPnames().size() ; pid++) {
 			String pname = normalizeName(sr.getPnames().get(pid));
 			int value = sr.getMarks().get(pid);
-				
+
 			order.add(pname);
-				
+
 			pwnet.append(pname).append("    ") ;
 			pwnet.append(value + " ");
 			pwnet.append("1.0 1.0 ") ; // pos of place circle center
-			pwnet.append("1.0 1.0 ") ; // pos of place name tag 
+			pwnet.append("1.0 1.0 ") ; // pos of place name tag
 			pwnet.append("0\n"); // free 0 !!! gratos !! "&@`#  GSPN NOTE : no whitespace after this 0 or gspn will crash !
-			
-			placeMap.put(pid,nb++);			
+
+			placeMap.put(pid,nb++);
 		}
 
 		getLog().info("Transformed "+ (nb-1) + " places.");
@@ -83,14 +83,14 @@ public class StructuralToGreatSPN {
 			pwnet.append("1 ");  // number of servers
 			pwnet.append("0 ");  // Stochastic transition kind  : 0 = exponential ; 127 = deterministic ; 0 < p < 127 = relative priority of trans
 			int nbArcsIn = sr.getFlowPT().getColumn(tid).size();
-			pwnet.append(nbArcsIn+ " "); 
+			pwnet.append(nbArcsIn+ " ");
 			pwnet.append("0 ");// rotation coef of the trans  in graphical interface
 			pwnet.append("1.0 1.0 ") ;  // position of trans
 			pwnet.append("1.0 1.0 ") ;  // position of name tag
 			pwnet.append("1.0 1.0 ") ;  // position of ??
 			// Definition not clear on order of pos  ??? cimer GSPN
-			pwnet.append("0\n"); // free 0 !!! gratos !! "&@`#  GSPN	
-				
+			pwnet.append("0\n"); // free 0 !!! gratos !! "&@`#  GSPN
+
 			SparseIntArray inputs = sr.getFlowPT().getColumn(tid);
 			for (int i = 0; i < inputs.size(); i++) {
 				int pid = placeMap.get(inputs.keyAt(i));
@@ -101,7 +101,7 @@ public class StructuralToGreatSPN {
 				pwnet.append("0 "); // number of inflexion points
 				pwnet.append("0\n") ; // delimiter gratos cimer GSPN. NOTE : no whitespace after this 0 or gspn will crash !
 			}
-			inputs = sr.getFlowTP().getColumn(tid);			
+			inputs = sr.getFlowTP().getColumn(tid);
 			pwnet.append("   "+inputs.size()+"\n");
 			for (int i = 0; i < inputs.size(); i++) {
 				int pid = placeMap.get(inputs.keyAt(i));
@@ -130,12 +130,12 @@ public class StructuralToGreatSPN {
 //  string pathdef = dir + "model.def" ;
 //  ofstream netff(pathnet.c_str());
 //  ofstream deff(pathdef.c_str());
-//  
+//
 //  netff.precision(4);
 //  deff.precision(4);
 //
 //  deff << "|256\n%\n|\n" ; // header for def files
-//    
+//
 //  netff << "|0|\n|\nf   0   " ; // number of mrking parameters
 //  netff << LPlace.size() << "   ";
 //  netff << "0   "; // number of rate parameters
@@ -144,7 +144,7 @@ public class StructuralToGreatSPN {
 //  netff << "0   "; // free 0 !!! gratos !! "&@`#  GSPN
 //  netff << "0" << endl ; // number of layers seems to be optional
 //
-//  
+//
 //
 //  // export classes
 //  LClasse.ExportToGSPN(deff) ;
@@ -165,7 +165,7 @@ public class StructuralToGreatSPN {
 //  list<Place>::iterator it;
 //  for (it = lst.begin();it!= lst.end();it++ ) {
 //    it->ExportMarkGSPN(deff,numligne); // resolves to : os << mult;
-//    it->ExportToGSPN(netff,numligne); // 
+//    it->ExportToGSPN(netff,numligne); //
 //    netff << endl ;
 //  }
 //  return 0;
@@ -179,7 +179,7 @@ public class StructuralToGreatSPN {
 //	  else if (isBW) { os << *marking << " " ; } //export number of marks for B/W places
 //	  else { os << "-" << numligne+10000 << " " ; }
 //	  os << pos.getGspn()  ; // pos of place circle center
-//	  os << namepos.getGspn() ; // pos of place name tag 
+//	  os << namepos.getGspn() ; // pos of place name tag
 //	  os << "0 "; // free 0 !!! gratos !! "&@`#  GSPN
 //	  if (!isBW) {
 //	    os << dompos.getGspn() ; // pos of domain tag
@@ -190,7 +190,7 @@ public class StructuralToGreatSPN {
 //int Transition::ExportToGSPN (ostream &os,ostream &deff,int & numligne) {
 //  if (name != "")
 //    os << name ;
-//  else 
+//  else
 //    os << "T_" << id ;
 //  os << "  " ;
 //  os << "1.0   " ; // rate of the transition
@@ -207,10 +207,10 @@ public class StructuralToGreatSPN {
 //  os << namepos.getGspn() << " " ; // position of name tag
 //  os << "1.0 1.0 " ; // position of ??
 //  // Definition not clear on order of pos  ??? cimer GSPN
-//  guard->ExportToGSPN(os);  
+//  guard->ExportToGSPN(os);
 //
 //
-//  
+//
 //  for (it = arcIn.begin() ; it != arcIn.end() ;it ++) {
 //    if ( ! (*it)->IsInhibitor() ) (*it)->ExportToGSPN(os,deff,numligne);
 //  }
@@ -227,18 +227,18 @@ public class StructuralToGreatSPN {
 //  return 0;
 //}
 //int Arc::ExportToGSPN (ostream &os,ostream &deff,int & numligne) {
-//	  
+//
 //	  if (!place->Dom() || place->Dom()->Name() == "null") {
 //	    os << "   ";
 //	    os << valuation.getMultiplicityBWfunc () << "   "; // multiplicity of the arc
-//	    os << place->Id()+1 << "   "; 
+//	    os << place->Id()+1 << "   ";
 //	    os << pi.size() << " " ; // number of inflexion points
 //	    os << "0" ; // delimiter gratos cimer GSPN. NOTE : no whitespace after this 0 or gspn will crash !
 //	    os << endl;
 //	  } else {
 //	    os << "   ";
 //	    os << "1   "; // multiplicity of the arc
-//	    os << place->Id()+1 << "   "; 
+//	    os << place->Id()+1 << "   ";
 //	    os << pi.size() << " " ; // number of inflexion points
 //	    os << "0 " ; // delimiter gratos cimer GSPN
 //	    os << valpos.getGspn() ; // function color position
@@ -248,7 +248,7 @@ public class StructuralToGreatSPN {
 //	      ostringstream ost;
 //	      ost << "F" << numligne++;
 //	      string fname = ost.str();
-//	      
+//
 //	      os << fname;
 //
 //	      deff <<  "(" << fname << " f " ;
@@ -261,7 +261,7 @@ public class StructuralToGreatSPN {
 //	  }
 //	  for (list<Position>::iterator it = pi.begin() ; it!=pi.end() ; it++ )
 //	    os << it->getposV().first << " " << it->getposV().second << endl ;
-//	  
+//
 //	  return 1;
 //	}
 

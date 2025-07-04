@@ -44,8 +44,9 @@ public class GraphSuffix {
 		IntMatrixCol tgraph = graph.transpose();
 		Set<Integer> heads = new HashSet<>();
 		for (int pid = 0; pid < tgraph.getColumnCount(); pid++) {
-			if (tgraph.getColumn(pid).size() == 0 && spn.getMarks().get(pid) == 0 && !nonstable[pid])
+			if (tgraph.getColumn(pid).size() == 0 && spn.getMarks().get(pid) == 0 && !nonstable[pid]) {
 				heads.add(pid);
+			}
 		}
 
 		// 6. Calcul des suffixes des têtes
@@ -61,8 +62,9 @@ public class GraphSuffix {
 			nonstable[i] = true;
 			reduced++;
 		}
-		if (!unStableSuffix.isEmpty())
+		if (!unStableSuffix.isEmpty()) {
 			doneProps.put("unMarkedSuffixTest", false, "UNMARKED_SUFFIX_TEST");
+		}
 		return reduced;
 	}
 
@@ -86,8 +88,9 @@ public class GraphSuffix {
 			nonstable[i] = true;
 			reduced++;
 		}
-		if (!safeNodes.isEmpty())
+		if (!safeNodes.isEmpty()) {
 			doneProps.put("markedSuffixTest", false, "MARKED_SUFFIX_TEST");
+		}
 		return reduced;
 	}
 
@@ -119,8 +122,9 @@ public class GraphSuffix {
 		BitSet bs = new BitSet();
 
 		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
-			if (spn.getMarks().get(pid) > 0)
+			if (spn.getMarks().get(pid) > 0) {
 				bs.set(pid);
+			}
 		}
 		sr.setProtected(bs);
 

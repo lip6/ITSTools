@@ -17,10 +17,11 @@ public class FlowMatrix {
 		flowTP = new IntMatrixCol(nbvar, nbtrans);
 		read = new IntMatrixCol(nbvar, nbtrans);
 	}
-	
+
 	public void addWriteEffect(int tindex, int vindex, int val) {
-		if (val == 0)
+		if (val == 0) {
 			return;
+		}
 		addToColumn(flow.getColumn(tindex), vindex, val);
 		if (val < 0) {
 			addToColumn(flowPT.getColumn(tindex), vindex, -val);
@@ -30,14 +31,14 @@ public class FlowMatrix {
 	}
 
 	private void addToColumn(SparseIntArray column, int vindex, int val) {
-		int cur = column.get(vindex);				
+		int cur = column.get(vindex);
 		cur+=val;
 		column.put(vindex, cur);
 	}
 
 	public void addReadEffect(int tindex, int vindex, int val) {
 		SparseIntArray line = flowPT.getColumn(tindex);
-		int cur = line.get(vindex);				
+		int cur = line.get(vindex);
 		int max=Math.max(cur,val);
 		if (max != cur) {
 			line.put(vindex, max);
@@ -45,21 +46,21 @@ public class FlowMatrix {
 		}
 		read.getColumn(tindex).put(vindex, max);
 	}
-	
+
 	public IntMatrixCol getIncidenceMatrix() {
 		return flow;
 	}
-	
+
 	public IntMatrixCol getRead() {
 		return read;
 	}
-	
+
 	public IntMatrixCol getFlowPT() {
 		return flowPT;
 	}
-	
+
 	public IntMatrixCol getFlowTP() {
 		return flowTP;
 	}
-	
+
 }

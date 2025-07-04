@@ -17,8 +17,8 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 public class FlowPrinter {
 
 	static int nbWritten = 1000;
-	
-	
+
+
 	public static String drawNet (ISparsePetriNet sr, String title)  {
 		return drawNet(sr, title, Collections.emptySet(), Collections.emptySet(),150);
 	}
@@ -26,21 +26,21 @@ public class FlowPrinter {
 	public static String drawNet (ISparsePetriNet sr, String title, int maxShown)  {
 		return drawNet(sr, title, Collections.emptySet(), Collections.emptySet(),maxShown);
 	}
-	
+
 	public static String drawNet (ISparsePetriNet sr, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans)  {
 		return drawNet(sr, title, hlPlaces, hlTrans, 150);
 	}
 	public static String drawNet (ISparsePetriNet sr, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans, int maxShown)  {
 		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames(), sr.computeSupport(), "places: "+sr.getPnames().size() + " trans:"+ sr.getTnames().size()+ " " + title, hlPlaces, hlTrans, maxShown);
 	}
-	
+
 	public static String drawNet (IntMatrixCol flowPT, IntMatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames, BitSet untouchable, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans, int maxShown) {
 		try {
 			Path out = Files.createTempFile("petri"+nbWritten++ +"_", ".dot");
 			PrintWriter pw = new PrintWriter(out.toFile());
 
 			pw.println("digraph {");
-			pw.println("  overlap=\"false\";");			
+			pw.println("  overlap=\"false\";");
 			pw.println("  labelloc=\"t\";");
 			boolean isLarge = false;
 			Set<Integer> torep = new HashSet<>();
@@ -48,7 +48,7 @@ public class FlowPrinter {
 
 			IntMatrixCol tflowPT = null;
 			IntMatrixCol tflowTP = null;
-			
+
 			if (pnames.size() + tnames.size() > 2*maxShown) {
 				isLarge = true;
 				title += "(Net is too large representing up to roughly "+maxShown+" objects)";
@@ -80,12 +80,12 @@ public class FlowPrinter {
 								break; // or (i+1) would overflow
 							}
 							pi = untouchable.nextSetBit(pi+1);
-						}						
+						}
 					}
 					if (toret.isEmpty() && torep.isEmpty()) {
 						torep.add(0);
 					}
-					
+
 					int sz = 0;
 					while (torep.size() + toret.size() < maxShown && torep.size() + toret.size() > sz) {
 						sz = torep.size() + toret.size();
@@ -118,12 +118,12 @@ public class FlowPrinter {
 						if (!isLarge || torep.contains(col.keyAt(i))) {
 							pw.print(" p" + col.keyAt(i)+" -> t"+ti);
 							if (col.valueAt(i) != 1) {
-								pw.print(" [label=\""+col.valueAt(i)+"\"]"); 
+								pw.print(" [label=\""+col.valueAt(i)+"\"]");
 							}
 							pw.println(";");
 							totalArcs ++;
 						} else {
-							incomplete = true; 
+							incomplete = true;
 						}
 					}
 				} else {
@@ -131,17 +131,17 @@ public class FlowPrinter {
 				}
 				col = flowTP.getColumn(ti);
 				if (totalArcs < maxShown * 4) {
-					for (int i = 0; i < col.size(); i++) {					
+					for (int i = 0; i < col.size(); i++) {
 
 						if (!isLarge || torep.contains(col.keyAt(i))) {
 							pw.print("  t"+ti+" -> p" + col.keyAt(i) );
 							if (col.valueAt(i) != 1) {
-								pw.print(" [label=\""+col.valueAt(i)+"\"]"); 
+								pw.print(" [label=\""+col.valueAt(i)+"\"]");
 							}
 							pw.println(";");
 							totalArcs++;
 						} else {
-							incomplete = true; 
+							incomplete = true;
 						}
 					}
 				} else {
@@ -167,7 +167,7 @@ public class FlowPrinter {
 				}
 				if (isLarge) {
 					boolean incomplete = false;
-					SparseIntArray col = tflowPT.getColumn(pi);				
+					SparseIntArray col = tflowPT.getColumn(pi);
 					for (int i = 0; i < col.size(); i++) {
 						if (! toret.contains(col.keyAt(i))) {
 							incomplete = true;
@@ -176,7 +176,7 @@ public class FlowPrinter {
 					}
 					if (!incomplete) {
 						col = tflowTP.getColumn(pi);
-						for (int i = 0; i < col.size(); i++) {					
+						for (int i = 0; i < col.size(); i++) {
 							if (!toret.contains(col.keyAt(i))) {
 								incomplete = true;
 								break;
@@ -187,7 +187,7 @@ public class FlowPrinter {
 						color += ",style=\"dashed\"";
 					}
 				}
-				pw.println("  p"+pi+ " [shape=\"oval\",label=\""+pnames.get(pi) +(marks.get(pi)!=0?"("+marks.get(pi)+")":"") + "\"" + color +"];");			
+				pw.println("  p"+pi+ " [shape=\"oval\",label=\""+pnames.get(pi) +(marks.get(pi)!=0?"("+marks.get(pi)+")":"") + "\"" + color +"];");
 			}
 
 			pw.println("}");
@@ -204,13 +204,13 @@ public class FlowPrinter {
 	private static void addNeighborhood(int ti, IntMatrixCol flowPT, IntMatrixCol flowTP, Set<Integer> torep,
 			Set<Integer> toret) {
 		toret.add(ti);
-		SparseIntArray col = flowPT.getColumn(ti);				
+		SparseIntArray col = flowPT.getColumn(ti);
 		for (int i = 0; i < col.size(); i++) {
-			torep.add(col.keyAt(i));						
+			torep.add(col.keyAt(i));
 		}
 		col = flowTP.getColumn(ti);
 		for (int i = 0; i < col.size(); i++) {
-			torep.add(col.keyAt(i));						
+			torep.add(col.keyAt(i));
 		}
 	}
 }

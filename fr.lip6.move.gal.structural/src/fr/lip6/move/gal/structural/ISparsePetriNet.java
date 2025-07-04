@@ -43,12 +43,11 @@ public interface ISparsePetriNet {
 			prop.setBody(replacePredicates(prop.getBody()));
 		}
 	}
-	
+
 	default Expression replacePredicates(Expression expr) {
 		if (expr == null) {
 			return expr;
-		} else if (expr instanceof BinOp) {
-			BinOp bin = (BinOp) expr;
+		} else if (expr instanceof BinOp bin) {
 			if (bin.getOp() == Op.DEAD) {
 				return Expression.not(Expression.op(Op.EX, Expression.constant(true), null));
 			}
@@ -58,8 +57,7 @@ public interface ISparsePetriNet {
 				return expr;
 			}
 			return Expression.op(bin.op, l, r);
-		} else if (expr instanceof NaryOp) {
-			NaryOp nop = (NaryOp) expr;
+		} else if (expr instanceof NaryOp nop) {
 			List<Expression> resc = new ArrayList<>();
 			if (expr.getOp() == Op.CARD || expr.getOp() == Op.BOUND) {
 				for (Expression child : nop.getChildren()) {
@@ -79,7 +77,7 @@ public interface ISparsePetriNet {
 						if (!pres.add(getFlowPT().getColumn(tid))) {
 							skipped++;
 						}
-					}					
+					}
 				}
 				if (skipped > 0) {
 					Logger.getLogger("fr.lip6.move.gal").info("Reduced "+skipped+" identical enabling conditions.");
@@ -91,7 +89,7 @@ public interface ISparsePetriNet {
 					}
 					resc.add(Expression.nop(Op.AND, conds));
 				}
-				return Expression.nop(Op.OR, resc);				
+				return Expression.nop(Op.OR, resc);
 			} else {
 				boolean changed = false;
 				for (Expression child : nop.getChildren()) {
@@ -106,7 +104,7 @@ public interface ISparsePetriNet {
 				}
 				return Expression.nop(nop.getOp(), resc);
 			}
-		} 
+		}
 		return expr;
 	}
 }
