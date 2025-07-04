@@ -9,12 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.graph.Kosaraju;
 import fr.lip6.move.gal.graph.Tarjan;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
@@ -23,7 +21,7 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 /**
  * Implement Haddad/Pradat-Peyre/Berthelot/Thierry-Mieg structural reduction
  * rules.
- * 
+ *
  * @author ythierry
  *
  */
@@ -34,8 +32,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	private List<Integer> marks;
 	private IntMatrixCol flowPT;
 	private IntMatrixCol flowTP;
-	private List<String> tnames;
-	private List<String> pnames;
+	private final List<String> tnames;
+	private final List<String> pnames;
 	private int maxArcValue;
 	private BitSet untouchable;
 	private BitSet tokeepImages;
@@ -368,7 +366,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	 * Detects and destroys transitions t such that exists t1,t2 such that t1
 	 * fireable => t1.t2 is fireable for any state t has the same effects as t1.t2 t
 	 * has superior or equal preconditions to t1.
-	 * 
+	 *
 	 * @param rt
 	 * @return the number of transitions discarded by the rule
 	 */
@@ -1828,7 +1826,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	/**
 	 * Returns true if one of the transitions is touching at least one of
 	 * "untouchable" places.
-	 * 
+	 *
 	 * @param Hids
 	 */
 	private boolean touches(List<Integer> Hids) {
@@ -2129,7 +2127,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	/**
 	 * Return true iff. sa is equal to sb on all entries except that sa[i]=sb[j] and
 	 * sa[j]=sb[i] and sa[j] is 0.
-	 * 
+	 *
 	 * @param sa   first array
 	 * @param sb   second
 	 * @param indi
@@ -3150,7 +3148,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	 * P with k input transitions (feeders), creates k new places, redirects each
 	 * feeder to a unique new place, duplicates all output transitions (consumers)
 	 * for each new place, and erases the original consumers.
-	 * 
+	 *
 	 * @param placeId The index of the place to decompose.
 	 * @return The number of new places created.
 	 */
