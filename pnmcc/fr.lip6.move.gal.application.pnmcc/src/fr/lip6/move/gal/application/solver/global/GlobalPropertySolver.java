@@ -23,6 +23,7 @@ import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.application.solver.UpperBoundsSolver;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.graph.GraphSuffix;
+import fr.lip6.move.gal.structural.graph.PlacesInNonTrivialSCCComputer;
 import fr.lip6.move.gal.graph.Tarjan;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
@@ -431,10 +432,8 @@ public class GlobalPropertySolver {
 	}
 
 	public boolean executeSCCLivenessTest(ISparsePetriNet spn, List<List<Integer>> en) {
-		// recursive tarjan
-		// new Tarjan().parsePetriNet(spn);
 		// stack based tarjan
-		Set<Integer> scc = Tarjan.computePlacesInNonTrivialSCC(spn);
+		Set<Integer> scc = PlacesInNonTrivialSCCComputer.computePlacesInNonTrivialSCC(spn);
 		if (DEBUG > 2)
 			FlowPrinter.drawNet(spn, "SCC TARJAN", scc, Collections.emptySet());
 
