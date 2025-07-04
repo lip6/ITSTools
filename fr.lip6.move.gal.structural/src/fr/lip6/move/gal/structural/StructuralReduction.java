@@ -3048,4 +3048,111 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		dropTransitions(new ArrayList<>(tokill), true, rule);
 	}
 	
+    /**
+     * Applies causal decomposition to the place with the given placeId.
+     * For a place P with k input transitions (feeders), creates k new places,
+     * redirects each feeder to a unique new place, duplicates all output transitions
+     * (consumers) for each new place, and erases the original consumers.
+     * @param placeId The index of the place to decompose.
+     * @return The number of new places created.
+     */
+    public int applyCausalDecomposition(int placeId) {
+        if (placeId < 0 || placeId >= pnames.size()) {
+            System.out.println("Invalid placeId: " + placeId);
+            return 0;
+        }
+
+        // Get transposed matrices for place-based access
+        IntMatrixCol tflowTP = flowTP.transpose(); // Transitions feeding into places
+        IntMatrixCol tflowPT = flowPT.transpose(); // Transitions consuming from places
+
+        // Find input transitions (feeders) to placeId
+        SparseIntArray feeders = tflowTP.getColumn(placeId);
+        int k = feeders.size();
+        if (k <= 1) {
+            System.out.println("Place " + pnames.get(placeId) + " has " + k + " feeders; no decomposition needed.");
+            return 0;
+        }
+
+        // Check initial marking
+        if (marks.get(placeId) != 0) {
+            System.out.println("Place " + pnames.get(placeId) + " has non-zero initial marking; decomposition may not be safe.");
+        }
+
+        // Store original number of places
+        int nbP = pnames.size();
+
+        // Create k new places
+        for (int i = 0; i < k; i++) {
+            String newPlaceName = pnames.get(placeId) + "_" + i;
+            int newPlaceId = pnames.size();
+            pnames.add(newPlaceName);
+            marks.add(0); // New places have zero initial marking
+            image.add(Expression.var(newPlaceId)); // Copy expression as variable reference
+            flowPT.addRow(); // Add new row for new place in flowPT
+            flowTP.addRow(); // Add new row for new place in flowTP
+            if (DEBUG >= 1) {
+                System.out.println("Created new place " + newPlaceName + " with id " + newPlaceId);
+            }
+        }
+
+        // Redirect each feeder to its own new place
+        for (int i=0; i < feeders.size(); i++) {
+			int tid = feeders.keyAt(i);
+			int weight = feeders.valueAt(i);
+			// Remove output to original place
+			flowTP.getColumn(tid).put(placeId,0);
+			// Add output to new place occurrence
+			flowTP.getColumn(tid).put(nbP + i, weight);
+		}
+        
+        // deal with consumers
+        // Find output transitions (consumers) from placeId
+        SparseIntArray consumers = tflowPT.getColumn(placeId);
+        
+        int nbT = tnames.size();
+        List<Integer> tokill = new ArrayList<>();
+        // iterate and copy each consumer in a new version for each new place
+        for (int index=0 ; index < consumers.size() ; index++) {
+        	int tid = consumers.keyAt(index);
+        	tokill.add(tid);
+        	for (int i=0 ; i < k ; i++) {
+				// create a new transition for each new place
+				String newTransName = tnames.get(tid) + "_" + i;
+				SparseIntArray origPre = flowPT.getColumn(tid).clone();
+				SparseIntArray origPost = flowTP.getColumn(tid).clone();
+				
+				// Replace placeId with newPlaceId in pre
+				origPre.put(nbP + i, origPre.get(placeId));
+				origPre.put(placeId, 0);
+				
+				// Append new transition
+				flowPT.appendColumn(origPre);
+				flowTP.appendColumn(origPost);
+				tnames.add(newTransName);
+				
+
+			}
+        }
+        
+        dropTransitions(tokill, true, "Causal decomposition of place " + pnames.get(placeId));
+        
+        if (DEBUG >= 2) {
+            Set<Integer> highlightPlaces = new HashSet<>();
+            for (int i = 0; i < k; i++) {
+				highlightPlaces.add(nbP + i); // New places are at indices nbP to nbP+k-1
+			}
+            Set<Integer> highlightTrans = new HashSet<>();
+            for (int tid = nbT - tokill.size(); tid < tnames.size(); tid++) {
+                highlightTrans.add(tid);
+            }
+            FlowPrinter.drawNet(this, "After causal decomposition of place " + pnames.get(placeId), highlightPlaces, highlightTrans);
+        }
+
+        System.out.println("Causal decomposition created " + k + " new places and " +
+                (consumers.size() * k) + " new transitions for place " + pnames.get(placeId));
+        return k;
+    }
+	
+	
 }
