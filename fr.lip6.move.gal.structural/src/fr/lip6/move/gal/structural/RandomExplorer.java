@@ -212,9 +212,9 @@ public class RandomExplorer {
 				long dur = System.currentTimeMillis() - time + 1;
 				if (dur > 1000 * timeout) {
 					System.out
-					.println("Interrupted probabilistic random walk after " + i + "  steps, run timeout after "
-							+ dur + " ms. (steps per millisecond=" + (i / dur) + " )" + " properties seen :"
-							+ Arrays.stream(verdicts).filter(x -> x > 0).count() + " out of " + exprs.size());
+							.println("Interrupted probabilistic random walk after " + i + "  steps, run timeout after "
+									+ dur + " ms. (steps per millisecond=" + (i / dur) + " )" + " properties seen :"
+									+ Arrays.stream(verdicts).filter(x -> x > 0).count() + " out of " + exprs.size());
 					break;
 				}
 				SparseIntArray state = todo.remove(todo.size() - 1);
@@ -317,7 +317,7 @@ public class RandomExplorer {
 
 		int[] threads = { 0, 1, 2, 3 };
 		int[][] verdicts = new int[4][];
-		WalkStats ws = new WalkStats(bestFirst<0 ? WalkType.RANDOM : WalkType.BEST_FIRST);
+		WalkStats ws = new WalkStats(bestFirst < 0 ? WalkType.RANDOM : WalkType.BEST_FIRST);
 		Arrays.stream(threads).unordered().parallel().forEach(
 				id -> verdicts[id] = runRandomReachabilityDetection(nbSteps, exprs, timeout, bestFirst, false, ws));
 		int[] finalverdict = new int[exprs.size()];
@@ -326,7 +326,7 @@ public class RandomExplorer {
 				finalverdict[i] = Math.max(finalverdict[i], v[i]);
 			}
 		}
-		long remaining = Arrays.stream(finalverdict).filter(i -> i==0).count();
+		long remaining = Arrays.stream(finalverdict).filter(i -> i == 0).count();
 		System.out.println(ws + " remains " + remaining + "/" + exprs.size() + " properties");
 		return finalverdict;
 	}
@@ -340,7 +340,7 @@ public class RandomExplorer {
 		int steps;
 		long resets;
 		long duration;
-		int states=-1;
+		int states = -1;
 
 		public WalkStats(WalkType wt) {
 			type = wt;
@@ -358,7 +358,8 @@ public class RandomExplorer {
 
 		@Override
 		public String toString() {
-			return type +" walk for " + steps + " steps ("+resets +" resets) in " + duration + " ms. (" + (steps/(duration+1)) + " steps per ms)" + (states>0 ? " saw "+states + " states" :"");
+			return type + " walk for " + steps + " steps (" + resets + " resets) in " + duration + " ms. ("
+					+ (steps / (duration + 1)) + " steps per ms)" + (states > 0 ? " saw " + states + " states" : "");
 		}
 	}
 
@@ -372,7 +373,7 @@ public class RandomExplorer {
 	 *                  target with the Best-first heuristic
 	 * @param max       if true, we are trying to maximize the expressions (bounds)
 	 *                  rather than test their truth value
-	 * @param stats TODO
+	 * @param stats     TODO
 	 * @return a set of answers, one per expression in exprs. For "normal" case
 	 *         these are 1 if we found a counter example or 0 otherwise. For bounds
 	 *         these are the max value of the expression.
@@ -742,9 +743,9 @@ public class RandomExplorer {
 				long dur = System.currentTimeMillis() - time + 1;
 				if (dur > 1000 * timeout) {
 					System.out
-					.println("Interrupted probabilistic random walk after " + i + "  steps, run timeout after "
-							+ dur + " ms. (steps per millisecond=" + (i / dur) + " )" + " properties seen :"
-							+ Arrays.stream(verdicts).filter(x -> x > 0).count() + " out of " + exprs.size());
+							.println("Interrupted probabilistic random walk after " + i + "  steps, run timeout after "
+									+ dur + " ms. (steps per millisecond=" + (i / dur) + " )" + " properties seen :"
+									+ Arrays.stream(verdicts).filter(x -> x > 0).count() + " out of " + exprs.size());
 					break;
 				}
 				SparseIntArray state;

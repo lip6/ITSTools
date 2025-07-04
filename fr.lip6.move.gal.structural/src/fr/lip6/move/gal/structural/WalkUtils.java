@@ -22,6 +22,7 @@ public class WalkUtils {
 
 	/**
 	 * Constructs a WalkUtils instance for a given sparse Petri net.
+	 * 
 	 * @param sr The sparse Petri net to be used.
 	 */
 	public WalkUtils(ISparsePetriNet sr) {
@@ -36,11 +37,11 @@ public class WalkUtils {
 			effects.computeIfAbsent(col, k -> new ArrayList<>()).add(i);
 		}
 		behaviorMap = new int[net.getTransitionCount()];
-		behaviors = new int [effects.size()][];
+		behaviors = new int[effects.size()][];
 		int i = 0;
 		for (Entry<SparseIntArray, List<Integer>> ent : effects.entrySet()) {
-			behaviors[i] = new int [ent.getValue().size()];
-			int j=0;
+			behaviors[i] = new int[ent.getValue().size()];
+			int j = 0;
 			for (Integer t : ent.getValue()) {
 				behaviorMap[t] = i;
 				behaviors[i][j++] = t;
@@ -57,6 +58,7 @@ public class WalkUtils {
 
 	/**
 	 * Computes the enabled transitions for a given state in the Petri net.
+	 * 
 	 * @param state The current state of the Petri net.
 	 * @return An array of enabled transitions.
 	 */
@@ -78,12 +80,15 @@ public class WalkUtils {
 		list[0] = li - 1;
 		return list;
 	}
+
 	/**
-	 * Checks if the net can stutter, i.e., if there are enabled transitions that don't change the state.
+	 * Checks if the net can stutter, i.e., if there are enabled transitions that
+	 * don't change the state.
+	 * 
 	 * @param enabled An array of enabled transitions.
 	 * @return True if the net can stutter, false otherwise.
 	 */
-	public boolean canStutter (int [] enabled) {
+	public boolean canStutter(int[] enabled) {
 		for (int i = enabled[0]; i >= 1; i--) {
 			int t = enabled[i];
 			if (behaviorMap[t] == emptyEffect) {
@@ -159,7 +164,7 @@ public class WalkUtils {
 				continue;
 			} else {
 				if (!seenEffects[behaviorMap[t]]) {
-					disabledEffects.put(behaviorMap[t],1);
+					disabledEffects.put(behaviorMap[t], 1);
 				}
 				WalkUtils.dropAt(enabled, i);
 			}
@@ -174,7 +179,8 @@ public class WalkUtils {
 				SparseIntArray col = tFlowPT.getColumn(p);
 				for (int i = 0; i < col.size(); i++) {
 					int t = col.keyAt(i);
-					if (seen[t] || seenEffects[behaviorMap[t]] || (dropEmptyEffects && combFlow.getColumn(t).size() == 0)) {
+					if (seen[t] || seenEffects[behaviorMap[t]]
+							|| (dropEmptyEffects && combFlow.getColumn(t).size() == 0)) {
 						continue;
 					}
 
@@ -188,12 +194,12 @@ public class WalkUtils {
 		}
 
 		// make sure there are no illegitimately disabled effects
-		for (int i=0,ie=disabledEffects.size() ; i < ie ; i++) {
+		for (int i = 0, ie = disabledEffects.size(); i < ie; i++) {
 			int effect = disabledEffects.keyAt(i);
 			if (seenEffects[effect]) {
 				continue;
 			} else {
-				//recompute enablings of transitions with this effect
+				// recompute enablings of transitions with this effect
 				for (int t : behaviors[effect]) {
 					if (seen[t]) {
 						continue;
@@ -212,6 +218,7 @@ public class WalkUtils {
 		enabled[enabled[0] + 1] = value;
 		enabled[0]++;
 	}
+
 	public static void dropAt(int[] enabled, int index) {
 		if (index < enabled[0]) {
 			enabled[index] = enabled[enabled[0]];

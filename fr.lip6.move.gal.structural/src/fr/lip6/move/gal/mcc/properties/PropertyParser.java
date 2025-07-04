@@ -11,7 +11,7 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class PropertyParser {
 
-	public static int  fileToProperties(String path, PetriNet ptnet, PropertyType propertyType) throws IOException {
+	public static int fileToProperties(String path, PetriNet ptnet, PropertyType propertyType) throws IOException {
 		File ff = new File(path);
 		if (ff.exists()) {
 			PropReader.readXMLPropertiesIntoProps(ff, ptnet, propertyType == PropertyType.LTL);
@@ -20,11 +20,12 @@ public class PropertyParser {
 			}
 		} else {
 			if (propertyType == PropertyType.DEADLOCK) {
-				fr.lip6.move.gal.structural.Property deadlockProp =
-						new fr.lip6.move.gal.structural.Property(Expression.op(Op.EF,Expression.op(Op.DEAD, null, null),null), propertyType ,"ReachabilityDeadlock");
+				fr.lip6.move.gal.structural.Property deadlockProp = new fr.lip6.move.gal.structural.Property(
+						Expression.op(Op.EF, Expression.op(Op.DEAD, null, null), null), propertyType,
+						"ReachabilityDeadlock");
 				ptnet.getProperties().add(deadlockProp);
 			} else {
-				System.out.println("No "+path+" examination file found. Proceeding without properties.");
+				System.out.println("No " + path + " examination file found. Proceeding without properties.");
 			}
 		}
 		return ptnet.getProperties().size();

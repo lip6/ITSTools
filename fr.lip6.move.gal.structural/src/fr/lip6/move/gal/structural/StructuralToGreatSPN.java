@@ -17,14 +17,13 @@ public class StructuralToGreatSPN {
 	private List<String> order = new ArrayList<>();
 
 	private static Logger getLog() {
-		return log ;
+		return log;
 	}
-
 
 	public void transform(StructuralReduction sr, String path) throws IOException {
 
-		PrintWriter pwdef = new PrintWriter(new File(path+".def"));
-		PrintWriter pwnet = new PrintWriter(new File(path+".net"));
+		PrintWriter pwdef = new PrintWriter(new File(path + ".def"));
+		PrintWriter pwnet = new PrintWriter(new File(path + ".net"));
 		handlePage(sr, pwdef, pwnet);
 		pwnet.close();
 		pwdef.close();
@@ -44,52 +43,54 @@ public class StructuralToGreatSPN {
 	private void handlePage(StructuralReduction sr, PrintWriter pwdef, PrintWriter pwnet) {
 		Map<Integer, Integer> placeMap = new HashMap<>();
 
-		pwdef.println("|256\n%\n|\n") ; // header for def files
+		pwdef.println("|256\n%\n|\n"); // header for def files
 
-		pwnet.append("|0|\n|\nf 0 ") ; // number of marking parameters
+		pwnet.append("|0|\n|\nf 0 "); // number of marking parameters
 
 		long nbplaces = sr.getPnames().size();
-		pwnet.append(nbplaces+" ");
+		pwnet.append(nbplaces + " ");
 		pwnet.append("0 "); // number of rate parameters
 		long nbtrans = sr.getTnames().size();
-		pwnet.append(nbtrans+ " ");
+		pwnet.append(nbtrans + " ");
 		pwnet.append("0 "); // number of groups
-		pwnet.append("0 "); // free 0 !!! gratos !! "&@`#  GSPN
+		pwnet.append("0 "); // free 0 !!! gratos !! "&@`# GSPN
 		pwnet.append("0\n"); // number of layers seems to be optional
 
 		int nb = 1;
-		for (int pid = 0 ; pid < sr.getPnames().size() ; pid++) {
+		for (int pid = 0; pid < sr.getPnames().size(); pid++) {
 			String pname = normalizeName(sr.getPnames().get(pid));
 			int value = sr.getMarks().get(pid);
 
 			order.add(pname);
 
-			pwnet.append(pname).append("    ") ;
+			pwnet.append(pname).append("    ");
 			pwnet.append(value + " ");
-			pwnet.append("1.0 1.0 ") ; // pos of place circle center
-			pwnet.append("1.0 1.0 ") ; // pos of place name tag
-			pwnet.append("0\n"); // free 0 !!! gratos !! "&@`#  GSPN NOTE : no whitespace after this 0 or gspn will crash !
+			pwnet.append("1.0 1.0 "); // pos of place circle center
+			pwnet.append("1.0 1.0 "); // pos of place name tag
+			pwnet.append("0\n"); // free 0 !!! gratos !! "&@`# GSPN NOTE : no whitespace after this 0 or gspn
+									// will crash !
 
-			placeMap.put(pid,nb++);
+			placeMap.put(pid, nb++);
 		}
 
-		getLog().info("Transformed "+ (nb-1) + " places.");
+		getLog().info("Transformed " + (nb - 1) + " places.");
 
-		for (int tid = 0 ; tid < sr.getTnames().size() ; tid++) {
+		for (int tid = 0; tid < sr.getTnames().size(); tid++) {
 			String tname = normalizeName(sr.getTnames().get(tid));
-			pwnet.append(tname+ " ");
+			pwnet.append(tname + " ");
 
-			pwnet.append("1.0   ") ; // rate of the transition
-			pwnet.append("1 ");  // number of servers
-			pwnet.append("0 ");  // Stochastic transition kind  : 0 = exponential ; 127 = deterministic ; 0 < p < 127 = relative priority of trans
+			pwnet.append("1.0   "); // rate of the transition
+			pwnet.append("1 "); // number of servers
+			pwnet.append("0 "); // Stochastic transition kind : 0 = exponential ; 127 = deterministic ; 0 < p <
+								// 127 = relative priority of trans
 			int nbArcsIn = sr.getFlowPT().getColumn(tid).size();
-			pwnet.append(nbArcsIn+ " ");
-			pwnet.append("0 ");// rotation coef of the trans  in graphical interface
-			pwnet.append("1.0 1.0 ") ;  // position of trans
-			pwnet.append("1.0 1.0 ") ;  // position of name tag
-			pwnet.append("1.0 1.0 ") ;  // position of ??
-			// Definition not clear on order of pos  ??? cimer GSPN
-			pwnet.append("0\n"); // free 0 !!! gratos !! "&@`#  GSPN
+			pwnet.append(nbArcsIn + " ");
+			pwnet.append("0 ");// rotation coef of the trans in graphical interface
+			pwnet.append("1.0 1.0 "); // position of trans
+			pwnet.append("1.0 1.0 "); // position of name tag
+			pwnet.append("1.0 1.0 "); // position of ??
+			// Definition not clear on order of pos ??? cimer GSPN
+			pwnet.append("0\n"); // free 0 !!! gratos !! "&@`# GSPN
 
 			SparseIntArray inputs = sr.getFlowPT().getColumn(tid);
 			for (int i = 0; i < inputs.size(); i++) {
@@ -99,10 +100,11 @@ public class StructuralToGreatSPN {
 				pwnet.append(val + "   "); // multiplicity of the arc
 				pwnet.append(pid + "   ");
 				pwnet.append("0 "); // number of inflexion points
-				pwnet.append("0\n") ; // delimiter gratos cimer GSPN. NOTE : no whitespace after this 0 or gspn will crash !
+				pwnet.append("0\n"); // delimiter gratos cimer GSPN. NOTE : no whitespace after this 0 or gspn will
+										// crash !
 			}
 			inputs = sr.getFlowTP().getColumn(tid);
-			pwnet.append("   "+inputs.size()+"\n");
+			pwnet.append("   " + inputs.size() + "\n");
 			for (int i = 0; i < inputs.size(); i++) {
 				int pid = placeMap.get(inputs.keyAt(i));
 				int val = inputs.valueAt(i);
@@ -110,7 +112,8 @@ public class StructuralToGreatSPN {
 				pwnet.append(val + "   "); // multiplicity of the arc
 				pwnet.append(pid + "   ");
 				pwnet.append("0 "); // number of inflexion points
-				pwnet.append("0\n") ; // delimiter gratos cimer GSPN. NOTE : no whitespace after this 0 or gspn will crash !
+				pwnet.append("0\n"); // delimiter gratos cimer GSPN. NOTE : no whitespace after this 0 or gspn will
+										// crash !
 			}
 			pwnet.append("   0\n"); // number of inhibitor arcs
 		}
@@ -264,5 +267,3 @@ public class StructuralToGreatSPN {
 //
 //	  return 1;
 //	}
-
-

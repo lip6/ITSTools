@@ -17,10 +17,9 @@ public class LTSMinPropertyPrinter extends PropertyPrinter {
 		return apRef.getAp().getExpression().accept(this);
 	}
 
-
 	@Override
 	public Void visit(TransRef transRef) {
-		pw.append("t"+transRef.getValue());
+		pw.append("t" + transRef.getValue());
 		return null;
 	}
 

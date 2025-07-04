@@ -12,7 +12,6 @@ import fr.lip6.move.gal.structural.expr.Simplifier;
 
 public class LogicSimplifier {
 
-
 	public static int simplifyWithDead(List<Property> properties) {
 		int simplified = 0;
 		for (Property prop : properties) {
@@ -24,16 +23,16 @@ public class LogicSimplifier {
 				}
 				// simplify(body);
 				int eval = evalInDeadlock(body.childAt(0));
-				if (eval == -1 && body.getOp()==Op.AG) {
+				if (eval == -1 && body.getOp() == Op.AG) {
 					prop.setBody(Expression.constant(false));
 					simplified++;
-				} else if (eval == 1 && body.getOp()==Op.EF) {
+				} else if (eval == 1 && body.getOp() == Op.EF) {
 					prop.setBody(Expression.constant(true));
 					simplified++;
 				}
 			}
 
-			case CTL:{
+			case CTL: {
 				prop.setBody(Simplifier.pushNegation(prop.getBody()));
 				Expression withDead = evalWithAFdead(prop.getBody());
 				if (withDead != prop.getBody()) {
@@ -53,42 +52,38 @@ public class LogicSimplifier {
 		return simplified;
 	}
 
-
-
 	private static Expression evalWithAFdead(Expression expr) {
-		if (expr==null) {
+		if (expr == null) {
 			return expr;
 		} else {
 			switch (expr.getOp()) {
 			case EF:
-			case AF:
-			{
+			case AF: {
 				Expression son = expr.childAt(0);
 
-				if (son.getOp()==Op.AX) {
+				if (son.getOp() == Op.AX) {
 					// EF AX f -> true
 					// AF AX f -> true
 					return Expression.constant(true);
 				}
 				if (AtomicPropManager.isPureBool(son)) {
-					if (evalInDeadlock(son)==1) {
+					if (evalInDeadlock(son) == 1) {
 						return Expression.constant(true);
 					}
 				}
 				break;
 			}
 			case EG:
-			case AG:
-			{
+			case AG: {
 				Expression son = expr.childAt(0);
 
-				if (son.getOp()==Op.EX) {
+				if (son.getOp() == Op.EX) {
 					// AG EX f -> false
 					// EG EX f -> false
 					return Expression.constant(false);
 				}
 				if (AtomicPropManager.isPureBool(son)) {
-					if (evalInDeadlock(son)==-1) {
+					if (evalInDeadlock(son) == -1) {
 						return Expression.constant(false);
 					}
 				}
@@ -102,7 +97,7 @@ public class LogicSimplifier {
 			}
 			List<Expression> resc = new ArrayList<>(expr.nbChildren());
 			boolean changed = false;
-			for (int cid = 0, cide = expr.nbChildren() ; cid < cide ; cid++) {
+			for (int cid = 0, cide = expr.nbChildren(); cid < cide; cid++) {
 				Expression child = expr.childAt(cid);
 				Expression e = evalWithAFdead(child);
 				resc.add(e);
@@ -110,7 +105,7 @@ public class LogicSimplifier {
 					changed = true;
 				}
 			}
-			if (! changed) {
+			if (!changed) {
 				return expr;
 			} else {
 				return Expression.nop(expr.getOp(), resc);
@@ -118,29 +113,27 @@ public class LogicSimplifier {
 		}
 	}
 
-
-
 	private static int evalInDeadlock(Expression body) {
 		if (body.getOp() == Op.ENABLED) {
 			return -1;
 		} else if (body.getOp() == Op.OR) {
-			for (int i=0,ie=body.nbChildren() ; i < ie ; i++) {
+			for (int i = 0, ie = body.nbChildren(); i < ie; i++) {
 				Expression c = body.childAt(i);
 				int v = evalInDeadlock(c);
-				if (v==0) {
+				if (v == 0) {
 					return 0;
-				} else if (v==1) {
+				} else if (v == 1) {
 					return 1;
 				}
 			}
 			return -1;
 		} else if (body.getOp() == Op.AND) {
-			for (int i=0,ie=body.nbChildren() ; i < ie ; i++) {
+			for (int i = 0, ie = body.nbChildren(); i < ie; i++) {
 				Expression c = body.childAt(i);
 				int v = evalInDeadlock(c);
-				if (v==0) {
+				if (v == 0) {
 					return 0;
-				} else if (v==-1) {
+				} else if (v == -1) {
 					return -1;
 				}
 			}
@@ -151,8 +144,6 @@ public class LogicSimplifier {
 			return 0;
 		}
 	}
-
-
 
 	public static int simplifyWithInitial(List<Property> properties, SparseIntArray spinit, SparsePetriNet spn) {
 
@@ -188,10 +179,11 @@ public class LogicSimplifier {
 	}
 
 	/**
-	 * This function is an adaptation to LTL/CTL of the Initial states simplification
-	 * strategy proposed in Section 3 of the paper : Simplification of CTL Formulae
-	 * for Efficient Model Checking of Petri Nets Published at IC PetriNets'2018 By
-	 * Bonneland, et al. of Jiri Srba's group working on Tapaal.
+	 * This function is an adaptation to LTL/CTL of the Initial states
+	 * simplification strategy proposed in Section 3 of the paper : Simplification
+	 * of CTL Formulae for Efficient Model Checking of Petri Nets Published at IC
+	 * PetriNets'2018 By Bonneland, et al. of Jiri Srba's group working on Tapaal.
+	 * 
 	 * @param spn
 	 */
 	private static int evalInInitial(Expression predicate, SparseIntArray init, SparsePetriNet spn) {
@@ -204,7 +196,12 @@ public class LogicSimplifier {
 				return -1;
 			}
 		}
-		case LT:case LEQ:case EQ:case NEQ:case GEQ:case GT: {
+		case LT:
+		case LEQ:
+		case EQ:
+		case NEQ:
+		case GEQ:
+		case GT: {
 			if (predicate.eval(init) == 1) {
 				return 1;
 			} else {
@@ -212,9 +209,9 @@ public class LogicSimplifier {
 			}
 		}
 		case ENABLED: {
-			for (int i=0; i < predicate.nbChildren(); i++) {
+			for (int i = 0; i < predicate.nbChildren(); i++) {
 				Expression e = predicate.childAt(i);
-				if (e.getOp()!=Op.TRANSREF) {
+				if (e.getOp() != Op.TRANSREF) {
 					System.out.println("Unexpected child of enabling was not a transitions reference.");
 					return 0;
 				} else {
@@ -274,23 +271,31 @@ public class LogicSimplifier {
 				return -1;
 			}
 		}
-		case X:case EX:case AX:
+		case X:
+		case EX:
+		case AX:
 			return 0;
-		case G:case EG:case AG:{
+		case G:
+		case EG:
+		case AG: {
 			if (evalInInitial(predicate.childAt(0), init, spn) == -1) {
 				return -1;
 			} else {
 				return 0;
 			}
 		}
-		case F:case EF:case AF:{
+		case F:
+		case EF:
+		case AF: {
 			if (evalInInitial(predicate.childAt(0), init, spn) == 1) {
 				return 1;
 			} else {
 				return 0;
 			}
 		}
-		case U:case EU:case AU: {
+		case U:
+		case EU:
+		case AU: {
 			int evalr = evalInInitial(predicate.childAt(1), init, spn);
 			if (evalr == 1) {
 				return 1;
@@ -302,10 +307,10 @@ public class LogicSimplifier {
 			return 0;
 		}
 		default:
-			Logger.getLogger("fr.lip6.move.gal").warning("When simplifiying with initial state, unexpected operator in formula :" + predicate.getOp());
+			Logger.getLogger("fr.lip6.move.gal").warning(
+					"When simplifiying with initial state, unexpected operator in formula :" + predicate.getOp());
 			return 0;
 		}
 	}
-
 
 }

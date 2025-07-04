@@ -4,14 +4,16 @@ import android.util.SparseIntArray;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class FlowMatrix {
-	// To represent the flow matrix, if we can build it. We use a sparse representation.
-	// Map variable index -> Transition index -> update to variable (a relative integer)
-	private IntMatrixCol flow ;
-	private IntMatrixCol read ;
-	private IntMatrixCol flowPT ;
-	private IntMatrixCol flowTP ;
+	// To represent the flow matrix, if we can build it. We use a sparse
+	// representation.
+	// Map variable index -> Transition index -> update to variable (a relative
+	// integer)
+	private IntMatrixCol flow;
+	private IntMatrixCol read;
+	private IntMatrixCol flowPT;
+	private IntMatrixCol flowTP;
 
-	public FlowMatrix (int nbvar, int nbtrans) {
+	public FlowMatrix(int nbvar, int nbtrans) {
 		flow = new IntMatrixCol(nbvar, nbtrans);
 		flowPT = new IntMatrixCol(nbvar, nbtrans);
 		flowTP = new IntMatrixCol(nbvar, nbtrans);
@@ -32,14 +34,14 @@ public class FlowMatrix {
 
 	private void addToColumn(SparseIntArray column, int vindex, int val) {
 		int cur = column.get(vindex);
-		cur+=val;
+		cur += val;
 		column.put(vindex, cur);
 	}
 
 	public void addReadEffect(int tindex, int vindex, int val) {
 		SparseIntArray line = flowPT.getColumn(tindex);
 		int cur = line.get(vindex);
-		int max=Math.max(cur,val);
+		int max = Math.max(cur, val);
 		if (max != cur) {
 			line.put(vindex, max);
 			addToColumn(flowTP.getColumn(tindex), vindex, max - cur);

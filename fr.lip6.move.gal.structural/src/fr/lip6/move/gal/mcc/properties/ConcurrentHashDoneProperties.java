@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConcurrentHashDoneProperties implements DoneProperties {
 	private static final int DEBUG = 0;
-	private Map<String,Boolean> map = new ConcurrentHashMap<>();
-	protected Map<String,List<String>> alias = new HashMap<>();
+	private Map<String, Boolean> map = new ConcurrentHashMap<>();
+	protected Map<String, List<String>> alias = new HashMap<>();
 
 	@Override
 	public boolean containsKey(Object arg0) {
@@ -27,12 +27,12 @@ public class ConcurrentHashDoneProperties implements DoneProperties {
 	@Override
 	public Boolean put(String prop, Boolean value, String techniques) {
 		if (DEBUG >= 1) {
-			System.out.println(prop +"=" + value +"; "+techniques);
+			System.out.println(prop + "=" + value + "; " + techniques);
 		}
 		Boolean b = map.put(prop, value);
 		if (b == null) {
 			for (String aka : alias.getOrDefault(prop, Collections.emptyList())) {
-				put(aka,value,techniques);
+				put(aka, value, techniques);
 			}
 		}
 		return b;
@@ -44,7 +44,7 @@ public class ConcurrentHashDoneProperties implements DoneProperties {
 		Boolean b = map.put(prop, true);
 		if (b == null) {
 			for (String aka : alias.getOrDefault(prop, Collections.emptyList())) {
-				put(aka,value,techniques);
+				put(aka, value, techniques);
 			}
 		}
 		return b;
@@ -72,9 +72,8 @@ public class ConcurrentHashDoneProperties implements DoneProperties {
 
 	@Override
 	public void addAlias(String propToCheck, String aka) {
-		alias.compute(propToCheck, (k,v) ->
-		{
-			if (v==null) {
+		alias.compute(propToCheck, (k, v) -> {
+			if (v == null) {
 				v = new ArrayList<>();
 			}
 			v.add(aka);

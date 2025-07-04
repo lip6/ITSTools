@@ -29,22 +29,25 @@ public final class PropReader {
 			PropHandler handler = new PropHandler(ptnet, isLTL);
 			long debut = System.currentTimeMillis();
 			saxParser.parse(in, handler);
-			//LOGGER.info("Load time of PNML: " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+			// LOGGER.info("Load time of PNML: " + (System.currentTimeMillis() - debut) + "
+			// ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		catch (IOException e) {
 			LOGGER.warning("IO exception : " + e.getMessage()); //$NON-NLS-1$
-			error =e;
+			error = e;
 		} catch (ParserConfigurationException e) {
 			LOGGER.warning("Error at ToolSpecific Xml parser creation. " + e.getMessage()); //$NON-NLS-1$
-			error =e;
+			error = e;
 		} catch (SAXException e) {
 			LOGGER.warning("Parse error while parsing toolspecific elements in xml.\n details:" + e.getMessage()); //$NON-NLS-1$
 			e.printStackTrace();
-			error =e;
+			error = e;
 		}
 		if (error != null) {
-			throw new IOException("Parse error while treating translation of formula, possibly this examination is not supported yet.", error);
+			throw new IOException(
+					"Parse error while treating translation of formula, possibly this examination is not supported yet.",
+					error);
 		}
 	}
 

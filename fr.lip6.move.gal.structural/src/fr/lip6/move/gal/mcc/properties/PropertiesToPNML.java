@@ -29,7 +29,7 @@ public class PropertiesToPNML {
 	static Logger log = Logger.getLogger("fr.lip6.move.gal");
 
 	private static Logger getLog() {
-		return log ;
+		return log;
 	}
 
 	/**
@@ -37,79 +37,82 @@ public class PropertiesToPNML {
 	 * @param spn
 	 * @param path
 	 * @param doneProps
-	 * @return a list of places to add, with their initial marking to represent constants
+	 * @return a list of places to add, with their initial marking to represent
+	 *         constants
 	 * @throws IOException
 	 */
-	public static List<Integer> transform(SparsePetriNet spn, String path, DoneProperties doneProps) throws IOException {
+	public static List<Integer> transform(SparsePetriNet spn, String path, DoneProperties doneProps)
+			throws IOException {
 		long time = System.currentTimeMillis();
 		PrintWriter pw = new PrintWriter(new File(path));
 		pw.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 
 		pw.append("<property-set xmlns=\"http://mcc.lip6.fr/\">\n");
 		List<Integer> usedConstants = new ArrayList<>();
-		int exported=0;
+		int exported = 0;
 		for (Property prop : spn.getProperties()) {
-			if (! doneProps.containsKey(prop.getName())) {
-				pw.append("<property>\n" +
-						"<id>"+ prop.getName() +"</id>\n" +
-						"<description>Automatically generated</description>\n" +
-						"<formula>\n");
+			if (!doneProps.containsKey(prop.getName())) {
+				pw.append("<property>\n" + "<id>" + prop.getName() + "</id>\n"
+						+ "<description>Automatically generated</description>\n" + "<formula>\n");
 				exportProperty(pw, prop.getBody(), prop.getType(), spn, usedConstants);
-				pw.append("</formula>\n" +
-						"</property>\n" +
-						"");
+				pw.append("</formula>\n" + "</property>\n" + "");
 				exported++;
 			} else {
 				continue;
 				// This block would output trivially true/false properties.
-				//				if (res) {
-				//					// true => 0 <= 0
-				//					pw.append("<integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le>\n");
-				//				} else {
-				//					// false => 1 <= 0
-				//					pw.append("<integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le>\n");
-				//				}
+				// if (res) {
+				// // true => 0 <= 0
+				// pw.append("<integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le>\n");
+				// } else {
+				// // false => 1 <= 0
+				// pw.append("<integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le>\n");
+				// }
 			}
 		}
 		pw.append("</property-set>\n");
 		pw.close();
-		getLog().info("Export to MCC of "+ exported +" properties in file "+path +" took "+ (System.currentTimeMillis()-time) + " ms.");
+		getLog().info("Export to MCC of " + exported + " properties in file " + path + " took "
+				+ (System.currentTimeMillis() - time) + " ms.");
 		return usedConstants;
 	}
 
-
-	private static void exportProperty(PrintWriter pw, Expression body, PropertyType type, ISparsePetriNet spn, List<Integer> usedConstants) {
+	private static void exportProperty(PrintWriter pw, Expression body, PropertyType type, ISparsePetriNet spn,
+			List<Integer> usedConstants) {
 		if (body == null) {
-			return ;
+			return;
 		} else if (type == PropertyType.DEADLOCK) {
 			pw.append("<exists-path><finally><deadlock/></finally></exists-path>\n");
-			return ;
+			return;
 		} else if (type == PropertyType.LTL) {
 			pw.append("<all-paths>");
-			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount(),usedConstants);
+			PrintVisitor v = new PrintVisitor(pw, type, spn.getPlaceCount(), usedConstants);
 			body.accept(v);
 			pw.append("</all-paths>");
-			return ;
+			return;
 		} else if (type == PropertyType.BOUNDS && body.getOp() == Op.CONST) {
 			pw.append("<place-bound>");
-			for (int i=0; i < body.getValue(); i++) {
-				pw.append("<place>p"+spn.getPlaceCount()+"</place>");
+			for (int i = 0; i < body.getValue(); i++) {
+				pw.append("<place>p" + spn.getPlaceCount() + "</place>");
 			}
 			pw.append("</place-bound>\n");
-			return ;
+			return;
 		} else if (type == PropertyType.INVARIANT && body.getOp() == Op.BOOLCONST) {
 			if (body.getValue() == 1) {
-				// simplest true formula we can think of, true directly in initial state in particular
-				pw.append("<exists-path><finally><integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le></finally></exists-path>");
+				// simplest true formula we can think of, true directly in initial state in
+				// particular
+				pw.append(
+						"<exists-path><finally><integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le></finally></exists-path>");
 			} else {
-				// simplest false formula we can think of, false directly in initial state in particular
-				pw.append("<all-paths><globally><integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le></globally></all-paths> ");
+				// simplest false formula we can think of, false directly in initial state in
+				// particular
+				pw.append(
+						"<all-paths><globally><integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le></globally></all-paths> ");
 			}
-			return ;
+			return;
 		} else {
-			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount(),usedConstants);
+			PrintVisitor v = new PrintVisitor(pw, type, spn.getPlaceCount(), usedConstants);
 			body.accept(v);
-			return ;
+			return;
 		}
 	}
 
@@ -132,56 +135,47 @@ class PrintVisitor implements ExprVisitor<Void> {
 	@Override
 	public Void visit(VarRef varRef) {
 		if (type == PropertyType.BOUNDS) {
-			pw.append("<place-bound>")
-			.append("<place>p"+ varRef.index+"</place>")
-			.append("</place-bound>\n");
+			pw.append("<place-bound>").append("<place>p" + varRef.index + "</place>").append("</place-bound>\n");
 		} else {
-			pw.append("<tokens-count>")
-			.append("<place>p"+ varRef.index+"</place>")
-			.append("</tokens-count>\n");
+			pw.append("<tokens-count>").append("<place>p" + varRef.index + "</place>").append("</tokens-count>\n");
 		}
 		return null;
 	}
 
 	@Override
 	public Void visit(Constant constant) {
-		pw.append("<integer-constant>"+constant.value+"</integer-constant>\n");
+		pw.append("<integer-constant>" + constant.value + "</integer-constant>\n");
 		return null;
 	}
 
 	@Override
 	public Void visit(BinOp binOp) {
 		switch (binOp.getOp()) {
-		case AF :
-		{
+		case AF: {
 			pw.append("<all-paths><finally>\n");
 			binOp.left.accept(this);
 			pw.append("</finally></all-paths>\n");
 			break;
 		}
-		case AG :
-		{
+		case AG: {
 			pw.append("<all-paths><globally>\n");
 			binOp.left.accept(this);
 			pw.append("</globally></all-paths>\n");
 			break;
 		}
-		case EF :
-		{
+		case EF: {
 			pw.append("<exists-path><finally>\n");
 			binOp.left.accept(this);
 			pw.append("</finally></exists-path>\n");
 			break;
 		}
-		case EG :
-		{
+		case EG: {
 			pw.append("<exists-path><globally>\n");
 			binOp.left.accept(this);
 			pw.append("</globally></exists-path>\n");
 			break;
 		}
-		case AU :
-		{
+		case AU: {
 			pw.append("<all-paths><until><before>\n");
 			binOp.left.accept(this);
 			pw.append("</before><reach>");
@@ -189,8 +183,7 @@ class PrintVisitor implements ExprVisitor<Void> {
 			pw.append("</reach></until></all-paths>");
 			break;
 		}
-		case EU :
-		{
+		case EU: {
 			pw.append("<exists-path><until><before>\n");
 			binOp.left.accept(this);
 			pw.append("</before><reach>");
@@ -198,50 +191,43 @@ class PrintVisitor implements ExprVisitor<Void> {
 			pw.append("</reach></until></exists-path>");
 			break;
 		}
-		case AX :
-		{
+		case AX: {
 			pw.append("<all-paths><next>");
 			binOp.left.accept(this);
 			pw.append("</next></all-paths>");
 			break;
 		}
-		case EX :
-		{
+		case EX: {
 			pw.append("<exists-path><next>");
 			binOp.left.accept(this);
 			pw.append("</next></exists-path>");
 			break;
 		}
-		case F :
-		{
+		case F: {
 			pw.append("<finally>\n");
 			binOp.left.accept(this);
 			pw.append("</finally>\n");
 			break;
 		}
-		case G :
-		{
+		case G: {
 			pw.append("<globally>\n");
 			binOp.left.accept(this);
 			pw.append("</globally>\n");
 			break;
 		}
-		case X :
-		{
+		case X: {
 			pw.append("<next>\n");
 			binOp.left.accept(this);
 			pw.append("</next>\n");
 			break;
 		}
-		case NOT :
-		{
+		case NOT: {
 			pw.append("<negation>\n");
 			binOp.left.accept(this);
 			pw.append("</negation>\n");
 			break;
 		}
-		case U :
-		{
+		case U: {
 			pw.append("<until><before>\n");
 			binOp.left.accept(this);
 			pw.append("</before><reach>");
@@ -249,8 +235,7 @@ class PrintVisitor implements ExprVisitor<Void> {
 			pw.append("</reach></until>");
 			break;
 		}
-		case LEQ :
-		{
+		case LEQ: {
 			// MCC format actually only supports <= : integer-le
 			pw.append("<integer-le>\n");
 			binOp.left.accept(this);
@@ -258,8 +243,7 @@ class PrintVisitor implements ExprVisitor<Void> {
 			pw.append("</integer-le>\n");
 			break;
 		}
-		case GT :
-		{
+		case GT: {
 			// a > b => ! a <= b
 			pw.append("<negation><integer-le>\n");
 			binOp.left.accept(this);
@@ -267,8 +251,7 @@ class PrintVisitor implements ExprVisitor<Void> {
 			pw.append("</integer-le></negation>\n");
 			break;
 		}
-		case GEQ :
-		{
+		case GEQ: {
 			// a >= b => b <= a
 			pw.append("<integer-le>\n");
 			binOp.right.accept(this);
@@ -276,8 +259,7 @@ class PrintVisitor implements ExprVisitor<Void> {
 			pw.append("</integer-le>\n");
 			break;
 		}
-		case EQ :
-		{
+		case EQ: {
 			// a == b => a <= b && b <= a
 			pw.append("<conjunction>\n");
 			pw.append("<integer-le>\n");
@@ -291,8 +273,7 @@ class PrintVisitor implements ExprVisitor<Void> {
 			pw.append("</conjunction>\n");
 			break;
 		}
-		case NEQ :
-		{
+		case NEQ: {
 			// a != b => ! (a <= b && b <= a)
 			pw.append("<negation>");
 			pw.append("<conjunction>\n");
@@ -308,13 +289,12 @@ class PrintVisitor implements ExprVisitor<Void> {
 			pw.append("</negation>\n");
 			break;
 		}
-		case LT :
-		{
+		case LT: {
 			if (binOp.right.getOp() == Op.CONST) {
-				// x < K  =>  x <= K-1
+				// x < K => x <= K-1
 				pw.append("<integer-le>\n");
 				binOp.left.accept(this);
-				pw.append("<integer-constant>"+(binOp.right.getValue()-1)+"</integer-constant>\n");
+				pw.append("<integer-constant>" + (binOp.right.getValue() - 1) + "</integer-constant>\n");
 				pw.append("</integer-le>\n");
 			} else {
 				// a < b => a <= b && ! b <= a
@@ -333,23 +313,23 @@ class PrintVisitor implements ExprVisitor<Void> {
 			}
 			break;
 		}
-		default :
-		{
+		default: {
 			PropertiesToPNML.log.warning("Unexpected operator in binary formula :" + binOp);
 		}
 		}
 		return null;
 	}
 
-
 	@Override
 	public Void visitBool(BoolConstant boolConstant) {
 		if (boolConstant.value) {
 			// true => 0 <= 0
-			pw.append("<integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le>\n");
+			pw.append(
+					"<integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le>\n");
 		} else {
 			// false => 1 <= 0
-			pw.append("<integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le>\n");
+			pw.append(
+					"<integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le>\n");
 		}
 		return null;
 	}
@@ -372,7 +352,7 @@ class PrintVisitor implements ExprVisitor<Void> {
 		return null;
 	}
 
-	public void combine (String operator, List<Expression> operands) {
+	public void combine(String operator, List<Expression> operands) {
 		// go for a log expansion to binary constructions.
 		int sz = operands.size();
 		if (sz == 0) {
@@ -382,28 +362,25 @@ class PrintVisitor implements ExprVisitor<Void> {
 			operands.get(0).accept(this);
 		} else {
 			int mid = sz / 2;
-			pw.append("<"+ operator+">\n");
-			combine(operator,operands.subList(0, mid));
-			combine(operator,operands.subList(mid, sz));
-			pw.append("</"+operator +">\n");
+			pw.append("<" + operator + ">\n");
+			combine(operator, operands.subList(0, mid));
+			combine(operator, operands.subList(mid, sz));
+			pw.append("</" + operator + ">\n");
 		}
 	}
 
 	@Override
 	public Void visit(NaryOp naryOp) {
 		switch (naryOp.getOp()) {
-		case AND :
-		{
+		case AND: {
 			combine("conjunction", naryOp.getChildren());
 			break;
 		}
-		case OR :
-		{
+		case OR: {
 			combine("disjunction", naryOp.getChildren());
 			break;
 		}
-		case ADD :
-		{
+		case ADD: {
 			if (type == PropertyType.BOUNDS) {
 				pw.append("<place-bound>");
 			} else {
@@ -411,7 +388,7 @@ class PrintVisitor implements ExprVisitor<Void> {
 			}
 			for (Expression child : naryOp.getChildren()) {
 				if (child.getOp() == Op.PLACEREF) {
-					pw.append("<place>p"+ child.getValue()+"</place>");
+					pw.append("<place>p" + child.getValue() + "</place>");
 				} else if (child.getOp() == Op.CONST) {
 					// do we already have such a place ?
 					int val = child.getValue();
@@ -420,7 +397,7 @@ class PrintVisitor implements ExprVisitor<Void> {
 						ind = usedConstants.size();
 						usedConstants.add(val);
 					}
-					pw.append("<place>p"+(placeCount+ind)+"</place>");
+					pw.append("<place>p" + (placeCount + ind) + "</place>");
 				}
 			}
 			if (type == PropertyType.BOUNDS) {
@@ -430,12 +407,11 @@ class PrintVisitor implements ExprVisitor<Void> {
 			}
 			break;
 		}
-		case ENABLED:
-		{
+		case ENABLED: {
 			pw.append("<is-fireable>");
 			for (Expression child : naryOp.getChildren()) {
 				if (child.getOp() == Op.TRANSREF) {
-					pw.append("<transition>t"+ child.getValue()+"</transition>");
+					pw.append("<transition>t" + child.getValue() + "</transition>");
 				} else {
 					throw new IllegalArgumentException("Unexpected child of enabled should be a transition.");
 				}
@@ -443,12 +419,11 @@ class PrintVisitor implements ExprVisitor<Void> {
 			pw.append("</is-fireable>\n");
 			break;
 		}
-		case CARD:
-		{
+		case CARD: {
 			pw.append("<tokens-count>");
 			for (Expression child : naryOp.getChildren()) {
 				if (child.getOp() == Op.PLACEREF) {
-					pw.append("<place>p"+ child.getValue()+"</place>");
+					pw.append("<place>p" + child.getValue() + "</place>");
 				} else if (child.getOp() == Op.CONST) {
 					// do we already have such a place ?
 					int val = child.getValue();
@@ -457,13 +432,12 @@ class PrintVisitor implements ExprVisitor<Void> {
 						ind = usedConstants.size();
 						usedConstants.add(val);
 					}
-					pw.append("<place>p"+(placeCount+ind)+"</place>");
+					pw.append("<place>p" + (placeCount + ind) + "</place>");
 				}
 			}
 			pw.append("</tokens-count>\n");
 		}
-		default :
-		{
+		default: {
 			PropertiesToPNML.log.warning("Unexpected operator in formula :" + naryOp);
 		}
 		}

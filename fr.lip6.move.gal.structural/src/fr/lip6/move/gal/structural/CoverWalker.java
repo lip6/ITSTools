@@ -13,7 +13,6 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class CoverWalker {
 
-
 	private static final int DEBUG = 0;
 	private CoverWalkUtils wu;
 
@@ -21,7 +20,7 @@ public class CoverWalker {
 		wu = new CoverWalkUtils(sr);
 	}
 
-	private static final int omega  = Integer.MAX_VALUE;
+	private static final int omega = Integer.MAX_VALUE;
 
 	private void updateMaxVerdicts(List<Expression> exprs, SparseIntArray state, int[] verdicts) {
 		for (int v = 0; v < verdicts.length; v++) {
@@ -31,7 +30,7 @@ public class CoverWalker {
 			if (exprs.get(v).getOp() == Op.ADD) {
 				Expression dad = exprs.get(v);
 				int sum = 0;
-				for (int cid = 0 ; cid < dad.nbChildren() ; cid++) {
+				for (int cid = 0; cid < dad.nbChildren(); cid++) {
 					Expression c = dad.childAt(cid);
 					if (c.getOp() == Op.CONST) {
 						sum += c.getValue();
@@ -53,7 +52,6 @@ public class CoverWalker {
 			}
 		}
 	}
-
 
 	public int[] runRandomReachabilityDetection(long nbSteps, List<Expression> exprs, int timeout, int bestFirst,
 			boolean max, SparseIntArray maxReached) {
@@ -88,7 +86,8 @@ public class CoverWalker {
 
 				System.out.println("Interrupted " + (bestFirst >= 0 ? "Best-First " : "") + "random walk after " + i
 						+ "  steps, including " + nbresets + " resets, run timeout after " + dur
-						+ " ms. (steps per millisecond=" + (i / dur) + " )" + " properties seen " + Arrays.toString(verdicts)
+						+ " ms. (steps per millisecond=" + (i / dur) + " )" + " properties seen "
+						+ Arrays.toString(verdicts)
 						+ (DEBUG >= 1 ? new SparseIntArray(verdicts) + (" reached state " + state) : ""));
 				return verdicts;
 			}
@@ -97,7 +96,7 @@ public class CoverWalker {
 			int newTotalTokens = state.sumValuesOmega();
 			if (newTotalTokens > totalTokens) {
 				int addedOmega = addOmega(state, stack);
-				if (addedOmega >0) {
+				if (addedOmega > 0) {
 					totalTokens = state.sumValuesOmega();
 					stack.clear();
 					totalOmega += addedOmega;
@@ -179,22 +178,21 @@ public class CoverWalker {
 		return verdicts;
 	}
 
-
 	private int addOmega(SparseIntArray state, LinkedHashSet<SparseIntArray> stack) {
 		int added = 0;
 		// implement A. Valmari's multi scan to add more omega in one go.
 		boolean repeat = false;
 		do {
 			repeat = false;
-			for (Iterator<SparseIntArray> it = stack.iterator() ; it.hasNext()  ; ) {
+			for (Iterator<SparseIntArray> it = stack.iterator(); it.hasNext();) {
 				SparseIntArray old = it.next();
 				if (SparseIntArray.coversStrictly(state, old)) {
 					int localAdded = 0;
-					for (int i=0,ie=state.size(); i < ie ; i++) {
+					for (int i = 0, ie = state.size(); i < ie; i++) {
 						if (state.valueAt(i) != omega && old.get(state.keyAt(i)) < state.valueAt(i)) {
 							state.setValueAt(i, omega);
-							added ++;
-							localAdded ++;
+							added++;
+							localAdded++;
 							repeat = true;
 						}
 					}
@@ -210,7 +208,6 @@ public class CoverWalker {
 		return added;
 	}
 
-
 	// another implementation
 	public static boolean compareAndUpdateIfDominates(SparseIntArray cur, SparseIntArray past) {
 		// Determine the sizes outside the loop since they are fixed.
@@ -224,7 +221,7 @@ public class CoverWalker {
 
 		// Step 2: Iterate a second time to update dominant entries.
 		int i = 0, j = 0;
-		for ( ; i < ss1 && j < ss2; ) {
+		for (; i < ss1 && j < ss2;) {
 			int sk1 = cur.keyAt(i);
 			int sk2 = past.keyAt(j);
 
@@ -246,16 +243,12 @@ public class CoverWalker {
 
 		}
 		if (i < ss1 && j >= ss2) {
-			for (;i<ss1;i++) {
+			for (; i < ss1; i++) {
 				cur.setValueAt(i, omega);
 			}
 		}
 
 		return true;
 	}
-
-
-
-
 
 }

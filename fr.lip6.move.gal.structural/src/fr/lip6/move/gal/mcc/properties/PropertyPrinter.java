@@ -45,7 +45,7 @@ public class PropertyPrinter extends CExpressionPrinter {
 	@Override
 	public Void visit(AtomicPropRef apRef) {
 		if (forSpot) {
-			pw.print("LTLAP"+apRef.getAp().getName());
+			pw.print("LTLAP" + apRef.getAp().getName());
 		} else {
 			pw.print("(LTLAP" + apRef.getAp().getName() + "==true)");
 		}

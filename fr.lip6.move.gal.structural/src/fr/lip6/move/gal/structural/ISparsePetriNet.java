@@ -80,12 +80,13 @@ public interface ISparsePetriNet {
 					}
 				}
 				if (skipped > 0) {
-					Logger.getLogger("fr.lip6.move.gal").info("Reduced "+skipped+" identical enabling conditions.");
+					Logger.getLogger("fr.lip6.move.gal").info("Reduced " + skipped + " identical enabling conditions.");
 				}
 				for (SparseIntArray pre : pres) {
 					List<Expression> conds = new ArrayList<>();
-					for (int i=0,ie=pre.size();i<ie;i++) {
-						conds.add(Expression.op(Op.GEQ, Expression.var(pre.keyAt(i)), Expression.constant(pre.valueAt(i))));
+					for (int i = 0, ie = pre.size(); i < ie; i++) {
+						conds.add(Expression.op(Op.GEQ, Expression.var(pre.keyAt(i)),
+								Expression.constant(pre.valueAt(i))));
 					}
 					resc.add(Expression.nop(Op.AND, conds));
 				}

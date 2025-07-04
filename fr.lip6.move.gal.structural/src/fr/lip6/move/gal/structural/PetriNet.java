@@ -26,6 +26,7 @@ public abstract class PetriNet {
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	public String getName() {
 		return name;
 	}
@@ -35,12 +36,13 @@ public abstract class PetriNet {
 	}
 
 	public abstract int getTransitionIndex(String name);
+
 	public abstract int getPlaceIndex(String name);
 
 	public BitSet computeSupport() {
 		BitSet supp = new BitSet();
 		for (Property p : getProperties()) {
-			addSupport(p.getBody(),supp);
+			addSupport(p.getBody(), supp);
 		}
 		return supp;
 	}
@@ -60,10 +62,9 @@ public abstract class PetriNet {
 		return null;
 	}
 
-
 	public void testAliasing(DoneProperties doneProps) {
 		int init = getProperties().size();
-		Map<Expression,String> alias = new HashMap<>();
+		Map<Expression, String> alias = new HashMap<>();
 		Iterator<Property> it = getProperties().iterator();
 		while (it.hasNext()) {
 			Property prop = it.next();
@@ -76,7 +77,8 @@ public abstract class PetriNet {
 			}
 		}
 		if (init != getProperties().size()) {
-			System.out.println("Reduction of identical properties reduced properties to check from "+init+" to "+getProperties().size());
+			System.out.println("Reduction of identical properties reduced properties to check from " + init + " to "
+					+ getProperties().size());
 		}
 	}
 }

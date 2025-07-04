@@ -13,6 +13,7 @@ public class CoverWalkUtils {
 
 	/**
 	 * Constructs a CoverWalkUtils instance for a given sparse Petri net.
+	 * 
 	 * @param sr The sparse Petri net to be used.
 	 */
 	public CoverWalkUtils(ISparsePetriNet sr) {
@@ -31,9 +32,9 @@ public class CoverWalkUtils {
 		tFlowPT = net.getFlowPT().transpose();
 	}
 
-
 	/**
 	 * Computes the enabled transitions for a given state in the Petri net.
+	 * 
 	 * @param state The current state of the Petri net.
 	 * @return An array of enabled transitions.
 	 */
@@ -42,7 +43,8 @@ public class CoverWalkUtils {
 
 		int li = 1; // Index for inserting enabled transitions into the list.
 		for (int t = 0, e = net.getTransitionCount(); t < e; t++) {
-			// Check if the transition is enabled by comparing the current state with the transition's requirements.
+			// Check if the transition is enabled by comparing the current state with the
+			// transition's requirements.
 			if (SparseIntArray.greaterOrEqual(state, net.getFlowPT().getColumn(t))) {
 				list[li++] = t; // Add the transition to the list of enabled transitions.
 			}
@@ -52,10 +54,11 @@ public class CoverWalkUtils {
 	}
 
 	/**
-	 * Checks if the net can stutter, i.e., if there are enabled transitions that don't change the state
-	 * given the places marked with omega.
+	 * Checks if the net can stutter, i.e., if there are enabled transitions that
+	 * don't change the state given the places marked with omega.
+	 * 
 	 * @param enabled An array of enabled transitions.
-	 * @param omegas A SparseIntArray indicating places marked with omega.
+	 * @param omegas  A SparseIntArray indicating places marked with omega.
 	 * @return True if the net can stutter, false otherwise.
 	 */
 	public boolean canStutter(int[] enabled, SparseIntArray omegas) {
@@ -69,12 +72,12 @@ public class CoverWalkUtils {
 		return false;
 	}
 
-
 	/**
-	 * Updates a list of enabled transitions to remove those with effects that are entirely nullified
-	 * by omega-marked places.
+	 * Updates a list of enabled transitions to remove those with effects that are
+	 * entirely nullified by omega-marked places.
+	 * 
 	 * @param enabled An array of enabled transitions.
-	 * @param omegas A SparseIntArray indicating places marked with omega.
+	 * @param omegas  A SparseIntArray indicating places marked with omega.
 	 */
 	void dropEmpty(int[] enabled, SparseIntArray omegas) {
 		for (int i = enabled[0]; i >= 1; i--) {
@@ -85,7 +88,6 @@ public class CoverWalkUtils {
 			}
 		}
 	}
-
 
 	void dropUnavailable(int[] enabled, SparseIntArray parikh) {
 		for (int i = enabled[0]; i >= 1; i--) {
@@ -154,7 +156,8 @@ public class CoverWalkUtils {
 				SparseIntArray col = tFlowPT.getColumn(p);
 				for (int i = 0; i < col.size(); i++) {
 					int t = col.keyAt(i);
-					if (seen[t] || (dropEmptyEffects && SparseIntArray.containsAllKeys(omegas, combFlow.getColumn(t)))) {
+					if (seen[t]
+							|| (dropEmptyEffects && SparseIntArray.containsAllKeys(omegas, combFlow.getColumn(t)))) {
 						continue;
 					}
 
@@ -168,12 +171,12 @@ public class CoverWalkUtils {
 
 	}
 
-	private static final int omega  = Integer.MAX_VALUE;
+	private static final int omega = Integer.MAX_VALUE;
 
 	private SparseIntArray extractOmegas(SparseIntArray state) {
 		SparseIntArray omegas = new SparseIntArray();
 
-		for (int i=0;i< state.size(); i++) {
+		for (int i = 0; i < state.size(); i++) {
 			if (state.valueAt(i) == omega) {
 				omegas.append(state.keyAt(i), omega);
 			}
@@ -182,11 +185,11 @@ public class CoverWalkUtils {
 		return omegas;
 	}
 
-
 	public static void add(int[] enabled, int value) {
 		enabled[enabled[0] + 1] = value;
 		enabled[0]++;
 	}
+
 	public static void dropAt(int[] enabled, int index) {
 		if (index < enabled[0]) {
 			enabled[index] = enabled[enabled[0]];

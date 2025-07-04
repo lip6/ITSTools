@@ -83,14 +83,14 @@ public class Tarjan {
 		}
 
 		Map<Integer, List<Integer>> sccs = new HashMap<>();
-		for(int pid = 0; pid < id.length; pid++) {
+		for (int pid = 0; pid < id.length; pid++) {
 			sccs.computeIfAbsent(id[pid], k -> new ArrayList<>()).add(pid);
 
 		}
 		Set<Integer> nonTrivialSCC = new HashSet<>();
 
-		for(List<Integer> scc : sccs.values()) {
-			if(scc.size() > 1 || adj.get(scc.get(0), scc.get(0)) == 1) {
+		for (List<Integer> scc : sccs.values()) {
+			if (scc.size() > 1 || adj.get(scc.get(0), scc.get(0)) == 1) {
 				nonTrivialSCC.addAll(scc);
 			}
 		}
@@ -98,13 +98,13 @@ public class Tarjan {
 
 	}
 
-	public static Set<Integer> computePlacesInNonTrivialSCC (ISparsePetriNet spn) {
+	public static Set<Integer> computePlacesInNonTrivialSCC(ISparsePetriNet spn) {
 		IntMatrixCol graph = computeAdjacency(spn);
 		Set<Integer> nonTrivialSCC = new HashSet<>();
 
 		List<List<Integer>> sccs = searchForSCC(graph);
-		for(List<Integer> scc : sccs) {
-			if(scc.size() > 1 || graph.get(scc.get(0), scc.get(0)) == 1) {
+		for (List<Integer> scc : sccs) {
+			if (scc.size() > 1 || graph.get(scc.get(0), scc.get(0)) == 1) {
 				nonTrivialSCC.addAll(scc);
 			}
 		}
@@ -128,9 +128,6 @@ public class Tarjan {
 		return adj;
 	}
 
-
-
-
 	/**
 	 * Non recursive version based on Ivan Stoev proposal on SO :
 	 * https://stackoverflow.com/questions/46511682/non-recursive-version-of-tarjans-algorithm.
@@ -138,13 +135,12 @@ public class Tarjan {
 	 * @param graph
 	 * @return the SCCs
 	 */
-	public static List<List<Integer>> searchForSCC(IntMatrixCol graph)
-	{
+	public static List<List<Integer>> searchForSCC(IntMatrixCol graph) {
 		List<List<Integer>> stronglyConnectedComponents = new ArrayList<>();
 
 		int preCount = 0;
-		int [] low = new int[graph.getColumnCount()];
-		boolean [] visited = new boolean[graph.getColumnCount()];
+		int[] low = new int[graph.getColumnCount()];
+		boolean[] visited = new boolean[graph.getColumnCount()];
 		Stack<Integer> stack = new Stack<>();
 
 		Stack<Integer> minStack = new Stack<>();
@@ -152,13 +148,10 @@ public class Tarjan {
 		Stack<Iterator<Integer>> enumeratorStack = new Stack<>();
 
 		Iterator<Integer> enumerator = IntStream.range(0, graph.getColumnCount()).iterator();
-		while (true)
-		{
-			if (enumerator.hasNext())
-			{
+		while (true) {
+			if (enumerator.hasNext()) {
 				int v = enumerator.next();
-				if (!visited[v])
-				{
+				if (!visited[v]) {
 					low[v] = preCount++;
 					visited[v] = true;
 					stack.push(v);
@@ -168,18 +161,14 @@ public class Tarjan {
 					vStack.push(v);
 					enumeratorStack.push(enumerator);
 					enumerator = Arrays.stream(graph.getColumn(v).copyKeys()).iterator();
-				}
-				else if (minStack.size() > 0)
-				{
+				} else if (minStack.size() > 0) {
 					int min = minStack.pop();
 					if (low[v] < min) {
 						min = low[v];
 					}
 					minStack.push(min);
 				}
-			}
-			else
-			{
+			} else {
 				// Level up
 				if (enumeratorStack.size() == 0) {
 					break;
@@ -189,17 +178,13 @@ public class Tarjan {
 				int v = vStack.pop();
 				int min = minStack.pop();
 
-				if (min < low[v])
-				{
+				if (min < low[v]) {
 					low[v] = min;
-				}
-				else
-				{
+				} else {
 					List<Integer> component = new ArrayList<>();
 
 					int w;
-					do
-					{
+					do {
 						w = stack.pop();
 						component.add(w);
 						low[w] = graph.getColumnCount();
@@ -207,8 +192,7 @@ public class Tarjan {
 					stronglyConnectedComponents.add(component);
 				}
 
-				if (minStack.size() > 0)
-				{
+				if (minStack.size() > 0) {
 					min = minStack.pop();
 					if (low[v] < min) {
 						min = low[v];

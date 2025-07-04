@@ -46,28 +46,23 @@ public class SpotPropertyPrinter extends CExpressionPrinter {
 		case EQ:
 			quoteInfix(binOp, "==");
 			break;
-		case NEQ :
-		{
+		case NEQ: {
 			quoteInfix(binOp, "!=");
 			break;
 		}
-		case LT :
-		{
+		case LT: {
 			quoteInfix(binOp, "<");
 			break;
 		}
-		case LEQ :
-		{
+		case LEQ: {
 			quoteInfix(binOp, "<=");
 			break;
 		}
-		case GEQ :
-		{
+		case GEQ: {
 			quoteInfix(binOp, ">=");
 			break;
 		}
-		case GT :
-		{
+		case GT: {
 			quoteInfix(binOp, ">");
 			break;
 		}

@@ -20,8 +20,8 @@ import uniol.apt.analysis.invariants.InvariantCalculator.InvariantAlgorithm;
 
 /**
  * A front-end for functionality computing invariants. Underlying code is
- * adapted from CvO-Theory group's APT : https://github.com/CvO-Theory/apt
- * See also uniol.apt package and classes.
+ * adapted from CvO-Theory group's APT : https://github.com/CvO-Theory/apt See
+ * also uniol.apt package and classes.
  *
  * @author ythierry
  *
@@ -49,7 +49,7 @@ public class InvariantCalculator {
 		} catch (ArithmeticException e) {
 			invar = new HashSet<>();
 			Logger.getLogger("fr.lip6.move.gal")
-			.info("Invariants computation overflowed in " + (System.currentTimeMillis() - time) + " ms");
+					.info("Invariants computation overflowed in " + (System.currentTimeMillis() - time) + " ms");
 		}
 		return invar;
 	}
@@ -100,7 +100,7 @@ public class InvariantCalculator {
 					sb.append(pnames.get(k));
 				}
 				if (initial != null) {
-					sum = Math.addExact(sum, (Math.multiplyExact((long)v, initial.get(k))));
+					sum = Math.addExact(sum, (Math.multiplyExact((long) v, initial.get(k))));
 				}
 			}
 		}
@@ -121,7 +121,7 @@ public class InvariantCalculator {
 		} catch (Exception e) {
 			task.cancel(true);
 			Logger.getLogger("fr.lip6.move.gal")
-			.warning("Invariant computation timed out after " + timeout + " seconds.");
+					.warning("Invariant computation timed out after " + timeout + " seconds.");
 		}
 		return new HashSet<>();
 	}
@@ -209,11 +209,11 @@ public class InvariantCalculator {
 			cache(pn, invar);
 			// InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 			Logger.getLogger("fr.lip6.move.gal")
-			.info("Computed " + invar.size() + " invariants in " + (System.currentTimeMillis() - time) + " ms");
+					.info("Computed " + invar.size() + " invariants in " + (System.currentTimeMillis() - time) + " ms");
 		} catch (ArithmeticException e) {
 			invar = new HashSet<>();
 			Logger.getLogger("fr.lip6.move.gal")
-			.info("Invariants computation overflowed in " + (System.currentTimeMillis() - time) + " ms");
+					.info("Invariants computation overflowed in " + (System.currentTimeMillis() - time) + " ms");
 		}
 		return invar;
 	}
@@ -267,7 +267,7 @@ public class InvariantCalculator {
 			}
 			if (discarded > 0) {
 				Logger.getLogger("fr.lip6.move.gal").info("Flow matrix only has " + sumMatrix.getColumnCount()
-				+ " transitions (discarded " + discarded + " similar events)");
+						+ " transitions (discarded " + discarded + " similar events)");
 			}
 		}
 		return sumMatrix;

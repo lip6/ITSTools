@@ -32,7 +32,8 @@ public class GraphSuffix {
 		// prédecesseur.
 		reduced += reduceUnmarkedSuffix(spn, graph, nonstable, doneProps);
 		if (reduced > 0) {
-			System.out.println("Structural test allowed to assert that " + reduced + " places are NOT stable. Took "+(System.currentTimeMillis() - time)+" ms.");
+			System.out.println("Structural test allowed to assert that " + reduced + " places are NOT stable. Took "
+					+ (System.currentTimeMillis() - time) + " ms.");
 		}
 
 		return nonstable;
