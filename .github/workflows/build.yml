@@ -14,17 +14,17 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    - name: Set up JDK 17
+    - name: Set up JDK 
       uses: actions/setup-java@v5
       with:
-        java-version: 21
+        java-version: 24
         distribution: 'temurin'
     - name: Setup Maven
       uses: stCarolas/setup-maven@v5
       with:
         maven-version: 3.9.9
     - name: Build with Maven
-      run: cd fr.lip6.move.gal.parent && mvn -B -e install && cd -
+      run: cd fr.lip6.move.gal.parent && mvn -B -e install -Djdk.xml.maxGeneralEntitySizeLimit=0 -Djdk.xml.totalEntitySizeLimit=0 && cd -
     - name: copy update site to website
       run: cp -r fr.lip6.move.gal.updatesite/target/repository/* website/ ; ls website/
     - name: Copy scripts

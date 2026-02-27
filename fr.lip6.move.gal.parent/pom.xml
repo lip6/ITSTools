@@ -6,7 +6,7 @@
 
 	<!-- Tycho requires Maven 3 -->
 	<prerequisites>
-		<maven>3.9.0</maven>
+		<maven>3.9.9</maven>
 	</prerequisites>
 
 
@@ -146,12 +146,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<junit-version>4.8.1</junit-version>
 		<eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
-		<platform-version-name>2025-03</platform-version-name>
-		<tycho-version>4.0.12</tycho-version>
+		<platform-version-name>2025-12</platform-version-name>
+		<tycho-version>5.0.2</tycho-version>
 		<sonar.exclusions>**/Messages.java</sonar.exclusions>
-		<xtextVersion>2.38.0</xtextVersion>
-		<xtendVersion>2.38.0</xtendVersion>
-		<mwe2Version>2.21.0</mwe2Version>
+		<xtextVersion>2.39.0</xtextVersion>
+		<xtendVersion>2.39.0</xtendVersion>
+		<mwe2Version>2.22.0</mwe2Version>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 	</properties>
