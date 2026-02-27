@@ -608,8 +608,8 @@ public class LTLPropertySolver {
 					// make sure this term is initially true
 					if (ap2.eval(init)!=0) {
 						if (DeadlockTester.testEGap(ap2,spn, 15)) {
-							System.out.println("Proved EG "+ap2);
-							falseKnowledge.add(Expression.nop(Op.G,ap2));
+							System.out.println("Proved EG "+ap2 + " asserting that LTL formula F !"+ap2+" is false.");
+							falseKnowledge.add(Expression.nop(Op.F,Expression.not(ap2)));
 						} else {
 							System.out.println("Could not prove EG "+ap2);
 						}
@@ -617,8 +617,8 @@ public class LTLPropertySolver {
 				}
 			} else {
 				if (DeadlockTester.testEGap(ap,spn, 15)) {
-					System.out.println("Proved EG "+ap);
-					falseKnowledge.add(Expression.nop(Op.G,ap));
+					System.out.println("Proved EG "+ap +" asserting that LTL formula F !"+ap+" is false.");
+					falseKnowledge.add(Expression.nop(Op.F, Expression.not(ap)));
 				} else {
 					System.out.println("Could not prove EG "+ap);
 				}
