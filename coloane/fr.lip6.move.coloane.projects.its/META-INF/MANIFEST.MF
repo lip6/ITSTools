@@ -21,7 +21,7 @@ Require-Bundle: org.eclipse.ui,
  fr.lip6.move.coloane.tools.layout,
  fr.lip6.move.coloane.projects.expressions,
  fr.lip6.move.gal,
- org.apache.commons.lang3,
+ org.apache.commons.text,
  fr.lip6.move.gal.itstools.binaries,
  fr.lip6.move.gal.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-21

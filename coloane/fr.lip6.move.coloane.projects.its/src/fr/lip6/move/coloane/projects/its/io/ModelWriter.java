@@ -26,7 +26,7 @@ import fr.lip6.move.coloane.projects.its.expression.IEvaluationContext;
 import fr.lip6.move.coloane.projects.its.expression.IVariableBinding;
 
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -119,7 +119,7 @@ public final class ModelWriter {
 				for (CTLFormulaDescription cfd : cl.getCTLFormulas()) {
 					sb.append("<formula name='").append(cfd.getName()).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
 					sb.append(" description='").append(cfd.getComments()).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
-					sb.append(" formula='").append( StringEscapeUtils.escapeXml(cfd.getCtlFormula().getFormulaString())).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+					sb.append(" formula='").append( StringEscapeUtils.escapeXml10(cfd.getCtlFormula().getFormulaString())).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
 					// Fin du noeud
 					sb.append("/>\n"); //$NON-NLS-1$
 				}
