@@ -1259,6 +1259,53 @@ public class SpotRunner {
 		}
 		return false;
 	}
+	
+	public boolean isSatisfiable(String formula) throws IOException {
+		List<File> todel = new ArrayList<>();
+		CommandLine cl = new CommandLine();
+		try {
+			long time = System.currentTimeMillis();
+			
+			cl.addArg(pathToltlfilt);
+			
+			cl.addArg("--satisfiable");
+			cl.addArg("-q"); // quiet : 0=SAT, 1=UNSAT			
+			cl.addArg("-f");
+			cl.addArg(formula);
+
+			if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
+			
+			File stdOutput = Files.createTempFile("isSat", ".out").toFile();
+			todel.add(stdOutput);
+			int status = Runner.runTool(timeout, cl, stdOutput, true);
+			if (status == 0 || status == 1) {
+				if (DEBUG >= 1) System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms.");
+				
+				if (status == 0) {
+					return true;
+				} else {
+					return false;
+				}
+				
+			} else {
+				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+				try (Stream<String> stream = Files.lines(Paths.get(stdOutput.getCanonicalPath()))) {
+					stream.forEach(System.out::println);
+				}
+				throw new IOException("Failed Spot invocation");
+			}
+		} catch (IOException | TimeoutException | InterruptedException e) {
+			System.err.println("Error while executing :"+ cl);
+			e.printStackTrace();
+			throw new IOException(e);
+		} finally {
+			if (DEBUG == 0)
+				for (File f : todel) {
+					f.delete();
+				}
+		}
+	}
+	
 
 	/**
 	 * Returns some stats on the argument TGBA, in this order :

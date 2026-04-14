@@ -228,22 +228,31 @@ public class KnowledgeStatsCalculator {
 					TGBA maxqe = buildAndPrintAutomatonStats("maxqe", maxqeform, formulaName, out, sr,selectedKnowledge.size());
 					
 					/* negative knowledge */
-					/* K- inter K+ inter A(phi) = empty */
-					/* So negate formula, AND the quantified knowledge -> automaton */
-					/* then test AND (product) the negative knowledge one by one is empty */
+					/* K- is false ; so !K- contains a run of S.*/
+					/* This run must also be part of K+, since K+ wraps S. Using this fact lets us use a smaller language for inclusion test. */
+					/* So, consider !K- AND K+ : it must contain a system run.*/
+					/* So if it is included in !phi, !phi contains a system run, that is a counterexample to phi. */
+					
+					/* To avoid complementations and full inclusions, we leverage a "satisfiable" LTL test */
+					/* !K- AND K+ AND phi unsatisfiable => (!K- AND K+) included in !phi since (!K- AND K+) cannot be empty.*/
+					/* hence we have a counterexample to phi if  : !K- AND K+ AND phi is UNSAT*/					
 					if (! selectedFalseKnowledge.isEmpty()) {
 						long time = System.currentTimeMillis();
+
+						// Build our formula for (K+ AND phi)
+						String kplusandphi = "(" + rawFormula + ")&&(" + quantifiedKnowledge + ")";
 						
-						String negRawFormula = rawFormulas.get(lineNumber);
-						if (! negateFormula) {
-							negRawFormula = "!(" + negRawFormula + ")";
+						boolean hasCounterExample = false;
+						
+						for (String fk : selectedFalseKnowledge) {
+							String totest = "!(" + fk + ")&&(" + kplusandphi + ")";
+							if (!sr.isSatisfiable(totest)) {   // new helper (see next message)
+					            System.out.println("Negative knowledge disproves " + formulaName +
+					                                   " using false fact: " + fk);
+					            hasCounterExample = true;
+					            break;
+					        }
 						}
-						// cumulate positive knowledge and negated formula automaton
-						String knowledgeAndPhi = "(" + negRawFormula + ")&&(" + quantifiedKnowledge + ")";
-						// Build our automaton for (K+ AND phi)
-						boolean hasCounterExample = sr.isIncludedIn(selectedFalseKnowledge, maxqe); 
-						
-						// System.out.println("! MaxQE = !(" + maxqeform + ")  false knowledge : " + selectedFalseKnowledge + " verdict :" + hasCounterExample);
 						
 						TGBA tgba = null;
 						if (hasCounterExample) {
