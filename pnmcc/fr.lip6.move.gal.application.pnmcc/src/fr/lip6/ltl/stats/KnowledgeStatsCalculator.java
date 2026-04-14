@@ -219,8 +219,8 @@ public class KnowledgeStatsCalculator {
 						selectedKnowledgeQE.add(quantifySyntactically(k, toQuantify));
 					}
 					String quantifiedKnowledge = selectedKnowledgeQE.isEmpty() ? "1" : String.join(" && ", selectedKnowledgeQE);
-					
-					TGBA minqe = buildAndPrintAutomatonStats("minqe", "(" + rawFormula + ")&&" + quantifiedKnowledge, formulaName, out, sr,selectedKnowledge.size());
+					String minqeform = "(" + rawFormula + ")&&" + quantifiedKnowledge;
+					TGBA minqe = buildAndPrintAutomatonStats("minqe", minqeform, formulaName, out, sr,selectedKnowledge.size());
 					if (minqe != null) {
 						TGBA minrelax = computeStats(formulaName, minqe, GivenStrategy.STUTTER_RELAX, selectedKnowledge, out, sr, "p"+ "minqe"+GivenStrategy.STUTTER_RELAX);
 					}
@@ -241,7 +241,6 @@ public class KnowledgeStatsCalculator {
 						// cumulate positive knowledge and negated formula automaton
 						String knowledgeAndPhi = "(" + negRawFormula + ")&&(" + quantifiedKnowledge + ")";
 						// Build our automaton for (K+ AND phi)
-						//boolean hasCounterExample = sr.testNegativeKnowledge(selectedFalseKnowledge, knowledgeAndPhi);
 						boolean hasCounterExample = sr.isIncludedIn(selectedFalseKnowledge, maxqe); 
 						
 						// System.out.println("! MaxQE = !(" + maxqeform + ")  false knowledge : " + selectedFalseKnowledge + " verdict :" + hasCounterExample);
