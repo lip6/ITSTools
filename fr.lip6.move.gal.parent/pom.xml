@@ -242,6 +242,7 @@
 					<version>${tycho-version}</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
+						<release>21</release>
 						<compilerArgument>-err:-forbidden</compilerArgument>
 					</configuration>
 				</plugin>
