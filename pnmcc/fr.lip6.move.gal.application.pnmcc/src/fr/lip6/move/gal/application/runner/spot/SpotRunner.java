@@ -1105,8 +1105,6 @@ public class SpotRunner {
 
 			// build automaton for tgba
 			// pass TGBA in HOAF
-			// build automaton for tgba
-			// pass TGBA in HOAF
 			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
 			todel.add(curAut);
 			PrintWriter pw = new PrintWriter(curAut);
