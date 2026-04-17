@@ -112,6 +112,8 @@ public class BinaryToolsPlugin extends Plugin {
 			return "petri64.exe";
 		} else if (osName.contains("linux")) {
 			return "petri64";
+		} else if (osName.contains("mac os x") || osName.contains("darwin")) {
+			return "petri64-mac";
 		} else {
 			throw new IOException("System platform not supported by PetriSpot: " + osName);
 		}

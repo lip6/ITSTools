@@ -100,6 +100,10 @@
  		<module>../ltl/fr.lip6.ltl.jhoaf</module>
 		<module>../ltl/fr.lip6.ltl.tgba</module>
 		
+		<!-- PetriSpot : Petri net invariants solver -->
+		<module>../petrispot/fr.lip6.petrispot.binaries</module>
+		<module>../petrispot/fr.lip6.move.petrispot.runner</module>
+		
 		<!-- LTSmin interactions : launching and configuration -->
  		<module>../ltsmin/fr.lip6.move.gal.ltsmin.preference</module>
 		<module>../ltsmin/fr.lip6.move.gal.ltsmin.binaries</module>

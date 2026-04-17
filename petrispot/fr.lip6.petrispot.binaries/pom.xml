@@ -30,6 +30,7 @@
                                 <mkdir dir="bin"/>
                                 <get src="https://github.com/yanntm/PetriSpot/raw/refs/heads/Inv-Linux/petri64" dest="bin/petri64"/>
                                 <get src="https://github.com/yanntm/PetriSpot/raw/refs/heads/Inv-Windows/petri64.exe" dest="bin/petri64.exe"/>
+                                <get src="https://github.com/yanntm/PetriSpot/raw/refs/heads/Inv-OSX/petri64" dest="bin/petri64-mac"/>
                                 <chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
                             </target>
                         </configuration>
