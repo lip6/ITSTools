@@ -1,8 +1,10 @@
 package fr.lip6.move.petrispot.runner;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
@@ -21,12 +23,15 @@ import fr.lip6.petrispot.binaries.BinaryToolsPlugin;
  *   <li>Write it to a temporary KERS file.</li>
  *   <li>Invoke petri64 with the appropriate mode flag.</li>
  *   <li>Read the output KERS file and return the result matrix.</li>
- *   <li>Clean up temporary files.</li>
+ *   <li>Clean up temporary files (unless DEBUG &gt;= 1).</li>
  * </ol>
  */
 public class PetriSpotRunner {
 
 	private static final Logger log = Logger.getLogger("fr.lip6.move.gal");
+
+	/** Set to 1 to keep intermediate files for inspection; 2 for extra verbose output. */
+	private static final int DEBUG = 0;
 
 	/** Default timeout in seconds for the PetriSpot binary. */
 	private static final long DEFAULT_TIMEOUT_S = 120;
@@ -54,65 +59,61 @@ public class PetriSpotRunner {
 	 * @return the result matrix (columns = invariants/flows), or {@code null} on failure
 	 */
 	public static IntMatrixCol computeInvariants(SparsePetriNet spn, InvariantMode mode, long timeout) {
-		// Step 1 – build incidence matrix: effect = post - pre = -1*flowPT + 1*flowTP
-		IntMatrixCol incidence = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
-
-		Path workDir = null;
+		List<File> todel = new ArrayList<>();
+		// Default: empty matrix — safe for all callers (means "no invariants found")
+		IntMatrixCol result = new IntMatrixCol(0, 0);
 		try {
-			// Step 2 – write incidence matrix to a temp KERS file
-			workDir = Files.createTempDirectory("petrispot-");
-			Path inputKers  = workDir.resolve("input.kers");
-			Path outputKers = workDir.resolve("output.kers");
+			// Step 1 – build incidence matrix: effect = post - pre = -1*flowPT + 1*flowTP
+			IntMatrixCol incidence = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
 
-			KERSFormatIO.write(incidence, inputKers);
+			// Step 2 – write incidence matrix to a temp KERS file
+			File inputKers  = Files.createTempFile("petrispot-input-",  ".kers").toFile();
+			File outputKers = Files.createTempFile("petrispot-output-", ".kers").toFile();
+			todel.add(inputKers);
+			todel.add(outputKers);
+
+			KERSFormatIO.write(incidence, inputKers.toPath());
 
 			// Step 3 – build command line
 			String binaryPath = BinaryToolsPlugin.getPetriURI().getPath();
 			CommandLine cl = new CommandLine();
 			cl.addArg(binaryPath);
-			cl.addArg("--loadKERS=" + inputKers.toAbsolutePath());
+			cl.addArg("--loadKERS=" + inputKers.getCanonicalPath());
 			cl.addArg(modeFlag(mode));
-			cl.addArg("--basisKERS=" + outputKers.toAbsolutePath());
-			cl.setWorkingDir(workDir.toFile());
+			cl.addArg("--basisKERS=" + outputKers.getCanonicalPath());
 
-			log.info("Invoking PetriSpot: " + cl);
+			System.out.println("Running PetriSpot : " + cl);
 			long t0 = System.currentTimeMillis();
 
 			// Step 4 – invoke and monitor
 			int exitCode = Runner.runTool(timeout, cl);
-			log.info("PetriSpot finished in " + (System.currentTimeMillis() - t0) + " ms, exit=" + exitCode);
 
 			if (exitCode != 0) {
-				log.warning("PetriSpot returned non-zero exit code " + exitCode + " for mode " + mode);
-				return null;
+				System.out.println("PetriSpot run failed in " + (System.currentTimeMillis() - t0)
+						+ " ms. Status: " + exitCode);
+			} else if (!outputKers.exists() || outputKers.length() == 0) {
+				System.out.println("PetriSpot produced no output file for mode " + mode);
+			} else {
+				// Step 5 – parse result
+				if (DEBUG >= 1) System.out.println("Successful run of PetriSpot took "
+						+ (System.currentTimeMillis() - t0) + " ms. Input: "
+						+ inputKers.getCanonicalPath() + " Output: " + outputKers.getCanonicalPath());
+				result = KERSFormatIO.read(outputKers.toPath());
+				if (DEBUG >= 2) System.out.println("PetriSpot result matrix: " + result);
 			}
-
-			if (!Files.exists(outputKers)) {
-				log.warning("PetriSpot produced no output file for mode " + mode);
-				return null;
-			}
-
-			// Step 5 – parse result
-			return KERSFormatIO.read(outputKers);
-
 		} catch (TimeoutException e) {
-			log.warning("PetriSpot timed out after " + timeout + " s (" + mode + ")");
-			return null;
+			System.out.println("PetriSpot timed out after " + timeout + " s (" + mode + ")");
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			log.warning("PetriSpot invocation interrupted (" + mode + ")");
-			return null;
+			System.out.println("PetriSpot invocation interrupted (" + mode + ")");
 		} catch (IOException e) {
-			log.warning("PetriSpot I/O error (" + mode + "): " + e.getMessage());
-			return null;
+			System.out.println("PetriSpot I/O error (" + mode + "): " + e.getMessage());
 		} finally {
-			// Step 6 – cleanup
-			if (workDir != null) {
-				deleteQuietly(workDir.resolve("input.kers"));
-				deleteQuietly(workDir.resolve("output.kers"));
-				deleteQuietly(workDir);
-			}
+			if (DEBUG == 0)
+				for (File f : todel)
+					f.delete();
 		}
+		return result;
 	}
 
 	/**
@@ -135,14 +136,6 @@ public class PetriSpotRunner {
 		case PSEMIFLOWS:  return "--Psemiflows";
 		case TSEMIFLOWS:  return "--Tsemiflows";
 		default: throw new IllegalArgumentException("Unknown mode: " + mode);
-		}
-	}
-
-	private static void deleteQuietly(Path p) {
-		try {
-			Files.deleteIfExists(p);
-		} catch (IOException e) {
-			// best-effort cleanup
 		}
 	}
 }

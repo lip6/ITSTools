@@ -90,8 +90,12 @@ public class KERSFormatIO {
 			if (nnz == 0) continue;
 			writeIntLE(out, ci);
 			writeIntLE(out, nnz);
+			// Contiguous row indices block
 			for (int i = 0; i < nnz; i++) {
-				writeIntLE(out,  col.keyAt(i));
+				writeIntLE(out, col.keyAt(i));
+			}
+			// Contiguous values block
+			for (int i = 0; i < nnz; i++) {
 				writeLongLE(out, (long) col.valueAt(i));
 			}
 		}
@@ -129,20 +133,30 @@ public class KERSFormatIO {
 
 		// Stream column entries until sentinel 0xFFFFFFFF (== -1 as signed int)
 		int colIdx;
+		int[] rowBuf  = new int[0];
+		long[] valBuf = new long[0];
+
 		while ((colIdx = readIntLE(in)) != -1) {
 			int nnz = readIntLE(in);
+			// Grow scratch buffers only when needed
+			if (nnz > rowBuf.length) {
+				rowBuf = new int[nnz];
+				valBuf = new long[nnz];
+			}
+			// Read contiguous row-indices block, then contiguous values block
+			for (int i = 0; i < nnz; i++) rowBuf[i] = readIntLE(in);
+			for (int i = 0; i < nnz; i++) valBuf[i] = readLongLE(in);
+
 			// Pre-allocate exactly nnz slots — avoids all GrowingArrayUtils resizing
 			SparseIntArray col = new SparseIntArray(nnz);
 			for (int i = 0; i < nnz; i++) {
-				int  row  = readIntLE(in);
-				long val  = readLongLE(in);
-				int  ival = (int) val;
-				if (ival != val) {
-					log.warning("KERS value " + val + " at col=" + colIdx
-							+ " row=" + row + " overflows int; truncated.");
+				int  ival = (int) valBuf[i];
+				if (ival != valBuf[i]) {
+					log.warning("KERS value " + valBuf[i] + " at col=" + colIdx
+							+ " row=" + rowBuf[i] + " overflows int; truncated.");
 				}
 				// Row indices sorted ascending in file: append is O(1) — no binary search
-				col.append(row, ival);
+				col.append(rowBuf[i], ival);
 			}
 			// Replace the empty column allocated by IntMatrixCol constructor
 			matrix.setColumn(colIdx, col);
