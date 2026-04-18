@@ -30,7 +30,6 @@ import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
-import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
@@ -44,6 +43,8 @@ import fr.lip6.move.gal.structural.hlpn.HLPlace;
 import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
+import fr.lip6.move.petrispot.runner.PetriSpotRunner;
+import fr.lip6.move.petrispot.runner.PetriSpotRunner.InvariantMode;
 
 public class GlobalPropertySolver {
 
@@ -670,12 +671,7 @@ public class GlobalPropertySolver {
 			maxSeen.add(1);
 		}
 		// the invariants themselves
-		Set<SparseIntArray> invar;
-		{
-			// effect matrix
-			IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
-			invar = InvariantCalculator.computePInvariants(sumMatrix, false, 60);
-		}
+		IntMatrixCol invar = PetriSpotRunner.computeInvariants(spn, InvariantMode.PFLOWS, 60);
 
 		UpperBoundsSolver.approximateStructuralBoundsUsingInvariants(spn, invar, toCheck, maxStruct);
 
@@ -693,7 +689,7 @@ public class GlobalPropertySolver {
 				.info("Rough structural analysis with invariants proved " + d + " places are one safe in "
 						+ (System.currentTimeMillis() - time) + " ms (including invariant computation).");
 
-		DeadlockTester.testOneSafeWithSMT(toCheck, spn, invar, doneProps, 10);
+		DeadlockTester.testOneSafeWithSMT(toCheck, spn, invar.getColumns(), doneProps, 10);
 
 		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 	}

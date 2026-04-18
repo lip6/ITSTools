@@ -77,7 +77,6 @@ import fr.lip6.move.gal.struct2gal.SpecBuilder;
 import fr.lip6.move.gal.struct2gal.StructuralReductionBuilder;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
-import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
@@ -1193,10 +1192,8 @@ public class Application implements IApplication, Ender {
 				tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
 
 			if (false) {
-				IntMatrixCol sumP = IntMatrixCol.sumProd(-1, reader.getSPN().getFlowPT(), 1,
-						reader.getSPN().getFlowTP());
-				Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumP, true);
-				InvariantCalculator.printInvariant(invar, reader.getSPN().getPnames(), reader.getSPN().getMarks());
+				IntMatrixCol inv = PetriSpotRunner.computeInvariants(reader.getSPN(), InvariantMode.PSEMIFLOWS);
+				InvariantPrinter.printInvariant(inv.getColumns(), reader.getSPN().getPnames(), reader.getSPN().getMarks());
 			}
 			reader.rebuildSpecification(doneProps);
 			// SMT does support hierarchy theoretically but does not like it much currently,

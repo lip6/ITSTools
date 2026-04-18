@@ -35,6 +35,7 @@ import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
+import fr.lip6.move.petrispot.runner.PetriSpotRunner;
 
 public class UpperBoundsSolver {
 
@@ -75,12 +76,7 @@ public class UpperBoundsSolver {
 		}
 		
 		StructuralReduction sr = new StructuralReduction(spn);
-		Set<SparseIntArray> invar;
-		{
-			// effect matrix
-			IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
-			invar = InvariantCalculator.computePInvariants(sumMatrix);
-		}
+		IntMatrixCol invar = PetriSpotRunner.computeInvariants(spn, PetriSpotRunner.InvariantMode.PFLOWS, 120);
 		approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
 		printBounds("after Invariants on skeleton", maxSeen, maxStruct);
 		
@@ -182,13 +178,7 @@ public class UpperBoundsSolver {
 				StructuralReduction sr = new StructuralReduction(spn);
 				
 				// the invariants themselves
-				Set<SparseIntArray> invar ;
-				{
-					// effect matrix
-					List<Integer> repr = new ArrayList<>();
-					IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(spn, repr);
-					invar = InvariantCalculator.computePInvariants(sumMatrix);
-				}
+				IntMatrixCol invar = PetriSpotRunner.computeInvariants(spn, PetriSpotRunner.InvariantMode.PFLOWS, 60);
 				approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
 
 				printBounds("after invariants", maxSeen, maxStruct);
@@ -598,7 +588,7 @@ public class UpperBoundsSolver {
 		sb.append("]");
 	}
 
-	public static void approximateStructuralBoundsUsingInvariants(ISparsePetriNet sr, Set<SparseIntArray> invar, List<Expression> tocheck,
+	public static void approximateStructuralBoundsUsingInvariants(ISparsePetriNet sr, IntMatrixCol invar, List<Expression> tocheck,
 			List<Integer> maxStruct) {
 		{
 			// try to set a max bound on variables using invariants
@@ -612,7 +602,7 @@ public class UpperBoundsSolver {
 			List<SparseIntArray> geninv = new ArrayList<SparseIntArray>();
 			
 			// do the split
-			for (SparseIntArray invariant : invar) {
+			for (SparseIntArray invariant : invar.getColumns()) {
 				boolean hasNeg = false;
 				for (int i=0; i < invariant.size() ; i++) {
 					if (invariant.valueAt(i) < 0) {
@@ -627,7 +617,7 @@ public class UpperBoundsSolver {
 				}
 			}
 			
-			
+			boolean first = true;
 			// start with positive semi flows
 			for (SparseIntArray invariant : posinv) {
 
@@ -637,19 +627,29 @@ public class UpperBoundsSolver {
 				// e.g.  2*p0 + p1 = 5 =>  p0 <= 2 ; p1 <= 5
 				
 				// compute K
-				int sum = 0;
+				long lsum = 0;
 				for (int i = 0 ; i < invariant.size() ; i++) {
 					int v = invariant.keyAt(i);
 					int val = invariant.valueAt(i);
-					sum += sr.getMarks().get(v) * val;
+					lsum += sr.getMarks().get(v) * val;
 				}
-				// iterate elements and set bound
-				for (int i = 0 ; i < invariant.size() ; i++) {
-					int v = invariant.keyAt(i);
-					int val = invariant.valueAt(i);
-					int bound = sum / val ;
-					limits[v] = Math.min(limits[v]==-1?Integer.MAX_VALUE:limits[v], bound);
+				try {
+					int sum = Math.toIntExact(lsum);
+					// iterate elements and set bound
+					for (int i = 0 ; i < invariant.size() ; i++) {
+						int v = invariant.keyAt(i);
+						int val = invariant.valueAt(i);
+						int bound = sum / val ;
+						limits[v] = Math.min(limits[v]==-1?Integer.MAX_VALUE:limits[v], bound);
+					}
+				} catch (ArithmeticException e) {
+					if (first) {
+						System.out.println("Overflow detected while computing structural bounds with invariants. Skipping invariant " + invariant);
+
+						first = false;
+					}
 				}
+				
 			}
 			
 			if (Application.DEBUG >= 2) {
