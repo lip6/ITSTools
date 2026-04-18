@@ -1,7 +1,7 @@
 # ITSTools
 A multi-formalism, multi-solution model-checker centered on the language GAL.
 
-See our main homepage for details : http://ddd.lip6.fr
+See our main homepage for details : https://lip6.github.io/ITSTools-web/
 
 To install this tool, within a recent eclipse, Help -> Install New Software -> Add this update site https://lip6.github.io/ITSTools/
 
