@@ -42,42 +42,42 @@ public class KnowledgeStatsCalculator {
 
 		File outputFile = outputDir.resolve("formulaStats.csv").toFile();
 		try (PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(outputFile)))) {
-		    synchronized (out) {
-		        out.println(AutomatonStats.buildHeaderLine());
-		    }
+			synchronized (out) {
+				out.println(AutomatonStats.buildHeaderLine());
+			}
 
-		    // Traverse the input directory
-		    try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(inputPath)) {
-		        List<Path> paths = new ArrayList<>();
-		        for (Path path : directoryStream) {
-		            if (Files.isDirectory(path)) {
-		                paths.add(path);
-		            }
-		        }
+			// Traverse the input directory
+			try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(inputPath)) {
+				List<Path> paths = new ArrayList<>();
+				for (Path path : directoryStream) {
+					if (Files.isDirectory(path)) {
+						paths.add(path);
+					}
+				}
 
-		        paths.parallelStream().unordered().forEach(path -> {
-		            try {
-		                findAndProcessFiles(path, out, "LTLFireability");
-		            } catch (Exception e) {
-		                System.err.println("Error processing: " + path.toString() + " - " + e.getMessage());
-		            }
-		        });
-		        paths.parallelStream().unordered().forEach(path -> {
-		            try {
-		                findAndProcessFiles(path, out, "LTLCardinality");
-		            } catch (Exception e) {
-		                System.err.println("Error processing: " + path.toString() + " - " + e.getMessage());
-		            }
-		        });
-		        
-		    } catch (IOException e) {
-		        System.err.println("Error reading input directory: " + e.getMessage());
-		    }
-		    synchronized (out) {
-		    	out.flush();
-		    }
+				paths.parallelStream().unordered().forEach(path -> {
+					try {
+						findAndProcessFiles(path, out, "LTLFireability");
+					} catch (Exception e) {
+						System.err.println("Error processing: " + path.toString() + " - " + e.getMessage());
+					}
+				});
+				paths.parallelStream().unordered().forEach(path -> {
+					try {
+						findAndProcessFiles(path, out, "LTLCardinality");
+					} catch (Exception e) {
+						System.err.println("Error processing: " + path.toString() + " - " + e.getMessage());
+					}
+				});
+
+			} catch (IOException e) {
+				System.err.println("Error reading input directory: " + e.getMessage());
+			}
+			synchronized (out) {
+				out.flush();
+			}
 		} catch (FileNotFoundException e) {
-		    System.err.println("Error opening output file: " + e.getMessage());
+			System.err.println("Error opening output file: " + e.getMessage());
 		}
 		System.out.println("In total out of "+nbFolder+" found knowledge information in "+ nbTreated + " cases.");
 
@@ -110,9 +110,9 @@ public class KnowledgeStatsCalculator {
 				// System.out.println("Working on "+dir+" for " + formulaType);
 				calculateBenchmarkStats(formulasFile, knowledgeFile, falseKnowledgeFile, out);
 				nbTreated.incrementAndGet();
-			    synchronized (out) {
-			    	out.flush();
-			    }
+				synchronized (out) {
+					out.flush();
+				}
 			} else {
 				System.err.println("Incomplete set of files in folder: " + benchmarkDir.toString());
 			}
@@ -134,8 +134,8 @@ public class KnowledgeStatsCalculator {
 
 	private void generateMinMax(File formulasFile, File knowledgeFile, File falseKnowledgeFile, String model, String exam, PrintStream out, boolean negateFormula)  {
 		try {
-//			if (! model.equals("CloudOpsManagement-PT-00080by00040"))
-//				return;
+			//			if (! model.equals("CloudOpsManagement-PT-00080by00040"))
+			//				return;
 
 			List<String> rawFormulas = Files.readAllLines(formulasFile.toPath());
 			List<String> knowledgeFormulas = Files.readAllLines(knowledgeFile.toPath());
@@ -145,7 +145,7 @@ public class KnowledgeStatsCalculator {
 			List<Set<String>> knowledgeSupports = new ArrayList<>();
 			List<Set<String>> falseKnowledgeSupports = new ArrayList<>();
 
-			
+
 			// Compute support sets once and store
 			for (String formula : rawFormulas) {
 				rawSupports.add(support(formula));
@@ -156,7 +156,7 @@ public class KnowledgeStatsCalculator {
 			for (String formula : falseKnowledgeFormulas) {
 				falseKnowledgeSupports.add(support(formula));
 			}
-			
+
 			SpotRunner sr = new SpotRunner(10);
 
 			if (negateFormula) {
@@ -171,13 +171,13 @@ public class KnowledgeStatsCalculator {
 				Set<String> rawSupport = rawSupports.get(lineNumber);
 
 				String formulaName = model + "-" + exam + "-" + String.format("%02d", lineNumber);				
-				
-				
+
+
 				// the assertions we keep
 				ArrayList<String> selectedKnowledge = new ArrayList<>();
 				// the support of these assertions
 				Set<String> extendedSupport = new HashSet<>(rawSupport);
-				
+
 				// First pass to retain facts whose alphabet intersects formula
 				selectKnowledge(knowledgeFormulas, knowledgeSupports, rawSupport, selectedKnowledge, extendedSupport);
 				// make unique, but preserve order
@@ -186,29 +186,29 @@ public class KnowledgeStatsCalculator {
 				ArrayList<String> selectedFalseKnowledge = new ArrayList<>();
 				selectKnowledge(falseKnowledgeFormulas, falseKnowledgeSupports, rawSupport, selectedFalseKnowledge, extendedSupport);
 				selectedFalseKnowledge = new ArrayList<>(new LinkedHashSet<>(selectedFalseKnowledge));
-				
+
 				String andknowledge = String.join(" && ", selectedKnowledge);
 				if (selectedKnowledge.isEmpty()) {
 					System.out.println("No knowledge for formula " + formulaName + " (negative facts :"+selectedFalseKnowledge.size()+ ")");
-					
+
 					andknowledge = "1";					
 				}
 				if (selectedKnowledge.isEmpty() && selectedFalseKnowledge.isEmpty()) {
 					System.out.println("No knowledge for formula " + formulaName + " (negative facts :"+selectedFalseKnowledge.size()+ ")");
 					continue;
 				}
-				
+
 				TGBA rawTGBA = buildAndPrintAutomatonStats("raw", rawFormula, formulaName, out, sr,0);
-				
+
 				boolean withMinMax = true;
-				
+
 				if (withMinMax) {
 					// NB : no existential quantification
 					buildAndPrintAutomatonStats("min", "(" + rawFormula + ")&&" + andknowledge, formulaName, out, sr,selectedKnowledge.size());
 
 					buildAndPrintAutomatonStats("max", "(" + rawFormula + ")||!(" + andknowledge + ")", formulaName, out, sr,selectedKnowledge.size());
 				}
-				
+
 				Set<String> toQuantify = new HashSet<>(extendedSupport);
 				toQuantify.removeAll(rawSupport);
 				//andknowledge = "(G((p16||!p32)))";
@@ -226,44 +226,49 @@ public class KnowledgeStatsCalculator {
 					}
 					String maxqeform = "(" + rawFormula + ")||!(" + quantifiedKnowledge + ")";
 					TGBA maxqe = buildAndPrintAutomatonStats("maxqe", maxqeform, formulaName, out, sr,selectedKnowledge.size());
-					
+
 					/* negative knowledge */
 					/* K- is false ; so !K- contains a run of S.*/
 					/* This run must also be part of K+, since K+ wraps S. Using this fact lets us use a smaller language for inclusion test. */
 					/* So, consider !K- AND K+ : it must contain a system run.*/
 					/* So if it is included in !phi, !phi contains a system run, that is a counterexample to phi. */
-					
+
 					/* To avoid complementations and full inclusions, we leverage a "satisfiable" LTL test */
 					/* !K- AND K+ AND phi unsatisfiable => (!K- AND K+) included in !phi since (!K- AND K+) cannot be empty.*/
 					/* hence we have a counterexample to phi if  : !K- AND K+ AND phi is UNSAT*/					
-					if (! selectedFalseKnowledge.isEmpty()) {
+					if (! selectedFalseKnowledge.isEmpty() && ! minqe.isEmptyLanguage()) {
 						long time = System.currentTimeMillis();
 
 						// Build our formula for (K+ AND phi)
 						String kplusandphi = "(" + rawFormula + ")&&(" + quantifiedKnowledge + ")";
-						
+
+						//System.out.println("Testing formula " + formulaName + " : " + rawFormula);
+						//System.out.println("With positive knowledge : " + quantifiedKnowledge);
+
+
+
 						boolean hasCounterExample = false;
-						
+
 						for (String fk : selectedFalseKnowledge) {
 							String totest = "!(" + fk + ")&&(" + kplusandphi + ")";
-							if (!sr.isSatisfiable(totest)) {   // new helper (see next message)
-					            System.out.println("Negative knowledge disproves " + formulaName +
-					                                   " using false fact: " + fk);
-					            hasCounterExample = true;
-					            break;
-					        }
+							if (!sr.isSatisfiable(totest)) {  
+								System.out.println("Negative knowledge disproves " + formulaName +
+										" using false fact: " + fk);
+								hasCounterExample = true;
+								break;
+							}
 						}
-						
+
 						TGBA tgba = null;
 						if (hasCounterExample) {
 							tgba = TGBA.makeTrue();
 						}
 						AutomatonStats rawStats = AutomatonStatsCalculator.computeStats(tgba, formulaName, "negative",time,selectedFalseKnowledge.size());
-						synchronized (out) { out.println(rawStats.toString()); }												
+						synchronized (out) { out.println(rawStats.toString()); }
 					}
-					
+
 				}
-				
+
 				// incremental
 				applyGivenThat(formulaName, rawTGBA, selectedKnowledge, out, sr,"");
 				// global
@@ -298,13 +303,13 @@ public class KnowledgeStatsCalculator {
 			if (toadd[i])
 				selectedKnowledge.add("(" + knowledgeFormulas.get(i) + ")");
 		}
-		
-		
+
+
 		// second pass, keep if it intersects formulas we kept in first pass : touches extendedSupport
 		// currently disabled
 		boolean secondPass = false;
 		if (secondPass) {
-			
+
 			boolean[] toadd2 = new boolean[knowledgeFormulas.size()];
 			Set<String> finalSupport = new HashSet<>(extendedSupport);
 			for (int i = 0; i < knowledgeFormulas.size(); ++i) {						
@@ -320,7 +325,7 @@ public class KnowledgeStatsCalculator {
 				if (toadd2[i])
 					selectedKnowledge.add("(" + knowledgeFormulas.get(i) + ")");
 			}
-			
+
 			// update alphabet for "--remove-ap" invocations
 			extendedSupport = finalSupport;
 		}
@@ -358,9 +363,15 @@ public class KnowledgeStatsCalculator {
 
 	public void applyGivenThat(String formulaName, TGBA rawTGBA, ArrayList<String> selectedKnowledge,
 			PrintStream out, SpotRunner sr, String prefix) {
-		
+
 		boolean compositions = true;
 		boolean doubleCompositions = false;
+
+		{
+			TGBA autoSmall = computeStats(formulaName, rawTGBA, GivenStrategy.AUTO_SMALL, selectedKnowledge, out, sr, prefix+ GivenStrategy.AUTO_SMALL);
+			TGBA autoSI = computeStats(formulaName, rawTGBA, GivenStrategy.AUTO_SI, selectedKnowledge, out, sr, prefix+ GivenStrategy.AUTO_SI);
+				
+		}
 		
 		TGBA minato = computeStats(formulaName, rawTGBA, GivenStrategy.MINATO, selectedKnowledge, out, sr, prefix+ GivenStrategy.MINATO);
 		// minato/minato
@@ -374,7 +385,7 @@ public class KnowledgeStatsCalculator {
 				}
 			}
 		}
-		
+
 		TGBA relax = computeStats(formulaName, rawTGBA, GivenStrategy.STUTTER_RELAX, selectedKnowledge, out, sr, prefix+ GivenStrategy.STUTTER_RELAX);
 		if (compositions && relax != null) {
 			TGBA relaxmin = computeStats(formulaName, relax, GivenStrategy.MINATO, selectedKnowledge, out, sr, prefix+ GivenStrategy.STUTTER_RELAX+ GivenStrategy.MINATO);
@@ -385,20 +396,20 @@ public class KnowledgeStatsCalculator {
 				}
 			}
 		}
-		
+
 		computeStats(formulaName, rawTGBA, GivenStrategy.STUTTER_RESTRICT, selectedKnowledge, out, sr, prefix+ GivenStrategy.STUTTER_RESTRICT);
-		
-//		TGBA all =computeStats(formulaName, rawTGBA, GivenStrategy.ALL, selectedKnowledge, out, sr, prefix+ GivenStrategy.ALL);
-//		
-//		if (compositions && all != null) {
-//			TGBA allall =computeStats(formulaName, all, GivenStrategy.ALL, selectedKnowledge, out, sr, prefix+ GivenStrategy.ALL+ GivenStrategy.ALL);
-//		}
+
+		//		TGBA all =computeStats(formulaName, rawTGBA, GivenStrategy.ALL, selectedKnowledge, out, sr, prefix+ GivenStrategy.ALL);
+		//		
+		//		if (compositions && all != null) {
+		//			TGBA allall =computeStats(formulaName, all, GivenStrategy.ALL, selectedKnowledge, out, sr, prefix+ GivenStrategy.ALL+ GivenStrategy.ALL);
+		//		}
 
 	}
 
 	public TGBA computeStats(String formulaName, TGBA rawTGBA, GivenStrategy strat, ArrayList<String> selectedKnowledge,
 			PrintStream out, SpotRunner sr, String prefix) {
-		
+
 		long time = System.currentTimeMillis();
 		TGBA tgbaRes = sr.givenThat(rawTGBA, selectedKnowledge, strat);
 		AutomatonStats stats = AutomatonStatsCalculator.computeStats(tgbaRes, formulaName, prefix,time,selectedKnowledge.size());
