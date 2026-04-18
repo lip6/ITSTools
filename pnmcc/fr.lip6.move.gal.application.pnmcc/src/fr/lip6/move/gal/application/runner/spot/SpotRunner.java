@@ -60,7 +60,12 @@ public class SpotRunner {
 		/** A variant of restrict designed to make the language SI */
 		STUTTER_RESTRICT,
 		/** do both [the default] */
-		ALL;
+		ALL,
+		/** small automata */
+		AUTO_SMALL,
+		/** Stutter insensitive automata */
+		AUTO_SI
+		;
 		
 		public String toString() {
 			switch (this) {
@@ -70,6 +75,8 @@ public class SpotRunner {
 			case STUTTER_RELAX: return "stutter-relax";
 			case STUTTER_RESTRICT: return "stutter-restrict";
 			case ALL: return "all";
+			case AUTO_SMALL: return "auto-small";
+			case AUTO_SI: return "auto-si";
 			default : return null;
 			}
 		}
