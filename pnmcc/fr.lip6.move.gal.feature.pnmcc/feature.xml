@@ -308,88 +308,62 @@ This Agreement is governed by the laws of the State of New York and the intellec
 
    <plugin
          id="fr.lip6.move.gal.logic"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="fr.lip6.move.gal.application.pnmcc"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="fr.lip6.move.gal.logic.saxparse"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="fr.lip6.move.gal.gal2pins"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="fr.lip6.move.gal.louvain"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="fr.lip6.move.gal.louvain.binaries"
-         download-size="0"
-         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.logicng"
-         download-size="0"
-         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="fr.lip6.move.gal.pn2pins"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="fr.lip6.ltl.jhoaf"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="fr.lip6.ltl.tgba"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="fr.lip6.ltl.spot.binaries"
-         download-size="0"
-         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="fr.lip6.smt.z3.binaries"
-         download-size="0"
-         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.antlr.antlr4-runtime"
-         download-size="0"
-         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="fr.lip6.move.petrispot.runner"
+         version="0.0.0"/>
+
+   <plugin
+         id="fr.lip6.petrispot.binaries"
          version="0.0.0"/>
 
 </feature>

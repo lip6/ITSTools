@@ -89,6 +89,9 @@ import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
+import fr.lip6.move.petrispot.runner.InvariantPrinter;
+import fr.lip6.move.petrispot.runner.PetriSpotRunner;
+import fr.lip6.move.petrispot.runner.PetriSpotRunner.InvariantMode;
 import fr.lip6.move.serialization.SerializationUtil;
 import smtanalysis.SMTAnalyzer;
 
@@ -423,42 +426,25 @@ public class Application implements IApplication, Ender {
 
 		if (invariants) {
 			reader.createSPN(false,false);
-			List<Integer> repr = new ArrayList<>();
-			IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(reader.getSPN(), repr);
 			SparsePetriNet spn = reader.getSPN();
 			if (pflows || psemiflows) {
 				long time = System.currentTimeMillis();
-				Set<SparseIntArray> invar;
-				if (pflows) {
-					invar = InvariantCalculator.computePInvariants(sumMatrix);
-				} else {
-					invar = InvariantCalculator.computePInvariants(sumMatrix, true, 120);
-				}
-				System.out.println("Computed "+invar.size()+" P "+(psemiflows?"semi":"")+" flows in "+(System.currentTimeMillis()-time)+" ms.");
-//				InvariantSet inv = new InvariantSet(invar, sumMatrix.transpose());
-//				inv.print(System.out, spn.getPnames(), spn.getMarks());
-				InvariantCalculator.printInvariant(invar, spn.getPnames(), spn.getMarks());
-			} 
-			
+				InvariantMode mode = pflows ? InvariantMode.PFLOWS : InvariantMode.PSEMIFLOWS;
+				IntMatrixCol result = PetriSpotRunner.computeInvariants(spn, mode);
+				System.out.println("Computed "+result.getColumnCount()+" P "+(psemiflows?"semi":"")+" flows in "+(System.currentTimeMillis()-time)+" ms.");
+				InvariantPrinter.printInvariant(result.getColumns(), spn.getPnames(), spn.getMarks());
+			}
+
 			if (tflows || tsemiflows) {
 				long time = System.currentTimeMillis();
-				Set<SparseIntArray> invarT;
-				if (tflows) {
-					invarT= InvariantCalculator.computeTinvariants(reader.getSPN(), sumMatrix, repr,false);
-				} else {
-					invarT= InvariantCalculator.computeTinvariants(reader.getSPN(), sumMatrix, repr,true);					
-				}
-
-				System.out.println("Computed "+invarT.size()+" T "+(psemiflows?"semi":"")+" flows in "+(System.currentTimeMillis()-time)+" ms.");
-				//InvariantSet inv = new InvariantSet(invarT, sumMatrix);
-				//inv.print(System.out, reader.getSPN().getTnames(), null);
-				InvariantCalculator.printInvariant(invarT, reader.getSPN().getTnames(), null );				
+				InvariantMode mode = tflows ? InvariantMode.TFLOWS : InvariantMode.TSEMIFLOWS;
+				IntMatrixCol result = PetriSpotRunner.computeInvariants(spn, mode);
+				System.out.println("Computed "+result.getColumnCount()+" T "+(tsemiflows?"semi":"")+" flows in "+(System.currentTimeMillis()-time)+" ms.");
+				InvariantPrinter.printInvariant(result.getColumns(), spn.getTnames(), null);
 			}
-			
 			// Still WIP
 			// SparseIntArray inv = DeadlockTester.findPositiveTsemiflow(sumMatrix);
-			
-			return null;
+			return IApplication.EXIT_OK;
 		}
 
 		// for debug and control COL files are small, otherwise 1MB PNML limit (i.e.
@@ -1065,9 +1051,6 @@ public class Application implements IApplication, Ender {
 								ReachabilitySolver.checkInInitial(skel, doneProps);
 							}
 						}
-
-
-
 
 						DoneProperties skelProps = new ConcurrentHashDoneProperties();
 						reader.setSpn(skel,true);
