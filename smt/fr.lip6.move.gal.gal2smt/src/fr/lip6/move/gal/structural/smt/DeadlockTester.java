@@ -2,6 +2,7 @@ package fr.lip6.move.gal.structural.smt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -1995,7 +1996,7 @@ public class DeadlockTester {
 	 * @param smt solver access
 	 * @return number of positive flows
 	 */
-	private static int declareInvariants(Set<SparseIntArray> invar, List<Integer> marks, Script invpos,
+	private static int declareInvariants(Collection<SparseIntArray> invar, List<Integer> marks, Script invpos,
 			Script invneg, SMT smt) {
 		int posinv = 0;
 		// splitting posneg from pure positive
@@ -2123,7 +2124,7 @@ public class DeadlockTester {
 		script.add(new C_assert(invarexpr));
 	}
 		
-	public static void testOneSafeWithSMT(List<Expression> toCheck, ISparsePetriNet sr, Set<SparseIntArray> invar, DoneProperties doneProps, int timeout) {
+	public static void testOneSafeWithSMT(List<Expression> toCheck, ISparsePetriNet sr, Collection<SparseIntArray> invar, DoneProperties doneProps, int timeout) {
 		boolean isSafe = sr.isSafe();
 		
 		
