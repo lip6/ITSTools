@@ -1,20 +1,15 @@
 package fr.lip6.move.gal.application.solver.ltl;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import android.util.SparseIntArray;
 import fr.lip6.ltl.tgba.AcceptedRunFoundException;
 import fr.lip6.ltl.tgba.EmptyProductException;
 import fr.lip6.ltl.tgba.LTLException;
@@ -32,25 +27,21 @@ import fr.lip6.move.gal.application.solver.GALSolver;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.application.solver.logic.AtomicReducerSR;
+import fr.lip6.move.gal.application.solver.ltl.knowledge.KnowledgeFacts;
+import fr.lip6.move.gal.application.solver.ltl.knowledge.KnowledgeReducer;
 import fr.lip6.move.gal.gal2smt.Solver;
-import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
-import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
-import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
-import fr.lip6.move.gal.structural.WalkUtils;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
-import fr.lip6.move.gal.structural.expr.AtomicPropManager;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.Simplifier;
-import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
 public class LTLPropertySolver {
 
@@ -100,7 +91,7 @@ public class LTLPropertySolver {
 			}
 			if (! skel.getProperties().isEmpty()) {
 				
-				if (testAFDead(skel) && skel.testInDeadlock()>0) {
+				if (KnowledgeFacts.testAFDead(skel) && skel.testInDeadlock()>0) {
 					solved += ReachabilitySolver.checkInInitial(skel, doneProps);
 				}
 				skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p,skel));
@@ -108,7 +99,7 @@ public class LTLPropertySolver {
 					System.out.println("Remains "+skel.getProperties().size()+ " properties that can be checked using skeleton over-approximation.");
 					reader.setSpn(skel,true);
 					solved += ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-					if (testAFDead(skel) && skel.testInDeadlock()>0) {
+					if (KnowledgeFacts.testAFDead(skel) && skel.testInDeadlock()>0) {
 						solved +=ReachabilitySolver.checkInInitial(skel, doneProps);
 					}
 					new AtomicReducerSR().strongReductions(reader.getSPN(), doneProps, new SpotRunner(10), true);
@@ -186,7 +177,7 @@ public class LTLPropertySolver {
 		//verifyWithLTSmin (reader.getSPN(),doneProps,15);
 		
 		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-		if (testAFDead(reader.getSPN()) && reader.getSPN().testInDeadlock()>0) {
+		if (KnowledgeFacts.testAFDead(reader.getSPN()) && reader.getSPN().testInDeadlock()>0) {
 			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 		}
 		
@@ -248,22 +239,23 @@ public class LTLPropertySolver {
 					return;
 				
 			}
-			// so we couldn't find a counter example, let's reflect upon this fact.
-			TGBA tgbak = applyKnowledgeBasedReductions(spnForProp,tgba, spot, propPN);				
 			
-			SparsePetriNet spnForPropWithK;
-			if (tgbak != tgba) {
-				ReductionType rt = tgbak.isStutterInvariant() ? ReductionType.SI_LTL : ReductionType.LTL;
+			TGBA tgbak = tgba;
+			SparsePetriNet spnForPropWithK = spnForProp;
+			if (! noKnowledgetest) {
+				// so we couldn't find a counter example, let's reflect upon this fact.
+				tgbak = KnowledgeReducer.applyKnowledgeBasedReductions(spnForProp,tgba, spot, propPN);				
 
-				spnForPropWithK = reduceForProperty(spnForProp, tgbak, rt,
-						spnForProp.getProperties().isEmpty() ? propPN : spnForProp.getProperties().get(0));
-				
-				// try again on this reduced system
-				tgbak = applyKnowledgeBasedReductions(spnForPropWithK, tgbak, spot, propPN);
-			} else {
-				spnForPropWithK = spnForProp;
-			}
-			
+				if (tgbak != tgba) {
+					ReductionType rt = tgbak.isStutterInvariant() ? ReductionType.SI_LTL : ReductionType.LTL;
+
+					spnForPropWithK = reduceForProperty(spnForProp, tgbak, rt,
+							spnForProp.getProperties().isEmpty() ? propPN : spnForProp.getProperties().get(0));
+
+					// try again on this reduced system
+					tgbak = KnowledgeReducer.applyKnowledgeBasedReductions(spnForPropWithK, tgbak, spot, propPN);
+				}
+			}			
 			if (doneProps.containsKey(propPN.getName())) 
 				return;
 			
@@ -538,668 +530,5 @@ public class LTLPropertySolver {
 		return sr;
 	}
 
-	private TGBA applyKnowledgeBasedReductions(SparsePetriNet spn, TGBA tgba, SpotRunner spot, Property propPN) throws LTLException, TimeoutException {
-
-		if (noKnowledgetest) {
-			return tgba;
-		}
-		
-		// cheap knowledge 
-		List<Expression> knowledge = new ArrayList<>(); 
-		List<Expression> falseKnowledge = new ArrayList<>(); 
-		
-		addInitialStateKnowledge(knowledge, spn, tgba);
-
-		addNextStateKnowledge(knowledge, falseKnowledge, spn, tgba);
-		
-		addConvergenceKnowledge(knowledge, spn, tgba);
-		
-		System.out.println("Knowledge obtained : " + knowledge);
-		System.out.println("False Knowledge obtained : " + falseKnowledge);
-		
-		// try to reduce the tgba using this knowledge
-		if (false)
-			tgba = manuallyIntegrateKnowledge(spn, tgba, knowledge, propPN, spot);
-		else
-			tgba = spotIntegrateKnowledge(spn, tgba, knowledge, falseKnowledge, propPN, spot);
-
-		if (tgba.isEmptyLanguage() || tgba.isUniversalLanguage()) {
-			return tgba;
-		} else {
-			addInvarianceKnowledge(knowledge, falseKnowledge, spn, tgba);
-
-			System.out.println("Knowledge obtained : " + knowledge);
-			System.out.println("False Knowledge obtained : " + falseKnowledge);
-
-			tgba = spotIntegrateKnowledge(spn, tgba, knowledge, falseKnowledge, propPN, spot);						
-		}
-		
-		if (tgba.isEmptyLanguage() || tgba.isUniversalLanguage()) {
-			return tgba;
-		} else {
-			spot.computeInfStutter(tgba);
-			List<Expression> ff = computeEGknowledge(spn, tgba);
-			if (!ff.isEmpty()) {
-				falseKnowledge.addAll(ff);
-				System.out.println("Knowledge obtained : " + knowledge);
-				System.out.println("False Knowledge obtained : " + falseKnowledge);
-
-				tgba = spotIntegrateKnowledge(spn, tgba, knowledge, falseKnowledge, propPN, spot);						
-			}
-		}
-
-		return tgba;
-	}
-
-	public List<Expression> computeEGknowledge(SparsePetriNet spn, TGBA tgba) {
-		List<Expression> falseKnowledge = new ArrayList<>();
-		SparseIntArray init = new SparseIntArray(spn.getMarks());
-		List<Expression> infS = tgba.getInfStutter();
-		if (infS == null) {
-			SpotRunner sr = new SpotRunner(10);
-			sr.computeInfStutter(tgba);			
-		}
-		Expression ap = tgba.getInfStutter().get(tgba.getInitial());
-		boolean isInitiallyTrue = ap.eval(init)!=0;
-		if (isInitiallyTrue) {
-			if (ap.getOp() == Op.OR) {
-				for (int i=0;i<ap.nbChildren();i++) {
-					Expression ap2 = ap.childAt(i);
-					// make sure this term is initially true
-					if (ap2.eval(init)!=0) {
-						if (DeadlockTester.testEGap(ap2,spn, 15)) {
-							System.out.println("Proved EG "+ap2 + " asserting that LTL formula F !"+ap2+" is false.");
-							falseKnowledge.add(Expression.nop(Op.F,Expression.not(ap2)));
-						} else {
-							System.out.println("Could not prove EG "+ap2);
-						}
-					}
-				}
-			} else {
-				if (DeadlockTester.testEGap(ap,spn, 15)) {
-					System.out.println("Proved EG "+ap +" asserting that LTL formula F !"+ap+" is false.");
-					falseKnowledge.add(Expression.nop(Op.F, Expression.not(ap)));
-				} else {
-					System.out.println("Could not prove EG "+ap);
-				}
-			}
-		}
-		
-//		else {
-//				if (DeadlockTester.testEGap(Expression.not(ap.getExpression()),spn, solverPath, 15)) {
-//					System.out.println("Proved EG !"+ap.getName());
-//					falseKnowledge.add(Expression.nop(Op.G,Expression.not(Expression.apRef(ap))));
-//				} else {
-//					System.out.println("Could not prove EG !"+ap.getName());
-//				}
-//			}
-//		}
-		return falseKnowledge;
-	}
-
-	public void addInvarianceKnowledge(List<Expression> knowledge, List<Expression> falseKnowledge, SparsePetriNet spn, TGBA tgba) {
-		
-		SparsePetriNet spnred = new SparsePetriNet(spn);
-		spnred.getProperties().clear();
-		
-		
-		Set<Expression> apSet = new HashSet<>();
-		{
-			Set<Expression> seen = new HashSet<>();
-			for (int s=0,se=tgba.nbStates() ; s < se ; s++) {
-				for (TGBAEdge e : tgba.getEdges().get(s)) {
-					addCondition(e.getCondition(), seen, apSet);
-				}
-			}
-		}
-		// unify
-		List<Expression> apForm = new ArrayList<>(apSet);
-		
-		if (DEBUG >=1) {
-			System.out.println("Running invariance knowledge with AP :" + tgba.getAPs());
-		}
-		
-		// build a list of invariants to test with SMT/random
-		// for each of them test value in initial state
-		SparseIntArray istate = new SparseIntArray(spnred.getMarks());
-		{
-			
-			for (int index = 0; index < apForm.size() ; index++) {
-       				Expression cmp = apForm.get(index);
-					int val = cmp.eval(istate);
-					if (val == 0) {
-						// initially false, reverse the expression so it is initially true
-						cmp = Simplifier.pushNegation(Expression.not(cmp));
-						
-						// update
-						apForm.set(index, cmp);						
-					}
-					
-					// our new formula
-					String pname = "apf" + index;
-					// cleanup any AP refs in actual predicate
-					cmp = AtomicPropManager.rewriteWithoutAP(cmp);
-					// assert that the AP formula is invariant
-					Property p = new Property(Expression.nop(Op.AG, cmp), PropertyType.INVARIANT, pname);
-					spnred.getProperties().add(p);						
-			}
-		}
-		
-		String wd = "/tmp";
-		try {
-			File workFolder = Files.createTempDirectory("redAtoms").toFile();
-			workFolder.deleteOnExit();
-			wd = workFolder.getCanonicalPath();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		MccTranslator reader = new MccTranslator(wd, false);
-		reader.setSpn(spnred, true);
-		
-		DoneProperties todoProps = new ConcurrentHashDoneProperties();
-		try {
-			ReachabilitySolver.applyReductions(reader, todoProps , 100);
-		} catch (GlobalPropertySolvedException e) {
-			e.printStackTrace();
-		}
-		
-		int nsolved = 0;
-		for (Entry<String, Boolean> ent : todoProps.entrySet()) {
-			Boolean res = ent.getValue();
-			String pname = ent.getKey();
-			int pindex = Integer.parseInt(pname.replace("apf", ""));
-			Expression c = apForm.get(pindex);
-			if (res) {
-				// cool we've proven an invariant, we can substitute							
-				if (DEBUG >= 1) System.out.println("Successfully proved AP formula is invariant; concluding " + pname +"="+ c + " is always true.");						
-
-				knowledge.add(Expression.nop(Op.G, c));
-				nsolved ++;
-			} else {
-				// so we have proved that EF !p 
-				Expression FnotP = Expression.nop(Op.F, Expression.not(c));						
-				falseKnowledge.add(FnotP);
-			}
-		}
-		if (nsolved > 0) {
-			
-			if (DEBUG >=1) {
-				System.out.println("Finished invariance knowledge with AP :" + tgba.getAPs());
-			}
-			
-			System.out.println("Found "+nsolved+" invariant AP formulas.");
-		}		
-		
-	}
-
-	private TGBA spotIntegrateKnowledge(SparsePetriNet spn, TGBA tgba, List<Expression> knowledge, List<Expression> falseKnowledge, Property propPN,
-			SpotRunner spot) throws TimeoutException, EmptyProductException, AcceptedRunFoundException {
-		
-		long time = System.currentTimeMillis();
-		int oriAlphabetSize = tgba.getAPs().size();
-		int oriNbStates = tgba.getEdges().size();
-		int oriNbEdge = tgba.getEdges().stream().mapToInt(List::size).sum();
-		boolean wasStutter = tgba.isStutterInvariant();
-		
-		tgba = knowledgeLoop(tgba, knowledge, falseKnowledge, spot);
-				
-		System.out.println("Knowledge based reduction with " + knowledge.size() + " factoid took "
-				+ (System.currentTimeMillis() - time) + " ms. Reduced automaton from " + oriNbStates + " states, "
-				+ oriNbEdge + " edges and " + oriAlphabetSize + " AP (stutter "+ (wasStutter?"insensitive":"sensitive") +") to " + tgba.getEdges().size() + " states, "
-				+ tgba.getEdges().stream().mapToInt(List::size).sum() + " edges and " + tgba.getAPs().size() + " AP (stutter " + (tgba.isStutterInvariant()?"insensitive":"sensitive")+").");		
-
-		if (tgba.isEmptyLanguage()) {
-			throw new EmptyProductException("KNOWLEDGE");
-		} else if (tgba.isUniversalLanguage()) {
-			throw new AcceptedRunFoundException("KNOWLEDGE");
-		}
-				
-		spot.computeInfStutter(tgba);
-		spot.runLTLSimplifications(spn);
-		
-		return tgba;
-	}
-
-	public TGBA knowledgeLoop(TGBA tgba, List<Expression> knowledge, List<Expression> falseKnowledge, SpotRunner spot) {
-		
-		
-		
-		
-		if (true) {
-			// Spot 2.11+
-			TGBA tgbarelax = tgba;
-			TGBA res = null;
-			res = spot.givenThat(tgba, knowledge, SpotRunner.GivenStrategy.MINATO);
-			if (res != null) tgbarelax = res;
-			
-			if (tgbarelax.isEmptyLanguage()) {
-				System.out.println("Property proved to be true thanks to knowledge (Minato strategy)");
-				return tgbarelax;
-			} else if (tgbarelax.isUniversalLanguage()) {
-				System.out.println("Property proved to be false thanks to knowledge (Minato strategy)");
-				return tgbarelax;
-			}
-			
-			// more aggressive : AND the knowledge
-			{
-				Expression allFacts = Expression.nop(Op.AND, knowledge);
-				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.MINATO);
-				if (res != null) tgbarelax = res;
-				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER_RELAX);
-				if (res != null) tgbarelax = res;
-				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.MINATO);
-				if (res != null) tgbarelax = res;
-				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.STUTTER_RELAX);
-				if (res != null) tgbarelax = res;
-				res = spot.givenThat(tgbarelax, allFacts, SpotRunner.GivenStrategy.ALL);
-				if (res != null) tgbarelax = res;
-			}
-
-			if (tgbarelax.isEmptyLanguage()) {
-				System.out.println("Property proved to be true thanks to conjunction of knowledge (Minato strategy)");
-				return tgbarelax;
-			} else if (tgbarelax.isUniversalLanguage()) {
-				System.out.println("Property proved to be false thanks to conjunction of knowledge (Minato strategy)");
-				return tgbarelax;
-			}
-
-			
-			if (! tgba.isStutterInvariant() && tgbarelax.isStutterInvariant()) {
-				System.out.println("Knowledge sufficient to adopt a stutter insensitive property.");
-			}
-
-			
-			// test inclusion
-			// autfilt --included-in=AnotPhi.hoa Kmoins.hoa
-			{
-				Expression allFacts = Expression.nop(Op.AND, knowledge);
-				for (Expression factoid : falseKnowledge) {				
-					Expression negFact = Expression.op(Op.AND,allFacts,factoid);
-					if (spot.isIncludedIn(negFact,tgbarelax)) {
-						System.out.println("Property proved to be false thanks to negative knowledge :" + factoid);
-						return TGBA.makeTrue();				
-					}
-				}
-			}
-			return tgbarelax;
-		} else {
-		
-			// OLD STYLE : Spot 2.10.4.dev "manual" knowledge loop
-			// counter-examples ?
-			{
-				TGBA tgbarelax = tgba;
-				for (Expression factoid : knowledge) {
-					tgbarelax = spot.givenThat(tgbarelax, factoid, SpotRunner.GivenStrategy.RELAX);
-					if (tgba.isEmptyLanguage()) {
-						System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-						return tgbarelax;
-					} else if (tgba.isUniversalLanguage()) {
-						System.out.println("Property proved to be false thanks to knowledge :" + factoid);
-						return tgbarelax;
-					}
-				}
-				// test inclusion
-				// autfilt --included-in=AnotPhi.hoa Kmoins.hoa
-				for (Expression factoid : falseKnowledge) {
-					if (spot.isIncludedIn(factoid,tgbarelax)) {
-						System.out.println("Property proved to be false thanks to negative knowledge :" + factoid);
-						return TGBA.makeTrue();				
-					}
-				}
-			}
-
-
-			for (Expression factoid : knowledge) {
-				tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RESTRICT);
-				if (tgba.isEmptyLanguage()) {
-					System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-					return tgba;
-				}
-			}
-
-			if (!tgba.isStutterInvariant()) {
-				Expression allFacts = Expression.nop(Op.AND, knowledge);
-				tgba = spot.givenThat(tgba, allFacts, SpotRunner.GivenStrategy.STUTTER_RELAX);
-				if (tgba.isStutterInvariant()) {
-					System.out.println("Knowledge sufficient to adopt a stutter insensitive property.");
-				}
-			}
-
-			for (Expression factoid : knowledge) {
-				tgba = spot.givenThat(tgba, factoid, SpotRunner.GivenStrategy.RELAX);
-				if (tgba.isEmptyLanguage()) {
-					System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-					return tgba;
-				} else if (tgba.isUniversalLanguage()) {
-					System.out.println("Property proved to be false thanks to knowledge :" + factoid);
-					return tgba;
-				}
-			}
-		}
-		return tgba;
-	}
-
-	public TGBA manuallyIntegrateKnowledge(SparsePetriNet spn, TGBA tgba, List<Expression> knowledge, Property propPN,
-			SpotRunner spot) throws AcceptedRunFoundException, EmptyProductException, TimeoutException {
-		boolean needRebuild = true;
-		boolean wasAdopted = false;
-		for (Expression factoid : knowledge) {
-			String ltl = SpotRunner.printLTLProperty(factoid);
-
-			try {
-				// need to complement tgba				
-
-				File comp = Files.createTempFile("comp", ".hoa").toFile();
-				if (needRebuild) {
-					if (! spot.buildComplement(tgba, comp)) {
-						// failure of Spot ?
-						continue;
-					}				
-				}
-				// test inclusion : Knowledge dominates the formula
-				// i.e. A is a subset of K
-				// therefore !K*A = 0
-				//				if (sr.isProductEmpty(comp,"!(" +ltl + ")")) {
-				//					// property is true, negation is empty
-				//					System.out.println("Property (complement) proved to be true thanks to knowledge :" + factoid);
-				//					return TGBA.makeFalse(); 
-				//				}
-
-				// test disjoint : A * K is empty
-				// therefore, A does not cover K => does not cover S
-				// we have empty product with !A.
-				if (spot.isProductEmpty(comp,ltl)) {
-					System.out.println("Property (complement) proved to be false thanks to knowledge :" + factoid);
-					throw new AcceptedRunFoundException("KNOWLEDGE");
-					//return TGBA.makeTrue();
-				}
-			} catch (IOException e) {
-				// skip
-				System.out.println("IOexception raised when running Spot : " + e);
-			}
-
-			TGBA prod = spot.computeProduct(tgba, ltl);
-			if (prod.getEdges().get(prod.getInitial()).size() == 0) {
-				// this is just false !
-				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-				throw new EmptyProductException("KNOWLEDGE");
-//				return TGBA.makeFalse();
-			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
-				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
-				tgba = prod;
-				propPN.setBody(Expression.op(Op.OR, propPN.getBody(), Expression.not(Expression.resolveAP(factoid))));
-				needRebuild = true;
-				wasAdopted = true;
-			} else if (prod.getAPs().size() < tgba.getAPs().size()) {
-				System.out.println("Adopting property with smaller alphabet thanks to knowledge :" + factoid);
-				tgba = prod;
-				propPN.setBody(Expression.op(Op.OR, propPN.getBody(), Expression.not(Expression.resolveAP(factoid))));
-				needRebuild = true;
-				wasAdopted = true;
-			}			
-		}						
-
-		if (wasAdopted) {
-			spot.computeInfStutter(tgba);
-			spot.runLTLSimplifications(spn);
-		}
-		return tgba;
-	}
-
-	public void addNextStateKnowledge(List<Expression> knowledge, List<Expression> falseKnowledge, SparsePetriNet spn, TGBA tgba) {
-		Set<Expression> condX = new HashSet<>();
-		Set<Expression> condXX = new HashSet<>();
-		{
-			Set<Expression> seen = new HashSet<>();
-			Set<Expression> seenX = new HashSet<>();
-			// check if there are true arc from initial state
-			for (TGBAEdge edge : tgba.getEdges().get(tgba.getInitial())) {
-				// not a self loop, that is F as front operator
-				if (edge.getDest() != tgba.getInitial() || edge.getCondition().getOp() != Op.BOOLCONST) {
-					int dest = edge.getDest();
-					for (TGBAEdge edgeX : tgba.getEdges().get(dest)) {
-						Expression condition = edgeX.getCondition();
-						addCondition(condition, seen, condX); 
-						for (TGBAEdge edgeXX : tgba.getEdges().get(edgeX.getDest())) {
-							Expression conditionX = edgeXX.getCondition();
-							addCondition(conditionX, seenX, condXX);
-						}
-						
-					}
-				}
-			}
-		}
-		if (condX.isEmpty() && condXX.isEmpty())
-			return;
-		List<Expression> condXlist=new ArrayList<>(condX);
-		int lastCondX = condXlist.size();
-		condXlist.addAll(condXX);
-		boolean [] alltrue = new boolean[condXlist.size()];
-		boolean [] allfalse = new boolean[condXlist.size()];
-		Arrays.fill(alltrue,true);
-		Arrays.fill(allfalse,true);
-		boolean doXX = true;
-		
-		// run a 1 step test
-		WalkUtils wu = new WalkUtils(spn);
-		SparseIntArray init = wu.getInitial();
-		int[] enabled = wu.getInitialEnabling().clone();
-		
-		// we are starting from a deadlock ?
-		if (enabled[0]==0) {
-			for (int ei = 0; ei < condXlist.size() ; ei++) {
-				if (!allfalse[ei] && !alltrue[ei]) {
-					continue;
-				}
-				Expression cond=condXlist.get(ei);
-				int res = cond.eval(init);
-				if (res==0) {
-					alltrue[ei]=false;
-				} else {
-					allfalse[ei]=false;
-				}
-			}			
-		}
-		
-		for (int i=0 ; i < enabled[0] ; i++) {
-			int ti = enabled[i+1];
-			SparseIntArray dest = wu.fire(ti, init);
-			for (int ei = 0; ei < lastCondX ; ei++) {
-				if (!allfalse[ei] && !alltrue[ei]) {
-					continue;
-				}
-				Expression cond=condXlist.get(ei);
-				int res = cond.eval(dest);
-				if (res==0) {
-					alltrue[ei]=false;
-				} else {
-					allfalse[ei]=false;
-				}
-			}
-			if (! condXX.isEmpty() && enabled[0] < 2000) {
-				int [] enableX = Arrays.copyOf(enabled, enabled.length);
-				wu.updateEnabled(dest, enableX, ti);
-				if (enableX[0] > 0) {
-					for (int ii=0 ; ii < enableX[0] ; ii++) {
-						int tti = enableX[ii+1];
-						SparseIntArray destX = wu.fire(tti, dest);
-						for (int ei = lastCondX; ei < condXlist.size() ; ei++) {
-							if (!allfalse[ei] && !alltrue[ei]) {
-								continue;
-							}
-							Expression cond=condXlist.get(ei);
-							int res = cond.eval(destX);
-							if (res==0) {
-								alltrue[ei]=false;
-							} else {
-								allfalse[ei]=false;
-							}
-						}
-					}
-				} else {
-					// successor state is a deadlock
-					for (int ei = lastCondX; ei < condXlist.size() ; ei++) {
-						if (!allfalse[ei] && !alltrue[ei]) {
-							continue;
-						}
-						Expression cond=condXlist.get(ei);
-						int res = cond.eval(dest);
-						if (res==0) {
-							alltrue[ei]=false;
-						} else {
-							allfalse[ei]=false;
-						}
-					}					
-				}
-			} else {
-				doXX=false;
-			}
-		}
-		
-		// interpret results as LTL assertions (knowledge)
-		for (int ei = 0; ei < lastCondX ; ei++) {
-			if (alltrue[ei]) {
-				knowledge.add(Expression.nop(Op.X,condXlist.get(ei)));
-			} else if (allfalse[ei]) {
-				knowledge.add(Expression.nop(Op.X,Expression.not(condXlist.get(ei))));				
-			} else {
-				falseKnowledge.add(Expression.nop(Op.X,condXlist.get(ei)));
-				falseKnowledge.add(Expression.nop(Op.X,Expression.not(condXlist.get(ei))));
-			}
-		}
-		if (doXX) {
-			for (int ei = lastCondX; ei < condXlist.size() ; ei++) {
-				if (alltrue[ei]) {
-					knowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,condXlist.get(ei))));
-				} else if (allfalse[ei]) {
-					knowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,Expression.not(condXlist.get(ei)))));				
-				} else {
-					falseKnowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,condXlist.get(ei))));
-					falseKnowledge.add(Expression.nop(Op.X,Expression.nop(Op.X,Expression.not(condXlist.get(ei)))));
-				}
-			}
-		}
-	}
-
-	public void addCondition(Expression condition, Set<Expression> seen, Set<Expression> condX) {
-		if (condition.getOp() != Op.BOOLCONST) {
-			if (seen.add(condition) && seen.add(Expression.not(condition))) {
-				// grab formulas labeling edges out of this node
-				condX.add(condition);
-			}
-			// now also extract pure AP
-			Set<Expression> aps = new HashSet<>();
-			extractAP(condition,aps);
-			for (Expression ap : aps) {
-				if (seen.add(ap) && seen.add(Expression.not(ap))) {
-					condX.add(ap);
-				}
-			}
-		}
-	}
-	
-	private void extractAP(Expression condition, Set<Expression> aps) {
-		if (condition == null) {
-			return;
-		} else if (condition.getOp() == Op.APREF) {
-			aps.add(condition);
-		} else {
-			for (int i=0, ie = condition.nbChildren() ; i < ie ; i++) {
-				extractAP(condition.childAt(i), aps);
-			}
-		}
-	}
-
-
-	public void addInitialStateKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
-		SparseIntArray init = new SparseIntArray(spn.getMarks());
-		List<Expression> kis = new ArrayList<>();
-		for (AtomicProp ap : tgba.getAPs()) {
-			if (ap.getExpression().eval(init) == 1) {
-				kis.add(Expression.apRef(ap));
-			} else {
-				kis.add(Expression.not(Expression.apRef(ap)));
-			}
-		}
-		knowledge.add(Expression.nop(Op.AND,kis));
-	}
-
-	public void addConvergenceKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
-		// we are SCC free hence structurally we will meet a deadlock in all traces
-		// hence we must be accepted in one of these states, and they are by definition stuttering
-		boolean allPathsAreDead = testAFDead (spn);
-
-		if (allPathsAreDead) {
-			System.out.println("Detected that all paths lead to deadlock. Applying this knowledge to assert that all AP eventually converge : F ( (Ga|G!a) & (Gb|G!b)...)");
-
-			boolean [] results = DeadlockTester.testAPInDeadlocksWithSMT(spn, tgba.getAPs());						
-
-			// build expressions :  G p | G !p 
-			// for each ap "p", but remove bad values eliminated through SMT
-			for (int i=0,ie=tgba.getAPs().size() ; i < ie ; i++) {
-				boolean posExist = results[2*i];
-				boolean negExist = results[2*i+1];
-				knowledge.add(
-						Expression.op(Op.F, 
-								Expression.op(Op.OR, 
-										posExist ? Expression.op(Op.G, Expression.apRef(tgba.getAPs().get(i)), null): Expression.constant(false), 
-												negExist ? Expression.op(Op.G, Expression.not(Expression.apRef(tgba.getAPs().get(i))),null): Expression.constant(false)),null));
-				if (!posExist && ! negExist) {
-					System.out.println("Strange error detected, AP can be neither true nor false in deadlock.");
-				}
-			}
-		} else {
-			// recompute stable though testAFDead did it, but it's basically a graph traversal no big deal
-			Set<Integer> stablePlaces = new HashSet<>();
-			Set<Integer> stableTrans = new HashSet<>();
-			StructuralReduction.computeStabilizing(spn, stablePlaces,stableTrans);
-			if (!stablePlaces.isEmpty()) {
-				int nbstable=0;
-				for (int apid=0,ie=tgba.getAPs().size() ; apid < ie ; apid++) {
-					AtomicProp ap = tgba.getAPs().get(apid);
-					BitSet supp = new BitSet(); 
-					SparsePetriNet.addSupport(ap.getExpression(), supp);
-					
-					boolean covered = true;
-					for (int i = supp.nextSetBit(0); i >= 0; i = supp.nextSetBit(i+1)) {
-						// operate on index i here
-						if (!stablePlaces.contains(i)) {
-							covered=false;
-							break;
-						}
-						if (i == Integer.MAX_VALUE) {
-							break; // or (i+1) would overflow
-						}
-					}
-					if (covered) {
-						nbstable++;
-						knowledge.add(
-								Expression.op(Op.F, 
-										Expression.op(Op.OR, 
-												Expression.op(Op.G, Expression.apRef(tgba.getAPs().get(apid)), null), 
-												Expression.op(Op.G, Expression.not(Expression.apRef(tgba.getAPs().get(apid))),null)),null));						
-					}
-				}
-				if (nbstable >0) {
-					System.out.println("Detected a total of "+stablePlaces.size()+"/"+ spn.getPlaceCount()+ " stabilizing places and "+stableTrans.size()+"/"+ spn.getTransitionCount()+ " transitions leading to convergence knowledge of the form 'F(Gp|G!p)' for "+nbstable+"/"+ tgba.getAPs().size()+" atomic propositions.");
-				}
-			}
-		}
-	}
-
-	private boolean testAFDead(ISparsePetriNet spn) {
-		try {
-			if (spn.getFlowPT().getColumns().stream().allMatch(c -> c.size() > 0)) {
-				StructuralReduction.findSCCSuffixes(spn, ReductionType.DEADLOCK, new BitSet());
-			}
-		} catch (DeadlockFound e) {
-			// AF dead is true
-			System.out.println("Detected that all paths lead to deadlock. Applying this knowledge to assert that all AP eventually converge (and all enablings converge to false).");
-
-			return true;
-		}
-		return false;
-	}
 
 }
