@@ -194,8 +194,10 @@ public class KnowledgeFacts {
 				knowledge.add(Expression.nop(Op.G, c));
 				nsolved ++;
 			} else {
+				if (DEBUG >= 1) System.out.println("Successfully disproved AP formula is invariant; concluding " + pname +"="+ c + " while initially true, can become false.");
 				// so we have proved that EF !p 
-				Expression FnotP = Expression.nop(Op.F, Expression.not(c));						
+				// Therefore in LTL, G p is false
+				Expression FnotP = Expression.nop(Op.G, c);						
 				falseKnowledge.add(FnotP);
 			}
 		}
