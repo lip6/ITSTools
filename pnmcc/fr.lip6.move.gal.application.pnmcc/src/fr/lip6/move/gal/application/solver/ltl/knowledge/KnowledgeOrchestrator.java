@@ -45,8 +45,9 @@ public class KnowledgeOrchestrator {
 			KnowledgeFacts.addInvarianceKnowledge(knowledge, falseKnowledge, spn, tgba);
 
 			// Second integration
+			propPN = new Property(tgba.getApm().collectAndRewriteUsingAtoms(spn.getProperties().get(0).getBody()), propPNori.getType(), propPNori.getName());
 			tgba = KnowledgeReducer.integrateKnowledge(spn, tgba, knowledge, falseKnowledge, propPN, spot);
-
+			
 			// Step 3 : more expensive quest for negative knowledge on forced alternance of AP
 			List<Expression> ff = KnowledgeFacts.computeEGknowledge(spn, tgba);
 			if (!ff.isEmpty()) {
