@@ -144,6 +144,10 @@ public class SMTUtils {
 	}
 
 	public static ISolver initSolver(org.smtlib.SMT smt, String logic, int timeoutQ, int timeoutT) {
+		return initSolver(smt, logic, timeoutQ, timeoutT, false);
+	}
+	
+	public static ISolver initSolver(org.smtlib.SMT smt, String logic, int timeoutQ, int timeoutT, boolean verbose) {
 		smt.smtConfig.executable = "";
 
 		try {
@@ -185,7 +189,10 @@ public class SMTUtils {
 		if (err.isError()) {
 			throw new RuntimeException("Could not set logic" + err);
 		}
-		System.out.println("Starting Z3 with timeout " + smt.smtConfig.timeoutTotal + " s and query timeout " + smt.smtConfig.timeout + " ms");
+		
+		if (verbose || DEBUG >= 1) {
+			System.out.println("Starting Z3 with timeout " + smt.smtConfig.timeoutTotal + " s and query timeout " + smt.smtConfig.timeout + " ms");
+		}
 		return solver;
 	}
 
