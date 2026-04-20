@@ -35,7 +35,7 @@ public class AtomicPropManager {
 		
 		for (Property prop : props) {
 			if (prop.getType() == PropertyType.LTL || prop.getType() == PropertyType.CTL || prop.getType() == PropertyType.INVARIANT) {
-				Expression e = collectAndRewriteUsingAtoms(prop.getBody(), uniqueMap);
+				Expression e = collectAndRewriteUsingAtoms(prop.getBody());
 				propsWithAp.put(prop.getName(), e);
 			}
 		}		
@@ -87,7 +87,7 @@ public class AtomicPropManager {
 		return baos.toString();
 	}
 	
-	public Expression collectAndRewriteUsingAtoms (Expression expr, Map<String, AtomicProp> uniqueMap) {
+	public Expression collectAndRewriteUsingAtoms (Expression expr) {
 		if (expr == null) {
 			return expr;
 		} else if (expr.getOp() == Op.BOOLCONST) {
@@ -95,7 +95,7 @@ public class AtomicPropManager {
 		} else if (expr.getOp() == Op.NOT) {
 			// helps to recognize that !AP is the negation of AP
 			// Can reduce number of AP as well as help simplifications
-			Expression nc = collectAndRewriteUsingAtoms(expr.childAt(0),uniqueMap);
+			Expression nc = collectAndRewriteUsingAtoms(expr.childAt(0));
 			if (nc != expr.childAt(0)) {
 				return Expression.not(nc);
 			} else {
@@ -139,7 +139,7 @@ public class AtomicPropManager {
 				// rewrite "others"
 				List<Expression> resc = new ArrayList<>(others.size()+1);
 				for (Expression child:others) {
-					resc.add(collectAndRewriteUsingAtoms(child, uniqueMap));					
+					resc.add(collectAndRewriteUsingAtoms(child));					
 				}
 				// rewrite expression
 				resc.add(Expression.apRef(ap));
@@ -151,7 +151,7 @@ public class AtomicPropManager {
 		}
 		
 		if (expr.getOp() == Op.APREF) {
-			return collectAndRewriteUsingAtoms(((AtomicPropRef) expr).getAp().getExpression(), uniqueMap);
+			return collectAndRewriteUsingAtoms(((AtomicPropRef) expr).getAp().getExpression());
 		}
 		
 		// recursive case
@@ -159,7 +159,7 @@ public class AtomicPropManager {
 		boolean changed = false;
 		for (int ci=0,cie=expr.nbChildren() ; ci < cie ;  ci++) {
 			Expression child = expr.childAt(ci);
-			Expression nc = collectAndRewriteUsingAtoms(child, uniqueMap);
+			Expression nc = collectAndRewriteUsingAtoms(child);
 			if (nc != child) {
 				changed = true;
 			}

@@ -1265,6 +1265,10 @@ public class SpotRunner {
 		return false;
 	}
 	
+	public boolean isSatisfiable(Expression formula) throws IOException {
+		return isSatisfiable(printLTLProperty(formula));
+	}
+	
 	public boolean isSatisfiable(String formula) throws IOException {
 		List<File> todel = new ArrayList<>();
 		CommandLine cl = new CommandLine();

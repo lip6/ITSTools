@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -28,7 +27,7 @@ import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.application.solver.logic.AtomicReducerSR;
 import fr.lip6.move.gal.application.solver.ltl.knowledge.KnowledgeFacts;
-import fr.lip6.move.gal.application.solver.ltl.knowledge.KnowledgeReducer;
+import fr.lip6.move.gal.application.solver.ltl.knowledge.KnowledgeOrchestrator;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.FlowPrinter;
@@ -211,8 +210,7 @@ public class LTLPropertySolver {
 
 			// annotate it with Infinite Stutter Accepted Formulas
 			spot.computeInfStutter(tgba);
-
-			
+						
 			checkLTLProperty(spnForProp.getProperties().get(0), tgba, spnForProp, reader, doneProps, spot, time);
 		}
 	}
@@ -244,8 +242,12 @@ public class LTLPropertySolver {
 			SparsePetriNet spnForPropWithK = spnForProp;
 			if (! noKnowledgetest) {
 				// so we couldn't find a counter example, let's reflect upon this fact.
-				tgbak = KnowledgeReducer.applyKnowledgeBasedReductions(spnForProp,tgba, spot, propPN);				
+				tgbak = KnowledgeOrchestrator.applyKnowledgeBasedReductions(spnForProp,tgba, spot, propPN);
 
+				if (doneProps.containsKey(propPN.getName())) 
+					return;
+				
+				// did not conclude, but maybe got a smaller automaton (less observed AP, Stutter insensitive)
 				if (tgbak != tgba) {
 					ReductionType rt = tgbak.isStutterInvariant() ? ReductionType.SI_LTL : ReductionType.LTL;
 
@@ -253,9 +255,10 @@ public class LTLPropertySolver {
 							spnForProp.getProperties().isEmpty() ? propPN : spnForProp.getProperties().get(0));
 
 					// try again on this reduced system
-					tgbak = KnowledgeReducer.applyKnowledgeBasedReductions(spnForPropWithK, tgbak, spot, propPN);
+					tgbak = KnowledgeOrchestrator.applyKnowledgeBasedReductions(spnForPropWithK,tgbak, spot, spnForPropWithK.getProperties().isEmpty() ? propPN : spnForPropWithK.getProperties().get(0));
 				}
-			}			
+			}
+			
 			if (doneProps.containsKey(propPN.getName())) 
 				return;
 			
