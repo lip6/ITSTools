@@ -46,6 +46,8 @@ import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.IntMatrixCol;
+import fr.lip6.move.petrispot.runner.PetriSpotRunner;
+import fr.lip6.move.petrispot.runner.PetriSpotRunner.InvariantMode;
 
 import static fr.lip6.move.gal.structural.smt.SMTUtils.* ;
 
@@ -61,7 +63,7 @@ public class DeadlockTester {
 		
 		IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(sr, representative);
 
-		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix);		
+		IntMatrixCol invar = PetriSpotRunner.computeInvariants(sumMatrix, InvariantMode.PFLOWS);		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Set<SparseIntArray> invarT = null; //computeTinvariants(sr, sumMatrix, tnames);
 		
@@ -359,7 +361,8 @@ public class DeadlockTester {
 		
 		IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(sr, representative);
 
-		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix);		
+		IntMatrixCol invar = PetriSpotRunner.computeInvariants(sumMatrix, InvariantMode.PFLOWS);		
+		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Set<SparseIntArray> invarT = null ; // computeTinvariants(sr, sumMatrix, tnames);
 		
@@ -460,7 +463,7 @@ public class DeadlockTester {
 	public static List<SparseIntArray> escalateRealToInt(ISparsePetriNet sr, List<Script> properties,
 			List<Script> propertiesWithSE, int timeout, boolean withWitness, List<Integer> representative,
 			List<SparseIntArray> pors, IntMatrixCol sumMatrix) {
-		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix);		
+		IntMatrixCol invar = PetriSpotRunner.computeInvariants(sumMatrix,InvariantMode.PSEMIFLOWS);		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Set<SparseIntArray> invarT = null ; //computeTinvariants(sr, sumMatrix, tnames);
 		timeout *= 5;
@@ -583,7 +586,8 @@ public class DeadlockTester {
 			cantStutter.add(new C_check_sat());
 			// ok let's go
 			try {
-				Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix);
+				IntMatrixCol invar = PetriSpotRunner.computeInvariants(sumMatrix, InvariantMode.PFLOWS);		
+
 				ReadFeedCache rfc = new ReadFeedCache();
 				String reply = verifyPossible(sr, cantStutter, sumMatrix, invar, null, true, null, null,
 						representative, rfc, 3000, timeout, null);
@@ -607,7 +611,7 @@ public class DeadlockTester {
 	}
 	
 	private static List<String> verifyPossible(ISparsePetriNet sr, List<Script> properties, List<Script> propertiesWithSE,
-			boolean isSafe, IntMatrixCol sumMatrix, Set<SparseIntArray> invar,
+			boolean isSafe, IntMatrixCol sumMatrix, IntMatrixCol invar,
 			Set<SparseIntArray> invarT, boolean solveWithReals, List<SparseIntArray> parikhs, List<SparseIntArray> pors,
 			List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax, boolean[] done, boolean withWitness) {
 		long time = System.currentTimeMillis();		
@@ -809,14 +813,14 @@ public class DeadlockTester {
 	}
 	
 	private static String areDeadlocksPossible(ISparsePetriNet sr, IntMatrixCol sumMatrix, 
-			Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, SparseIntArray por, List<Integer> representative) {
+			IntMatrixCol invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, SparseIntArray por, List<Integer> representative) {
 		Script scriptAssertDead = assertNetIsDead(sr);
 		return verifyPossible(sr, scriptAssertDead, sumMatrix, invar, invarT, solveWithReals, parikh, por, representative, new ReadFeedCache(), 3000, 300, null);
 	}
 		
 	static final Configuration smtConf = new SMT().smtConfig;
 	private static String verifyPossible(ISparsePetriNet sr, Script tocheck, IntMatrixCol sumMatrix,
-			Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, SparseIntArray por, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
+			IntMatrixCol invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, SparseIntArray por, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
 		long time;		
 		lastState = null;
 		lastParikh = null;
@@ -1222,7 +1226,23 @@ public class DeadlockTester {
 	}
 
 	
+	private static Object lock = new Object();
+	private record Args(int nbCol, int nbRow, int nnzPT, int nnzTP) {
+		Args(StructuralReduction sr) {
+			this(sr.getTransitionCount(), sr.getPlaceCount(), sr.getFlowPT().nnz(), sr.getFlowTP().nnz());
+		}
+	};
+	private static Args lastArgs = new Args(0,0,0,0);
+	
 	public static List<Integer> testDeadTransitionWithSMT(StructuralReduction sr, int timeout) {
+		synchronized (lock) {
+			// avoid unsuccessful repeated calls.
+			Args current = new Args(sr);
+			if (current.equals(lastArgs)) {
+				System.out.println("Skipped dead transition search.");
+				return Collections.emptyList();
+			}
+		}
 		List<Property> props = new ArrayList<>();
 		SparseIntArray initial = new SparseIntArray(sr.getMarks());
 		for (int tid=0; tid < sr.getTransitionCount() ; tid++) {
@@ -1256,6 +1276,11 @@ public class DeadlockTester {
 			}
 		}
 		System.out.println("Search for dead transitions found "+deadTrans.size()+ " dead transitions in " + (System.currentTimeMillis()-time) + "ms");
+		if (deadTrans.size() == 0) {
+			synchronized (lock) {
+				lastArgs = new Args(sr);
+			}
+		}
 		return deadTrans;
 	}
 	
@@ -1270,7 +1295,8 @@ public class DeadlockTester {
 
 		try {
 			IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(sr, repr);
-			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix);		
+			IntMatrixCol invar = PetriSpotRunner.computeInvariants(sumMatrix, InvariantMode.PFLOWS);		
+		
 
 			// using reals currently
 			boolean solveWithReals = true;
@@ -1505,7 +1531,8 @@ public class DeadlockTester {
 		ISolver solver = null;
 		try {
 			IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(sr, repr);
-			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix);		
+			IntMatrixCol invar = PetriSpotRunner.computeInvariants(sumMatrix, InvariantMode.PFLOWS);		
+		
 			org.smtlib.SMT smt = new SMT();
 
 			// using reals currently
@@ -1961,7 +1988,7 @@ public class DeadlockTester {
 	 * @param solveWithReals 
 	 * @return "unsat" is what we hope for, could also return "sat" and maybe "unknown". 
 	 */
-	private static String assertInvariants(Set<SparseIntArray> invar, ISparsePetriNet sr, ISolver solver,
+	private static String assertInvariants(IntMatrixCol invar, ISparsePetriNet sr, ISolver solver,
 			org.smtlib.SMT smt, boolean verbose, boolean solveWithReals) {
 
 		long time = System.currentTimeMillis();
@@ -1981,7 +2008,7 @@ public class DeadlockTester {
 			time = System.currentTimeMillis();
 			execAndCheckResult(invneg, solver);
 			textReply = checkSat(solver,  true);
-			if (verbose)  Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+poscount+" positive and " + (invar.size() - poscount) +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+			if (verbose)  Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+poscount+" positive and " + (invar.getColumnCount() - poscount) +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 		return textReply;
 	}
@@ -1996,12 +2023,12 @@ public class DeadlockTester {
 	 * @param smt solver access
 	 * @return number of positive flows
 	 */
-	private static int declareInvariants(Collection<SparseIntArray> invar, List<Integer> marks, Script invpos,
+	private static int declareInvariants(IntMatrixCol invar, List<Integer> marks, Script invpos,
 			Script invneg, SMT smt) {
 		int posinv = 0;
 		// splitting posneg from pure positive
 		IFactory efactory = smt.smtConfig.exprFactory;
-		for (SparseIntArray invariant : invar) {
+		for (SparseIntArray invariant : invar.getColumns()) {
 			boolean hasNeg = false;
 			for (int i=0; i < invariant.size() ; i++) {
 				if (invariant.valueAt(i) < 0) {
@@ -2124,7 +2151,7 @@ public class DeadlockTester {
 		script.add(new C_assert(invarexpr));
 	}
 		
-	public static void testOneSafeWithSMT(List<Expression> toCheck, ISparsePetriNet sr, Collection<SparseIntArray> invar, DoneProperties doneProps, int timeout) {
+	public static void testOneSafeWithSMT(List<Expression> toCheck, ISparsePetriNet sr, IntMatrixCol invar, DoneProperties doneProps, int timeout) {
 		boolean isSafe = sr.isSafe();
 		
 		
@@ -2178,7 +2205,7 @@ public class DeadlockTester {
 		}
 		
 		d= clearDone(toCheck, doneProps , ef, solver);
-		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+poscount+" positive and " + (invar.size() - poscount) +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms proved " + d + " places are One-Safe.");
+		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+poscount+" positive and " + (invar.getColumnCount() - poscount) +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms proved " + d + " places are One-Safe.");
 		
 		if (toCheck.isEmpty()) {
 			solver.exit();
@@ -2231,7 +2258,7 @@ public class DeadlockTester {
 		
 		IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(sr, representative);
 
-		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix);		
+		IntMatrixCol invar = PetriSpotRunner.computeInvariants(sumMatrix, InvariantMode.PFLOWS);		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Set<SparseIntArray> invarT = null; //computeTinvariants(sr, sumMatrix, tnames);
 		
