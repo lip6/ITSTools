@@ -150,7 +150,8 @@ public class LTLPropertySolver {
 			System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 			sr.setProtected(support);
 			try {
-				ReachabilitySolver.applyReductions(sr, ReductionType.LTL, true, true);				
+				ReachabilitySolver.applyReductions(sr, ReductionType.LTL, true, true);
+				ReachabilitySolver.applyReductions(sr, ReductionType.LTL, true, true);
 				reader.getSPN().readFrom(sr);
 				reader.getSPN().removeConstantPlaces();
 			} catch (GlobalPropertySolvedException gse) {
@@ -207,7 +208,9 @@ public class LTLPropertySolver {
 
 			ReductionType rt = tgba.isStutterInvariant() ? ReductionType.SI_LTL : ReductionType.LTL;
 			SparsePetriNet spnForProp = reduceForProperty(reader.getSPN(), tgba, rt,propPN);
-
+			
+			// recompute on reduced system.
+			tgba = spot.transformToTGBA(spnForProp.getProperties().get(0));
 			// annotate it with Infinite Stutter Accepted Formulas
 			spot.computeInfStutter(tgba);
 						
