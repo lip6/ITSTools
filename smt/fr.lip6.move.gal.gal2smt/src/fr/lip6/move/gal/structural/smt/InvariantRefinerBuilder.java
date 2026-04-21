@@ -2,7 +2,6 @@ package fr.lip6.move.gal.structural.smt;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.smtlib.IExpr;
 import org.smtlib.SMT;
@@ -10,8 +9,8 @@ import org.smtlib.IExpr.IFactory;
 import org.smtlib.command.C_assert;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.util.IntMatrixCol;
+import fr.lip6.move.petrispot.runner.PetriSpotRunner;
 
 public class InvariantRefinerBuilder {
 
@@ -22,12 +21,12 @@ public class InvariantRefinerBuilder {
 	 * @return a list of refiners, possibly empty
 	 */
 	public static List<IRefiner> buildInvariantRefiners(IntMatrixCol effects, List<Integer> marks) {
-		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(effects);
+		IntMatrixCol invar = PetriSpotRunner.computeInvariants(effects, PetriSpotRunner.InvariantMode.PFLOWS);
 		// splitting posneg from pure positive
 		IFactory efactory = SMT.instance.smtConfig.exprFactory;
 		StaticRefiner invpos = new StaticRefiner("Positive P Invariants (semi-flows)");
 		StaticRefiner invneg = new StaticRefiner("Generalized P Invariants (flows)");
-		for (SparseIntArray invariant : invar) {
+		for (SparseIntArray invariant : invar.getColumns()) {
 			boolean hasNeg = false;
 			for (int i=0; i < invariant.size() ; i++) {
 				if (invariant.valueAt(i) < 0) {
