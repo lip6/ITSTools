@@ -351,4 +351,12 @@ public class IntMatrixCol {
 		return max;
 	}
 	
+	public int nnz () {
+		int nnz = 0;
+		for (var col : getColumns()) {
+			nnz += col.size();
+		}
+		return nnz;
+	}
+	
 }
