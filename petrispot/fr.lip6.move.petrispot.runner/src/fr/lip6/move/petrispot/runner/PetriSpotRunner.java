@@ -28,8 +28,6 @@ import fr.lip6.petrispot.binaries.BinaryToolsPlugin;
  */
 public class PetriSpotRunner {
 
-	private static final Logger log = Logger.getLogger("fr.lip6.move.gal");
-
 	/** Set to 1 to keep intermediate files for inspection; 2 for extra verbose output. */
 	private static final int DEBUG = 0;
 
@@ -58,13 +56,18 @@ public class PetriSpotRunner {
 	 * @param timeout timeout in seconds for the external binary
 	 * @return the result matrix (columns = invariants/flows), or {@code null} on failure
 	 */
-	public static IntMatrixCol computeInvariants(SparsePetriNet spn, InvariantMode mode, long timeout) {
+	public static IntMatrixCol computeInvariants(IntMatrixCol incidence, InvariantMode mode, long timeout) {
+		if (mode == InvariantMode.PFLOWS) {
+			IntMatrixCol cached = checkCache(incidence);
+			if (cached != null) {
+				return cached;
+			}
+		}
 		List<File> todel = new ArrayList<>();
 		// Default: empty matrix — safe for all callers (means "no invariants found")
 		IntMatrixCol result = new IntMatrixCol(0, 0);
 		try {
-			// Step 1 – build incidence matrix: effect = post - pre = -1*flowPT + 1*flowTP
-			IntMatrixCol incidence = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
+			
 
 			// Step 2 – write incidence matrix to a temp KERS file
 			File inputKers  = Files.createTempFile("petrispot-input-",  ".kers").toFile();
@@ -113,6 +116,7 @@ public class PetriSpotRunner {
 				for (File f : todel)
 					f.delete();
 		}
+		cache(incidence, result);
 		return result;
 	}
 
@@ -122,9 +126,40 @@ public class PetriSpotRunner {
 	public static IntMatrixCol computeInvariants(SparsePetriNet spn, InvariantMode mode) {
 		return computeInvariants(spn, mode, DEFAULT_TIMEOUT_S);
 	}
+	
+	public static IntMatrixCol computeInvariants(SparsePetriNet spn, InvariantMode mode, long timeout) {
+		// Step 1 – build incidence matrix: effect = post - pre = -1*flowPT + 1*flowTP
+		IntMatrixCol incidence = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
+		return computeInvariants(incidence, mode, timeout);
+	}
 
 	// ---- private helpers ----
 
+	public static IntMatrixCol computeInvariants(IntMatrixCol incidence, InvariantMode mode) {
+		return computeInvariants(incidence, mode, DEFAULT_TIMEOUT_S);
+	}
+
+	private static final Object lock = new Object();
+	private static IntMatrixCol last = null;
+	private static IntMatrixCol lastInv = null;
+	private static void cache(IntMatrixCol pn, IntMatrixCol inv) {
+		synchronized (lock) {
+			last = new IntMatrixCol(pn);
+			lastInv = new IntMatrixCol(inv);
+		}
+	}
+
+	private static IntMatrixCol checkCache(IntMatrixCol pn) {
+		synchronized (lock) {
+			if (pn.equals(last)) {
+				Logger.getLogger("fr.lip6.move.gal").info("Invariant cache hit.");
+				return lastInv;
+			} else {
+				return null;
+			}
+		}
+	}
+	
 	/**
 	 * Returns the PetriSpot command-line flag for the requested computation mode.
 	 * TODO: replace placeholders with actual flags once confirmed.
