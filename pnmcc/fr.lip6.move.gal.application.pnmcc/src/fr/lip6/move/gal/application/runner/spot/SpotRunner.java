@@ -1071,8 +1071,6 @@ public class SpotRunner {
 
 				if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
 				File stdOutput = Files.createTempFile("stateBased", ".hoa").toFile();
-				if (DEBUG==0)
-					stdOutput.deleteOnExit();
 				int status = Runner.runTool(timeout, cl, stdOutput, true);
 				if (status == 0 || status == 1) {
 					if (DEBUG >= 1) System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());

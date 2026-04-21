@@ -64,6 +64,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 
 			@Override
 			public void run() {
+				List<File> todel = new ArrayList<>();
 				try {
 					System.out.println("Built C files in : \n" + new File(workFolder + "/"));
 					
@@ -75,20 +76,20 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 						final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(Solver.Z3, timeout);
 						g2p.setSmtConfig(gsf);
 						g2p.initSolver();
-						g2p.transform(spec, workFolder.getCanonicalPath(), doPOR, isSafe);
+						g2p.transform(spec, workFolder.getCanonicalPath(), doPOR, isSafe, todel);
 
 					} else {
 						p2p = new PetriNet2PinsTransformer();
 						if (tgba != null) {
-							p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false, tgba.getAPs());
+							p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false, tgba.getAPs(), todel);
 						} else {
-							p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false, null);
+							p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false, null, todel);
 						}
 						
 					}
 					try {
-						compilePINS((int)Math.max(2, timeout/5));
-						linkPINS(Math.max(1, timeout/5));
+						compilePINS((int)Math.max(2, timeout/5), todel);
+						linkPINS(Math.max(1, timeout/5), todel);
 					} catch (TimeoutException to) {
 						throw new RuntimeException("Compilation or link of executable timed out." + to);
 					}
@@ -111,14 +112,14 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 					todo.removeAll(doneProps.keySet());
 					
 					if (tgba == null) {
-						checkProperties(g2p, p2p, timeout,doneProps);
+						checkProperties(g2p, p2p, timeout,doneProps, todel);
 					} else {
-						checkProperty(tgba.getName(), stateBasedHOA, timeout, false, PropertyType.LTL);
+						checkProperty(tgba.getName(), stateBasedHOA, timeout, false, PropertyType.LTL, todel);
 					}
 					todo.removeAll(doneProps.keySet());
 					if (! todo.isEmpty() && shouldRetry) {
 						System.out.println("Retrying LTSmin with larger timeout "+(8*timeout)+ " s");
-						checkProperties(g2p, p2p, 8 * timeout, doneProps);
+						checkProperties(g2p, p2p, 8 * timeout, doneProps, todel);
 					}
 					todo.removeAll(doneProps.keySet());
 					if ( todo.isEmpty()) {
@@ -131,10 +132,16 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 				} catch (RuntimeException e) {
 					System.out.println("WARNING : LTS min runner thread failed on error :" + e);
 					e.printStackTrace();
+				} finally {
+					if (DEBUG == 0) {
+						for (File f : todel) {
+							if (f.exists()) f.delete();
+						}
+					}
 				}
 			}
 
-			public void checkProperties(Gal2PinsTransformerNext g2p, PetriNet2PinsTransformer p2p, long time, DoneProperties doneProps)
+			public void checkProperties(Gal2PinsTransformerNext g2p, PetriNet2PinsTransformer p2p, long time, DoneProperties doneProps, List<File> todel)
 					throws IOException, InterruptedException {
 				boolean negateResult;
 				if (spn == null) {
@@ -155,7 +162,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 							ptype = PropertyType.INVARIANT;
 						}
 						
-						checkProperty(prop.getName(),pbody,time,negateResult, ptype);
+						checkProperty(prop.getName(),pbody,time,negateResult, ptype, todel);
 					}
 
 				} else {							
@@ -173,7 +180,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 							negateResult = false;
 						}
 						
-						checkProperty(prop.getName(),pbody,time/spn.getProperties().size(),negateResult, prop.getType());
+						checkProperty(prop.getName(),pbody,time/spn.getProperties().size(),negateResult, prop.getType(), todel);
 					}
 				}
 			}
@@ -184,7 +191,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 		runnerThread.start();
 	}
 	
-	private void checkProperty(String pname, String pbody, long timeout, boolean negateResult, PropertyType propertyType) throws IOException, InterruptedException {
+	private void checkProperty(String pname, String pbody, long timeout, boolean negateResult, PropertyType propertyType, List<File> todel) throws IOException, InterruptedException {
 		if (doneProps.containsKey(pname)) {
 			return;
 		}
@@ -228,7 +235,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 		
 		try {
 			File outputff = Files.createTempFile("ltsrun", ".out").toFile();
-			outputff.deleteOnExit();
+			todel.add(outputff);
 			long time = System.currentTimeMillis();
 			System.out.println("Running LTSmin : " + ltsmin);
 			int status = Runner.runTool(timeout, ltsmin, outputff, true);
@@ -276,6 +283,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 					} 
 				}
 			}
+			if (DEBUG >= 1) System.out.println("Property " + pname + " result: " + result);
 			String ress = (result + "").toUpperCase();
 			doneProps.put(pname,"TRUE".equals(ress),(withPOR ? "PARTIAL_ORDER ":"") + "EXPLICIT LTSMIN SAT_SMT");
 			System.out.flush();
@@ -289,7 +297,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 		return pbody==null || pbody.contains(".hoa") || ! pbody.contains("X");
 	}
 
-	private void compilePINS(int timeout) throws IOException, TimeoutException, InterruptedException {
+	private void compilePINS(int timeout, List<File> todel) throws IOException, TimeoutException, InterruptedException {
 		// compile
 		long time = System.currentTimeMillis();
 		CommandLine clgcc = new CommandLine();
@@ -309,8 +317,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 
 		System.out.println("Running compilation step : " + clgcc);
 		File outputff = Files.createTempFile("gccrun", ".out").toFile();
-		outputff.deleteOnExit();
-		new File(workFolder+"/model.o").deleteOnExit();
+		todel.add(outputff);
 		int status = Runner.runTool(timeout, clgcc, outputff, true);
 		if (status != 0) {
 			Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
@@ -320,7 +327,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 		System.out.flush();
 	}
 
-	private void linkPINS(long timeLimit) throws IOException, TimeoutException, InterruptedException {
+	private void linkPINS(long timeLimit, List<File> todel) throws IOException, TimeoutException, InterruptedException {
 		// link
 		long time = System.currentTimeMillis();
 		CommandLine clgcc = new CommandLine();
@@ -333,8 +340,7 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 		clgcc.addArg("model.o");
 		System.out.println("Running link step : " + clgcc);
 		File outputff = Files.createTempFile("linkrun", ".out").toFile();
-		outputff.deleteOnExit();
-		new File(workFolder+"/gal.so").deleteOnExit();
+		todel.add(outputff);
 		int status = Runner.runTool(timeout, clgcc, outputff, true);
 		if (status != 0) {
 			Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));

@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.application.solver.ltl;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -28,7 +29,6 @@ import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.application.solver.logic.AtomicReducerSR;
 import fr.lip6.move.gal.application.solver.ltl.knowledge.KnowledgeFacts;
 import fr.lip6.move.gal.application.solver.ltl.knowledge.KnowledgeOrchestrator;
-import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
@@ -400,6 +400,10 @@ public class LTLPropertySolver {
 			ltsminRunner.join(timeout*1000);
 			ltsminRunner.interrupt();
 			ltsminRunner.join();
+			
+			if (DEBUG < 1) {
+				new File(stateBasedHOA).delete();
+			}
 		} catch (IOException | InterruptedException e) {
 			System.out.println("LTSmin runner failed with exception " + e.getMessage());
 			e.printStackTrace();

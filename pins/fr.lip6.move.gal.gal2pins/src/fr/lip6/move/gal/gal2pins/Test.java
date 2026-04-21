@@ -1,6 +1,11 @@
 package fr.lip6.move.gal.gal2pins;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
@@ -20,6 +25,14 @@ public class Test {
 		
 		Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(Solver.Z3, 300000);
 		g2p.setSmtConfig(gsf);
-		g2p.transform(spec, "tests/", true, false);
+		List<File> produced = new ArrayList<>();
+		g2p.transform(spec, "tests/", true, false, produced);
+		for (File f : produced) {
+			try {
+				System.out.println("Produced file: " + f.getCanonicalPath());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

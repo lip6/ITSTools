@@ -2,7 +2,7 @@ package fr.lip6.move.gal.structural.expr;
 
 import java.io.PrintWriter;
 
-public class CExpressionPrinter implements ExprVisitor<Void> {
+public class CExpressionPrinter implements ExprVisitor<Void>, AutoCloseable {
 
 	private String prefix;
 	protected PrintWriter pw;

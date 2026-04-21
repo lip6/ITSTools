@@ -8,24 +8,13 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 import fr.lip6.ltl.tgba.TGBA;
-import fr.lip6.move.gal.LTLProp;
-import fr.lip6.move.gal.Property;
-import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.application.runner.AbstractRunner;
 import fr.lip6.move.gal.application.runner.Ender;
-import fr.lip6.move.gal.application.runner.IRunner;
-import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
-import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
-import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.ltsmin.BinaryToolsPlugin;
 import fr.lip6.move.gal.ltsmin.BinaryToolsPlugin.Tool;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
-import fr.lip6.move.gal.mcc.properties.MCCExporter;
-import fr.lip6.move.gal.mcc.properties.PropertyPrinter;
-import fr.lip6.move.gal.pn2pins.PetriNet2PinsTransformer;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.gal.structural.PropertyType;
@@ -65,26 +54,21 @@ public class LTSminPNMLRunner extends AbstractRunner implements ILTSminRunner {
 
 			@Override
 			public void run() {
+				List<File> todel = new ArrayList<>();
 				try {
 					System.out.println("Building PNML and property files in : \n" + new File(workFolder + "/"));
 					
 					// step 1 : build PNML
-					File pnmlpathff = Files.createTempFile("model", ".pnml").toFile();
-					pnmlpathff.deleteOnExit();
+					File pnmlpathff = Files.createTempFile("model", ".pnml").toFile();					
+					todel.add(pnmlpathff);
 					pnmlPath = pnmlpathff.getCanonicalPath();
 					StructuralToPNML.transform(spn, pnmlPath);
 					
 					// step 2 : export properties
-					if (tgba != null) {
-											
-					} else {
-						
-					}
-					
 					if (tgba == null) {
-						checkProperties(timeout,doneProps);
+						checkProperties(timeout,doneProps, todel);
 					} else {
-						checkProperty(tgba.getName(), stateBasedHOA, timeout, false, PropertyType.LTL);
+						checkProperty(tgba.getName(), stateBasedHOA, timeout, false, PropertyType.LTL, todel);
 					}
 					
 					/*
@@ -119,10 +103,14 @@ public class LTSminPNMLRunner extends AbstractRunner implements ILTSminRunner {
 				} catch (RuntimeException e) {
 					System.out.println("WARNING : LTS min runner thread failed on error :" + e);
 					e.printStackTrace();
+				} finally {
+					if (DEBUG == 0)
+						for (File f : todel)
+							f.delete();
 				}
 			}
 
-			public void checkProperties(long time, DoneProperties doneProps)
+			public void checkProperties(long time, DoneProperties doneProps, List<File> todel)
 					throws IOException, InterruptedException {
 				boolean negateResult;
 
@@ -133,7 +121,6 @@ public class LTSminPNMLRunner extends AbstractRunner implements ILTSminRunner {
 					String pbody = null;
 					if (prop.getType() == PropertyType.LTL) {
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						PrintWriter pw = new PrintWriter(baos);
 						{
 							CExpressionPrinter printer = new CExpressionPrinter(new PrintWriter(baos), "src");
 							prop.getBody().accept(printer);
@@ -148,7 +135,7 @@ public class LTSminPNMLRunner extends AbstractRunner implements ILTSminRunner {
 						negateResult = false;
 					}
 
-					checkProperty(prop.getName(),pbody,time,negateResult, prop.getType());
+					checkProperty(prop.getName(),pbody,time,negateResult, prop.getType(), todel);
 				}
 			}
 
@@ -159,7 +146,7 @@ public class LTSminPNMLRunner extends AbstractRunner implements ILTSminRunner {
 		runnerThread.start();
 	}
 	
-	private void checkProperty(String pname, String pbody, long timeout, boolean negateResult, PropertyType propertyType) throws IOException, InterruptedException {
+	private void checkProperty(String pname, String pbody, long timeout, boolean negateResult, PropertyType propertyType, List<File> todel) throws IOException, InterruptedException {
 		if (doneProps.containsKey(pname)) {
 			return;
 		}
@@ -203,7 +190,7 @@ public class LTSminPNMLRunner extends AbstractRunner implements ILTSminRunner {
 		
 		try {
 			File outputff = Files.createTempFile("ltsrun", ".out").toFile();
-			outputff.deleteOnExit();
+			todel.add(outputff);
 			long time = System.currentTimeMillis();
 			System.out.println("Running LTSmin : " + ltsmin);
 			int status = Runner.runTool(timeout, ltsmin, outputff, true);
@@ -262,61 +249,6 @@ public class LTSminPNMLRunner extends AbstractRunner implements ILTSminRunner {
 	
 	private boolean isStutterInvariant(String pbody) {		
 		return pbody==null || pbody.contains(".hoa") || ! pbody.contains("X");
-	}
-
-	private void compilePINS(int timeout) throws IOException, TimeoutException, InterruptedException {
-		// compile
-		long time = System.currentTimeMillis();
-		CommandLine clgcc = new CommandLine();
-		clgcc.setWorkingDir(workFolder);
-		clgcc.addArg(BinaryToolsPlugin.getProgramURI(Tool.limit_time).getPath().toString());		
-		clgcc.addArg(Long.toString(timeout));
-		clgcc.addArg("gcc");
-		clgcc.addArg("-c");
-		clgcc.addArg("-I" + BinaryToolsPlugin.getIncludeFolderURI().getPath().toString());
-		clgcc.addArg("-I.");
-		clgcc.addArg("-std=c99");
-		clgcc.addArg("-fPIC");
-		// try no opt to limit timeout
-		clgcc.addArg("-O0");
-		// clgcc.addArg("-O2");
-		clgcc.addArg("model.c");
-
-		System.out.println("Running compilation step : " + clgcc);
-		File outputff = Files.createTempFile("gccrun", ".out").toFile();
-		outputff.deleteOnExit();
-		new File(workFolder+"/model.o").deleteOnExit();
-		int status = Runner.runTool(timeout, clgcc, outputff, true);
-		if (status != 0) {
-			Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
-			throw new RuntimeException("Could not compile executable ." + clgcc);
-		}
-		System.out.println("Compilation finished in "+ (System.currentTimeMillis() -time) +" ms.");
-		System.out.flush();
-	}
-
-	private void linkPINS(long timeLimit) throws IOException, TimeoutException, InterruptedException {
-		// link
-		long time = System.currentTimeMillis();
-		CommandLine clgcc = new CommandLine();
-		File cwd = workFolder;
-		clgcc.setWorkingDir(cwd);
-		clgcc.addArg("gcc");
-		clgcc.addArg("-shared");
-		clgcc.addArg("-o");
-		clgcc.addArg("gal.so");
-		clgcc.addArg("model.o");
-		System.out.println("Running link step : " + clgcc);
-		File outputff = Files.createTempFile("linkrun", ".out").toFile();
-		outputff.deleteOnExit();
-		new File(workFolder+"/gal.so").deleteOnExit();
-		int status = Runner.runTool(timeout, clgcc, outputff, true);
-		if (status != 0) {
-			Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
-			throw new RuntimeException("Could not link executable ." + clgcc);
-		}
-		System.out.println("Link finished in "+ (System.currentTimeMillis() -time) +" ms.");
-		System.out.flush();
 	}
 
 	public void setNet(SparsePetriNet spn) {

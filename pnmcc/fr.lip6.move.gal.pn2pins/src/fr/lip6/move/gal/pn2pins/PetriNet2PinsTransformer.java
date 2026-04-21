@@ -30,9 +30,9 @@ public class PetriNet2PinsTransformer {
 	private NecessaryEnablingsolver nes;
 	private boolean hasPartialOrder;
 
-	private void buildBodyFile(String path) throws IOException {
+	private void buildBodyFile(String path, List<File> todel) throws IOException {
 		File fpath = new File(path);
-		if (DEBUG==0) fpath.deleteOnExit();
+		todel.add(fpath);
 		PrintWriter pw = new PrintWriter(path);
 
 		if (!forSpot) {
@@ -131,9 +131,9 @@ public class PetriNet2PinsTransformer {
 		pw.close();
 	}
 
-	private void buildHeader(String path) throws IOException {
+	private void buildHeader(String path, List<File> todel) throws IOException {
 		File fpath = new File(path);
-		if (DEBUG==0) fpath.deleteOnExit();
+		todel.add(fpath);
 		PrintWriter pw = new PrintWriter(path);
 		pw.print(
 				"#include <ltsmin/pins.h>\n"+
@@ -808,7 +808,7 @@ public class PetriNet2PinsTransformer {
 	private boolean forSpot;
 	private List<AtomicProp> invAtoms = new ArrayList<>();
 	
-	public void transform(SparsePetriNet spn, String cwd, boolean withPorMatrix, boolean forSpot, List<AtomicProp> listAtoms) {
+	public void transform(SparsePetriNet spn, String cwd, boolean withPorMatrix, boolean forSpot, List<AtomicProp> listAtoms, List<File> todel) {
 		this.forSpot = forSpot;
 		//		if ( spec.getMain() instanceof GALTypeDeclaration ) {
 		//			Logger.getLogger("fr.lip6.move.gal").fine("detecting pure GAL");
@@ -857,9 +857,9 @@ public class PetriNet2PinsTransformer {
 		nes = new NecessaryEnablingsolver(spn.isSafe());
 		try {
 
-			buildBodyFile(cwd + "/model.c");
+			buildBodyFile(cwd + "/model.c", todel);
 			if (!forSpot)
-				buildHeader(cwd + "/model.h");
+				buildHeader(cwd + "/model.h", todel);
 
 			Logger.getLogger("fr.lip6.move.gal").info("Built C files in " + (System.currentTimeMillis() - time)
 					+ "ms conformant to PINS "+(forSpot?"(SPOT variant)":"(ltsmin variant)")+"in folder :" + cwd);

@@ -3,6 +3,7 @@ package fr.lip6.move.gal.application.runner.spot;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -26,6 +27,8 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class SpotLTLRunner extends AbstractRunner implements IRunner {
 
+	private static int DEBUG = 0;
+
 	private String workFolder;
 	private long timeout;
 	private boolean isSafe;
@@ -48,6 +51,7 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 
 			@Override
 			public void run() {
+				List<File> todel = new ArrayList<>();
 				try {
 					System.out.println("Built C files in : \n" + new File(workFolder + "/"));
 					
@@ -59,11 +63,11 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 						final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solver, timeout);
 						g2p.setSmtConfig(gsf);
 						g2p.initSolver();
-						g2p.transform(spec, workFolder, false, isSafe);
+						g2p.transform(spec, workFolder, false, isSafe, todel);
 
 					} else {
 						p2p = new PetriNet2PinsTransformer();
-						p2p.transform(spn, workFolder, false, true, null);
+						p2p.transform(spn, workFolder, false, true, null, todel);
 						
 					}
 					try {
@@ -100,6 +104,13 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 				} catch (RuntimeException e) {
 					System.out.println("WARNING : SpotMC runner thread failed on error :" + e);
 					e.printStackTrace();
+				} finally {
+					if (DEBUG == 0) {
+						for (File f : todel) {
+							if (f.exists()) f.delete();
+						}
+						new File(workFolder).deleteOnExit();
+					}
 				}
 			}
 

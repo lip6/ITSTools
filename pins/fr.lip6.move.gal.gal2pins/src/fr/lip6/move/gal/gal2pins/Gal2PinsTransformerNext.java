@@ -798,7 +798,8 @@ public class Gal2PinsTransformerNext {
 	private List<AtomicProp> atoms = new ArrayList<>();
 	private Map<BooleanExpression, AtomicProp> atomMap = new HashMap<BooleanExpression, AtomicProp>();
 	private boolean isSafe;
-	public void transform (Specification spec, String cwd, boolean withPorMatrix, boolean isSafe) {
+
+	public void transform (Specification spec, String cwd, boolean withPorMatrix, boolean isSafe, List<File> todel) {
 		this.isSafe = isSafe;
 //		if ( spec.getMain() instanceof GALTypeDeclaration ) {
 //			Logger.getLogger("fr.lip6.move.gal").fine("detecting pure GAL");
@@ -862,6 +863,9 @@ public class Gal2PinsTransformerNext {
 			buildBodyFile(cwd + "/model.c");
 			
 			buildHeader(cwd + "/model.h");
+
+			todel.add(new File(cwd + "/model.c"));
+			todel.add(new File(cwd + "/model.h"));
 
 			Logger.getLogger("fr.lip6.move.gal").info("Built C files in "+ (System.currentTimeMillis()- time ) + "ms conformant to PINS in folder :"+cwd);
 		} catch (IOException e) {
