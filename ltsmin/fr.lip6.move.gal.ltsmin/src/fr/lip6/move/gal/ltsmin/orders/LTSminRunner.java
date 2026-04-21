@@ -3,6 +3,7 @@ package fr.lip6.move.gal.ltsmin.orders;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -74,7 +75,8 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 					final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solver, timeout);
 					g2p.setSmtConfig(gsf);
 				//	g2p.initSolver();
-					g2p.transform(spec, workFolder, doPOR, false);
+					List<File> todel = new ArrayList<>();
+					g2p.transform(spec, workFolder, doPOR, false, todel);
 
 					if (ltsminpath != null) {
 						compilePINS(400);
