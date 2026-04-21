@@ -278,26 +278,6 @@ public class UpperBoundsSolver {
 				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 				
 				sr.setProtected(support);
-
-//				boolean foundDead = false;
-//				if (iterations >= 1 && !foundDead) {
-//					List<Integer> deadPlaces = findDeadPlaces(reader);
-//
-//					if (!deadPlaces.isEmpty()) {
-//						sr.dropSurroundingTransitions(deadPlaces, "Dead places");
-//						iter++;
-//						foundDead=true;
-//					}
-//				}
-//				if (iterations >= 1 && !foundDead) {
-//					List<Integer> deadTransitions = findDeadTransitions(reader);
-//
-//					if (!deadTransitions.isEmpty()) {
-//						sr.dropTransitions(deadTransitions, true, "Dead transitions detected with 'AG(!fireable(t))'");						
-//						iter++;
-//					}
-//				}
-				
 				
 				// a single place, that is one bounded : kill it's consumers
 				if (support.cardinality()==1 && maxStruct.get(0)==1) {
@@ -427,77 +407,6 @@ public class UpperBoundsSolver {
 			return maxStruct;
 		}
 	
-	
-	private static List<Integer> findDeadTransitions (MccTranslator ori) {
-		MccTranslator subproblem = ori.copy();
-		SparsePetriNet spn = subproblem.getSPN();		
-		spn.getProperties().clear();
-		
-		SparseIntArray initial = new SparseIntArray(spn.getMarks());
-		for (int tid=0; tid < spn.getTransitionCount() ; tid++) {
-			SparseIntArray pt = spn.getFlowPT().getColumn(tid);
-			if (! SparseIntArray.greaterOrEqual(initial, pt)) {
-				Property tisdead = new Property(
-						Expression.nop(Op.AG, 
-								Expression.nop(Op.NOT, Expression.nop(Op.ENABLED,Expression.trans(tid)))), PropertyType.INVARIANT, "TDEAD"+tid);
-				spn.getProperties().add(tisdead);
-			}
-		}
-		subproblem.setSpn(spn, true);
-		subproblem.simplifySPN(true, true);
-		
-		long time = System.currentTimeMillis();
-		System.out.println("Running "+spn.getProperties().size()+" sub problems to find dead transitions.");
-		DoneProperties localDone = new ConcurrentHashDoneProperties();
-		try {
-			ReachabilitySolver.applyReductions(subproblem,localDone,100);
-		} catch (GlobalPropertySolvedException e) {
-			e.printStackTrace();
-		}
-		List<Integer> deadTrans = new ArrayList<Integer>();
-		for (Entry<String, Boolean> ent : localDone.entrySet()) {
-			if (ent.getValue()) {
-				int tid = Integer.parseInt(ent.getKey().substring(5));
-				deadTrans.add(tid);
-			}
-		}
-		System.out.println("Search for dead transitions found "+deadTrans.size()+ " dead transitions in " + (System.currentTimeMillis()-time) + "ms");
-		return deadTrans;
-	}
-	
-
-	private static List<Integer> findDeadPlaces (MccTranslator ori) {
-		MccTranslator subproblem = ori.copy();
-		SparsePetriNet spn = subproblem.getSPN();		
-		spn.getProperties().clear();
-		
-		for (int pid=0; pid < spn.getPlaceCount() ; pid++) {
-			if (spn.getMarks().get(pid) == 0) {
-				Property pisdead = new Property(
-						Expression.nop(Op.AG, 
-								Expression.nop(Op.EQ, Expression.var(pid), Expression.constant(0))), PropertyType.INVARIANT, "PDEAD"+pid);
-				spn.getProperties().add(pisdead);
-			}
-		}
-		
-		long time = System.currentTimeMillis();
-		System.out.println("Running "+spn.getProperties().size()+" sub problems to find dead places.");
-		DoneProperties localDone = new ConcurrentHashDoneProperties();
-		try {
-			ReachabilitySolver.applyReductions(subproblem,localDone,100);
-		} catch (GlobalPropertySolvedException e) {
-			e.printStackTrace();
-		}
-		List<Integer> deadPlaces = new ArrayList<Integer>();
-		for (Entry<String, Boolean> ent : localDone.entrySet()) {
-			if (ent.getValue()) {
-				int pid = Integer.parseInt(ent.getKey().substring(5));
-				deadPlaces.add(pid);
-			}
-		}
-		System.out.println("Search for dead places found "+deadPlaces.size()+ " dead places in " + (System.currentTimeMillis()-time) + "ms");
-		return deadPlaces;
-	}
 	
 	private static void testWithReachability(MccTranslator ori, List<Integer> maxSeen, List<Integer> maxStruct,
 			DoneProperties doneProps) {
