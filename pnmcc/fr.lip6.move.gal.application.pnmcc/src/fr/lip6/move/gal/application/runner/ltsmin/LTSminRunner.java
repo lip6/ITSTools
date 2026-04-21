@@ -197,10 +197,11 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 		}
 		CommandLine ltsmin = new CommandLine();
 		ltsmin.setWorkingDir(workFolder);
-		ltsmin.addArg(BinaryToolsPlugin.getProgramURI(Tool.mc).getPath().toString());
+		ltsmin.addArg(BinaryToolsPlugin.getProgramURI(Tool.seq).getPath().toString());
 		ltsmin.addArg("./gal.so");
 
-		ltsmin.addArg("--threads=8");
+		// Multicore disabled due to instabilities.
+		// ltsmin.addArg("--threads=8");
 		boolean withPOR = false;
 		if (doPOR && isStutterInvariant(pbody)) {
 			ltsmin.addArg("-p");

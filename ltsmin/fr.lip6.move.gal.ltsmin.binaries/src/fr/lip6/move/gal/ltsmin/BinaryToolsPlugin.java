@@ -40,8 +40,8 @@ public class BinaryToolsPlugin extends Plugin {
 	private static BinaryToolsPlugin plugin;
 
 	// variants of the tool : multicore, sequential, symbolic...
-	public enum Tool {mc, pnmlmc, sym, limit_time};
-	private static URI toolUri [] = new URI [4];
+	public enum Tool {mc, pnmlmc, sym, seq, limit_time};
+	private static URI toolUri [] = new URI [5];
 	
 	/**
 	 * The constructor
@@ -84,7 +84,7 @@ public class BinaryToolsPlugin extends Plugin {
 		if (toolUri[tool.ordinal()] == null) {
 			String relativePath=null;		
 			switch (tool) {
-			case mc : case sym :
+			case mc : case sym : case seq :
 				relativePath = "bin/pins2lts-"+ tool.toString() + "-" + getArchOS();
 				break;
 			case pnmlmc :
