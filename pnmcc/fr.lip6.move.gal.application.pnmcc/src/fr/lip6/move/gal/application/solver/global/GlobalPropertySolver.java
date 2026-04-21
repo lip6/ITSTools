@@ -689,7 +689,7 @@ public class GlobalPropertySolver {
 				.info("Rough structural analysis with invariants proved " + d + " places are one safe in "
 						+ (System.currentTimeMillis() - time) + " ms (including invariant computation).");
 
-		DeadlockTester.testOneSafeWithSMT(toCheck, spn, invar.getColumns(), doneProps, 10);
+		DeadlockTester.testOneSafeWithSMT(toCheck, spn, invar, doneProps, 10);
 
 		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 	}
