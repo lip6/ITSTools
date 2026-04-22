@@ -152,7 +152,7 @@ public class KERSFormatIO {
 			SparseIntArray col = new SparseIntArray(nnz);
 			for (int i = 0; i < nnz; i++) {
 				int  ival = (int) valBuf[i];
-				if (ival != valBuf[i] || valbuf[i] < 0) {
+				if (ival != valBuf[i] || valBuf[i] < 0) {
 					log.warning("KERS value " + valBuf[i] + " at col=" + colIdx
 							+ " row=" + rowBuf[i] + " overflows int; skipping row.");
 					skip = true;
