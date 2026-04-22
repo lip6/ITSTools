@@ -152,7 +152,7 @@ public class KERSFormatIO {
 			SparseIntArray col = new SparseIntArray(nnz);
 			for (int i = 0; i < nnz; i++) {
 				int  ival = (int) valBuf[i];
-				if (ival != valBuf[i] || valBuf[i] < 0) {
+				if (ival != valBuf[i]) {
 					log.warning("KERS value " + valBuf[i] + " at col=" + colIdx
 							+ " row=" + rowBuf[i] + " overflows int; skipping row.");
 					skip = true;
@@ -161,7 +161,7 @@ public class KERSFormatIO {
 				// Row indices sorted ascending in file: append is O(1) — no binary search
 				col.append(rowBuf[i], ival);
 			}
-			// Replace the empty column allocated by IntMatrixCol constructor
+			// add the invariant
 			if (!skip)
 				matrix.appendColumn(col);
 		}
