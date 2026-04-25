@@ -40,6 +40,7 @@ import fr.lip6.move.petrispot.runner.PetriSpotRunner;
 public class UpperBoundsSolver {
 
 	private static final int omega  = Integer.MAX_VALUE;
+	private static final int DEBUG = 0;
 	
 	
 	public static List<Integer> treatSkeleton(MccTranslator reader, DoneProperties doneProps) {
@@ -341,11 +342,21 @@ public class UpperBoundsSolver {
 						} else {
 							CoverWalker cw = new CoverWalker(spn);
 							SparseIntArray maxState = new SparseIntArray();
-							int[] verdicts = cw.runRandomReachabilityDetection(10000, tocheck, 3000, -1, true, maxState);
+							long start = System.currentTimeMillis();
 							
-							iter += interpretVerdict(tocheck, spn, doneProps, verdicts,"COVER",maxSeen,maxStruct);
+							int nbsteps = 10000;
+							long total = 10000; // 10 seconds 
+							while (System.currentTimeMillis() - start < total) {
+								int[] verdicts = cw.runRandomReachabilityDetection(nbsteps, tocheck, (int) (total - (start - System.currentTimeMillis())) / 1000, -1, true, maxState);							
+								iter += interpretVerdict(tocheck, spn, doneProps, verdicts,"COVER",maxSeen,maxStruct);
+								if (DEBUG >= 1) printBounds("after cover walk", maxSeen, maxStruct);
+								if (maxSeen.size() == 0) {
+									break;
+								}
+							}
 							printBounds("after cover walk", maxSeen, maxStruct);
-
+							
+							
 							// Experimental code : try to remove sources of infinity.
 							if (false && ! spn.getProperties().isEmpty()) {
 								System.out.println("Resetting from maxState :" + maxState);
@@ -396,7 +407,8 @@ public class UpperBoundsSolver {
 			
 			reader.setSpn(spn,false);
 			
-			testWithReachability(reader,maxSeen,maxStruct,doneProps);
+			if (! spn.getProperties().isEmpty())
+				testWithReachability(reader,maxSeen,maxStruct,doneProps);
 			
 			return maxStruct;
 		}
