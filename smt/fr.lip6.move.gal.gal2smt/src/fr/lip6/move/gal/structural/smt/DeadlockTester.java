@@ -179,124 +179,122 @@ public class DeadlockTester {
 		return results;
 	}
 
-	
+	/**
+	 * This function looks for a "rythm" i.e. a Parikh vector of transitions with a
+	 * net positive effect on place markings. Existence of such a rythm is a
+	 * necessary condition for unboundedness (of the target place/of the net if -1).
+	 * But of course the Parikh may not be realizable, so an empty result (UNSAT)
+	 * indicates boundedness, but non empty result is not a proof.
+	 *
+	 * @param sumMatrix
+	 * @param positivePlace a target place index for which we want to ensure a
+	 *                      positive effect. Set to -1 for any place.
+	 * @return null if failed, empty if no positive T-semiflow, non empty if a
+	 *         positive T-semiflow was found. If positivePlace >= 0, the T-semiflow
+	 *         is forced to have a positive effect on this place.
+	 */
 	public static SparseIntArray findPositiveTsemiflow(IntMatrixCol sumMatrix, int positivePlace) {
 		org.smtlib.SMT smt = SMT.instance;
-		
 		ISolver solver = initSolver(smt, false, 4000, 6000);
-		
 		Script script;
+
 		// t must be positive, it's a T semi flow
 		script = declareVariables(sumMatrix.getColumnCount(), "t", false, true, smt, false);
 		execAndCheckResult(script, solver);
-//		// p must be positive, it's a positive solution
-//		script = declareVariables(sumMatrix.getRowCount(), "s", false, false, smt, false);
-//		execAndCheckResult(script, solver);
-		
+
 		script = new Script();
 		IFactory ef = smt.smtConfig.exprFactory;
-		
+
 		// At least one strictly positive selected transition
 		List<IExpr> onePos = new ArrayList<>();
-		for (int i=0; i < sumMatrix.getColumnCount() ; i++) {
-			onePos.add(ef.symbol("t"+i));
+		for (int i = 0; i < sumMatrix.getColumnCount(); i++) {
+			onePos.add(ef.symbol("t" + i));
 		}
 		org.smtlib.ISort.IApplication ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Int"));
 		ISymbol si = ef.symbol("Total");
-		script.add(new org.smtlib.command.C_define_fun(
-					si,
-					Collections.emptyList(),
-					ints2,
-					ef.fcn(ef.symbol("+"), onePos)
-					));
-		
-		script.add(new C_assert(ef.fcn(ef.symbol(">="), ef.symbol("Total"),ef.numeral(1))));
-		
+		script.add(new org.smtlib.command.C_define_fun(si, Collections.emptyList(), ints2,
+				ef.fcn(ef.symbol("+"), onePos)));
+		script.add(new C_assert(ef.fcn(ef.symbol(">="), ef.symbol("Total"), ef.numeral(1))));
 
 		// assert >= 0 effects of transitions on each place
 		// we work with one constraint for each place => use transposed
 		IntMatrixCol mat = sumMatrix.transpose();
-		
 		SparseIntArray total = new SparseIntArray();
-		for (int varindex = 0 ; varindex < mat.getColumnCount() ; varindex++) {
-
+		for (int varindex = 0; varindex < mat.getColumnCount(); varindex++) {
 			SparseIntArray line = mat.getColumn(varindex);
 			IExpr constraint = buildRowConstraint(line, ef);
-			
 			total = SparseIntArray.sumProd(1, total, 1, line);
-			int min =0;
+			int min = 0;
 			if (positivePlace == varindex) {
 				min = 1;
-			}			
-			script.add(
-					new C_assert(
-							ef.fcn(ef.symbol("<="), 
-									ef.numeral(min),
-									// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
-									constraint)));
+			}
+			script.add(new C_assert(ef.fcn(ef.symbol("<="), ef.numeral(min), constraint)));
 		}
-		
+
 		if (positivePlace < 0) {
-			// must be positive solution		
-			script.add(new C_assert(
-					ef.fcn(ef.symbol(">="), 
-							buildRowConstraint(total, ef),
-							ef.numeral(1)						
-							)));
+			// must be positive solution
+			script.add(new C_assert(ef.fcn(ef.symbol(">="), buildRowConstraint(total, ef), ef.numeral(1))));
 		}
-		
-		
+
 		execAndCheckResult(script, solver);
-		
-		String result = checkSat(solver);
-		if ("sat".equals(result)) {
-			System.out.println("Found an invariant !");
-			
-			SparseIntArray state = new SparseIntArray();
-			SparseIntArray parikh = new SparseIntArray();
-			SparseIntArray order = new SparseIntArray();
-			if (queryVariables(state, parikh, order, solver)) {
-				System.out.println("SMT solver failed to extract model.");
-				return null;
-			}
-			System.out.println("This invariant on transitions " + parikh);
-			System.out.println("Produces a positive solution :" + state);
-			
-			{
-				long ttime = System.currentTimeMillis();
-				System.out.println("Attempting to minimize the solution found.");				
-				IResponse response = solver.minimize(ef.symbol("Total"));
-				
-				System.out.println("Minimization OK="+ response +"took " + (System.currentTimeMillis() - ttime) + " ms.");				
-			}
-			result = checkSat(solver);
-			SparseIntArray oldparikh = parikh;
-			parikh = new SparseIntArray();
-			
-			if (queryVariables(state, parikh, order, solver)) {
-				System.out.println("SMT solver failed to minimize model, returning non optimized solution.");
-				return oldparikh;
-			}
 
-			System.out.println("This minimized invariant on transitions " + parikh);
-			System.out.println("Produces a positive solution");
-			
-			
-			solver.exit();
-			return parikh;
-		} else {
-			solver.exit();
-			System.out.println("When looking for a positive semi flow solution, solver replied " + result);
-			
-			if ("unsat".equals(result)) {
-				return new SparseIntArray();
+		long startTime = System.currentTimeMillis();
+		SparseIntArray returnValue = null;
+		String outcome;
+
+		try {
+			String satResult = checkSat(solver);
+
+			if ("unsat".equals(satResult)) {
+				outcome = "Net is bounded UNSAT";
+				returnValue = new SparseIntArray();
+			} else if ("sat".equals(satResult)) {
+				SparseIntArray state = new SparseIntArray();
+				SparseIntArray parikh = new SparseIntArray();
+				SparseIntArray order = new SparseIntArray();
+
+				if (queryVariables(state, parikh, order, solver)) {
+					outcome = "SAT but SMT solver failed to extract model";
+					returnValue = null;
+				} else {
+					SparseIntArray originalSolution = parikh;
+
+					// Minimization
+					long minStart = System.currentTimeMillis();
+					IResponse response = solver.minimize(ef.symbol("Total"));
+					long minTime = System.currentTimeMillis() - minStart;
+
+					String minSatResult = checkSat(solver);
+
+					outcome = "Found solution " + originalSolution + " and attempted to minimize in " + minTime + " ms";
+
+					if ("sat".equals(minSatResult)) {
+						parikh = new SparseIntArray();
+						if (queryVariables(state, parikh, order, solver)) {
+							returnValue = originalSolution;
+							outcome += " failed";
+						} else {
+							returnValue = parikh;
+							outcome += " success -> " + parikh;
+						}
+					} else {
+						returnValue = originalSolution;
+						outcome += " failed";
+					}
+				}
 			} else {
-				return null;
+				outcome = "FAIL (solver returned " + satResult + ")";
+				returnValue = null;
 			}
+		} finally {
+			solver.exit();
 		}
-		
-	}
 
+		long totalTime = System.currentTimeMillis() - startTime;
+		System.out.println("findPositiveTsemiflow completed in " + totalTime + " ms - " + outcome);
+
+		return returnValue;
+	}
 
 	public static IExpr buildRowConstraint(SparseIntArray line, IFactory ef) {
 		// assert : x = X0*C(t0,x) + ...+ XN*C(Tn,x)
@@ -463,7 +461,7 @@ public class DeadlockTester {
 	public static List<SparseIntArray> escalateRealToInt(ISparsePetriNet sr, List<Script> properties,
 			List<Script> propertiesWithSE, int timeout, boolean withWitness, List<Integer> representative,
 			List<SparseIntArray> pors, IntMatrixCol sumMatrix) {
-		IntMatrixCol invar = PetriSpotRunner.computeInvariants(sumMatrix,InvariantMode.PSEMIFLOWS);		
+		IntMatrixCol invar = PetriSpotRunner.computeInvariants(sumMatrix,InvariantMode.PFLOWS);		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Set<SparseIntArray> invarT = null ; //computeTinvariants(sr, sumMatrix, tnames);
 		timeout *= 5;
