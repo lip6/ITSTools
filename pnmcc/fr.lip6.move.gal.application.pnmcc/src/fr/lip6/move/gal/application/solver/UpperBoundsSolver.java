@@ -41,14 +41,6 @@ public class UpperBoundsSolver {
 
 	private static final int omega  = Integer.MAX_VALUE;
 	
-	public static void checkInInitial(SparsePetriNet spn, DoneProperties doneProps) {
-		for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(spn.getProperties())) {
-			if (prop.getBody().getOp() == Op.CONST) {
-				doneProps.put(prop.getName(),prop.getBody().getValue(),"TOPOLOGICAL INITIAL_STATE");				
-				spn.getProperties().remove(prop);
-			}
-		}
-	}
 	
 	public static List<Integer> treatSkeleton(MccTranslator reader, DoneProperties doneProps) {
 		SparsePetriNet spn = reader.getHLPN().skeleton();
@@ -62,11 +54,10 @@ public class UpperBoundsSolver {
 		
 		
 	//  need to protect some variables
-		List<Integer> tocheckIndexes = new ArrayList<>();
 		List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
-		computeToCheck(spn, tocheckIndexes, tocheck, doneProps);
-		List<Integer> maxStruct = new ArrayList<>(tocheckIndexes.size());
-		List<Integer> maxSeen = new ArrayList<>(tocheckIndexes.size());
+		computeToCheck(spn,tocheck, doneProps);
+		List<Integer> maxStruct = new ArrayList<>(tocheck.size());
+		List<Integer> maxSeen = new ArrayList<>(tocheck.size());
 		{
 			SparseIntArray m0 = new SparseIntArray(spn.getMarks());
 			for (Expression tc:tocheck) {
@@ -89,7 +80,7 @@ public class UpperBoundsSolver {
 				paths.add(null);
 				orders.add(null);
 			}
-			treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths , maxSeen, maxStruct, orders);
+			treatVerdicts(reader.getSPN(), doneProps, tocheck, paths , maxSeen, maxStruct, orders);
 		}
 		
 			List<Integer> repr = new ArrayList<>();
@@ -102,18 +93,26 @@ public class UpperBoundsSolver {
 		return maxStruct;
 	}
 
-	private static void checkStatus(SparsePetriNet spn, List<Expression> tocheck, List<Integer> maxStruct,
+	private static int checkStatus(SparsePetriNet spn, List<Expression> tocheck, List<Integer> maxStruct,
 			List<Integer> maxSeen, DoneProperties doneProps, String tech) {
+		int removed = 0;
 		for (int v = tocheck.size()-1 ; v >= 0 ; v--) {
+			Property prop = spn.getProperties().get(v);
 			if (maxSeen.get(v).equals(maxStruct.get(v))) {
-				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
 				doneProps.put(prop.getName(),maxSeen.get(v),tech);
-				tocheck.remove(v);
+			}
+			if (prop.getBody().getOp() == Op.CONST) {
+				doneProps.put(prop.getName(),prop.getBody().getValue(),"TOPOLOGICAL INITIAL_STATE");	
+			}
+			if (doneProps.containsKey(prop.getName())) {
 				spn.getProperties().remove(v);
 				maxSeen.remove(v);
 				maxStruct.remove(v);
+				tocheck.remove(v);
+				removed++;
 			}
 		}
+		return removed;
 	}
 	
 
@@ -123,13 +122,12 @@ public class UpperBoundsSolver {
 
 			SparsePetriNet spn = reader.getSPN();
 			//  need to protect some variables
-			List<Integer> tocheckIndexes = new ArrayList<>();
 			spn.testAliasing(doneProps);
 			List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
-			computeToCheck(spn, tocheckIndexes, tocheck, doneProps);
+			computeToCheck(spn, tocheck, doneProps);
 
-			List<Integer> maxStruct = new ArrayList<>(tocheckIndexes.size());
-			List<Integer> maxSeen = new ArrayList<>(tocheckIndexes.size());
+			List<Integer> maxStruct = new ArrayList<>(tocheck.size());
+			List<Integer> maxSeen = new ArrayList<>(tocheck.size());
 			{
 				SparseIntArray m0 = new SparseIntArray(spn.getMarks());
 				if (spn.isSafe()) {
@@ -169,9 +167,9 @@ public class UpperBoundsSolver {
 			boolean first = true;
 			do {
 				iter =0;
-				spn.testAliasing(doneProps);
+
 				if (! first)  {
-					computeToCheck(spn, tocheckIndexes, tocheck, doneProps);			
+					computeToCheck(spn, tocheck, doneProps);			
 				} else {
 					first = false;
 				}
@@ -210,7 +208,7 @@ public class UpperBoundsSolver {
 					
 					// interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], "PARIKH", maxSeen, maxStruct);
 					printBounds("after SMT", maxSeen, maxStruct);
-					iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct,orders);
+					iter += treatVerdicts(spn, doneProps, tocheck, paths, maxSeen, maxStruct,orders);
 					
 				
 					
@@ -263,11 +261,10 @@ public class UpperBoundsSolver {
 							}
 						}
 					}					
-					if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
-						iter++;
+					
 					
 					printBounds("After Parikh guided walk", maxSeen, maxStruct);
-				
+					checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL PARIKH_GUIDED_WALK");
 				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
 				if (spn.getProperties().isEmpty())
@@ -311,16 +308,14 @@ public class UpperBoundsSolver {
 				spn.testInInitial();
 				spn.removeConstantPlaces();
 				spn.simplifyLogic();			
-				checkInInitial(spn, doneProps);
-				
+
+				if (checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL STRUCTURAL_REDUCTION") > 0) {
+					printBounds("after structural reductions", maxSeen, maxStruct);
+					iter++;
+				}
 				if (spn.getProperties().isEmpty()) {
 					return Collections.emptyList();
 				}
-								
-				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
-					iter++;
-				
-				
 				
 				if (!isBounded.isPresent()) {
 					// check if we still have inf upper bounds
@@ -344,10 +339,9 @@ public class UpperBoundsSolver {
 						if (inv.size()==0) {
 							isBounded = Optional.of(true);
 						} else {
-							computeToCheck(spn, tocheckIndexes, tocheck, doneProps);
 							CoverWalker cw = new CoverWalker(spn);
 							SparseIntArray maxState = new SparseIntArray();
-							int[] verdicts = cw.runRandomReachabilityDetection(10000, tocheck, 3000, -1, true,maxState);
+							int[] verdicts = cw.runRandomReachabilityDetection(10000, tocheck, 3000, -1, true, maxState);
 							
 							iter += interpretVerdict(tocheck, spn, doneProps, verdicts,"COVER",maxSeen,maxStruct);
 							printBounds("after cover walk", maxSeen, maxStruct);
@@ -665,26 +659,24 @@ public class UpperBoundsSolver {
 		}
 	}
 
-	public static void computeToCheck(SparsePetriNet spn, List<Integer> tocheckIndexes, List<Expression> tocheck, DoneProperties doneProps) {
+	public static void computeToCheck(SparsePetriNet spn, List<Expression> tocheck, DoneProperties doneProps) {
 		int j=0;
-		tocheckIndexes.clear();
 		tocheck.clear();
 		for (fr.lip6.move.gal.structural.Property p : spn.getProperties()) {
 			if (! doneProps.containsKey(p.getName()) && p.getType() == PropertyType.BOUNDS) {
 				tocheck.add(p.getBody());
-				tocheckIndexes.add(j);
 			}
 			j++;
 		}			
 	}	
 	
 	static int treatVerdicts(SparsePetriNet sparsePetriNet, DoneProperties doneProps, List<Expression> tocheck,
-			List<Integer> tocheckIndexes, List<SparseIntArray> paths, List<Integer> maxSeen, List<Integer> maxStruct, List<SparseIntArray> orders) {
-		return treatVerdicts(sparsePetriNet, doneProps, tocheck, tocheckIndexes, paths, "",maxSeen,maxStruct,orders);
+			List<SparseIntArray> paths, List<Integer> maxSeen, List<Integer> maxStruct, List<SparseIntArray> orders) {
+		return treatVerdicts(sparsePetriNet, doneProps, tocheck, paths, "",maxSeen,maxStruct,orders);
 	}
 
 	static int treatVerdicts(SparsePetriNet spn, DoneProperties doneProps, List<Expression> tocheck,
-			List<Integer> tocheckIndexes, List<SparseIntArray> paths, String technique, List<Integer> maxSeen, List<Integer> maxStruct, List<SparseIntArray> orders) {
+			List<SparseIntArray> paths, String technique, List<Integer> maxSeen, List<Integer> maxStruct, List<SparseIntArray> orders) {
 		int seen = 0; 
 		for (int v = paths.size()-1 ; v >= 0 ; v--) {
 			if (maxSeen.get(v).equals(maxStruct.get(v))) {

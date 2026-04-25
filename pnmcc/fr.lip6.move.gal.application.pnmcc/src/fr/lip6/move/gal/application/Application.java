@@ -800,12 +800,9 @@ public class Application implements IApplication, Ender {
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 
-				UpperBoundsSolver.checkInInitial(reader.getSPN(), doneProps);
-
 				List<Integer> maxStruct = UpperBoundsSolver.applyReductions(reader, doneProps, skelBounds);
 
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-				// checkInInitial(reader.getSpec(), doneProps, isSafe);
 
 				if (doneProps.keySet().containsAll(
 						reader.getSPN().getProperties().stream().map(p -> p.getName()).collect(Collectors.toList()))) {
@@ -820,7 +817,6 @@ public class Application implements IApplication, Ender {
 						System.out.println("Starting property specific reduction for " + p.getName());
 						r2.getSPN().getProperties().clear();
 						r2.getSPN().getProperties().add(p);
-						UpperBoundsSolver.checkInInitial(r2.getSPN(), doneProps);
 						UpperBoundsSolver.applyReductions(r2, doneProps, Collections.singletonList(maxStruct.get(pid)));
 						System.out.println("Ending property specific reduction for " + p.getName() + " in "
 								+ (System.currentTimeMillis() - time) + " ms.");
