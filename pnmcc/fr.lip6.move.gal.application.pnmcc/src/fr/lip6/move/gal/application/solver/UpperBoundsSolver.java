@@ -266,8 +266,6 @@ public class UpperBoundsSolver {
 					
 					printBounds("After Parikh guided walk", maxSeen, maxStruct);
 					checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL PARIKH_GUIDED_WALK");
-				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
-					iter++;
 				if (spn.getProperties().isEmpty())
 					break;
 				
@@ -309,13 +307,24 @@ public class UpperBoundsSolver {
 				spn.testInInitial();
 				spn.removeConstantPlaces();
 				spn.simplifyLogic();			
-
+				
+				
+				
 				if (checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL STRUCTURAL_REDUCTION") > 0) {
 					printBounds("after structural reductions", maxSeen, maxStruct);
 					iter++;
 				}
 				if (spn.getProperties().isEmpty()) {
 					return Collections.emptyList();
+				}
+				
+				if (spn.getProperties().size() != tocheck.size()) {
+					System.out.println("Inconsistency detected : number of properties changed after reduction without any verdict. This should not happen.");
+				} else {
+					tocheck.clear();
+					for (Property prop : spn.getProperties()) {
+						tocheck.add(prop.getBody());
+					}
 				}
 				
 				if (!isBounded.isPresent()) {
@@ -348,7 +357,7 @@ public class UpperBoundsSolver {
 							long total = 10000; // 10 seconds 
 							while (System.currentTimeMillis() - start < total) {
 								int[] verdicts = cw.runRandomReachabilityDetection(nbsteps, tocheck, (int) (total - (start - System.currentTimeMillis())) / 1000, -1, true, maxState);							
-								iter += interpretVerdict(tocheck, spn, doneProps, verdicts,"COVER",maxSeen,maxStruct);
+								iter += interpretVerdict(tocheck, spn, doneProps, verdicts,"COVER", maxSeen, maxStruct);
 								if (DEBUG >= 1) printBounds("after cover walk", maxSeen, maxStruct);
 								if (maxSeen.size() == 0) {
 									break;
@@ -466,9 +475,6 @@ public class UpperBoundsSolver {
 				}
 			}
 			if (done) {
-				ori.getSPN().getProperties().remove(id);
-				maxSeen.remove(id);
-				maxStruct.remove(id);
 				seen++;
 			}
 		}
@@ -672,13 +678,11 @@ public class UpperBoundsSolver {
 	}
 
 	public static void computeToCheck(SparsePetriNet spn, List<Expression> tocheck, DoneProperties doneProps) {
-		int j=0;
 		tocheck.clear();
 		for (fr.lip6.move.gal.structural.Property p : spn.getProperties()) {
 			if (! doneProps.containsKey(p.getName()) && p.getType() == PropertyType.BOUNDS) {
 				tocheck.add(p.getBody());
 			}
-			j++;
 		}			
 	}	
 	
