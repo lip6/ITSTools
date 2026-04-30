@@ -222,7 +222,7 @@ public class UpperBoundsSolver {
 								sz += parikh.valueAt(i);
 							}
 							if (sz != 0) {
-								if (Application.DEBUG >= 1) {
+								if (DEBUG >= 1) {
 									System.out.println("SMT solver thinks a reachable witness state is likely to occur in "+sz +" steps.");
 									SparseIntArray init = new SparseIntArray();	
 									for (int i=0 ; i < parikh.size() ; i++) {
@@ -416,14 +416,20 @@ public class UpperBoundsSolver {
 			
 			reader.setSpn(spn,false);
 			
-			if (! spn.getProperties().isEmpty())
-				testWithReachability(reader,maxSeen,maxStruct,doneProps);
+			if (! spn.getProperties().isEmpty()) {
+				if (testWithReachability(reader,maxSeen,maxStruct,doneProps)>0) {
+					checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "REACHABILITY");
+					printBounds("after reachability check", maxSeen, maxStruct);
+				}
+			}
+					
+					
 			
 			return maxStruct;
 		}
 	
 	
-	private static void testWithReachability(MccTranslator ori, List<Integer> maxSeen, List<Integer> maxStruct,
+	private static int testWithReachability(MccTranslator ori, List<Integer> maxSeen, List<Integer> maxStruct,
 			DoneProperties doneProps) {
 
 		SparsePetriNet spnori = ori.getSPN();
@@ -432,7 +438,7 @@ public class UpperBoundsSolver {
 		spn.getProperties().clear();
 		
 		
-		IntMatrixCol tflowTP = subproblem.getSPN().getFlowTP().transpose();
+		//IntMatrixCol tflowTP = subproblem.getSPN().getFlowTP().transpose();
 		Map<Integer,String> propId = new HashMap<>();
 		for (int id=0; id < spnori.getProperties().size() ; id++) {
 			Property prop = spnori.getProperties().get(id);
@@ -478,7 +484,7 @@ public class UpperBoundsSolver {
 				seen++;
 			}
 		}
-		printBounds("After reachability solving "+seen+" queries.", maxSeen, maxStruct);
+		return seen;
 	}
 
 	private static void printBounds(String rule, List<Integer> maxSeen, List<Integer> maxStruct) {
@@ -573,7 +579,7 @@ public class UpperBoundsSolver {
 				
 			}
 			
-			if (Application.DEBUG >= 2) {
+			if (DEBUG >= 2) {
 				System.out.println("(Positive flows) Managed to find structural bounds :" + Arrays.toString(limits));						
 				System.out.println("Current structural bounds on expressions : " + maxStruct);
 			}
@@ -633,7 +639,7 @@ public class UpperBoundsSolver {
 						}							
 					}						
 				}
-				if (Application.DEBUG >= 2) {
+				if (DEBUG >= 2) {
 					System.out.println("Repeat="+repeat+" : Managed to find structural bounds :" + Arrays.toString(limits));						
 					System.out.println("Current structural bounds on expressions : " + maxStruct );
 				}
@@ -670,7 +676,7 @@ public class UpperBoundsSolver {
 						}
 					}						
 				}
-				if (Application.DEBUG >= 1) {
+				if (DEBUG >= 1) {
 					System.out.println("Current structural bounds on expressions : " + maxStruct);				
 				}
 			}
