@@ -7,22 +7,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.application.Application;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.CoverWalker;
-import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
-import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
@@ -165,6 +160,10 @@ public class UpperBoundsSolver {
 			
 			printBounds("Before main loop", maxSeen, maxStruct);
 			
+			boolean again = true;
+			
+			while (again) {
+				again = false;
 			boolean first = true;
 			do {
 				iter =0;
@@ -420,9 +419,10 @@ public class UpperBoundsSolver {
 				if (testWithReachability(reader,maxSeen,maxStruct,doneProps)>0) {
 					checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "REACHABILITY");
 					printBounds("after reachability check", maxSeen, maxStruct);
+					again = true;
 				}
 			}
-					
+			}
 					
 			
 			return maxStruct;
@@ -463,24 +463,32 @@ public class UpperBoundsSolver {
 			e.printStackTrace();
 		}
 		int seen = 0;
-		for (int id = spnori.getProperties().size() ; id >= 0 ; id--) {
+		for (int id=0; id < spnori.getProperties().size() ; id++) {
 			boolean done = false;
-			Boolean b = localDone.getValue("MAX"+id);
+			Boolean bmin = localDone.getValue("MIN"+id);
+			Boolean bmax = localDone.getValue("MAX"+id);
 			String pname = propId.get(id);
-			if (b!=null && b) {
+			if (bmax!=null && bmax) {			
 				// We *can* reach the structural max.
 				doneProps.put(pname, maxStruct.get(id), "REACHABILITY_MAX");
 				done = true;
-			} else {
-				b = localDone.getValue("MIN"+id);
-
-				if (b!=null && b) {
+			} else if (bmin!=null && bmin) {
 				// We *cannot exceed* the seen value.
 				doneProps.put(pname, maxSeen.get(id), "REACHABILITY_MIN");
 				done = true;
-				}
-			}
+			}			
 			if (done) {
+				seen++;
+				continue;
+			}
+			if (bmax!=null && !bmax) {
+				// We cannot reach the structural max ! bound is tighter than that.
+				maxStruct.set(id, maxStruct.get(id)-1);
+				seen++;
+			}
+			if (bmin!=null && !bmin) {
+				// We can exceed the seen value ! bound is looser than that.
+				maxSeen.set(id, maxSeen.get(id)+1);
 				seen++;
 			}
 		}
