@@ -129,7 +129,8 @@ public class HLSRTransformer {
 			for (fr.lip6.move.gal.structural.hlpn.Sort s : sortMap.values()) {
 				res.addSort(s);
 			}
-		} catch (NegativeArraySizeException nase) {
+			 Math.toIntExact(12l);
+		} catch (NegativeArraySizeException|ArithmeticException nase) {
 			if (! isOneSafe) {
 				throw new OverlargeMarkingException();
 			} else {
@@ -511,7 +512,7 @@ public class HLSRTransformer {
 	private Param createParameter(VariableDecl var) {
 		Sort sort = var.getSort();
 		if (sort instanceof UserSort) {
-			return new Param(Utils.normalizeName(var.getName()), computeSortCardinality(sort), getSortName(sort));
+			return new Param(Utils.normalizeName(var.getName()),  Math.toIntExact(computeSortCardinality(sort)), getSortName(sort));
 		} else {
 			getLog().warning("problem finding type for variable");
 			return null;
@@ -521,7 +522,7 @@ public class HLSRTransformer {
 
 	private int[] interpretMarking(HLMarking hlinitialMarking, Sort psort) {
 		if (hlinitialMarking == null) {
-			return new int[computeSortCardinality(psort)];
+			return new int[ Math.toIntExact(computeSortCardinality(psort))];
 		}
 		return interpretMarkingTerm(hlinitialMarking.getStructure(), psort);
 	}
@@ -531,7 +532,7 @@ public class HLSRTransformer {
 
 		if (term instanceof All) {
 			// All all = (All) term;
-			int size = computeSortCardinality(psort);
+			long size = computeSortCardinality(psort);
 			for (int i = 0; i < size; i++) {
 				toret.add(new Pair<>(Collections.singletonList(Expression.constant(i)), 1));
 			}
@@ -590,7 +591,7 @@ public class HLSRTransformer {
 					Expression bin = Expression.op(Op.MINUS,pr, Expression.constant(1));
 										
 					elemSort = var.getVariableDecl().getSort();
-					Expression max = Expression.constant(computeSortCardinality(elemSort));
+					Expression max = Expression.constant( Math.toIntExact(computeSortCardinality(elemSort)));
 					
 					// wrap function for negative integer i : 
 					// ( (i % max) + max ) % max )
@@ -610,7 +611,7 @@ public class HLSRTransformer {
 					
 					elemSort = var.getVariableDecl().getSort();
 					
-					Expression mod = Expression.op(Op.MOD, bin, Expression.constant(computeSortCardinality(elemSort)));
+					Expression mod = Expression.op(Op.MOD, bin, Expression.constant( Math.toIntExact(computeSortCardinality(elemSort))));
 					
 					value = mod;					
 				} else if (elem instanceof FiniteIntRangeConstant) {
@@ -690,7 +691,7 @@ public class HLSRTransformer {
 
 			Expression bin = Expression.op(Op.MINUS, pr, Expression.constant(1));
 								
-			Expression max = Expression.constant(computeSortCardinality(var.getVariableDecl().getSort()));
+			Expression max = Expression.constant( Math.toIntExact(computeSortCardinality(var.getVariableDecl().getSort())));
 			
 			// wrap function for negative integer i : 
 			// ( (i % max) + max ) % max )
@@ -711,7 +712,7 @@ public class HLSRTransformer {
 
 			Expression bin = Expression.op(Op.ADD, pr, Expression.constant(1));
 
-			Expression max = Expression.constant(computeSortCardinality(var.getVariableDecl().getSort()));
+			Expression max = Expression.constant( Math.toIntExact(computeSortCardinality(var.getVariableDecl().getSort())));
 
 			Expression mod = Expression.op(Op.MOD,bin, max);
 			
@@ -723,7 +724,7 @@ public class HLSRTransformer {
 	}
 
 	private int[] interpretMarkingTerm(Term term, Sort psort) {
-		int [] toret = new int[computeSortCardinality(psort)];
+		int [] toret = new int[ Math.toIntExact( computeSortCardinality(psort))];
 
 		if (term instanceof All) {
 			// All all = (All) term;
@@ -751,7 +752,7 @@ public class HLSRTransformer {
 		} else if (term instanceof Tuple) {
 			Tuple tuple = (Tuple) term;
 			// hopefully, only constants in the tuple
-			int tot = 1;
+			long tot = 1;
 			List<Integer> targets = new ArrayList<>();
 			targets.add(0);
 			
@@ -784,8 +785,8 @@ public class HLSRTransformer {
 				} else if (elem instanceof All) {
 					List<Integer> newtargets = new ArrayList<>();
 					for (int target : targets) {
-						for (int ii = 0, iie = computeSortCardinality(elemSort) ; ii < iie ; ii++) {
-							newtargets.add(target + tot * ii);
+						for (int ii = 0, iie = Math.toIntExact(computeSortCardinality(elemSort)) ; ii < iie ; ii++) {
+							newtargets.add( Math.toIntExact(target + tot * ii));
 						}
 					}
 					targets = newtargets;
@@ -793,7 +794,7 @@ public class HLSRTransformer {
 					FiniteIntRangeConstant firc = (FiniteIntRangeConstant) elem;
 					int pos = firc.getValue() - Math.toIntExact(firc.getRange().getStart());
 					for (int ii=0; ii < targets.size() ; ii++) {
-						targets.set(ii, targets.get(ii) + tot * pos);
+						targets.set(ii,  Math.toIntExact(targets.get(ii) + tot * pos));
 					}					
 				} else {
 					throw new UnsupportedOperationException();
@@ -832,7 +833,7 @@ public class HLSRTransformer {
 		return toret;
 	}
 
-	public void addTargets(Add add, List<Integer> targets, int tot, List<Integer> newtargets) {
+	public void addTargets(Add add, List<Integer> targets, long tot, List<Integer> newtargets) {
 		for (Term e : add.getSubterm()) {
 			if (e instanceof Add) {
 				Add added = (Add) e;
@@ -851,12 +852,12 @@ public class HLSRTransformer {
 		}
 	}
 
-	public List<Integer> interpretSubTerm(int tot, List<Integer> targets, Term elem) {
+	public List<Integer> interpretSubTerm(long tot, List<Integer> targets, Term elem) {
 		UserOperator uo = (UserOperator) elem;
 		if (uo.getDeclaration() instanceof FEConstant) {
 			int cte = HLUtils.getConstantIndex(uo);
 			for (int ii=0; ii < targets.size() ; ii++) {
-				targets.set(ii, targets.get(ii) + tot * cte);
+				targets.set(ii, Math.toIntExact(targets.get(ii) + tot * cte));
 			}
 		//	tot *= computeSortCardinality( ((FEConstant)uo.getDeclaration()).getSort());
 		} else if (uo.getDeclaration() instanceof PartitionElement) {
@@ -865,7 +866,7 @@ public class HLSRTransformer {
 			List<Integer> newtargets = new ArrayList<>();
 			for (Integer cte : ctes) {
 				for (int ii=0; ii < targets.size() ; ii++) {
-					newtargets.add(targets.get(ii) + tot * cte);
+					newtargets.add( Math.toIntExact(  targets.get(ii) + tot * cte));
 				}
 			}
 			targets = newtargets;
@@ -878,9 +879,9 @@ public class HLSRTransformer {
 
 
 
-	private HashMap<Sort, Integer> cache = new HashMap<Sort, Integer>();
-	private int computeSortCardinality(Sort psort) {
-		Integer val = cache.get(psort); 
+	private HashMap<Sort, Long> cache = new HashMap<>();
+	private long computeSortCardinality(Sort psort) {
+		Long val = cache.get(psort); 
 		if (val==null) {
 			val = _computeSortCardinality(psort);
 			cache.put(psort,val);
@@ -995,7 +996,7 @@ public class HLSRTransformer {
 		}
 	}
 
-	private Integer _computeSortCardinality(Sort psort) {
+	private long _computeSortCardinality(Sort psort) {
 		if (psort instanceof Bool) 	{
 			return 2;
 		} else if (psort instanceof Dot) {
@@ -1006,7 +1007,7 @@ public class HLSRTransformer {
 		} else if (psort instanceof FiniteIntRange) {
 			FiniteIntRange fir = (FiniteIntRange) psort;
 			// ranges are inclusive : [1,2] -> values 1 and 2 legal.
-			return Math.toIntExact(fir.getEnd()) - Math.toIntExact(fir.getStart()) + 1;
+			return fir.getEnd() - fir.getStart() + 1;
 		} else if (psort instanceof ProductSort) {
 			ProductSort ps = (ProductSort) psort;
 			int sum = 1; 
