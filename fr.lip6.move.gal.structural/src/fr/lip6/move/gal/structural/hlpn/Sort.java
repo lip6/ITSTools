@@ -2,12 +2,12 @@ package fr.lip6.move.gal.structural.hlpn;
 
 public class Sort {
 	private String name;
-	private int size;
-	public Sort(String name, int size) {
+	private long size;
+	public Sort(String name, long size) {
 		this.name = name;
 		this.size = size;
 	}
-	public int size() {
+	public long size() {
 		return size;
 	}
 	public void setSize(int size) {

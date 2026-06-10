@@ -40,7 +40,7 @@ public class SymmetricUnfolder {
 		
 		// examine each sort one by one.
 		// start with larger domains
-		net.getSorts().sort((a,b)->-Integer.compare(a.size(),b.size()));
+		net.getSorts().sort((a,b)->-Long.compare(a.size(),b.size()));
 		for (Sort sort : net.getSorts()) {
 
 			if (sort.size()==1) {
@@ -131,7 +131,7 @@ public class SymmetricUnfolder {
 				continue;
 			}
 			
-			Partition partition = new Partition(sort.size());
+			Partition partition = new Partition(Math.toIntExact(sort.size()));
 			
 			// tests for synchronization
 			for (HLTrans trans : net.getTransitions()) {				
@@ -152,7 +152,7 @@ public class SymmetricUnfolder {
 										if (strategy == Strategy.THAT_ONE_GUY) {
 											// "that one guy" strategy
 											// this is more refined but still an over approx
-											Partition p2 = new Partition(sort.size(),Collections.singletonList(0));
+											Partition p2 = new Partition(Math.toIntExact(sort.size()),Collections.singletonList(0));
 											partition = Partition.refine(partition, p2);
 										} else if (strategy == Strategy.FORKJOIN) {
 											// look for the origin of tokens being joined
@@ -224,16 +224,16 @@ public class SymmetricUnfolder {
 				int prodSize = place.getSort().size();
 
 				// to reinterpret a vector of indexes to an index in compound array
-				int [] multipliers = new int [prodSize];
+				long [] multipliers = new long [prodSize];
 				multipliers[prodSize-1]=1;						
 				for (int i=prodSize-2 ; i >= 0 ; i--) {
-					multipliers[i] = multipliers[i+1]*place.getSort().get(i+1).size();
+					multipliers[i] = Math.toIntExact(multipliers[i+1]*place.getSort().get(i+1).size());
 				}
 
 				// increment each element using its basis
 				int [] sizes = new int [prodSize];
 				for (int i=0;i<prodSize;i++) {
-					sizes[i]=place.getSort().get(i).size();
+					sizes[i]= Math.toIntExact(place.getSort().get(i).size());
 				}
 
 
@@ -500,7 +500,7 @@ public class SymmetricUnfolder {
 				}
 				
 				for (List<Integer> l : localpart.values()) {
-					Partition p2 = new Partition(sort.size(),l);
+					Partition p2 = new Partition(Math.toIntExact(sort.size()),l);
 					partition = Partition.refine(p2, partition);
 					
 					if (partition.getNbSubs()==sort.size()) {

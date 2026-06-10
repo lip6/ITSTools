@@ -12,7 +12,7 @@ public class HLPlace {
 	private boolean isConstant = false;
 	private List<Sort> sort;
 	
-	private int [] multipliers=null;
+	private long [] multipliers=null;
 	public HLPlace(String name, int start, int [] initial, List<Sort> sort) {
 		this.name = name;
 		this.startIndex = start;
@@ -66,9 +66,9 @@ public class HLPlace {
 		}
 		return sum;
 	}
-	public int[] getMultipliers() {
+	public long[] getMultipliers() {
 		if (multipliers ==null) {
-			multipliers = new int[sort.size()];
+			multipliers = new long[Math.toIntExact(sort.size())];
 			multipliers[sort.size()-1]=1;						
 			for (int i=sort.size()-2 ; i >= 0 ; i--) {
 				multipliers[i] = multipliers[i+1]*sort.get(i+1).size();

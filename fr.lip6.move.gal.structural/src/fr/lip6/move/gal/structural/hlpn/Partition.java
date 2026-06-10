@@ -115,10 +115,10 @@ public class Partition {
 		return partition.length;
 	}
 	
-	public static int sumprod(int[] cur, int[] multipliers) {
+	public static int sumprod(int[] cur, long[] multipliers) {
 		int res = 0;
 		for (int i=0,ie=cur.length; i < ie ; i++) {
-			res += cur[i]*multipliers[i];
+			res = Math.toIntExact(res + cur[i]*multipliers[i]);
 		}
 		return res;
 	}
@@ -128,7 +128,7 @@ public class Partition {
 		int [] res = new int [ (initial.length / size()) * getNbSubs()];
 		
 		List<Sort> sort = place.getSort();
-		int [] multipliers = new int[sort.size()];		
+		long [] multipliers = new long[Math.toIntExact(sort.size())];		
 		multipliers[sort.size()-1]=1;						
 		for (int i=sort.size()-2 ; i >= 0 ; i--) {
 			if (i+1 == sortindex) {
