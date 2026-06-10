@@ -68,7 +68,9 @@ public class PTNetHandler extends DefaultHandler {
 	@Override
 	public final void startElement(String uri, String localName, String baliseName, Attributes attributes)
 			throws SAXException {
-		if (doNupn) {
+		if (inOpaqueToolSpecific) {
+			return;
+		} else if (doNupn) {
 			nupnHandler.startElement(uri, localName, baliseName, attributes);
 		} else {
 			// Clear buffer at the start of elements we care about
@@ -140,6 +142,9 @@ public class PTNetHandler extends DefaultHandler {
 					stack.push(tool);
 					if ("nupn".equals(attributes.getValue("tool"))) {
 						doNupn = true;
+					} else {
+						logger.warning("Unknown tool specific annotation: " + attributes.getValue("tool"));
+						inOpaqueToolSpecific = true;
 					}
 				} catch (ClassCastException e) {
 					logger.warning("Skipping unknown tool specific annotation: " + attributes.getValue("tool"));
