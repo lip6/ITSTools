@@ -72,12 +72,13 @@ public class GlobalPropertySolver {
 
 		if (pn instanceof SparsePetriNet) {
 			SparsePetriNet spn = (SparsePetriNet) pn;
-			
+
 			IntMatrixCol tflowTP = spn.getFlowTP().transpose();
 			IntMatrixCol tflowPT = spn.getFlowPT().transpose();
-			
+			List<Integer> marks = spn.getMarks();
+
 			// test initial state first
-			for (int mark : spn.getMarks()) {
+			for (int mark : marks) {
 				if (mark > 1) {
 					// not one safe, definitely
 					System.out.println("Due to initial marking, net is not one safe.");
@@ -86,21 +87,29 @@ public class GlobalPropertySolver {
 					return;
 				}
 			}
-			
+			// from here on, m0(p) is 0 or 1 for every place p
+
 			boolean changed;
 			do {
 				changed = false;
-				// look for places that cannot be fed => we already checked initial so they are one safe  
-				for (int pid=0 ; pid < tflowTP.getColumnCount() ; pid++) {
+				// look for places whose total token supply (initial + producible) is at most one
+				// => they are one safe, and their consumers can fire at most once
+				for (int pid=0 ; pid < spn.getPlaceCount() ; pid++) {
 					if (osPlaces.contains(pid)) {
 						continue;
 					}
-					// cannot be fed at all
-					// or can only be fed exactly once at most
-					if (tflowTP.getColumn(pid).size()==0 || tflowTP.getColumn(pid).size()==1 && oneFireTrans.contains(tflowTP.getColumn(pid).keyAt(0))) {
+					SparseIntArray feed = tflowTP.getColumn(pid);
+					int m0 = marks.get(pid);
+					// cannot be fed at all : supply is just the initial marking, which we checked is <= 1
+					// or is initially empty and can only be fed exactly once at most, by a single token
+					// NB : a place that is both initially marked and feedable can reach 2, it is excluded here
+					// NB : the feeding arc weight must be 1, a single firing of weight k puts k tokens in
+					if ( (feed.size()==0)
+							|| (feed.size()==1 && m0==0 && feed.valueAt(0)==1 && oneFireTrans.contains(feed.keyAt(0))) ) {
 						changed = true;
 						osPlaces.add(pid);
-						// consumers from this place are hence single fireable
+						// consumers from this place are hence single fireable :
+						// they each need at least one token from a supply of at most one
 						SparseIntArray cons = tflowPT.getColumn(pid);
 						for (int i=0, ie=cons.size() ;i< ie; i++) {
 							int tid = cons.keyAt(i);
@@ -109,7 +118,7 @@ public class GlobalPropertySolver {
 					}
 				}
 			} while (changed);
-			
+
 			if (DEBUG==2) FlowPrinter.drawNet(spn, "Finally : Detected single feed",osPlaces,oneFireTrans);
 			if (! osPlaces.isEmpty()) {
 				System.out.println("Structural unfed/single firing approximation deduced that "+ osPlaces.size()+ "/" + spn.getPlaceCount() + " places are one safe.");
@@ -143,8 +152,8 @@ public class GlobalPropertySolver {
 			Property oneUnsafe = new Property(Expression.op(Op.AG, Expression.not(Expression.nop(Op.OR,gtone)), null), PropertyType.INVARIANT, "allosplace");
 			pn.getProperties().add(oneUnsafe);
 		}
-				
-		
+
+
 	}
 
 	void buildStableMarkingProperty(PetriNet spn, DoneProperties doneProps) {
