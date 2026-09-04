@@ -333,6 +333,37 @@ public class ReachabilitySolver {
 			maxTime = 30;
 		}
 		long timeParikh = System.currentTimeMillis();
+		if (PetriSpotWalker.USE_PETRISPOT) {
+			// one request: every unsolved predicate, the hinted ones walked with the parikh strategy
+			List<Problem> remain = new ArrayList<>(problems.getUnsolved());
+			List<Expression> tocheck = new ArrayList<>(remain.size());
+			List<SparseIntArray> hints = new ArrayList<>(remain.size());
+			int maxSz = 1;
+			for (Problem p : remain) {
+				tocheck.add(p.getPredicate());
+				SparseIntArray parikh = p.getSolution().hasWitness() ? p.getSolution().getParikh() : null;
+				hints.add(parikh);
+				if (parikh != null) {
+					int sz = 0;
+					for (int i=0 ; i < parikh.size() ; i++) sz += parikh.valueAt(i);
+					maxSz = Math.max(maxSz, sz);
+				}
+			}
+			PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(re.getNet(), tocheck, hints, 100L * maxSz, 1, maxTime);
+			if (psv != null) {
+				for (int v = 0; v < remain.size(); v++) {
+					if (psv.found[v] != 0) {
+						Problem p = remain.get(v);
+						doneProps.put(p.getName(), p.isEF(), "TOPOLOGICAL " + (psv.techniques[v] != null ? psv.techniques[v] : "EXPLICIT"));
+						p.getSolution().setReply(SMTReply.REACHABLE);
+						replayed++;
+					}
+				}
+				problems.update();
+				System.out.println("Parikh walk visited "+replayed+ " properties in "+ (System.currentTimeMillis() - timeParikh) + " ms.");
+				return replayed;
+			}
+		}
 		for (Entry<SparseIntArray, List<Problem>> ent:indexMap.entrySet()) {
 			Problem p = ent.getValue().get(0);
 			if (System.currentTimeMillis() - time >= maxTime * 1000) {

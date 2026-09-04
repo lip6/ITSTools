@@ -1,5 +1,6 @@
 package fr.lip6.move.petrispot.runner;
 
+import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.expr.ArrayVarRef;
 import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
@@ -48,6 +49,23 @@ public class SexprPropertyPrinter implements ExprVisitor<Void> {
 		if (knownBound >= 0) p.sb.append(' ').append(knownBound);
 		p.sb.append(')');
 		return p.sb.toString();
+	}
+
+	/**
+	 * {@code (parikh NAME (t k)...)}: a Parikh vector hint for property NAME,
+	 * keyed by transitions of the walked net (PetriSpot groups transitions of
+	 * identical effect itself). Null when the vector has no positive entry.
+	 */
+	public static String parikh(String name, SparseIntArray parikh) {
+		StringBuilder sb = new StringBuilder("(parikh ").append(name);
+		int n = 0;
+		for (int i = 0; i < parikh.size(); i++) {
+			if (parikh.valueAt(i) > 0) {
+				sb.append(" (t").append(parikh.keyAt(i)).append(' ').append(parikh.valueAt(i)).append(')');
+				n++;
+			}
+		}
+		return n == 0 ? null : sb.append(')').toString();
 	}
 
 	/** {@code (deadlock NAME)}: a dead marking answers TRUE. */

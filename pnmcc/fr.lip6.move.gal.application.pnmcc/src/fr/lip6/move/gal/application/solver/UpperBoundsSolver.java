@@ -213,6 +213,26 @@ public class UpperBoundsSolver {
 					
 				
 					
+					boolean guidedByPetriSpot = false;
+					if (PetriSpotWalker.USE_PETRISPOT && paths.size() == tocheck.size()) {
+						int maxSz = 0;
+						for (SparseIntArray parikh : paths) {
+							if (parikh == null) continue;
+							int sz = 0;
+							for (int i=0 ; i < parikh.size() ; i++) sz += parikh.valueAt(i);
+							maxSz = Math.max(maxSz, sz);
+						}
+						if (maxSz > 0) {
+							PetriSpotWalker.Verdicts psv = PetriSpotWalker.runBounds(sr, tocheck, maxStruct, paths, 100L * maxSz, 1, 30);
+							if (psv != null) {
+								int[] verdicts = new int[psv.max.length];
+								for (int i = 0; i < verdicts.length; i++) verdicts[i] = (int) Math.min(psv.max[i], Integer.MAX_VALUE);
+								iter += interpretVerdict(tocheck, spn, doneProps, verdicts, "PETRISPOT_PARIKH", maxSeen, maxStruct);
+								guidedByPetriSpot = true;
+							}
+						}
+					}
+					if (!guidedByPetriSpot)
 					for (int v = paths.size()-1 ; v >= 0 ; v--) {
 						SparseIntArray parikh = paths.get(v);
 						if (parikh != null) {

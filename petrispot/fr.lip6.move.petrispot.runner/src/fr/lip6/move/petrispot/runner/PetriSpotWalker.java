@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import android.util.SparseIntArray;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
@@ -73,6 +74,16 @@ public class PetriSpotWalker {
 	 */
 	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates, long steps,
 			int sweepSeconds, int totalSeconds) {
+		return runReachability(net, predicates, null, steps, sweepSeconds, totalSeconds);
+	}
+
+	/**
+	 * Same, with an optional Parikh vector per predicate (null entries allowed,
+	 * or a null list): the hinted predicates are walked with the parikh
+	 * strategy in their focused rounds.
+	 */
+	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates,
+			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds) {
 		if (predicates.isEmpty()) {
 			return new Verdicts(0);
 		}
@@ -89,7 +100,22 @@ public class PetriSpotWalker {
 		args.add("--walkSteps=" + steps);
 		args.add("--sweepTime=" + sweepSeconds);
 		args.add("--totalTime=" + totalSeconds);
-		return run(net, forms, args, totalSeconds);
+		return run(net, forms, hintForms(parikhs), args, totalSeconds);
+	}
+
+	/** The (parikh prop<i> ...) forms of a list of vectors, or null when there is none. */
+	private static List<String> hintForms(List<SparseIntArray> parikhs) {
+		if (parikhs == null) {
+			return null;
+		}
+		List<String> hints = new ArrayList<>();
+		for (int i = 0; i < parikhs.size(); i++) {
+			SparseIntArray p = parikhs.get(i);
+			if (p == null) continue;
+			String form = SexprPropertyPrinter.parikh("prop" + i, p);
+			if (form != null) hints.add(form);
+		}
+		return hints.isEmpty() ? null : hints;
 	}
 
 	/**
@@ -103,6 +129,12 @@ public class PetriSpotWalker {
 	 */
 	public static Verdicts runBounds(ISparsePetriNet net, List<Expression> expressions, List<Integer> knownBounds,
 			long steps, int sweepSeconds, int totalSeconds) {
+		return runBounds(net, expressions, knownBounds, null, steps, sweepSeconds, totalSeconds);
+	}
+
+	/** Same, with an optional Parikh vector per expression (see runReachability). */
+	public static Verdicts runBounds(ISparsePetriNet net, List<Expression> expressions, List<Integer> knownBounds,
+			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds) {
 		if (expressions.isEmpty()) {
 			return new Verdicts(0);
 		}
@@ -120,7 +152,7 @@ public class PetriSpotWalker {
 		args.add("--walkSteps=" + steps);
 		args.add("--sweepTime=" + sweepSeconds);
 		args.add("--totalTime=" + totalSeconds);
-		Verdicts v = run(net, forms, args, totalSeconds);
+		Verdicts v = run(net, forms, hintForms(parikhs), args, totalSeconds);
 		if (v != null) {
 			for (int i = 0; i < v.max.length; i++) {
 				if (v.max[i] == Long.MIN_VALUE) {
@@ -139,18 +171,25 @@ public class PetriSpotWalker {
 	 * @return TRUE if a deadlock was reached, FALSE if none was, null if PetriSpot could not run
 	 */
 	public static Boolean runDeadlock(ISparsePetriNet net, long steps, int timeoutSeconds) {
+		return runDeadlock(net, null, steps, timeoutSeconds);
+	}
+
+	/** Same, guided by a Parikh vector when one is given. */
+	public static Boolean runDeadlock(ISparsePetriNet net, SparseIntArray parikh, long steps, int timeoutSeconds) {
 		List<String> args = new ArrayList<>();
 		args.add("--walkSteps=" + steps);
 		args.add("-t");
 		args.add(Integer.toString(timeoutSeconds));
-		Verdicts v = run(net, List.of(SexprPropertyPrinter.deadlock("prop0")), args, timeoutSeconds);
+		List<String> hints = parikh == null ? null : hintForms(List.of(parikh));
+		Verdicts v = run(net, List.of(SexprPropertyPrinter.deadlock("prop0")), hints, args, timeoutSeconds);
 		if (v == null) {
 			return null;
 		}
 		return v.found[0] != 0;
 	}
 
-	private static Verdicts run(ISparsePetriNet net, List<String> forms, List<String> args, int budgetSeconds) {
+	private static Verdicts run(ISparsePetriNet net, List<String> forms, List<String> hints, List<String> args,
+			int budgetSeconds) {
 		long t0 = System.currentTimeMillis();
 		Verdicts verdicts = new Verdicts(forms.size());
 		List<File> todel = new ArrayList<>();
@@ -166,6 +205,12 @@ public class PetriSpotWalker {
 			cl.addArg(binaryPath());
 			cl.addArg("--net=" + netFile.getCanonicalPath());
 			cl.addArg("--props=" + propFile.getCanonicalPath());
+			if (hints != null) {
+				File hintFile = Files.createTempFile("petrispot-hints-", ".sexpr").toFile();
+				todel.add(hintFile);
+				Files.write(hintFile.toPath(), hints, StandardCharsets.UTF_8);
+				cl.addArg("--hints=" + hintFile.getCanonicalPath());
+			}
 			cl.addArg("--threads=" + THREADS);
 			cl.addArg("-q");
 			for (String a : args) {

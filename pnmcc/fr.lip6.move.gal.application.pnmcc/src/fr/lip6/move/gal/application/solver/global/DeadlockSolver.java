@@ -168,8 +168,9 @@ public abstract class DeadlockSolver {
 									}
 									// FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString());
 									time = System.currentTimeMillis();			
-									// TODO : transmit por info
-									re.runGuidedDeadlockDetection(100*sz, parikh,repr,30);
+									if (!petriSpotDeadlock(sr, parikh, 100*sz, 30)) {
+										re.runGuidedDeadlockDetection(100*sz, parikh,repr,30);
+									}
 								}
 							}
 						} catch (ArithmeticException e) {
@@ -262,10 +263,16 @@ public abstract class DeadlockSolver {
 	 * if the Java explorer must be used instead.
 	 */
 	private static boolean petriSpotDeadlock(StructuralReduction sr, int steps, int timeout) throws DeadlockFound {
+		return petriSpotDeadlock(sr, null, steps, timeout);
+	}
+
+	/** Same, guided by a Parikh vector from the SMT solver when one is given. */
+	private static boolean petriSpotDeadlock(StructuralReduction sr, SparseIntArray parikh, int steps, int timeout)
+			throws DeadlockFound {
 		if (!PetriSpotWalker.USE_PETRISPOT) {
 			return false;
 		}
-		Boolean found = PetriSpotWalker.runDeadlock(sr, steps, timeout);
+		Boolean found = PetriSpotWalker.runDeadlock(sr, parikh, steps, timeout);
 		if (found == null) {
 			return false;
 		}
