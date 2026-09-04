@@ -53,7 +53,7 @@ public class KERSFormatIO {
 		return Long.reverseBytes(in.readLong());
 	}
 
-	private static void writeIntLE(DataOutputStream out, int v) throws IOException {
+	static void writeIntLE(DataOutputStream out, int v) throws IOException {
 		out.writeInt(Integer.reverseBytes(v));
 	}
 
