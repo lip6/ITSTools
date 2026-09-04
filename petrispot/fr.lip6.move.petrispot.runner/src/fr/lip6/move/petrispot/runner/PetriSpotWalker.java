@@ -46,14 +46,21 @@ public class PetriSpotWalker {
 	/** Seconds added to the binary's own budget before it is killed. */
 	private static final int GRACE_SECONDS = 5;
 
-	/** Verdicts of one request: 1 when a witness was found, with the MCC technique words. */
+	/**
+	 * Verdicts of one request: found is 1 when a witness was found (or the
+	 * known bound was reached), with the MCC technique words; for bound
+	 * requests, max is the largest value of each expression seen.
+	 */
 	public static class Verdicts {
 		public final int[] found;
 		public final String[] techniques;
+		public final long[] max;
 
 		Verdicts(int n) {
 			found = new int[n];
 			techniques = new String[n];
+			max = new long[n];
+			java.util.Arrays.fill(max, Long.MIN_VALUE);
 		}
 	}
 
@@ -83,6 +90,46 @@ public class PetriSpotWalker {
 		args.add("--sweepTime=" + sweepSeconds);
 		args.add("--totalTime=" + totalSeconds);
 		return run(net, forms, args, totalSeconds);
+	}
+
+	/**
+	 * Maximise each expression (a weighted sum of places): a random sweep over
+	 * all of them for up to sweepSeconds, then focused best-first climbs until
+	 * totalSeconds, each walk firing at most steps transitions. knownBounds[i]
+	 * is a structural upper bound of expression i, or -1 when unknown; reaching
+	 * it ends that expression early.
+	 *
+	 * @return the largest values seen (Verdicts.max), or null if PetriSpot could not run
+	 */
+	public static Verdicts runBounds(ISparsePetriNet net, List<Expression> expressions, List<Integer> knownBounds,
+			long steps, int sweepSeconds, int totalSeconds) {
+		if (expressions.isEmpty()) {
+			return new Verdicts(0);
+		}
+		List<String> forms = new ArrayList<>(expressions.size());
+		try {
+			for (int i = 0; i < expressions.size(); i++) {
+				int k = knownBounds.get(i);
+				forms.add(SexprPropertyPrinter.bound("prop" + i, expressions.get(i), k >= 0 ? k : -1));
+			}
+		} catch (UnsupportedOperationException e) {
+			System.out.println("PetriSpot walker skipped: " + e.getMessage());
+			return null;
+		}
+		List<String> args = new ArrayList<>();
+		args.add("--walkSteps=" + steps);
+		args.add("--sweepTime=" + sweepSeconds);
+		args.add("--totalTime=" + totalSeconds);
+		Verdicts v = run(net, forms, args, totalSeconds);
+		if (v != null) {
+			for (int i = 0; i < v.max.length; i++) {
+				if (v.max[i] == Long.MIN_VALUE) {
+					System.out.println("PetriSpot walker reported no value for bound " + i);
+					return null;
+				}
+			}
+		}
+		return v;
 	}
 
 	/**
@@ -140,9 +187,12 @@ public class PetriSpotWalker {
 			reader.join();
 			int seen = 0;
 			for (int f : verdicts.found) seen += f;
-			System.out.println("PetriSpot walker: " + seen + "/" + forms.size() + " properties solved in "
+			int bounds = 0;
+			for (long m : verdicts.max) if (m != Long.MIN_VALUE) bounds++;
+			System.out.println("PetriSpot walker: " + seen + "/" + forms.size() + " properties solved"
+					+ (bounds > 0 ? ", " + bounds + " bounds reported" : "") + " in "
 					+ (System.currentTimeMillis() - t0) + " ms (exit " + exitCode + ").");
-			if (exitCode != 0 && seen == 0) {
+			if (exitCode != 0 && seen == 0 && bounds == 0) {
 				return null;
 			}
 			return verdicts;
@@ -169,15 +219,16 @@ public class PetriSpotWalker {
 		return BinaryToolsPlugin.getPetriURI().getPath();
 	}
 
-	/** Consume stdout to its end, recording every FORMULA line as it arrives. */
+	/** Consume stdout to its end, recording every FORMULA and BOUND line as it arrives. */
 	private static void readVerdicts(Process process, Verdicts verdicts) {
 		try (BufferedReader in = new BufferedReader(
 				new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
 			String line;
 			while ((line = in.readLine()) != null) {
 				if (DEBUG >= 2) System.out.println("[petrispot] " + line);
-				if (!line.startsWith("FORMULA prop")) continue;
-				// FORMULA prop<i> TRUE|FALSE TECHNIQUES <words>
+				boolean formula = line.startsWith("FORMULA prop");
+				if (!formula && !line.startsWith("BOUND prop")) continue;
+				// FORMULA prop<i> TRUE|FALSE|<k> TECHNIQUES <words>   or   BOUND prop<i> <max>
 				String[] words = line.split(" ", 5);
 				if (words.length < 3) continue;
 				int index;
@@ -187,9 +238,17 @@ public class PetriSpotWalker {
 					continue;
 				}
 				if (index < 0 || index >= verdicts.found.length) continue;
-				// every request asks for a witness, so a verdict means one was found
-				verdicts.found[index] = 1;
-				verdicts.techniques[index] = words.length == 5 ? words[4] : "EXPLICIT";
+				if (formula) {
+					// every request asks for a witness, so a verdict means one was found
+					verdicts.found[index] = 1;
+					verdicts.techniques[index] = words.length == 5 ? words[4] : "EXPLICIT";
+				} else {
+					try {
+						verdicts.max[index] = Math.max(verdicts.max[index], Long.parseLong(words[2]));
+					} catch (NumberFormatException e) {
+						// malformed line: ignore
+					}
+				}
 			}
 		} catch (IOException e) {
 			// stream closed by a kill: keep what was read

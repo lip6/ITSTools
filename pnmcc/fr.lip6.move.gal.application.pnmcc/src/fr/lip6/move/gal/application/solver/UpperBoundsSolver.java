@@ -31,6 +31,7 @@ import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.petrispot.runner.PetriSpotRunner;
+import fr.lip6.move.petrispot.runner.PetriSpotWalker;
 
 public class UpperBoundsSolver {
 
@@ -749,18 +750,33 @@ public class UpperBoundsSolver {
 	
 	static int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, SparsePetriNet spn,
 			DoneProperties doneProps, int steps, List<Integer> maxSeen, List<Integer> maxStruct) {
-		WalkStats ws = new WalkStats(WalkType.RANDOM);
-		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1,true, ws);
-		System.out.println(ws);
-		
-		ws = new WalkStats(WalkType.BEST_FIRST);
-		int seen = interpretVerdict(tocheck, spn, doneProps, verdicts,"RANDOM",maxSeen,maxStruct);
-		for (int i=0 ; i < tocheck.size() ; i++) {			
-			verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i,true, ws);
-			
-			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST",maxSeen,maxStruct);			
+		int seen = 0;
+		PetriSpotWalker.Verdicts psv = null;
+		if (PetriSpotWalker.USE_PETRISPOT) {
+			// one request replaces the random sweep and the per-property best-first climbs
+			int total = 30 + 5 * tocheck.size();
+			psv = PetriSpotWalker.runBounds(re.getNet(), tocheck, maxStruct, steps, 30, total);
 		}
-		System.out.println(ws);
+		if (psv != null) {
+			int[] verdicts = new int[psv.max.length];
+			for (int i = 0; i < verdicts.length; i++) {
+				verdicts[i] = (int) Math.min(psv.max[i], Integer.MAX_VALUE);
+			}
+			seen = interpretVerdict(tocheck, spn, doneProps, verdicts, "PETRISPOT", maxSeen, maxStruct);
+		} else {
+			WalkStats ws = new WalkStats(WalkType.RANDOM);
+			int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1,true, ws);
+			System.out.println(ws);
+
+			ws = new WalkStats(WalkType.BEST_FIRST);
+			seen = interpretVerdict(tocheck, spn, doneProps, verdicts,"RANDOM",maxSeen,maxStruct);
+			for (int i=0 ; i < tocheck.size() ; i++) {			
+				verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i,true, ws);
+
+				seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST",maxSeen,maxStruct);			
+			}
+			System.out.println(ws);
+		}
 		
 		
 //		if (seen == 0) {

@@ -37,6 +37,19 @@ public class SexprPropertyPrinter implements ExprVisitor<Void> {
 		return p.sb.toString();
 	}
 
+	/**
+	 * {@code (bound NAME expr [k])}: maximise expr, a weighted sum of places;
+	 * k, when non-negative, is a known upper bound whose value ends the target.
+	 */
+	public static String bound(String name, Expression expr, int knownBound) {
+		SexprPropertyPrinter p = new SexprPropertyPrinter();
+		p.sb.append("(bound ").append(name).append(' ');
+		expr.accept(p);
+		if (knownBound >= 0) p.sb.append(' ').append(knownBound);
+		p.sb.append(')');
+		return p.sb.toString();
+	}
+
 	/** {@code (deadlock NAME)}: a dead marking answers TRUE. */
 	public static String deadlock(String name) {
 		return "(deadlock " + name + ")";
