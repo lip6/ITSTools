@@ -56,11 +56,14 @@ public class PetriSpotWalker {
 		public final int[] found;
 		public final String[] techniques;
 		public final long[] max;
+		/** With traces requested: the transitions fired from the initial marking to the witness, per property (null when none). */
+		public final int[][] traces;
 
 		Verdicts(int n) {
 			found = new int[n];
 			techniques = new String[n];
 			max = new long[n];
+			traces = new int[n][];
 			java.util.Arrays.fill(max, Long.MIN_VALUE);
 		}
 	}
@@ -84,6 +87,12 @@ public class PetriSpotWalker {
 	 */
 	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates,
 			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds) {
+		return runReachability(net, predicates, parikhs, steps, sweepSeconds, totalSeconds, false);
+	}
+
+	/** Same; withTrace asks for the witness traces (Verdicts.traces), off the fast path otherwise. */
+	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates,
+			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds, boolean withTrace) {
 		if (predicates.isEmpty()) {
 			return new Verdicts(0);
 		}
@@ -100,6 +109,7 @@ public class PetriSpotWalker {
 		args.add("--walkSteps=" + steps);
 		args.add("--sweepTime=" + sweepSeconds);
 		args.add("--totalTime=" + totalSeconds);
+		if (withTrace) args.add("--trace");
 		return run(net, forms, hintForms(parikhs), args, totalSeconds);
 	}
 
@@ -272,9 +282,10 @@ public class PetriSpotWalker {
 			while ((line = in.readLine()) != null) {
 				if (DEBUG >= 2) System.out.println("[petrispot] " + line);
 				boolean formula = line.startsWith("FORMULA prop");
-				if (!formula && !line.startsWith("BOUND prop")) continue;
-				// FORMULA prop<i> TRUE|FALSE|<k> TECHNIQUES <words>   or   BOUND prop<i> <max>
-				String[] words = line.split(" ", 5);
+				boolean witness = line.startsWith("WITNESS prop");
+				if (!formula && !witness && !line.startsWith("BOUND prop")) continue;
+				// FORMULA prop<i> TRUE|FALSE|<k> TECHNIQUES <words>  |  BOUND prop<i> <max>  |  WITNESS prop<i> <k> t3 t9 ...
+				String[] words = line.split(" ", witness ? 4 : 5);
 				if (words.length < 3) continue;
 				int index;
 				try {
@@ -287,6 +298,23 @@ public class PetriSpotWalker {
 					// every request asks for a witness, so a verdict means one was found
 					verdicts.found[index] = 1;
 					verdicts.techniques[index] = words.length == 5 ? words[4] : "EXPLICIT";
+				} else if (witness) {
+					// transitions are named t<i> on the PNET path
+					String[] ts = words.length == 4 ? words[3].trim().split(" ") : new String[0];
+					int[] trace = new int[ts.length];
+					int n = 0;
+					for (String t : ts) {
+						if (t.length() > 1 && t.charAt(0) == 't') {
+							try {
+								trace[n++] = Integer.parseInt(t.substring(1));
+							} catch (NumberFormatException e) {
+								// not an index: unusable trace
+								n = -1;
+								break;
+							}
+						}
+					}
+					if (n >= 0) verdicts.traces[index] = java.util.Arrays.copyOf(trace, n);
 				} else {
 					try {
 						verdicts.max[index] = Math.max(verdicts.max[index], Long.parseLong(words[2]));

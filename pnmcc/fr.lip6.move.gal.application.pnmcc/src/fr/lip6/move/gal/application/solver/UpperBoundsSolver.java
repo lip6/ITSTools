@@ -32,6 +32,7 @@ import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.petrispot.runner.PetriSpotRunner;
 import fr.lip6.move.petrispot.runner.PetriSpotWalker;
+import fr.lip6.move.gal.application.solver.abstraction.ProjectionBoundsSolver;
 
 public class UpperBoundsSolver {
 
@@ -436,6 +437,13 @@ public class UpperBoundsSolver {
 			
 			reader.setSpn(spn,false);
 			
+			if (! spn.getProperties().isEmpty()) {
+				// over-approximation by place projection, refined on spurious witnesses (ABSTRACTION.md)
+				if (ProjectionBoundsSolver.solve(reader, tocheck, maxSeen, maxStruct, doneProps, 60) > 0) {
+					printBounds("after place projection", maxSeen, maxStruct);
+					again = true;
+				}
+			}
 			if (! spn.getProperties().isEmpty()) {
 				if (testWithReachability(reader,maxSeen,maxStruct,doneProps)>0) {
 					checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "REACHABILITY");
