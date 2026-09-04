@@ -215,7 +215,7 @@ public class PTNetHandler extends DefaultHandler {
 				if (src.type == NodeType.PLACE) {
 					net.addPreArc(src.index, target.index, value);
 				} else if (src.type == NodeType.TRANSITION) {
-					net.addPostArc(src.index, target.index, value);
+					net.addPostArc(target.index, src.index, value);
 				}
 			}
 		} else {
