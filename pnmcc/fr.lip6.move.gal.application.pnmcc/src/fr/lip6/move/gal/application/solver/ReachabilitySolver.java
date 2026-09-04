@@ -32,6 +32,7 @@ import fr.lip6.move.gal.structural.smt.Problem;
 import fr.lip6.move.gal.structural.smt.ProblemSet;
 import fr.lip6.move.gal.structural.smt.SMTBasedReachabilitySolver;
 import fr.lip6.move.gal.structural.smt.SMTReply;
+import fr.lip6.move.petrispot.runner.PetriSpotWalker;
 
 public class ReachabilitySolver {
 
@@ -503,30 +504,42 @@ public class ReachabilitySolver {
 	static int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, List<Property> props,
 			DoneProperties doneProps, int steps) {
 		long time = System.currentTimeMillis();
-		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1);
-		int seen = interpretWalkerVerdict(tocheck, props, doneProps, verdicts,"RANDOM");
-		if (tocheck.size() >= 15 && tocheck.size() < 100) {
-			steps /= 10;
+		int seen = 0;
+		int[] verdicts = null;
+		PetriSpotWalker.Verdicts psv = null;
+		if (PetriSpotWalker.USE_PETRISPOT) {
+			// one request replaces the random sweep and the per-property best-first walks
+			int total = 30 + 5 * Math.min(tocheck.size(), 50);
+			psv = PetriSpotWalker.runReachability(re.getNet(), tocheck, steps, 30, total);
 		}
-		if (tocheck.size() >= 100 && tocheck.size() < 500) {
-			steps /= 100;
-		}
-		if (tocheck.size() >= 500) {
-			steps /= 1000;
-		}
-		if (steps <= 30) {
-			steps = 30;
-		}
-		int seen100 = 0;
-		for (int i=0 ; i < tocheck.size() && i-seen100 < 50; i++) {
-			verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i);
-			for  (int j =0; j <= i ; j++) {
-				if (verdicts[j] != 0)
-					i--;
+		if (psv != null) {
+			seen = interpretWalkerVerdict(tocheck, props, doneProps, psv.found, psv.techniques);
+		} else {
+			verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1);
+			seen = interpretWalkerVerdict(tocheck, props, doneProps, verdicts,"RANDOM");
+			if (tocheck.size() >= 15 && tocheck.size() < 100) {
+				steps /= 10;
 			}
-			int seen1 = interpretWalkerVerdict(tocheck, props, doneProps, verdicts,"BESTFIRST");
-			seen+=seen1;
-			if (seen1 != 0) seen100 = i;
+			if (tocheck.size() >= 100 && tocheck.size() < 500) {
+				steps /= 100;
+			}
+			if (tocheck.size() >= 500) {
+				steps /= 1000;
+			}
+			if (steps <= 30) {
+				steps = 30;
+			}
+			int seen100 = 0;
+			for (int i=0 ; i < tocheck.size() && i-seen100 < 50; i++) {
+				verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i);
+				for  (int j =0; j <= i ; j++) {
+					if (verdicts[j] != 0)
+						i--;
+				}
+				int seen1 = interpretWalkerVerdict(tocheck, props, doneProps, verdicts,"BESTFIRST");
+				seen+=seen1;
+				if (seen1 != 0) seen100 = i;
+			}
 		}
 		long elapsed = System.currentTimeMillis() - time;
 		int maxt = (int) (elapsed > 1000 ? 3*(elapsed/1000) : 3);
@@ -546,6 +559,23 @@ public class ReachabilitySolver {
 	private static int interpretWalkerVerdict(List<Expression> tocheck, List<Property> props, DoneProperties doneProps,
 			int[] verdicts, String walkType) {
 		return interpretWalkerVerdict(tocheck, props, doneProps, verdicts, walkType, false);
+	}
+
+	/** Verdicts of the PetriSpot walker, with the technique words it reported per property. */
+	private static int interpretWalkerVerdict(List<Expression> tocheck, List<Property> props, DoneProperties doneProps,
+			int[] verdicts, String[] techniques) {
+		int seen = 0;
+		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
+			if (verdicts[v] != 0) {
+				fr.lip6.move.gal.structural.Property prop = props.get(v);
+				String tech = "TOPOLOGICAL " + (techniques[v] != null ? techniques[v] : "EXPLICIT");
+				doneProps.put(prop.getName(), prop.getBody().getOp() == Op.EF, tech);
+				tocheck.remove(v);
+				props.remove(v);
+				seen++;
+			}
+		}
+		return seen;
 	}
 
 	private static int interpretWalkerVerdict(List<Expression> tocheck, List<Property> props, DoneProperties doneProps,

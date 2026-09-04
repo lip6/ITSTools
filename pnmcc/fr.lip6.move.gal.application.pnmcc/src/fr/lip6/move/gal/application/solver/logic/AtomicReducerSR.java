@@ -35,6 +35,7 @@ import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.Simplifier;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
+import fr.lip6.move.petrispot.runner.PetriSpotWalker;
 
 public class AtomicReducerSR {
 	private static final int DEBUG = 0;
@@ -246,7 +247,14 @@ public class AtomicReducerSR {
 		RandomExplorer re = new RandomExplorer(spn);
 		int steps = 100000; // 100k steps
 		int timeout = 30; // 30 secs
-		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,timeout,-1);
+		int[] verdicts = null;
+		if (PetriSpotWalker.USE_PETRISPOT) {
+			PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(spn, tocheck, steps, timeout, timeout);
+			if (psv != null) verdicts = psv.found;
+		}
+		if (verdicts == null) {
+			verdicts = re.runRandomReachabilityDetection(steps,tocheck,timeout,-1);
+		}
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
 				// well, this is not an invariant, too bad

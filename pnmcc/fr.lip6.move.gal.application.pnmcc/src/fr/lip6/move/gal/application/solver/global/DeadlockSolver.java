@@ -25,6 +25,7 @@ import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.structural.StructuralToPNML;
+import fr.lip6.move.petrispot.runner.PetriSpotWalker;
 
 public abstract class DeadlockSolver {
 
@@ -137,10 +138,12 @@ public abstract class DeadlockSolver {
 					long time = System.currentTimeMillis();					
 					// 25 k step					
 					int steps = 1250000;
-					re.runDeadlockDetection(steps,true,30);						
-					if (sr.getTnames().size() < 20000) {
-						time = System.currentTimeMillis();
-						re.runDeadlockDetection(steps,false,30);
+					if (!petriSpotDeadlock(sr, steps, 30)) {
+						re.runDeadlockDetection(steps,true,30);						
+						if (sr.getTnames().size() < 20000) {
+							time = System.currentTimeMillis();
+							re.runDeadlockDetection(steps,false,30);
+						}
 					}
 
 						try {
@@ -181,8 +184,10 @@ public abstract class DeadlockSolver {
 					// 75 k steps in 3 traces
 					int nbruns = 4;
 					steps = 500000;
-					for (int  i = 1 ; i <= nbruns ; i++) {
-						re.runDeadlockDetection(steps, i%2 == 0,30);	
+					if (!petriSpotDeadlock(sr, steps, 30)) {
+						for (int  i = 1 ; i <= nbruns ; i++) {
+							re.runDeadlockDetection(steps, i%2 == 0,30);	
+						}
 					}
 
 					re = null;
@@ -250,4 +255,23 @@ public abstract class DeadlockSolver {
 		return hasConcluded;
 	}
 
+
+	/**
+	 * Random deadlock walks by PetriSpot when enabled and usable: throws
+	 * DeadlockFound if one was reached, returns true if PetriSpot ran, false
+	 * if the Java explorer must be used instead.
+	 */
+	private static boolean petriSpotDeadlock(StructuralReduction sr, int steps, int timeout) throws DeadlockFound {
+		if (!PetriSpotWalker.USE_PETRISPOT) {
+			return false;
+		}
+		Boolean found = PetriSpotWalker.runDeadlock(sr, steps, timeout);
+		if (found == null) {
+			return false;
+		}
+		if (found) {
+			throw new DeadlockFound();
+		}
+		return true;
+	}
 }
