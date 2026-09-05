@@ -780,8 +780,8 @@ public class GlobalPropertySolver {
 		if (doneProps.isFinished() || wasInterrupted || reader.getSPN().getProperties().isEmpty()) {
 			return;
 		}
-		timeout -= (System.currentTimeMillis() - time) * 1000;
-		if (timeout < 0) return;
+		timeout -= (System.currentTimeMillis() - time) / 1000;
+		if (timeout <= 0) return;
 		//CTL is not for LTSmin
 		if (reader.isDoLTSMin())
 		if (! reader.getSPN().getProperties().isEmpty() && !examinationForITS.startsWith("CTL")) {

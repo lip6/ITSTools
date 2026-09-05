@@ -134,6 +134,9 @@ public class PetriSpotWalker {
 		args.add("--walkSteps=" + steps);
 		args.add("--sweepTime=" + sweepSeconds);
 		args.add("--totalTime=" + totalSeconds);
+		// A round that ends on its step budget having found nothing stops the
+		// driver otherwise, handing back the seconds it was given.
+		args.add("--escalate");
 		if (withTrace) args.add("--trace");
 		return run(net, forms, hintForms(parikhs), args, totalSeconds);
 	}
@@ -216,6 +219,8 @@ public class PetriSpotWalker {
 		args.add("--walkSteps=" + steps);
 		args.add("--sweepTime=" + sweepSeconds);
 		args.add("--totalTime=" + totalSeconds);
+		// a bound round that ends on its step budget buys steps, not a shorter run
+		args.add("--escalate");
 		Verdicts v = run(net, forms, hintForms(parikhs), args, totalSeconds);
 		if (v != null) {
 			for (int i = 0; i < v.max.length; i++) {
