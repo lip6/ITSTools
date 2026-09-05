@@ -2157,8 +2157,11 @@ public class DeadlockTester {
 		
 		
 			boolean solveWithReals = true;
-			int timeoutQ = 100;
-			int timeoutT = 100;
+			// One shot: this test is never retried with a larger budget, so whatever the
+			// solver cannot prove within it is lost rather than deferred. Only timeoutT
+			// is read by initSolver; the per query bound is derived from it.
+			int timeoutQ = timeout;
+			int timeoutT = timeout;
 				
 			org.smtlib.SMT smt = new SMT();
 			IFactory ef = smt.smtConfig.exprFactory;
