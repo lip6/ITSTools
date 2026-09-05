@@ -38,6 +38,19 @@ import fr.lip6.move.serialization.SerializationUtil;
 public class ITSRunner extends AbstractRunner {
 
 	private static final int DEBUG = 0;
+
+	/**
+	 * How much of the ITS tool's own output is repeated on our standard output.
+	 * The tool prints a full statistics table and one verdict announcement per
+	 * property; on a model carrying tens of thousands of properties that is most
+	 * of the log, and every verdict it announces is reported again as a FORMULA
+	 * line of our own.
+	 *
+	 * 0 : no statistics table at all
+	 * 1 : one statistics table, no per property announcement, no fixpoint chatter
+	 * 2 : every line the tool prints
+	 */
+	private static final int VERBOSITY = 1;
 	private String examination;
 	private MccTranslator reader;
 	protected CommandLine cl;
@@ -203,17 +216,56 @@ public class ITSRunner extends AbstractRunner {
 			this.in = bufferedReader;
 		}
 
+		/** A statistics table was already repeated. */
+		private boolean statsShown = false;
+		/** The previous line was a statistics header, so this one is its data row. */
+		private boolean statsRow = false;
+		/** That header was repeated, so its data row must be too. */
+		private boolean rowShown = false;
+
+		/**
+		 * Whether a line of the tool's output is worth repeating on our own output.
+		 * The lines it drops are still read and interpreted below: only the echo
+		 * goes away.
+		 */
+		private boolean echo(String line) {
+			if (VERBOSITY >= 2) {
+				return true;
+			}
+			if (statsRow) {
+				statsRow = false;
+				return rowShown;
+			}
+			if (line.startsWith("Model ") && line.contains("|S| ")) {
+				// the statistics table is a header line and a single data row
+				statsRow = true;
+				rowShown = VERBOSITY >= 1 && ! statsShown;
+				statsShown = true;
+				return rowShown;
+			}
+			if (line.endsWith(" is true.") || line.endsWith(" does not hold.")) {
+				// one per property, and the verdict comes back as a FORMULA line
+				return false;
+			}
+			if (line.startsWith("SDD proceeding with computation,") || line.startsWith("SDD size :")) {
+				return false;
+			}
+			return true;
+		}
+
 		@Override
 		public void run() {
 			int seenCounts = 0;
 			Thread.currentThread().setName("ITS Reader");
 			try {
 				for (String line = ""; line != null ; in.ready(), line=in.readLine() ) {
-					// don't trace overlong lines e.g. formulas from COL to avoid swamping logs
-					if (line.length() > 155) {
-						System.out.println(line.substring(0, 155)+"..."+line.length());
-					} else {
-						System.out.println(line);
+					if (echo(line)) {
+						// don't trace overlong lines e.g. formulas from COL to avoid swamping logs
+						if (line.length() > 155) {
+							System.out.println(line.substring(0, 155)+"..."+line.length());
+						} else {
+							System.out.println(line);
+						}
 					}
 					//stdOutput.toString().split("\\r?\\n")) ;
 					if ( line.matches("Max variable value.*")) {
