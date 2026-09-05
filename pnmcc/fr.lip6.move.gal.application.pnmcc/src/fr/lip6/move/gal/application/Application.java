@@ -55,6 +55,9 @@ import java.util.concurrent.TimeoutException;
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.application.solver.ExhaustiveEngines;
 import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
+import fr.lip6.move.gal.application.solver.total.TotalExamination;
+import fr.lip6.move.gal.application.solver.total.TotalPrinter;
+import fr.lip6.move.gal.application.solver.total.TotalSolver;
 import fr.lip6.move.gal.application.solver.logic.AtomicReducerSR;
 import fr.lip6.move.gal.application.solver.ltl.LTLLengthAwareSolver;
 import fr.lip6.move.gal.application.solver.ltl.LTLLengthSensitivityAnalyzer;
@@ -487,7 +490,8 @@ public class Application implements IApplication, Ender {
 
 		// initialize a shared container to detect help detect termination in portfolio
 		// case
-		DoneProperties doneProps = new MccDonePropertyPrinter();
+		TotalExamination total = TotalExamination.of(examination);
+		DoneProperties doneProps = total != null ? new TotalPrinter(total) : new MccDonePropertyPrinter();
 
 		// reader now has a spec and maybe a ITS decomposition
 		// no properties yet.
@@ -578,7 +582,15 @@ public class Application implements IApplication, Ender {
 		}
 
 		// Now load properties from examination
-		reader.loadProperties(examination);
+		if (total != null) {
+			// one atom per place or transition, in place of a property file
+			examination = TotalSolver.prepare(total, reader);
+			if (examination == null) {
+				return null;
+			}
+		} else {
+			reader.loadProperties(examination);
+		}
 		if (reader.getHLPN() != null) {
 			reader.getHLPN().testAliasing(doneProps);
 		} else if (reader.getSPN() != null){

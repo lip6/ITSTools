@@ -32,6 +32,7 @@ import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.petrispot.runner.PetriSpotRunner;
 import fr.lip6.move.petrispot.runner.PetriSpotWalker;
+import fr.lip6.move.gal.application.solver.total.BoundsProgress;
 import fr.lip6.move.gal.application.solver.abstraction.ProjectionBoundsSolver;
 
 public class UpperBoundsSolver {
@@ -108,6 +109,8 @@ public class UpperBoundsSolver {
 				maxStruct.remove(v);
 				tocheck.remove(v);
 				removed++;
+			} else if (doneProps instanceof BoundsProgress) {
+				((BoundsProgress) doneProps).interval(prop.getName(), maxSeen.get(v), maxStruct.get(v));
 			}
 		}
 		return removed;
