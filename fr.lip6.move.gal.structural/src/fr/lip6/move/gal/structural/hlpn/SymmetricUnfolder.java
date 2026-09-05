@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.structural.hlpn;
 
+import fr.lip6.move.gal.util.LogValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -511,7 +512,7 @@ public class SymmetricUnfolder {
 				
 				if (DEBUG >=1)
 					System.out.println(
-							"Transition "+trans.getName()+" : constants on arcs in "+ ent.getValue() + " introduces in " + sort + " partition with " + localpart.size() + " elements that refines current partition to "+partition.getNbSubs() + " subsets.");
+							"Transition "+trans.getName()+" : constants on arcs in "+ LogValue.abbreviate(ent.getValue()) + " introduces in " + sort + " partition with " + localpart.size() + " elements that refines current partition to "+partition.getNbSubs() + " subsets.");
 				if (DEBUG >= 2)
 					System.out.println("Partition :" + localpart);
 

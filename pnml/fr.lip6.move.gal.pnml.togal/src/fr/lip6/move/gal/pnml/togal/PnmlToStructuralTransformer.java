@@ -20,6 +20,7 @@ import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
 import fr.lip6.move.pnml.framework.general.PnmlImport;
 import fr.lip6.move.pnml.framework.hlapi.HLAPIRootClass;
+import fr.lip6.move.gal.util.LogValue;
 import fr.lip6.move.pnml.framework.utils.ModelRepository;
 import fr.lip6.move.pnml.framework.utils.exception.InvalidIDException;
 import fr.lip6.move.pnml.framework.utils.exception.VoidRepositoryException;
@@ -62,7 +63,7 @@ public class PnmlToStructuralTransformer {
 					}
 				}
 				if (! notexist.isEmpty() ) {
-					getLog().info("Completing missing partition info from NUPN : creating a component with " + supp);
+					getLog().info("Completing missing partition info from NUPN : creating a component with " + LogValue.abbreviate(supp));
 					VarOrder vo = new VarOrder(supp, "missing");
 					order.accept( new IOrderVisitor<Void>() {
 
