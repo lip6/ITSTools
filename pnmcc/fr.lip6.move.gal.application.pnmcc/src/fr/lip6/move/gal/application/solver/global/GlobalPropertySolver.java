@@ -489,24 +489,23 @@ public class GlobalPropertySolver {
 	}
 
 	public boolean isSuccess(DoneProperties doneProperties, String examination) {
-		if (examination.equals(ONE_SAFE) || examination.equals(QUASI_LIVENESS) || examination.equals(LIVENESS)) {
+		switch (Aggregation.of(examination)) {
+		case ALL_TRUE:
 			// at least one false
 			for (Entry<String, Boolean> e : doneProperties.entrySet()) {
 				if (e.getValue() == false)
 					return false;
 			}
 			return true;
-
-		} else if (examination.equals(STABLE_MARKING)) {
+		case ANY_TRUE:
 			// at least one true
 			for (Entry<String, Boolean> e : doneProperties.entrySet()) {
 				if (e.getValue() == true)
 					return true;
 			}
 			return false;
+		default:
+			return false;
 		}
-
-		return false;
-
 	}
 }

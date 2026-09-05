@@ -9,6 +9,7 @@ import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 public class GlobalDonePropertyPrinter extends ConcurrentHashDoneProperties {
 
 	private String examination;
+	private final Aggregation aggregation;
 	// Solver threads accumulate into this concurrently, and computeTechniques
 	// iterates it while they do.
 	private Set<String> tech = ConcurrentHashMap.newKeySet();
@@ -22,6 +23,7 @@ public class GlobalDonePropertyPrinter extends ConcurrentHashDoneProperties {
 		super();
 		this.examination = examination;
 		this.makeTrace = makeTrace;
+		this.aggregation = Aggregation.of(examination);
 	}
 
 	public String computeTechniques() {
@@ -61,31 +63,16 @@ public class GlobalDonePropertyPrinter extends ConcurrentHashDoneProperties {
 		for (String t : techniques.split(" "))
 			tech.add(t);
 
-		switch (examination) {
-
-		case "StableMarking":
-			if (value) {
-				// One reading of the techniques, so the line printed and the value
-				// recorded describe the same thing.
-				String techs = computeTechniques();
-				super.put(examination, true, techs);
-				printVerdict(true, techs);
-				throw new GlobalPropertySolverException(examination + " TRUE", true);
-			}
-			break;
-		case "OneSafe":
-		case "Liveness":
-		case "QuasiLiveness": {
-			if (!value) {
-				String techs = computeTechniques();
-				super.put(examination, false, techs);
-				printVerdict(false, techs);
-				// Thrown by every thread that gets here, printer or not: each one
-				// has to unwind its own work.
-				throw new GlobalPropertySolverException(examination + " FALSE", false);
-			}
-			break;
-		}
+		Boolean deciding = aggregation.decidingValue();
+		if (deciding != null && deciding.equals(value)) {
+			// One reading of the techniques, so the line printed and the value
+			// recorded describe the same thing.
+			String techs = computeTechniques();
+			super.put(examination, deciding, techs);
+			printVerdict(deciding, techs);
+			// Thrown by every thread that gets here, printer or not: each one
+			// has to unwind its own work.
+			throw new GlobalPropertySolverException(examination + (deciding ? " TRUE" : " FALSE"), deciding);
 		}
 
 		return super.put(prop, value, techniques);
