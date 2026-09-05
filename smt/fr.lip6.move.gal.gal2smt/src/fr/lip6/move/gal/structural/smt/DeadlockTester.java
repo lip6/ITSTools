@@ -2150,79 +2150,91 @@ public class DeadlockTester {
 	}
 		
 	public static void testOneSafeWithSMT(List<Expression> toCheck, ISparsePetriNet sr, IntMatrixCol invar, DoneProperties doneProps, int timeout) {
-		boolean isSafe = sr.isSafe();
+		long solverStart = System.currentTimeMillis();
+		try {
+			boolean isSafe = sr.isSafe();
 		
 		
 		
-		boolean solveWithReals = true;
-		int timeoutQ = 100;
-		int timeoutT = 100;
+			boolean solveWithReals = true;
+			int timeoutQ = 100;
+			int timeoutT = 100;
 				
-		org.smtlib.SMT smt = new SMT();
-		IFactory ef = smt.smtConfig.exprFactory;
-		ISolver solver = initSolver(smt, solveWithReals,timeoutQ,timeoutT);		
-		{
-			// STEP 1 : declare variables, assert net is dead.
-			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
-			execAndCheckResult(varScript, solver);
-			String textReply = checkSat(solver);
-			// are we finished ?
-			if (textReply.equals("unsat")||textReply.equals("unknown")) {
-				solver.exit();
-				return ;
+			org.smtlib.SMT smt = new SMT();
+			IFactory ef = smt.smtConfig.exprFactory;
+			ISolver solver = initSolver(smt, solveWithReals,timeoutQ,timeoutT);		
+			{
+				// STEP 1 : declare variables, assert net is dead.
+				Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
+				execAndCheckResult(varScript, solver);
+				String textReply = checkSat(solver);
+				// are we finished ?
+				if (textReply.equals("unsat")||textReply.equals("unknown")) {
+					solver.exit();
+					return ;
+				}
 			}
-		}
 		
-		// STEP 2 : declare and assert invariants 
-		long time = System.currentTimeMillis();
-		Script invpos = new Script();
-		Script invneg = new Script();
-		int poscount = declareInvariants(invar,sr.getMarks(),invpos,invneg,smt);
+			// STEP 2 : declare and assert invariants 
+			long time = System.currentTimeMillis();
+			Script invpos = new Script();
+			Script invneg = new Script();
+			int poscount = declareInvariants(invar,sr.getMarks(),invpos,invneg,smt);
 
-		String textReply = "sat";
-		// add the positive only for now
-		if (!invpos.commands().isEmpty()) {
-			execAndCheckResult(invpos, solver);		
-			textReply = checkSat(solver,  false);
-		}
+			String textReply = "sat";
+			// add the positive only for now
+			if (!invpos.commands().isEmpty()) {
+				execAndCheckResult(invpos, solver);		
+				textReply = checkSat(solver,  false);
+			}
 		
-		int d = clearDone(toCheck, doneProps , ef, solver);
-		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+ "Absence check using  "+poscount+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms proved " + d + " places are One-Safe.");
+			int d = clearDone(toCheck, doneProps , ef, solver);
+			Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+ "Absence check using  "+poscount+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms proved " + d + " places are One-Safe.");
 
-		if (toCheck.isEmpty()) {
-			solver.exit();
-			return;
-		}
+			if (toCheck.isEmpty()) {
+				solver.exit();
+				return;
+			}
 		
 		
-		if (textReply.equals("sat") && ! invneg.commands().isEmpty()) {
-			time = System.currentTimeMillis();
-			execAndCheckResult(invneg, solver);
-			textReply = checkSat(solver,  true);
+			if (textReply.equals("sat") && ! invneg.commands().isEmpty()) {
+				time = System.currentTimeMillis();
+				execAndCheckResult(invneg, solver);
+				textReply = checkSat(solver,  true);
 			
-		}
+			}
 		
-		d= clearDone(toCheck, doneProps , ef, solver);
-		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+poscount+" positive and " + (invar.getColumnCount() - poscount) +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms proved " + d + " places are One-Safe.");
+			d= clearDone(toCheck, doneProps , ef, solver);
+			Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+poscount+" positive and " + (invar.getColumnCount() - poscount) +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms proved " + d + " places are One-Safe.");
 		
-		if (toCheck.isEmpty()) {
-			solver.exit();
-			return;
-		}
+			if (toCheck.isEmpty()) {
+				solver.exit();
+				return;
+			}
 				
 		
-		// STEP 3 : go heavy, use the state equation to refine our solution
-		time = System.currentTimeMillis();
-		IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(sr, new ArrayList<Integer>());
-		Script script = declareStateEquation(sumMatrix, sr.getMarks(), smt,solveWithReals, null);
+			// STEP 3 : go heavy, use the state equation to refine our solution
+			time = System.currentTimeMillis();
+			IntMatrixCol sumMatrix = InvariantCalculator.computeReducedFlow(sr, new ArrayList<Integer>());
+			Script script = declareStateEquation(sumMatrix, sr.getMarks(), smt,solveWithReals, null);
 
-		execAndCheckResult(script, solver);
+			execAndCheckResult(script, solver);
 		
-		d=clearDone(toCheck, doneProps , ef, solver);
-		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+" State equation constraints in "+ (System.currentTimeMillis()-time) +" ms proved " + d + " places are One-Safe.");
+			d=clearDone(toCheck, doneProps , ef, solver);
+			Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+" State equation constraints in "+ (System.currentTimeMillis()-time) +" ms proved " + d + " places are One-Safe.");
 		
-		solver.exit();
-		return;
+			solver.exit();
+			return;
+		} catch (RuntimeException re) {
+			// The SMT layer kills the solver process once its total timeout expires and
+			// only reports the death when the next script fails to reach it. On a hard
+			// model that is an expected outcome, not a failure of the run: the places
+			// already proved one safe are in doneProps and stay there, and the remaining
+			// methods still have their chance at the property. Every other solver entry
+			// point in this class guards itself the same way.
+			Logger.getLogger("fr.lip6.move.gal").info("Z3 timed out or crashed after "
+					+ (System.currentTimeMillis() - solverStart) + " ms, continuing without it.");
+		}
 	}
 
 
