@@ -2241,7 +2241,7 @@ public class DeadlockTester {
 			if ("unsat".equals(res)) {
 				toCheck.remove(i);
 				done++;
-				doneProps.put("place_"+pid, true, "SAT_SMT STRUCTURAL");
+				doneProps.put("osplace_"+pid, true, "SAT_SMT STRUCTURAL");
 			}			
 			solver.pop(1);			
 		}
