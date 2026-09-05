@@ -1,0 +1,15 @@
+# The exec bit does not survive packaging. The antrun step of the pom sets
+# a+rx on bin/ at build time, then Tycho jars the bundle into the p2 repository
+# and the jar format carries no unix mode, so p2 lays the files down as 644 and
+# the product ships binaries nobody can run. Restore the mode at install time,
+# which is the only point that sees a real filesystem.
+#
+# Naming instructions.install replaces the default action for the phase, so the
+# installBundle that p2 would have run on its own is repeated here.
+
+instructions.install=\
+  org.eclipse.equinox.p2.touchpoint.eclipse.installBundle(bundle:${artifact});\
+  org.eclipse.equinox.p2.touchpoint.eclipse.chmod(targetDir:@artifact,targetFile:bin/z3-linux64,permissions:755);
+
+instructions.uninstall=\
+  org.eclipse.equinox.p2.touchpoint.eclipse.uninstallBundle(bundle:${artifact});
