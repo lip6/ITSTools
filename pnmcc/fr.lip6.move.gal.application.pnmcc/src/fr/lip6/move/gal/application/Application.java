@@ -405,6 +405,23 @@ public class Application implements IApplication, Ender {
 				e.printStackTrace();
 			}
 			return null;
+		} catch (RuntimeException e) {
+			// The PNML frameworks signal a structurally invalid model with an unchecked
+			// exception, thrown from deep inside the transformer. That is a statement
+			// about the input, not a failure of the run, so it is reported as one. Only
+			// the frames of our own code are shown: the rest is framework and launcher
+			// scaffolding that says nothing about which construct was rejected.
+			System.out.println("Could not read the model in " + pwd
+					+ " : the PNML is invalid, or uses a construct that is not supported.");
+			System.out.println("Reason : " + e.getClass().getSimpleName()
+					+ (e.getMessage() != null ? " : " + e.getMessage() : ""));
+			for (StackTraceElement frame : e.getStackTrace()) {
+				if (frame.getClassName().startsWith("fr.lip6")) {
+					System.out.println("  raised at " + frame);
+					break;
+				}
+			}
+			return null;
 		}
 
 		if (studySMT) {
