@@ -48,6 +48,31 @@ public class PetriSpotWalker {
 	private static final int GRACE_SECONDS = 5;
 
 	/**
+	 * A walk in flight, so a caller that no longer needs it can stop it. The
+	 * verdicts printed before the kill are kept: stdout is parsed as it
+	 * arrives.
+	 */
+	public static final class Cancel {
+		private volatile Process process;
+		private volatile boolean cancelled;
+
+		public void cancel() {
+			cancelled = true;
+			Process p = process;
+			if (p != null) {
+				p.destroyForcibly();
+			}
+		}
+
+		private void attach(Process p) {
+			process = p;
+			if (cancelled) {
+				p.destroyForcibly();
+			}
+		}
+	}
+
+	/**
 	 * Verdicts of one request: found is 1 when a witness was found (or the
 	 * known bound was reached), with the MCC technique words; for bound
 	 * requests, max is the largest value of each expression seen.
@@ -111,6 +136,35 @@ public class PetriSpotWalker {
 		args.add("--totalTime=" + totalSeconds);
 		if (withTrace) args.add("--trace");
 		return run(net, forms, hintForms(parikhs), args, totalSeconds);
+	}
+
+	/**
+	 * A walk meant to run beside another solver: it takes the number of threads
+	 * it may use and a handle the caller stops it with, and it escalates its
+	 * step budget rather than conceding, since nothing else will use the time.
+	 *
+	 * @return one verdict per predicate, or null if PetriSpot could not run
+	 */
+	public static Verdicts runBeside(ISparsePetriNet net, List<Expression> predicates, long steps, int totalSeconds,
+			int threads, Cancel cancel) {
+		if (predicates.isEmpty()) {
+			return new Verdicts(0);
+		}
+		List<String> forms = new ArrayList<>(predicates.size());
+		try {
+			for (int i = 0; i < predicates.size(); i++) {
+				forms.add(SexprPropertyPrinter.reach("prop" + i, predicates.get(i)));
+			}
+		} catch (UnsupportedOperationException e) {
+			System.out.println("PetriSpot walker skipped: " + e.getMessage());
+			return null;
+		}
+		List<String> args = new ArrayList<>();
+		args.add("--walkSteps=" + steps);
+		args.add("--sweepTime=" + Math.min(10, totalSeconds));
+		args.add("--totalTime=" + totalSeconds);
+		args.add("--escalate");
+		return run(net, forms, null, args, totalSeconds, threads, cancel);
 	}
 
 	/** The (parikh prop<i> ...) forms of a list of vectors, or null when there is none. */
@@ -190,6 +244,11 @@ public class PetriSpotWalker {
 		args.add("--walkSteps=" + steps);
 		args.add("-t");
 		args.add(Integer.toString(timeoutSeconds));
+		// Without a total budget the driver walks one round and concludes; with
+		// --escalate a round that ended on its step budget buys more steps
+		// rather than giving the remaining seconds back.
+		args.add("--totalTime=" + timeoutSeconds);
+		args.add("--escalate");
 		List<String> hints = parikh == null ? null : hintForms(List.of(parikh));
 		Verdicts v = run(net, List.of(SexprPropertyPrinter.deadlock("prop0")), hints, args, timeoutSeconds);
 		if (v == null) {
@@ -200,6 +259,12 @@ public class PetriSpotWalker {
 
 	private static Verdicts run(ISparsePetriNet net, List<String> forms, List<String> hints, List<String> args,
 			int budgetSeconds) {
+		return run(net, forms, hints, args, budgetSeconds, THREADS, null);
+	}
+
+	/** Same, on a chosen number of threads and with a handle to stop it early. */
+	static Verdicts run(ISparsePetriNet net, List<String> forms, List<String> hints, List<String> args,
+			int budgetSeconds, int threads, Cancel cancel) {
 		long t0 = System.currentTimeMillis();
 		Verdicts verdicts = new Verdicts(forms.size());
 		List<File> todel = new ArrayList<>();
@@ -221,7 +286,7 @@ public class PetriSpotWalker {
 				Files.write(hintFile.toPath(), hints, StandardCharsets.UTF_8);
 				cl.addArg("--hints=" + hintFile.getCanonicalPath());
 			}
-			cl.addArg("--threads=" + THREADS);
+			cl.addArg("--threads=" + threads);
 			cl.addArg("-q");
 			for (String a : args) {
 				cl.addArg(a);
@@ -231,6 +296,9 @@ public class PetriSpotWalker {
 			ProcessBuilder pb = new ProcessBuilder(cl.getArgs());
 			pb.redirectError(Redirect.INHERIT);
 			Process process = pb.start();
+			if (cancel != null) {
+				cancel.attach(process);
+			}
 			Thread reader = new Thread(() -> readVerdicts(process, verdicts), "petrispot-stdout");
 			reader.start();
 			int exitCode = -1;

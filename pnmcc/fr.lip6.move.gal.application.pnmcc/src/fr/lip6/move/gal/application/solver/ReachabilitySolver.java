@@ -593,7 +593,7 @@ public class ReachabilitySolver {
 	}
 
 	/** Verdicts of the PetriSpot walker, with the technique words it reported per property. */
-	private static int interpretWalkerVerdict(List<Expression> tocheck, List<Property> props, DoneProperties doneProps,
+	static int interpretWalkerVerdict(List<Expression> tocheck, List<Property> props, DoneProperties doneProps,
 			int[] verdicts, String[] techniques) {
 		int seen = 0;
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
