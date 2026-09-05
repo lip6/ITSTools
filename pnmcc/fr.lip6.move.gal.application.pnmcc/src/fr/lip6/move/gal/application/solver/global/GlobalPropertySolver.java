@@ -19,6 +19,7 @@ import fr.lip6.move.gal.application.runner.Ender;
 import fr.lip6.move.gal.application.runner.IRunner;
 import fr.lip6.move.gal.application.runner.its.ITSRunner;
 import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;
+import fr.lip6.move.gal.application.solver.ParallelWalk;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.application.solver.UpperBoundsSolver;
 import fr.lip6.move.gal.gal2smt.Solver;
@@ -703,8 +704,24 @@ public class GlobalPropertySolver {
 		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 	}
 
+	/**
+	 * Hand the model to the exhaustive engines, with a PetriSpot walk on the
+	 * cores they leave idle: both are single threaded, and the walk publishes
+	 * into the same DoneProperties, so either may end the attempt.
+	 */
 	public static void verifyWithSDD(MccTranslator reader, DoneProperties doneProps, String examinationForITS,
 			int timeout) {
+		ParallelWalk walk = ParallelWalk.start(reader.getSPN(), doneProps, timeout);
+		try {
+			runExhaustiveEngines(reader, doneProps, examinationForITS, timeout);
+		} finally {
+			ParallelWalk.stop(walk);
+		}
+	}
+
+	/** The decision diagrams, then LTSmin, on whatever properties remain open. */
+	private static void runExhaustiveEngines(MccTranslator reader, DoneProperties doneProps,
+			String examinationForITS, int timeout) {
 		long time = System.currentTimeMillis();
 		boolean wasInterrupted = false;
 		if (reader.isDoITS())
