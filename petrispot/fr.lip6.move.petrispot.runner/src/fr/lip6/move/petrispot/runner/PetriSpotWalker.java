@@ -94,6 +94,22 @@ public class PetriSpotWalker {
 	}
 
 	/**
+	 * Receives each verdict line the moment PetriSpot prints it, on the reader
+	 * thread, so a caller can publish it before the walk is over. The Verdicts
+	 * returned at the end carry the same information; a listener that throws
+	 * is dropped and the caller reads the Verdicts as usual.
+	 */
+	public interface Listener {
+		/** FORMULA prop&lt;index&gt; value TECHNIQUES words : a witness, or a known bound reached (value is then the bound). */
+		default void formula(int index, String value, String techniques) {
+		}
+
+		/** BOUND prop&lt;index&gt; max : the largest value seen so far for a bound request. */
+		default void bound(int index, long max) {
+		}
+	}
+
+	/**
 	 * Look for a witness of each predicate: a random sweep over all of them for
 	 * up to sweepSeconds, then focused heuristic walks until totalSeconds.
 	 * Each walk fires at most steps transitions.
@@ -103,6 +119,12 @@ public class PetriSpotWalker {
 	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates, long steps,
 			int sweepSeconds, int totalSeconds) {
 		return runReachability(net, predicates, null, steps, sweepSeconds, totalSeconds);
+	}
+
+	/** Same, publishing each verdict to the listener as it arrives. */
+	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates, long steps,
+			int sweepSeconds, int totalSeconds, Listener listener) {
+		return runReachability(net, predicates, null, steps, sweepSeconds, totalSeconds, false, listener);
 	}
 
 	/**
@@ -118,6 +140,13 @@ public class PetriSpotWalker {
 	/** Same; withTrace asks for the witness traces (Verdicts.traces), off the fast path otherwise. */
 	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates,
 			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds, boolean withTrace) {
+		return runReachability(net, predicates, parikhs, steps, sweepSeconds, totalSeconds, withTrace, null);
+	}
+
+	/** Same, publishing each verdict to the listener as it arrives. */
+	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates,
+			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds, boolean withTrace,
+			Listener listener) {
 		if (predicates.isEmpty()) {
 			return new Verdicts(0);
 		}
@@ -138,7 +167,7 @@ public class PetriSpotWalker {
 		// driver otherwise, handing back the seconds it was given.
 		args.add("--escalate");
 		if (withTrace) args.add("--trace");
-		return run(net, forms, hintForms(parikhs), args, totalSeconds);
+		return run(net, forms, hintForms(parikhs), args, totalSeconds, THREADS, null, listener);
 	}
 
 	/**
@@ -150,6 +179,12 @@ public class PetriSpotWalker {
 	 */
 	public static Verdicts runBeside(ISparsePetriNet net, List<Expression> predicates, long steps, int totalSeconds,
 			int threads, Cancel cancel) {
+		return runBeside(net, predicates, steps, totalSeconds, threads, cancel, null);
+	}
+
+	/** Same, publishing each verdict to the listener as it arrives. */
+	public static Verdicts runBeside(ISparsePetriNet net, List<Expression> predicates, long steps, int totalSeconds,
+			int threads, Cancel cancel, Listener listener) {
 		if (predicates.isEmpty()) {
 			return new Verdicts(0);
 		}
@@ -167,7 +202,7 @@ public class PetriSpotWalker {
 		args.add("--sweepTime=" + Math.min(10, totalSeconds));
 		args.add("--totalTime=" + totalSeconds);
 		args.add("--escalate");
-		return run(net, forms, null, args, totalSeconds, threads, cancel);
+		return run(net, forms, null, args, totalSeconds, threads, cancel, listener);
 	}
 
 	/** The (parikh prop<i> ...) forms of a list of vectors, or null when there is none. */
@@ -202,6 +237,12 @@ public class PetriSpotWalker {
 	/** Same, with an optional Parikh vector per expression (see runReachability). */
 	public static Verdicts runBounds(ISparsePetriNet net, List<Expression> expressions, List<Integer> knownBounds,
 			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds) {
+		return runBounds(net, expressions, knownBounds, parikhs, steps, sweepSeconds, totalSeconds, null);
+	}
+
+	/** Same, publishing each value to the listener as it arrives. */
+	public static Verdicts runBounds(ISparsePetriNet net, List<Expression> expressions, List<Integer> knownBounds,
+			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds, Listener listener) {
 		if (expressions.isEmpty()) {
 			return new Verdicts(0);
 		}
@@ -221,7 +262,7 @@ public class PetriSpotWalker {
 		args.add("--totalTime=" + totalSeconds);
 		// a bound round that ends on its step budget buys steps, not a shorter run
 		args.add("--escalate");
-		Verdicts v = run(net, forms, hintForms(parikhs), args, totalSeconds);
+		Verdicts v = run(net, forms, hintForms(parikhs), args, totalSeconds, THREADS, null, listener);
 		if (v != null) {
 			for (int i = 0; i < v.max.length; i++) {
 				if (v.max[i] == Long.MIN_VALUE) {
@@ -264,12 +305,12 @@ public class PetriSpotWalker {
 
 	private static Verdicts run(ISparsePetriNet net, List<String> forms, List<String> hints, List<String> args,
 			int budgetSeconds) {
-		return run(net, forms, hints, args, budgetSeconds, THREADS, null);
+		return run(net, forms, hints, args, budgetSeconds, THREADS, null, null);
 	}
 
-	/** Same, on a chosen number of threads and with a handle to stop it early. */
+	/** Same, on a chosen number of threads, with a handle to stop it early and a listener fed as lines arrive. */
 	static Verdicts run(ISparsePetriNet net, List<String> forms, List<String> hints, List<String> args,
-			int budgetSeconds, int threads, Cancel cancel) {
+			int budgetSeconds, int threads, Cancel cancel, Listener listener) {
 		long t0 = System.currentTimeMillis();
 		Verdicts verdicts = new Verdicts(forms.size());
 		List<File> todel = new ArrayList<>();
@@ -304,7 +345,7 @@ public class PetriSpotWalker {
 			if (cancel != null) {
 				cancel.attach(process);
 			}
-			Thread reader = new Thread(() -> readVerdicts(process, verdicts), "petrispot-stdout");
+			Thread reader = new Thread(() -> readVerdicts(process, verdicts, listener), "petrispot-stdout");
 			reader.start();
 			int exitCode = -1;
 			try {
@@ -347,8 +388,12 @@ public class PetriSpotWalker {
 		return BinaryToolsPlugin.getPetriURI().getPath();
 	}
 
-	/** Consume stdout to its end, recording every FORMULA and BOUND line as it arrives. */
-	private static void readVerdicts(Process process, Verdicts verdicts) {
+	/**
+	 * Consume stdout to its end, recording every FORMULA and BOUND line as it
+	 * arrives and handing it to the listener, if any. A listener that throws
+	 * is not called again: the caller reads the Verdicts when the run ends.
+	 */
+	private static void readVerdicts(Process process, Verdicts verdicts, Listener listener) {
 		try (BufferedReader in = new BufferedReader(
 				new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
 			String line;
@@ -371,6 +416,14 @@ public class PetriSpotWalker {
 					// every request asks for a witness, so a verdict means one was found
 					verdicts.found[index] = 1;
 					verdicts.techniques[index] = words.length == 5 ? words[4] : "EXPLICIT";
+					if (listener != null) {
+						try {
+							listener.formula(index, words[2], verdicts.techniques[index]);
+						} catch (RuntimeException e) {
+							System.out.println("PetriSpot walker listener dropped: " + e.getMessage());
+							listener = null;
+						}
+					}
 				} else if (witness) {
 					// transitions are named t<i> on the PNET path
 					String[] ts = words.length == 4 ? words[3].trim().split(" ") : new String[0];
@@ -393,6 +446,15 @@ public class PetriSpotWalker {
 						verdicts.max[index] = Math.max(verdicts.max[index], Long.parseLong(words[2]));
 					} catch (NumberFormatException e) {
 						// malformed line: ignore
+						continue;
+					}
+					if (listener != null) {
+						try {
+							listener.bound(index, verdicts.max[index]);
+						} catch (RuntimeException e) {
+							System.out.println("PetriSpot walker listener dropped: " + e.getMessage());
+							listener = null;
+						}
 					}
 				}
 			}

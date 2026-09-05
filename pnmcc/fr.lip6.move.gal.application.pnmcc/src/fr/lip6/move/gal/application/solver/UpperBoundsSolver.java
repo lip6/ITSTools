@@ -227,7 +227,8 @@ public class UpperBoundsSolver {
 							maxSz = Math.max(maxSz, sz);
 						}
 						if (maxSz > 0) {
-							PetriSpotWalker.Verdicts psv = PetriSpotWalker.runBounds(sr, tocheck, maxStruct, paths, 100L * maxSz, 1, 30);
+							PetriSpotWalker.Verdicts psv = PetriSpotWalker.runBounds(sr, tocheck, maxStruct, paths, 100L * maxSz, 1, 30,
+									streamBounds(spn, doneProps, maxSeen, maxStruct, "PETRISPOT_PARIKH_WALK"));
 							if (psv != null) {
 								int[] verdicts = new int[psv.max.length];
 								for (int i = 0; i < verdicts.length; i++) verdicts[i] = (int) Math.min(psv.max[i], Integer.MAX_VALUE);
@@ -779,16 +780,53 @@ public class UpperBoundsSolver {
 	}
 	
 	
+	/**
+	 * A listener raising maxSeen as the walker reports values: a bound that
+	 * meets its structural bound is closed at once, an open one has its
+	 * interval reported when the printer listens. Indexes are those of the
+	 * lists, which must not change while the walk runs.
+	 */
+	static PetriSpotWalker.Listener streamBounds(SparsePetriNet spn, DoneProperties doneProps, List<Integer> maxSeen,
+			List<Integer> maxStruct, String tech) {
+		return new PetriSpotWalker.Listener() {
+			@Override
+			public void bound(int index, long max) {
+				int value = (int) Math.min(max, Integer.MAX_VALUE);
+				if (value <= maxSeen.get(index)) {
+					return;
+				}
+				maxSeen.set(index, value);
+				String name = spn.getProperties().get(index).getName();
+				if (value == Integer.MAX_VALUE || value == maxStruct.get(index)) {
+					doneProps.put(name, value, "TOPOLOGICAL " + tech);
+				} else if (doneProps instanceof BoundsProgress) {
+					((BoundsProgress) doneProps).interval(name, value, maxStruct.get(index));
+				}
+			}
+
+			@Override
+			public void formula(int index, String value, String techniques) {
+				// a known bound reached : the value is the bound
+				try {
+					bound(index, Long.parseLong(value));
+				} catch (NumberFormatException e) {
+					// not a bound line
+				}
+			}
+		};
+	}
+
 	static int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, SparsePetriNet spn,
 			DoneProperties doneProps, int steps, List<Integer> maxSeen, List<Integer> maxStruct) {
 		int seen = 0;
 		PetriSpotWalker.Verdicts psv = null;
 		if (PetriSpotWalker.USE_PETRISPOT) {
 			// one request replaces the random sweep and the per-property best-first climbs;
-			// the budget grows with the cohort but stays within a phase, so a cohort of
-			// hundreds of bounds still reports what the walk found
-			int total = Math.min(30 + 5 * tocheck.size(), 120);
-			psv = PetriSpotWalker.runBounds(re.getNet(), tocheck, maxStruct, steps, 30, total);
+			// values are published as the walk reports them, so the budget may grow with
+			// the cohort without holding anything back
+			int total = 30 + 5 * tocheck.size();
+			psv = PetriSpotWalker.runBounds(re.getNet(), tocheck, maxStruct, null, steps, 30, total,
+					streamBounds(spn, doneProps, maxSeen, maxStruct, "PETRISPOT_WALK"));
 		}
 		if (psv != null) {
 			int[] verdicts = new int[psv.max.length];

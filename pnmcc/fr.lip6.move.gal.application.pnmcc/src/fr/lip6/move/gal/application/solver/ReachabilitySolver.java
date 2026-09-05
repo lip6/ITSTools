@@ -348,7 +348,14 @@ public class ReachabilitySolver {
 					maxSz = Math.max(maxSz, sz);
 				}
 			}
-			PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(re.getNet(), tocheck, hints, 100L * maxSz, 1, maxTime);
+			PetriSpotWalker.Listener stream = new PetriSpotWalker.Listener() {
+				@Override
+				public void formula(int index, String value, String techniques) {
+					Problem p = remain.get(index);
+					doneProps.put(p.getName(), p.isEF(), "TOPOLOGICAL " + (techniques != null ? techniques : "EXPLICIT"));
+				}
+			};
+			PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(re.getNet(), tocheck, hints, 100L * maxSz, 1, maxTime, false, stream);
 			if (psv != null) {
 				for (int v = 0; v < remain.size(); v++) {
 					if (psv.found[v] != 0) {
@@ -540,7 +547,7 @@ public class ReachabilitySolver {
 		if (PetriSpotWalker.USE_PETRISPOT) {
 			// one request replaces the random sweep and the per-property best-first walks
 			int total = 30 + 5 * Math.min(tocheck.size(), 50);
-			psv = PetriSpotWalker.runReachability(re.getNet(), tocheck, steps, 30, total);
+			psv = PetriSpotWalker.runReachability(re.getNet(), tocheck, steps, 30, total, streamTo(props, doneProps));
 		}
 		if (psv != null) {
 			seen = interpretWalkerVerdict(tocheck, props, doneProps, psv.found, psv.techniques);
@@ -591,15 +598,33 @@ public class ReachabilitySolver {
 		return interpretWalkerVerdict(tocheck, props, doneProps, verdicts, walkType, false);
 	}
 
+	/** The walker found a witness of props[index]: EF holds, AG does not. */
+	static void publishWalkerVerdict(List<Property> props, DoneProperties doneProps, int index, String techniques) {
+		fr.lip6.move.gal.structural.Property prop = props.get(index);
+		String tech = "TOPOLOGICAL " + (techniques != null ? techniques : "EXPLICIT");
+		doneProps.put(prop.getName(), prop.getBody().getOp() == Op.EF, tech);
+	}
+
+	/**
+	 * A listener publishing each witness the moment the walker reports it; the
+	 * lists must not change while the walk runs, its indexes are theirs.
+	 */
+	static PetriSpotWalker.Listener streamTo(List<Property> props, DoneProperties doneProps) {
+		return new PetriSpotWalker.Listener() {
+			@Override
+			public void formula(int index, String value, String techniques) {
+				publishWalkerVerdict(props, doneProps, index, techniques);
+			}
+		};
+	}
+
 	/** Verdicts of the PetriSpot walker, with the technique words it reported per property. */
 	static int interpretWalkerVerdict(List<Expression> tocheck, List<Property> props, DoneProperties doneProps,
 			int[] verdicts, String[] techniques) {
 		int seen = 0;
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
-				fr.lip6.move.gal.structural.Property prop = props.get(v);
-				String tech = "TOPOLOGICAL " + (techniques[v] != null ? techniques[v] : "EXPLICIT");
-				doneProps.put(prop.getName(), prop.getBody().getOp() == Op.EF, tech);
+				publishWalkerVerdict(props, doneProps, v, techniques[v]);
 				tocheck.remove(v);
 				props.remove(v);
 				seen++;

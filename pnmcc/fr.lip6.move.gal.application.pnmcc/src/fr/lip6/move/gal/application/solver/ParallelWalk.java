@@ -69,7 +69,8 @@ public class ParallelWalk {
 		PetriSpotWalker.Cancel cancel = new PetriSpotWalker.Cancel();
 		Thread thread = new Thread(() -> {
 			try {
-				PetriSpotWalker.Verdicts v = PetriSpotWalker.runBeside(sr, tocheck, STEPS, seconds, THREADS, cancel);
+				PetriSpotWalker.Verdicts v = PetriSpotWalker.runBeside(sr, tocheck, STEPS, seconds, THREADS, cancel,
+						ReachabilitySolver.streamTo(props, doneProps));
 				if (v != null) {
 					int seen = ReachabilitySolver.interpretWalkerVerdict(tocheck, props, doneProps, v.found,
 							v.techniques);
