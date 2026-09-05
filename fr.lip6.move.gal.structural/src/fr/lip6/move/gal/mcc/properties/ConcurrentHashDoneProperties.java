@@ -2,7 +2,6 @@ package fr.lip6.move.gal.mcc.properties;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,7 +11,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConcurrentHashDoneProperties implements DoneProperties {
 	private static final int DEBUG = 0;
 	private Map<String, Boolean> map = new ConcurrentHashMap<>();
-	protected Map<String, List<String>> alias = new HashMap<>();
+	// Read by put on every solver thread while addAlias may still be writing.
+	// The lists are replaced rather than mutated, so a reader never observes one
+	// half built.
+	protected Map<String, List<String>> alias = new ConcurrentHashMap<>();
 
 	@Override
 	public boolean containsKey(Object arg0) {
@@ -73,11 +75,9 @@ public class ConcurrentHashDoneProperties implements DoneProperties {
 	@Override
 	public void addAlias(String propToCheck, String aka) {
 		alias.compute(propToCheck, (k, v) -> {
-			if (v == null) {
-				v = new ArrayList<>();
-			}
-			v.add(aka);
-			return v;
+			List<String> next = (v == null) ? new ArrayList<>() : new ArrayList<>(v);
+			next.add(aka);
+			return next;
 		});
 	}
 }
