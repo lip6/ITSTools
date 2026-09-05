@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
@@ -25,7 +24,6 @@ import org.eclipse.equinox.app.IApplicationContext;
 
 import android.util.SparseIntArray;
 import fr.lip6.ltl.stats.KnowledgeStatsCalculator;
-import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BoolProp;
 import fr.lip6.move.gal.False;
@@ -53,6 +51,9 @@ import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.application.solver.UpperBoundsSolver;
 import fr.lip6.move.gal.application.solver.ExclusiveImplicantsComputer.Constraint;
 import fr.lip6.move.gal.application.solver.global.DeadlockSolver;
+import java.util.concurrent.TimeoutException;
+import fr.lip6.ltl.tgba.TGBA;
+import fr.lip6.move.gal.application.solver.ExhaustiveEngines;
 import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.application.solver.logic.AtomicReducerSR;
 import fr.lip6.move.gal.application.solver.ltl.LTLLengthAwareSolver;
@@ -82,7 +83,6 @@ import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.StructuralToPNML;
-import fr.lip6.move.gal.structural.expr.AtomicPropManager;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
@@ -785,7 +785,7 @@ public class Application implements IApplication, Ender {
 //
 //					}
 
-					GlobalPropertySolver.verifyWithSDD(reader2, doneProps, examination, 30);
+					ExhaustiveEngines.verifyWithSDD(reader2, doneProps, examination, 30);
 				}
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				reader.rebuildSpecification(doneProps);

@@ -25,7 +25,7 @@ import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
 import fr.lip6.move.gal.application.solver.GALSolver;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
-import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
+import fr.lip6.move.gal.application.solver.ExhaustiveEngines;
 import fr.lip6.move.gal.application.solver.logic.AtomicReducerSR;
 import fr.lip6.move.gal.application.solver.ltl.knowledge.KnowledgeFacts;
 import fr.lip6.move.gal.application.solver.ltl.knowledge.KnowledgeOrchestrator;
@@ -302,7 +302,7 @@ public class LTLPropertySolver {
 				MccTranslator reader2 = reader.copy();
 				reader2.setSpn(spnHOA, false);
 				reader2.setTgba(tgbak);
-				GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", 15);
+				ExhaustiveEngines.verifyWithSDD(reader2, doneProps, "LTL", 15);
 			}
 			
 			if (doneProps.containsKey(propPN.getName())) 
@@ -337,7 +337,7 @@ public class LTLPropertySolver {
 				return;
 			
 			// 15 seconds timeout, just treat the fast ones.
-			GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", 15);
+			ExhaustiveEngines.verifyWithSDD(reader2, doneProps, "LTL", 15);
 			
 		} catch (AcceptedRunFoundException a) {
 			doneProps.put(propPN.getName(), false, a.getTechniques());

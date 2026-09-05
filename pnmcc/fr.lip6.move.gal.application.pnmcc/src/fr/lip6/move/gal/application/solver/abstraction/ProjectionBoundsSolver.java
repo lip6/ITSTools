@@ -3,10 +3,10 @@ package fr.lip6.move.gal.application.solver.abstraction;
 import java.util.BitSet;
 import java.util.List;
 
-import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
-import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
+import android.util.SparseIntArray;
+import fr.lip6.move.gal.application.solver.ExhaustiveEngines;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
@@ -105,7 +105,7 @@ public class ProjectionBoundsSolver {
 		DoneProperties local = new ConcurrentHashDoneProperties();
 		int budget = Math.max(2, budgetSeconds / 2);
 		if (sub.isDoITS()) {
-			GlobalPropertySolver.verifyWithSDD(sub, local, "ReachabilityCardinality", budget);
+			ExhaustiveEngines.verifyWithSDD(sub, local, "ReachabilityCardinality", budget);
 		} else {
 			try {
 				ReachabilitySolver.applyReductions(sub, local, budget);

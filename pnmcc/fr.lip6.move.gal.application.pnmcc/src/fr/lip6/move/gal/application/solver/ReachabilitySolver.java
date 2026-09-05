@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.application.Application;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
-import fr.lip6.move.gal.application.solver.global.GlobalPropertySolver;
 import fr.lip6.move.gal.application.solver.logic.AtomicReducerSR;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
@@ -69,7 +68,7 @@ public class ReachabilitySolver {
 			MccTranslator rc = reader.copy();
 			t = new Thread( () ->
 			{
-				GlobalPropertySolver.verifyWithSDD(rc, doneProps, "ReachabilityCardinality" , timeout > 0 ? timeout / 2 : 600);
+				ExhaustiveEngines.verifyWithSDD(rc, doneProps, "ReachabilityCardinality" , timeout > 0 ? timeout / 2 : 600);
 			});
 			t.start();
 		}
@@ -220,7 +219,7 @@ public class ReachabilitySolver {
 					if (timeSDD == 0) timeSDD=1;
 					if (timeSDD >= 15) timeSDD=15;
 					// a bit of exhaustive for relatively small systems
-					//			GlobalPropertySolver.verifyWithSDD(reader, doneProps, "ReachabilityCardinality", solverPath, timeSDD);
+					//			ExhaustiveEngines.verifyWithSDD(reader, doneProps, "ReachabilityCardinality", solverPath, timeSDD);
 				}
 
 				if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
@@ -269,7 +268,7 @@ public class ReachabilitySolver {
 					DoneProperties todoProps = new ConcurrentHashDoneProperties();
 					if (reader.getSPN().getTransitionCount() <= 2000) {
 						// a bit of exhaustive for relatively small systems
-						GlobalPropertySolver.verifyWithSDD(reader, todoProps , "ReachabilityCardinality", 15);
+						ExhaustiveEngines.verifyWithSDD(reader, todoProps , "ReachabilityCardinality", 15);
 
 						for (Entry<String, Boolean> prop : todoProps.entrySet()) {
 							for (Property p : spnOri.getProperties()) {
