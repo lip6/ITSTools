@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -22,10 +20,8 @@ import fr.lip6.move.gal.application.runner.ltsmin.LTSminRunner;
 import fr.lip6.move.gal.application.solver.ParallelWalk;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.application.solver.UpperBoundsSolver;
-import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.graph.GraphSuffix;
 import fr.lip6.move.gal.structural.graph.PlacesInNonTrivialSCCComputer;
-import fr.lip6.move.gal.graph.Tarjan;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
@@ -39,9 +35,7 @@ import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.hlpn.HLPlace;
-import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.petrispot.runner.PetriSpotRunner;
@@ -59,253 +53,9 @@ public class GlobalPropertySolver {
 
 	private static final String ONE_SAFE = "OneSafe";
 
-	private static final String REVERSIBLE = "Reversible";
-	
 	private static final int DEBUG = 0;
 
 	public GlobalPropertySolver() {
-	}
-
-	// **** solving global properties ****
-	void buildOneSafeProperty(PetriNet pn) {
-		Set<Integer> osPlaces = new HashSet<>();
-		Set<Integer> oneFireTrans = new HashSet<>();
-
-		if (pn instanceof SparsePetriNet) {
-			SparsePetriNet spn = (SparsePetriNet) pn;
-
-			IntMatrixCol tflowTP = spn.getFlowTP().transpose();
-			IntMatrixCol tflowPT = spn.getFlowPT().transpose();
-			List<Integer> marks = spn.getMarks();
-
-			// test initial state first
-			for (int mark : marks) {
-				if (mark > 1) {
-					// not one safe, definitely
-					System.out.println("Due to initial marking, net is not one safe.");
-					Property oneSafeProperty = new Property(Expression.constant(false), PropertyType.INVARIANT, "OneSafe");
-					pn.getProperties().add(oneSafeProperty);
-					return;
-				}
-			}
-			// from here on, m0(p) is 0 or 1 for every place p
-
-			boolean changed;
-			do {
-				changed = false;
-				// look for places whose total token supply (initial + producible) is at most one
-				// => they are one safe, and their consumers can fire at most once
-				for (int pid=0 ; pid < spn.getPlaceCount() ; pid++) {
-					if (osPlaces.contains(pid)) {
-						continue;
-					}
-					SparseIntArray feed = tflowTP.getColumn(pid);
-					int m0 = marks.get(pid);
-					// cannot be fed at all : supply is just the initial marking, which we checked is <= 1
-					// or is initially empty and can only be fed exactly once at most, by a single token
-					// NB : a place that is both initially marked and feedable can reach 2, it is excluded here
-					// NB : the feeding arc weight must be 1, a single firing of weight k puts k tokens in
-					if ( (feed.size()==0)
-							|| (feed.size()==1 && m0==0 && feed.valueAt(0)==1 && oneFireTrans.contains(feed.keyAt(0))) ) {
-						changed = true;
-						osPlaces.add(pid);
-						// consumers from this place are hence single fireable :
-						// they each need at least one token from a supply of at most one
-						SparseIntArray cons = tflowPT.getColumn(pid);
-						for (int i=0, ie=cons.size() ;i< ie; i++) {
-							int tid = cons.keyAt(i);
-							oneFireTrans.add(tid);
-						}
-					}
-				}
-			} while (changed);
-
-			if (DEBUG==2) FlowPrinter.drawNet(spn, "Finally : Detected single feed",osPlaces,oneFireTrans);
-			if (! osPlaces.isEmpty()) {
-				System.out.println("Structural unfed/single firing approximation deduced that "+ osPlaces.size()+ "/" + spn.getPlaceCount() + " places are one safe.");
-			}
-		}
-
-		List<Expression> gtone = new ArrayList<>();
-		boolean singleProp = false;
-		for (int pid = 0; pid < pn.getPlaceCount(); pid++) {
-
-			// in case colored models
-			if (pn instanceof SparseHLPetriNet) {
-				SparseHLPetriNet hlpn = (SparseHLPetriNet) pn;
-				if (pid >= hlpn.getPlaces().size())
-					break;
-			}
-			if (!osPlaces.contains(pid)) {
-				Expression pInfOne = Expression.op(Op.LEQ,
-						Expression.nop(Op.CARD, Collections.singletonList(Expression.var(pid))), Expression.constant(1));
-				if (singleProp) {
-					gtone.add(Expression.not(pInfOne));
-				} else {
-					// unary op ignore right
-					Expression ag = Expression.op(Op.AG, pInfOne, null);
-					Property oneSafeProperty = new Property(ag, PropertyType.INVARIANT, "osplace_" + pid);
-					pn.getProperties().add(oneSafeProperty);
-				}
-			}
-		}
-		if (singleProp) {
-			Property oneUnsafe = new Property(Expression.op(Op.AG, Expression.not(Expression.nop(Op.OR,gtone)), null), PropertyType.INVARIANT, "allosplace");
-			pn.getProperties().add(oneUnsafe);
-		}
-
-
-	}
-
-	void buildStableMarkingProperty(PetriNet spn, DoneProperties doneProps) {
-		boolean[] todiscard = new boolean[spn.getPlaceCount()];
-		if (spn instanceof SparsePetriNet) {
-			SparsePetriNet sspn = (SparsePetriNet) spn;
-			
-			int nbp= spn.getPlaceCount();
-			sspn.removeConstantPlaces();
-			if (sspn.getPlaceCount() < nbp) {
-				doneProps.put(STABLE_MARKING, true, "CONSTANT_TEST");
-			}
-			
-			//todiscard = computeNonStablePlaces(sspn, doneProps);
-			todiscard = GraphSuffix.computeNonStablePlaces(sspn, doneProps);
-
-		}
-
-		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
-			int sum = 0;
-			// in case colored models
-			if (spn instanceof SparseHLPetriNet) {
-				SparseHLPetriNet hlpn = (SparseHLPetriNet) spn;
-				if (pid >= hlpn.getPlaces().size())
-					break;
-				sum = Arrays.stream(hlpn.getPlaces().get(pid).getInitial()).sum();
-			} else if (spn instanceof SparsePetriNet) {
-				ISparsePetriNet sparse = (ISparsePetriNet) spn;
-				sum = sparse.getMarks().get(pid);
-			}
-
-			if (todiscard != null && todiscard[pid]) {
-				continue;
-			} else {
-				Expression stable = Expression.op(Op.EQ,
-						Expression.nop(Op.CARD, Collections.singletonList(Expression.var(pid))),
-						Expression.constant(sum));
-				Expression ef = Expression.op(Op.AG, stable, null);
-				Property stableMarkingProperty = new Property(ef, PropertyType.INVARIANT, "smplace_" + pid);
-				spn.getProperties().add(stableMarkingProperty);
-			}
-		}
-	}
-
-	private boolean[] computeNonStablePlaces(SparsePetriNet spn, DoneProperties doneProps) {
-		boolean [] nonstable = new boolean[spn.getPlaceCount()];
-		long time = System.currentTimeMillis();
-		// extract simple transitions to a PxP matrix
-		int nbP = spn.getPlaceCount();
-		IntMatrixCol graph = new IntMatrixCol(nbP,nbP);
-		
-		IntMatrixCol flowPT = spn.getFlowPT();
-		IntMatrixCol flowTP = spn.getFlowTP();
-		
-		for (int tid = 0; tid < flowPT.getColumnCount() ; tid++) {
-			SparseIntArray hPT = flowPT.getColumn(tid);
-			SparseIntArray hTP = flowTP.getColumn(tid);
-			if (hPT.size() == 1 && hTP.size() == 1 && hPT.valueAt(0)==1 && hTP.valueAt(0)==1) {				
-				graph.set(hTP.keyAt(0), hPT.keyAt(0), 1);
-			}						
-		}
-		
-		List<List<Integer>> sccs = Tarjan.searchForSCC(graph);
-		sccs.removeIf(s -> s.size() == 1);
-				
-		int reduced = 0;
-		// so we have SCC, any SCC with tokens initially in it  => all places in the SCC are NON STABLE
-		for (List<Integer> scc : sccs) {
-			boolean isMarked = false;
-			for (int pid: scc) {
-				if (spn.getMarks().get(pid) > 0) {
-					isMarked=true;
-					break;
-				}
-			}
-			if (isMarked) {
-				for (int pid: scc) {
-					nonstable [pid] = true;
-					reduced ++;
-				}
-			}
-		}
-		
-		if (reduced >0) {
-			System.out.println("SCC test allowed to assert that "+reduced+" places are NOT stable.");
-			doneProps.put("SccTest", false, "TRIVIAL_MARKED_SCC_TEST");
-		}
-		return nonstable;
-	}
-
-	void buildQuasiLivenessProperty(PetriNet spn) {
-		boolean[] todiscard = computeDominatedTransitions(spn);
-		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
-			if (!todiscard[tid]) {
-				Expression quasiLive = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-				Expression ef = Expression.op(Op.EF, quasiLive, null);
-				Property quasiLivenessProperty = new Property(ef, PropertyType.INVARIANT, "qltransition_" + tid);
-				spn.getProperties().add(quasiLivenessProperty);
-			}
-		}
-	}
-
-	private boolean[] computeDominatedTransitions(PetriNet pn) {
-		boolean[] todiscard = new boolean[pn.getTransitionCount()];
-		int discards = 0;
-		if (pn instanceof ISparsePetriNet) {
-			ISparsePetriNet spn = (ISparsePetriNet) pn;
-			IntMatrixCol tflowPT = spn.getFlowPT().transpose();
-
-			for (int pid = 0, pide = spn.getPlaceCount(); pid < pide; pid++) {
-				SparseIntArray tpt = tflowPT.getColumn(pid);
-				List<Integer> consumers = Arrays.stream(tpt.copyKeys()).boxed().collect(Collectors.toList());
-				consumers.sort((i, j) -> -Integer.compare(spn.getFlowPT().getColumn(i).size(),
-						spn.getFlowPT().getColumn(j).size()));
-				for (int i = 0; i < consumers.size(); i++) {
-					if (todiscard[consumers.get(i)])
-						continue;
-					for (int j = i + 1; j < consumers.size(); j++) {
-						if (todiscard[consumers.get(j)])
-							continue;
-						if (SparseIntArray.greaterOrEqual(spn.getFlowPT().getColumn(consumers.get(i)),
-								spn.getFlowPT().getColumn(consumers.get(j)))) {
-							todiscard[consumers.get(j)] = true;
-							discards++;
-						} else if (SparseIntArray.greaterOrEqual(spn.getFlowPT().getColumn(consumers.get(j)),
-								spn.getFlowPT().getColumn(consumers.get(i)))) {
-							todiscard[consumers.get(i)] = true;
-							discards++;
-							break;
-						}
-					}
-				}
-			}
-		}
-		if (discards > 0) {
-			System.out.println("Discarding " + discards + " transitions out of " + todiscard.length + ". Remains "
-					+ (todiscard.length - discards));
-		}
-		return todiscard;
-	}
-
-	void buildLivenessProperty(PetriNet spn) {
-		boolean[] todiscard = computeDominatedTransitions(spn);
-		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
-			if (!todiscard[tid]) {
-				Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-				Expression ef = Expression.op(Op.AG, Expression.op(Op.EF, live, null), null);
-				Property LivenessProperty = new Property(ef, PropertyType.CTL, "ltransition_" + tid);
-				spn.getProperties().add(LivenessProperty);
-			}
-		}
 	}
 
 	public Optional<Boolean> solveProperty(String examination, MccTranslator reader) {
@@ -376,9 +126,9 @@ public class GlobalPropertySolver {
 			{
 				// call for liveness exhaustive evaluation (using definiton)
 				if (reader.getHLPN() != null)
-					buildLivenessProperty(reader.getHLPN());
+					GlobalAtoms.liveness(reader.getHLPN(), GlobalAtoms.dominatedTransitions(reader.getHLPN()));
 				else
-					buildLivenessProperty(reader.getSPN());
+					GlobalAtoms.liveness(reader.getSPN(), GlobalAtoms.dominatedTransitions(reader.getSPN()));
 			}
 
 			reader.createSPN(false, false);
@@ -565,13 +315,13 @@ public class GlobalPropertySolver {
 
 					MccTranslator readercopy = reader.copy();
 					readercopy.getSPN().getProperties().clear();
-					buildReversibleProperty(readercopy.getSPN());
+					GlobalAtoms.reversible(readercopy.getSPN());
 					
 					GlobalDonePropertyPrinter localDone = new GlobalDonePropertyPrinter(LIVENESS, false);
 					
 					Optional<Boolean> result = applyExhaustiveMethods(examination, readercopy, localDone);
 					if (result.isPresent() && result.get()) {
-						doneProps.put(REVERSIBLE, true, localDone.computeTechniques());
+						doneProps.put(GlobalAtoms.REVERSIBLE, true, localDone.computeTechniques());
 						doneProps.put(examination, true, localDone.computeTechniques() + " QUASI_LIVE_REVERSIBLE");
 						GlobalDonePropertyPrinter gdpp = ((GlobalDonePropertyPrinter) doneProps);
 						if (gdpp.shouldTrace()) {
@@ -831,36 +581,31 @@ public class GlobalPropertySolver {
 	private void buildProperties(String examination, PetriNet spn, DoneProperties doneProps) {
 		switch (examination) {
 
-		case STABLE_MARKING:
-			buildStableMarkingProperty(spn,doneProps);
+		case STABLE_MARKING: {
+			boolean[] todiscard = null;
+			if (spn instanceof SparsePetriNet) {
+				SparsePetriNet sspn = (SparsePetriNet) spn;
+				int nbp = spn.getPlaceCount();
+				sspn.removeConstantPlaces();
+				if (sspn.getPlaceCount() < nbp) {
+					doneProps.put(STABLE_MARKING, true, "CONSTANT_TEST");
+				}
+				todiscard = GraphSuffix.computeNonStablePlaces(sspn, doneProps);
+			}
+			GlobalAtoms.stableMarking(spn, todiscard);
 			break;
+		}
 		case ONE_SAFE:
-			buildOneSafeProperty(spn);
+			GlobalAtoms.oneSafe(spn);
 			break;
 		case QUASI_LIVENESS:
-			buildQuasiLivenessProperty(spn);
+			GlobalAtoms.quasiLiveness(spn, GlobalAtoms.dominatedTransitions(spn));
 			break;
 		case LIVENESS:
-			buildLivenessProperty(spn);
+			GlobalAtoms.liveness(spn, GlobalAtoms.dominatedTransitions(spn));
 		}
 	}
 
-	private void buildReversibleProperty(SparsePetriNet spn) {
-		boolean conservative = spn.isConservative();
-		if (conservative) {
-			System.out.println("Net is conservative; using simplified expression for initial state.");
-		}
-		List<Expression> places = new ArrayList<>();
-		for (int p=0; p < spn.getPlaceCount() ; p++) {
-			int mark = spn.getMarks().get(p);
-			if (!conservative || mark != 0) {
-				Expression initialState = Expression.op(Op.EQ, Expression.var(p), Expression.constant(mark));
-				places.add(initialState);
-			}
-		}
-		spn.getProperties().add(new Property(Expression.nop(Op.AG, Expression.nop(Op.EF, Expression.nop(Op.AND,places))), PropertyType.CTL,REVERSIBLE));
-	}
-	
 	public boolean isSuccess(DoneProperties doneProperties, String examination) {
 		if (examination.equals(ONE_SAFE) || examination.equals(QUASI_LIVENESS) || examination.equals(LIVENESS)) {
 			// at least one false
