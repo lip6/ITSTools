@@ -784,8 +784,10 @@ public class UpperBoundsSolver {
 		int seen = 0;
 		PetriSpotWalker.Verdicts psv = null;
 		if (PetriSpotWalker.USE_PETRISPOT) {
-			// one request replaces the random sweep and the per-property best-first climbs
-			int total = 30 + 5 * tocheck.size();
+			// one request replaces the random sweep and the per-property best-first climbs;
+			// the budget grows with the cohort but stays within a phase, so a cohort of
+			// hundreds of bounds still reports what the walk found
+			int total = Math.min(30 + 5 * tocheck.size(), 120);
 			psv = PetriSpotWalker.runBounds(re.getNet(), tocheck, maxStruct, steps, 30, total);
 		}
 		if (psv != null) {
