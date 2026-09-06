@@ -462,11 +462,23 @@ public class Simplifier {
 	}
 
 	
+	/**
+	 * Whether the skeleton of a coloured net can settle this property. The
+	 * skeleton over-approximates the markings, and a coloured transition
+	 * enabled in the net has its skeleton transition enabled, never the
+	 * converse. So an AG proved on the skeleton transfers to the net when its
+	 * body tests enablings negatively only (not enabled there, not enabled
+	 * here), and an EF refuted on the skeleton transfers when its body tests
+	 * them positively only (enabled here, enabled there). Cardinality atoms
+	 * are exact on the skeleton and constrain nothing.
+	 */
 	public static boolean allEnablingsAreNegated(Property p, SparsePetriNet spn) {
 		SparseIntArray init = new SparseIntArray(spn.getMarks());
 		switch (p.getType()) {
 		case INVARIANT:
-			return allEnablingsAreNegated(p.getBody(), false);
+			// the helper accepts an enabling under an odd number of negations when
+			// started with false, under an even number when started with true
+			return allEnablingsAreNegated(p.getBody(), p.getBody().getOp() == Op.EF);
 		case CTL:
 		case LTL:
 			return allEnablingsAreInitiallyFalse(p.getBody(), init, spn);
