@@ -352,7 +352,8 @@ public class ReachabilitySolver {
 				@Override
 				public void formula(int index, String value, String techniques) {
 					Problem p = remain.get(index);
-					doneProps.put(p.getName(), p.isEF(), "TOPOLOGICAL " + (techniques != null ? techniques : "EXPLICIT"));
+					// a witness settles EF as true, a proof of absence settles it as false; AG the other way
+					doneProps.put(p.getName(), p.isEF() == PetriSpotWalker.isWitness(value), walkTechniques(techniques));
 				}
 			};
 			PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(re.getNet(), tocheck, hints, 100L * maxSz, 1, maxTime, false, stream);
@@ -360,8 +361,11 @@ public class ReachabilitySolver {
 				for (int v = 0; v < remain.size(); v++) {
 					if (psv.found[v] != 0) {
 						Problem p = remain.get(v);
-						doneProps.put(p.getName(), p.isEF(), "TOPOLOGICAL " + (psv.techniques[v] != null ? psv.techniques[v] : "EXPLICIT"));
-						p.getSolution().setReply(SMTReply.REACHABLE);
+						boolean witness = psv.found[v] == PetriSpotWalker.Verdicts.WITNESS;
+						doneProps.put(p.getName(), p.isEF() == witness, walkTechniques(psv.techniques[v]));
+						if (witness) {
+							p.getSolution().setReply(SMTReply.REACHABLE);
+						}
 						replayed++;
 					}
 				}
@@ -598,22 +602,33 @@ public class ReachabilitySolver {
 		return interpretWalkerVerdict(tocheck, props, doneProps, verdicts, walkType, false);
 	}
 
-	/** The walker found a witness of props[index]: EF holds, AG does not. */
-	static void publishWalkerVerdict(List<Property> props, DoneProperties doneProps, int index, String techniques) {
+	/**
+	 * The walker settled props[index]: with a witness EF holds and AG does not,
+	 * with a proof that no marking satisfies the predicate EF fails and AG holds.
+	 */
+	static void publishWalkerVerdict(List<Property> props, DoneProperties doneProps, int index, String techniques,
+			boolean witness) {
 		fr.lip6.move.gal.structural.Property prop = props.get(index);
-		String tech = "TOPOLOGICAL " + (techniques != null ? techniques : "EXPLICIT");
-		doneProps.put(prop.getName(), prop.getBody().getOp() == Op.EF, tech);
+		doneProps.put(prop.getName(), (prop.getBody().getOp() == Op.EF) == witness, walkTechniques(techniques));
+	}
+
+	/** The MCC technique words of a walker verdict, TOPOLOGICAL first and once. */
+	static String walkTechniques(String techniques) {
+		if (techniques == null) {
+			return "TOPOLOGICAL EXPLICIT";
+		}
+		return techniques.startsWith("TOPOLOGICAL") ? techniques : "TOPOLOGICAL " + techniques;
 	}
 
 	/**
-	 * A listener publishing each witness the moment the walker reports it; the
+	 * A listener publishing each verdict the moment the walker reports it; the
 	 * lists must not change while the walk runs, its indexes are theirs.
 	 */
 	static PetriSpotWalker.Listener streamTo(List<Property> props, DoneProperties doneProps) {
 		return new PetriSpotWalker.Listener() {
 			@Override
 			public void formula(int index, String value, String techniques) {
-				publishWalkerVerdict(props, doneProps, index, techniques);
+				publishWalkerVerdict(props, doneProps, index, techniques, PetriSpotWalker.isWitness(value));
 			}
 		};
 	}
@@ -624,7 +639,7 @@ public class ReachabilitySolver {
 		int seen = 0;
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
-				publishWalkerVerdict(props, doneProps, v, techniques[v]);
+				publishWalkerVerdict(props, doneProps, v, techniques[v], verdicts[v] == PetriSpotWalker.Verdicts.WITNESS);
 				tocheck.remove(v);
 				props.remove(v);
 				seen++;

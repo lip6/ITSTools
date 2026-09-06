@@ -120,7 +120,7 @@ public class ProjectionBoundsSolver {
 		int[] witness = null;
 		PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(proj.getNet(),
 				List.of(Expression.nop(Op.GT, abody, Expression.constant(bound))), null, 1000000, 1, Math.max(2, budget / 2), true);
-		if (psv != null && psv.found[0] != 0) witness = psv.traces[0];
+		if (psv != null && psv.found[0] == PetriSpotWalker.Verdicts.WITNESS) witness = psv.traces[0];
 		return new ProjectionCegar.Answer(ProjectionCegar.Status.REFUTED, witness);
 	}
 }

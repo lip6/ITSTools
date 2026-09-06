@@ -142,8 +142,8 @@ public class AtomicReducer {
 			verdicts = re.runRandomReachabilityDetection(steps,tocheck,timeout,-1);
 		}
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
-			if (verdicts[v] != 0) {
-				// well, this is not an invariant, too bad
+			if (verdicts[v] > 0) {
+				// a witness: this is not an invariant, too bad (a PetriSpot proof of absence is -1 and keeps it)
 				tocheck.remove(v);
 				tocheckIndexes.remove(v);
 			}

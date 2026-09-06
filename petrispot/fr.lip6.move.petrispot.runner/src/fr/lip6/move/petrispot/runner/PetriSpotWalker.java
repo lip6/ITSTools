@@ -73,11 +73,16 @@ public class PetriSpotWalker {
 	}
 
 	/**
-	 * Verdicts of one request: found is 1 when a witness was found (or the
-	 * known bound was reached), with the MCC technique words; for bound
-	 * requests, max is the largest value of each expression seen.
+	 * Verdicts of one request: found is WITNESS (1) when a witness was found
+	 * (or the known bound was reached), ABSENT (-1) when PetriSpot answered
+	 * that no marking can satisfy the predicate, 0 when it said nothing; the
+	 * MCC technique words go with either verdict. For bound requests, max is
+	 * the largest value of each expression seen.
 	 */
 	public static class Verdicts {
+		public static final int WITNESS = 1;
+		public static final int ABSENT = -1;
+
 		public final int[] found;
 		public final String[] techniques;
 		public final long[] max;
@@ -100,7 +105,10 @@ public class PetriSpotWalker {
 	 * is dropped and the caller reads the Verdicts as usual.
 	 */
 	public interface Listener {
-		/** FORMULA prop&lt;index&gt; value TECHNIQUES words : a witness, or a known bound reached (value is then the bound). */
+		/**
+		 * FORMULA prop&lt;index&gt; value TECHNIQUES words : TRUE is a witness, FALSE
+		 * a proof that none exists (see isWitness), a number a known bound reached.
+		 */
 		default void formula(int index, String value, String techniques) {
 		}
 
@@ -300,7 +308,16 @@ public class PetriSpotWalker {
 		if (v == null) {
 			return null;
 		}
-		return v.found[0] != 0;
+		return v.found[0] == Verdicts.WITNESS;
+	}
+
+	/**
+	 * The polarity of a FORMULA value on a reach or deadlock request: FALSE says
+	 * the predicate is satisfiable by no marking (today from constant folding
+	 * of the predicate, INTEROP.md section 5), anything else is a witness.
+	 */
+	public static boolean isWitness(String value) {
+		return !"FALSE".equals(value);
 	}
 
 	private static Verdicts run(ISparsePetriNet net, List<String> forms, List<String> hints, List<String> args,
@@ -355,7 +372,7 @@ public class PetriSpotWalker {
 			}
 			reader.join();
 			int seen = 0;
-			for (int f : verdicts.found) seen += f;
+			for (int f : verdicts.found) if (f != 0) seen++;
 			int bounds = 0;
 			for (long m : verdicts.max) if (m != Long.MIN_VALUE) bounds++;
 			System.out.println("PetriSpot walker: " + seen + "/" + forms.size() + " properties solved"
@@ -413,8 +430,8 @@ public class PetriSpotWalker {
 				}
 				if (index < 0 || index >= verdicts.found.length) continue;
 				if (formula) {
-					// every request asks for a witness, so a verdict means one was found
-					verdicts.found[index] = 1;
+					// TRUE or a bound value is a witness; FALSE is PetriSpot's proof that none exists
+					verdicts.found[index] = isWitness(words[2]) ? Verdicts.WITNESS : Verdicts.ABSENT;
 					verdicts.techniques[index] = words.length == 5 ? words[4] : "EXPLICIT";
 					if (listener != null) {
 						try {
