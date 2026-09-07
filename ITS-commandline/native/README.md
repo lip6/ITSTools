@@ -5,8 +5,9 @@
 is one file (about 80 MB) that starts in 10 ms where the Eclipse launcher takes
 0.3 s warm and 1 s cold, and runs the Java side at JIT speed or a little better
 (no warm-up); the external engines are unchanged. It needs the product's
-`plugins/` folder beside it for the binaries, named by
-`-Dfr.lip6.binaries.root=<product>/plugins`.
+`plugins/` folder beside it for the binaries (put the executable in the
+unzipped product, next to `its-tools`); `-Dfr.lip6.binaries.root=DIR` names
+another `plugins/` folder.
 
 `config/reachability-metadata.json` is the closed world: every class reached by
 reflection, every resource and proxy, as the tracing agent recorded them over

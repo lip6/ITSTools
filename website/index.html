@@ -1,55 +1,108 @@
-<h1> Download page for ITS tools command line</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ITS-Tools command line</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 52em; margin: 2em auto; padding: 0 1em; line-height: 1.5; color: #222; }
+  h1 { border-bottom: 2px solid #345; padding-bottom: .3em; }
+  h2 { margin-top: 2em; color: #345; }
+  code, pre { font-family: ui-monospace, monospace; background: #f4f4f4; }
+  code { padding: .1em .3em; }
+  pre { padding: .8em; overflow-x: auto; }
+  table { border-collapse: collapse; }
+  td, th { border: 1px solid #ccc; padding: .4em .8em; text-align: left; vertical-align: top; }
+  .note { background: #f7f3e3; border-left: 4px solid #c9a227; padding: .6em 1em; }
+</style>
+</head>
+<body>
 
-<h2>Converter tool</h2>
+<h1>ITS-Tools command line</h1>
 
-<p>This small tool can convert various dialects for Petri nets and properties to PNML standard for nets and MCC standard for properties.</p>
+<p>ITS-Tools is a model checker for Petri nets and for its own language GAL,
+combining structural reductions, SMT, symbolic decision diagrams, partial-order
+explicit engines and random walks. The
+<a href="https://lip6.github.io/ITSTools-web/">project homepage</a> describes the
+tool; this page distributes its command line, the build that runs in the
+<a href="https://mcc.lip6.fr">Model Checking Contest</a>.</p>
 
-<h2>Download the converter tool : <a href="fr.lip6.converter.jar">Converter tool</a>. 
-  This tool is packaged as a Java 17 or better executable : run it with "java -jar fr.lip6.converter.jar". </h2>
-<p> 
+<h2>Downloads</h2>
 
-<h2>Command line ITS-tools</h2>
+<table>
+<tr><th>Platform</th><th>Archive</th><th>Command</th></tr>
+<tr><td>Linux x86_64</td><td><a href="fr.lip6.move.gal.itscl.product-linux.gtk.x86_64.zip">fr.lip6.move.gal.itscl.product-linux.gtk.x86_64.zip</a></td><td><code>its-tools</code></td></tr>
+<tr><td>Windows x86_64</td><td><a href="fr.lip6.move.gal.itscl.product-win32.win32.x86_64.zip">fr.lip6.move.gal.itscl.product-win32.win32.x86_64.zip</a></td><td><code>eclipsec</code></td></tr>
+<tr><td>macOS x86_64</td><td><a href="fr.lip6.move.gal.itscl.product-macosx.cocoa.x86_64.zip">fr.lip6.move.gal.itscl.product-macosx.cocoa.x86_64.zip</a></td><td><code>its-tools</code></td></tr>
+</table>
 
-<p> Despite the ui integration of ITS-Tools with Eclipse being very nice, many scenarios involve calling the ITS-tools as part of a process,
-   thus are easier to write and maintain using the command line.
-Plus some people just think eclipse is bloated and over-complex or have never used it, adopting it because of ITS-tools is too much.
-However ITS-tools leverages many components of the eclipse platform, notably EMF and XText which made extracting our code a bit of an issue.
-</p>
+<p>Unzip, then run the command from the unzipped folder. <strong>Java 21 or
+later</strong> must be on the path; the archives embed the solver binaries
+(ITS, LTSmin, Spot, Z3, PetriSpot, GreatSPN order heuristics) for their
+platform. The same site is the Eclipse update site of ITS-Tools
+(<code>https://lip6.github.io/ITSTools/</code>) for the version with editors and
+the graphical integration.</p>
 
-<p>
-So due to popular demand, we are happy to present the ITS-tools command line support,
- that allows to do everything we could from Eclipse, but using a plain command line and with minimal download/install hassle.
-</p>
+<h2>Checking a Model Checking Contest instance</h2>
 
-<h2>Download the its-cl ITS tools command line for Linux here : <a href="fr.lip6.move.gal.itscl.product-linux.gtk.x86_64.zip"> its-cl Linux (gtk, x64)</a> 
-This is the version used in the <a href="http://mcc.lip6.fr">Model-checking competition at ICATPN </a>
-</h2>
+<p>Give a folder holding <code>model.pnml</code> and the property files of the
+contest (<code>ReachabilityCardinality.xml</code>, <code>LTLFireability.xml</code>,
+...), and an examination name:</p>
 
-<h2>Download the its-cl ITS tools command line for Windows here : <a href="fr.lip6.move.gal.itscl.product-win32.win32.x86_64.zip"> its-cl Windows (XP or later, x64)</a>. 
-  Please note that for this windows build you need to invoke "eclipsec" command instead of "its-tools".</h2>
+<pre>./its-tools -pnfolder path/to/AirplaneLD-PT-0010 -examination LTLCardinality \
+    -its -ltsmin -smt -timeout 3600</pre>
 
-<h2>Download the its-cl ITS tools command line for MacOS here : <a href="fr.lip6.move.gal.itscl.product-macosx.cocoa.x86_64.zip"> its-cl OSX (Cocoa x64)</a> </h2>
+<p>Verdicts are printed as <code>FORMULA name TRUE|FALSE|value TECHNIQUES ...</code>
+lines as they are established. Engines are opted in: <code>-its</code> (decision
+diagrams), <code>-ltsmin</code> (partial-order explicit), <code>-smt</code>
+(Z3 on the state equation), <code>-greatspnpath DIR -order META -manyOrder</code>
+(GreatSPN variable orders, the contest setting); <code>-timeout</code> is in
+seconds. <code>-onlyGal</code> stops after the translation to GAL.</p>
 
-<h3> Please note that you need Java 17 or better to run these tools. Simply unzip and run "its-tools" command.</h3>
+<h2>Checking a GAL model</h2>
 
-<p>
-Current flags are relatively limited :<br/>
-<ul>
-<li> -i FILE  : specify input file, a full gal model (parameters, hierarchy, loops, properties) such as used within eclipse.
-</li>
-<li> Logic flags (only one at a time)
-<ul>
-<li> -reach  : check all Safety and Bounds properties of the input
-</li>
-<li> -ctl  : check all CTL properties of the input
-</li>
-<li> -ltl  : check all LTL properties of the input
-</li>
-</ul>
-</li>
-<li>
--itsflags FLAGS : specify additional flags, passed as is to the actual model-checking tool. For instance <h5>-itsflags "--trace-states  -manywitness  10"</h5> will display several counter examples.
-</li>
-</ul>
+<pre>./its-tools -i model.gal -reach              # the safety and bound properties of the file
+./its-tools -i model.gal -ctl                # its CTL properties
+./its-tools -i model.gal -ltl                # its LTL properties
+./its-tools -i model.gal -ltl -itsflags "--trace-states -manywitness 10"</pre>
 
-</p>
+<p><code>-i</code> takes a full GAL model as written in Eclipse (parameters,
+hierarchy, loops, properties); one logic flag at a time; <code>-itsflags</code>
+passes its argument as is to the underlying engine; <code>-timeout</code>
+bounds the run in seconds, <code>-o FILE</code> writes the translated model.</p>
+
+<h2>The same tool without the JVM start-up</h2>
+
+<p>The Linux archive also ships <code>its-tools-flat.sh</code>, which runs the
+same classes on a plain class path (no Eclipse framework, no configuration
+folder, same arguments), and the site publishes
+<a href="its-tools-native">its-tools-native</a>, a GraalVM native image of it
+that starts in a few milliseconds. The image is built for the
+<a href="https://github.com/yanntm/ITS-Tools-MCC">contest driver</a>, whose
+runs define the set of classes it knows: put it in the unzipped Linux folder,
+beside <code>plugins/</code>, and run it with the <code>-pnfolder</code>
+arguments above.</p>
+
+<p class="note">The native image is experimental. A use it was not built for
+may fail with a <code>ClassNotFoundException</code>,
+<code>NoSuchMethodException</code> or
+<code>MissingReflectionRegistrationError</code> naming a class: please
+<a href="https://github.com/lip6/ITSTools/issues">open an issue</a> with the
+command line and that message, and run <code>its-tools</code> from the same
+folder meanwhile, which has no such limit.</p>
+
+<h2>Converter</h2>
+
+<p><a href="fr.lip6.converter.jar">fr.lip6.converter.jar</a> converts several Petri
+net dialects and property formats to PNML and to the contest's property format.
+Run it with <code>java -jar fr.lip6.converter.jar</code> (Java 21 or later).</p>
+
+<h2>Source, issues, licence</h2>
+
+<p>Source code and issue tracker: <a href="https://github.com/lip6/ITSTools">github.com/lip6/ITSTools</a>.
+The contest packaging (driver scripts, installation) lives in
+<a href="https://github.com/yanntm/ITS-Tools-MCC">ITS-Tools-MCC</a>.
+ITS-Tools is distributed under the GPL v3. LIP6, CNRS &amp; Sorbonne Université.</p>
+
+</body>
+</html>

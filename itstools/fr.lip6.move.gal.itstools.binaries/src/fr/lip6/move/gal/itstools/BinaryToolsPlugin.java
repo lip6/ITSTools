@@ -76,33 +76,41 @@ public class BinaryToolsPlugin extends Plugin {
 	
 	/** This bundle's symbolic name, the prefix of its folder in the product's plugins/. */
 	private static final String BUNDLE = "fr.lip6.move.gal.itstools.binaries";
-	/** System property naming the product's plugins/ folder when no framework runs and the class folder is not the bundle (a native image). */
+	/**
+	 * System property naming the product's plugins/ folder when no framework
+	 * runs; without it a native image looks beside its own executable.
+	 */
 	private static final String BINARIES_ROOT = "fr.lip6.binaries.root";
 
 	/**
-	 * A resource of this bundle: through the framework when there is one; on a
-	 * flat classpath (no framework, getDefault() is null) the bundle is the
-	 * unpacked folder this class was loaded from, plugins/<id>_<version>/, where
-	 * bin/ sits beside the classes. Loaded from a jar instead, the binaries are
-	 * expected unpacked in a folder of the jar's name beside it.
+	 * A resource of this bundle. Through the framework when there is one. Without
+	 * a framework (flat classpath, native image) the bundle is a folder of the
+	 * product's plugins/: the folder this class was loaded from when the class
+	 * path holds the unpacked bundle; else the plugins/ folder named by the
+	 * system property, or the one beside the running executable (a native image
+	 * has no class folder).
 	 */
 	private static URL bundleResource(String relativePath) {
 		if (getDefault() != null) {
 			return getDefault().getBundle().getResource(relativePath);
 		}
 		try {
-			// an explicit plugins folder (a native image has no class folder to start from)
 			String plugins = System.getProperty(BINARIES_ROOT);
 			if (plugins != null) {
-				File[] dirs = new File(plugins).listFiles((d, n) -> n.startsWith(BUNDLE + "_") || n.equals(BUNDLE));
-				if (dirs == null || dirs.length == 0) {
+				return inPlugins(new File(plugins), relativePath);
+			}
+			java.security.CodeSource src = BinaryToolsPlugin.class.getProtectionDomain().getCodeSource();
+			File root = (src != null && src.getLocation() != null) ? new File(src.getLocation().toURI()) : null;
+			if (root == null || (root.isFile() && !root.getName().endsWith(".jar"))) {
+				// a native image: the code source is the executable itself, or none; plugins/ sits beside it
+				String exe = root != null ? root.getPath() : ProcessHandle.current().info().command().orElse(null);
+				if (exe == null) {
 					return null;
 				}
-				File f = new File(dirs[0], relativePath);
-				return f.exists() ? f.toURI().toURL() : null;
+				return inPlugins(new File(new File(exe).getAbsoluteFile().getParentFile(), "plugins"), relativePath);
 			}
-			File root = new File(BinaryToolsPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 			if (root.isFile()) {
+				// loaded from a jar: the bundle unpacked in a folder of the jar's name beside it
 				root = new File(root.getParentFile(), root.getName().replaceFirst("\\.jar$", ""));
 			}
 			File f = new File(root, relativePath);
@@ -110,6 +118,16 @@ public class BinaryToolsPlugin extends Plugin {
 		} catch (URISyntaxException | java.net.MalformedURLException e) {
 			return null;
 		}
+	}
+
+	/** The resource in this bundle's folder of a plugins/ folder, or null. */
+	private static URL inPlugins(File plugins, String relativePath) throws java.net.MalformedURLException {
+		File[] dirs = plugins.listFiles((d, n) -> n.startsWith(BUNDLE + "_") || n.equals(BUNDLE));
+		if (dirs == null || dirs.length == 0) {
+			return null;
+		}
+		File f = new File(dirs[0], relativePath);
+		return f.exists() ? f.toURI().toURL() : null;
 	}
 
 	/** The entries of bin/, for the diagnostic when a tool is missing; none without a framework. */

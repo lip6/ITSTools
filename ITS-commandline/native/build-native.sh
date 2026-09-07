@@ -7,7 +7,7 @@
 # added there, then the image is rebuilt (about 40 s on 16 cores).
 # The ini's settings are the image's run-time defaults: 16 GB heap, 40 MB initial, 128 MB thread
 # stacks, G1; -Xmx and -XX: on the executable's command line override them.
-# At run time the executable needs -Dfr.lip6.binaries.root=<product>/plugins to find the tools.
+# At run time the executable finds the tools in plugins/ beside itself (-Dfr.lip6.binaries.root=DIR: elsewhere).
 set -e
 PROD=${1:?product folder}
 OUT=${2:-its-tools-native}
