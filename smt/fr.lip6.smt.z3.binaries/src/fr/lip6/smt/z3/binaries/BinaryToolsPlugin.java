@@ -73,6 +73,37 @@ public class BinaryToolsPlugin extends Plugin {
 
 	private static final Logger log = Logger.getLogger("fr.lip6.move.gal"); //$NON-NLS-1$
 
+	/**
+	 * A resource of this bundle: through the framework when there is one; on a
+	 * flat classpath (no framework, getDefault() is null) the bundle is the
+	 * unpacked folder this class was loaded from, plugins/<id>_<version>/, where
+	 * bin/ sits beside the classes. Loaded from a jar instead, the binaries are
+	 * expected unpacked in a folder of the jar's name beside it.
+	 */
+	private static URL bundleResource(String relativePath) {
+		if (getDefault() != null) {
+			return getDefault().getBundle().getResource(relativePath);
+		}
+		try {
+			File root = new File(BinaryToolsPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			if (root.isFile()) {
+				root = new File(root.getParentFile(), root.getName().replaceFirst("\\.jar$", ""));
+			}
+			File f = new File(root, relativePath);
+			return f.exists() ? f.toURI().toURL() : null;
+		} catch (URISyntaxException | java.net.MalformedURLException e) {
+			return null;
+		}
+	}
+
+	/** The entries of bin/, for the diagnostic when a tool is missing; none without a framework. */
+	private static Enumeration<URL> listBin() {
+		if (getDefault() == null) {
+			return java.util.Collections.emptyEnumeration();
+		}
+		return getDefault().getBundle().findEntries("bin/", "*", true);
+	}
+
 	public static URI getProgramURI() throws IOException {
 		return getProgramURI(Tool.z3);
 	}
@@ -96,10 +127,10 @@ public class BinaryToolsPlugin extends Plugin {
 	}
 
 	private static URI findRelativeURI(String tool, String relativePath) throws IOException {
-		URL toolff = getDefault().getBundle().getResource(relativePath);
+		URL toolff = bundleResource(relativePath);
 		if (toolff == null) {
 			log.severe("unable to find an executable [" + tool + "] in path " + relativePath);
-			Enumeration<URL> e = getDefault().getBundle().findEntries("bin/", "*", true);
+			Enumeration<URL> e = listBin();
 			log.fine("Listing URL available in bin/");
 			while (e.hasMoreElements()) {
 				log.finer(e.nextElement().toString());

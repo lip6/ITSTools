@@ -194,9 +194,21 @@ public class Application implements IApplication, Ender {
 	 */
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
+		return run((String[]) context.getArguments().get(APPARGS));
+	}
+
+	/** The flat classpath entry, no framework: the arguments its-tools takes after the application name. */
+	public static void main(String[] args) {
+		// the run's return value carries no status (null ends several normal paths); the exit ends the helper threads
+		new Application().run(args);
+		System.exit(0);
+	}
+
+	/** One run of the tool on its arguments: the timing and the last-resort catch around startNoEx. */
+	public Object run(String[] args) {
 		long time = System.currentTimeMillis();
 		try {
-			return startNoEx(context);
+			return startNoEx(args);
 		} catch (Exception e) {
 			System.err.println("Application raised an uncaught exception " + e.getMessage());
 			e.printStackTrace();
@@ -206,9 +218,8 @@ public class Application implements IApplication, Ender {
 		}
 	}
 
-	public Object startNoEx(IApplicationContext context) throws Exception {
+	public Object startNoEx(String[] args) throws Exception {
 		System.setErr(System.out);
-		String[] args = (String[]) context.getArguments().get(APPARGS);
 
 		logger.info("Running its-tools with arguments : " + Arrays.toString(args));
 		startTime = System.currentTimeMillis();

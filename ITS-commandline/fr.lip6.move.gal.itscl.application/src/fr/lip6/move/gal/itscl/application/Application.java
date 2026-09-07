@@ -37,11 +37,22 @@ public class Application implements IApplication {
 	 * @see org.eclipse.equinox.app.IApplication#start(org.eclipse.equinox.app.IApplicationContext)
 	 */
 	public Object start(IApplicationContext context) throws Exception {
-		String [] args = (String[]) context.getArguments().get(APPARGS);
-		
+		return run((String[]) context.getArguments().get(APPARGS));
+	}
+
+	/** The flat classpath entry, no framework: the same arguments as the its-tools launcher. */
+	public static void main(String[] args) throws Exception {
+		if (Arrays.asList(args).contains("-pnfolder")) {
+			fr.lip6.move.gal.application.Application.main(args);
+		}
+		new Application().run(args);
+		System.exit(0);
+	}
+
+	public Object run(String[] args) throws Exception {
 		List<String> listArgs = Arrays.asList(args);
 		if (listArgs.contains("-pnfolder")) {
-			return new fr.lip6.move.gal.application.Application().start(context);
+			return new fr.lip6.move.gal.application.Application().run(args);
 		}
 		
 		long startTime = System.currentTimeMillis();
