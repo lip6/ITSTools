@@ -41,6 +41,7 @@ import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.serialization.SerializationUtil;
 import fr.lip6.move.petrispot.runner.PetriSpotWalker;
+import fr.lip6.move.petrispot.runner.Effort;
 
 public class AtomicReducer {
 	private static final int DEBUG = 0;
@@ -135,7 +136,7 @@ public class AtomicReducer {
 		int timeout = 30; // 30 secs
 		int[] verdicts = null;
 		if (PetriSpotWalker.USE_PETRISPOT) {
-			PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(sr, tocheck, steps, timeout, timeout);
+			PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(sr, tocheck, steps, timeout, timeout, Effort.GLEAN);
 			if (psv != null) verdicts = psv.found;
 		}
 		if (verdicts == null) {

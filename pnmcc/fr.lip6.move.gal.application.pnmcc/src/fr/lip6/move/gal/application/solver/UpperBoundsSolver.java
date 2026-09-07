@@ -32,6 +32,7 @@ import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.petrispot.runner.PetriSpotRunner;
 import fr.lip6.move.petrispot.runner.PetriSpotWalker;
+import fr.lip6.move.petrispot.runner.Effort;
 import fr.lip6.move.gal.application.solver.total.BoundsProgress;
 import fr.lip6.move.gal.application.solver.abstraction.ProjectionBoundsSolver;
 
@@ -227,7 +228,7 @@ public class UpperBoundsSolver {
 							maxSz = Math.max(maxSz, sz);
 						}
 						if (maxSz > 0) {
-							PetriSpotWalker.Verdicts psv = PetriSpotWalker.runBounds(sr, tocheck, maxStruct, paths, 100L * maxSz, 1, 30,
+							PetriSpotWalker.Verdicts psv = PetriSpotWalker.runBounds(sr, tocheck, maxStruct, paths, 100L * maxSz, 1, 30, Effort.COMMIT,
 									streamBounds(spn, doneProps, maxSeen, maxStruct, "PETRISPOT_PARIKH_WALK"));
 							if (psv != null) {
 								int[] verdicts = new int[psv.max.length];
@@ -491,7 +492,7 @@ public class UpperBoundsSolver {
 		DoneProperties localDone = new ConcurrentHashDoneProperties();
 			
 		try {
-			ReachabilitySolver.applyReductions(subproblem,localDone,100);
+			ReachabilitySolver.applyReductions(subproblem, localDone, 100, Effort.COMMIT);
 		} catch (GlobalPropertySolvedException e) {
 			e.printStackTrace();
 		}
@@ -825,7 +826,7 @@ public class UpperBoundsSolver {
 			// values are published as the walk reports them, so the budget may grow with
 			// the cohort without holding anything back
 			int total = 30 + 5 * tocheck.size();
-			psv = PetriSpotWalker.runBounds(re.getNet(), tocheck, maxStruct, null, steps, 30, total,
+			psv = PetriSpotWalker.runBounds(re.getNet(), tocheck, maxStruct, null, steps, 30, total, Effort.COMMIT,
 					streamBounds(spn, doneProps, maxSeen, maxStruct, "PETRISPOT_WALK"));
 		}
 		if (psv != null) {

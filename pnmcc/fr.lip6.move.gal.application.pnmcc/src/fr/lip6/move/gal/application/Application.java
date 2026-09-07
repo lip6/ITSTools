@@ -91,6 +91,7 @@ import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
+import fr.lip6.move.petrispot.runner.Effort;
 import fr.lip6.move.petrispot.runner.InvariantPrinter;
 import fr.lip6.move.petrispot.runner.PetriSpotRunner;
 import fr.lip6.move.petrispot.runner.PetriSpotRunner.InvariantMode;
@@ -786,7 +787,7 @@ public class Application implements IApplication, Ender {
 						// requalify
 						propRed.setType(PropertyType.INVARIANT);
 						// solve with reachability
-						ReachabilitySolver.applyReductions(reader2, doneProps, -1);
+						ReachabilitySolver.applyReductions(reader2, doneProps, -1, Effort.COMMIT);
 
 						if (reader2.getSPN().getProperties().isEmpty()) {
 							continue;
@@ -986,7 +987,7 @@ public class Application implements IApplication, Ender {
 						reader.getHLPN().getProperties().removeAll(todel);
 
 						if (! skel.getProperties().isEmpty()) {
-							ReachabilitySolver.applyReductions(reader, skelProps, timeout);
+							ReachabilitySolver.applyReductions(reader, skelProps, timeout, Effort.COMMIT);
 							new AtomicReducerSR().strongReductions(reader.getSPN(), skelProps, null, true);
 							reader.getSPN().simplifyLogic();
 							ReachabilitySolver.checkInInitial(reader.getSPN(), skelProps);
@@ -995,7 +996,7 @@ public class Application implements IApplication, Ender {
 							reader.flattenSpec(false);
 							GALSolver.checkInInitial(reader.getSpec(), skelProps, reader.getSPN().isSafe());
 
-							ReachabilitySolver.applyReductions(reader, skelProps, timeout);
+							ReachabilitySolver.applyReductions(reader, skelProps, timeout, Effort.COMMIT);
 							
 							
 							for (fr.lip6.move.gal.structural.Property p : reader.getHLPN().getProperties()) {
@@ -1018,7 +1019,7 @@ public class Application implements IApplication, Ender {
 
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				if (!reader.getSPN().getProperties().isEmpty())
-					ReachabilitySolver.applyReductions(reader, doneProps, timeout);
+					ReachabilitySolver.applyReductions(reader, doneProps, timeout, Effort.COMMIT);
 
 //				if (!reader.getSPN().getProperties().isEmpty()) {
 //					List<fr.lip6.move.gal.structural.Property> props = new ArrayList<>(reader.getSPN().getProperties());
@@ -1071,7 +1072,7 @@ public class Application implements IApplication, Ender {
 				}
 
 				if (!reader.getSpec().getProperties().isEmpty())
-					ReachabilitySolver.applyReductions(reader, doneProps, timeout);
+					ReachabilitySolver.applyReductions(reader, doneProps, timeout, Effort.COMMIT);
 
 				// Per property approach = WIP
 //				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
@@ -1211,7 +1212,7 @@ public class Application implements IApplication, Ender {
 				} else {
 					MccTranslator copy = reader.copy();
 					copy.getSpec().getProperties().removeIf(p -> !p.getName().equals(prop.getName()));
-					ReachabilitySolver.applyReductions(copy, doneProps, -1);
+					ReachabilitySolver.applyReductions(copy, doneProps, -1, Effort.COMMIT);
 					System.out.println("For property " + prop.getName() + " final size "
 							+ ((GALTypeDeclaration) copy.getSpec().getTypes().get(0)).getVariables().size());
 				}

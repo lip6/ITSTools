@@ -32,6 +32,7 @@ import fr.lip6.move.gal.structural.smt.ProblemSet;
 import fr.lip6.move.gal.structural.smt.SMTBasedReachabilitySolver;
 import fr.lip6.move.gal.structural.smt.SMTReply;
 import fr.lip6.move.petrispot.runner.PetriSpotWalker;
+import fr.lip6.move.petrispot.runner.Effort;
 
 public class ReachabilitySolver {
 
@@ -51,7 +52,14 @@ public class ReachabilitySolver {
 		return done;
 	}
 
-	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, int timeout)
+	/**
+	 * The reachability loop: structural reductions, SMT, walks and their
+	 * replays, over and over while properties remain and time allows. The
+	 * effort is the contract of every walker call the loop makes: a glean when
+	 * the loop serves another logic's atoms or knowledge, a commit when it is
+	 * the engine of the question.
+	 */
+	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, int timeout, Effort effort)
 			throws GlobalPropertySolvedException {
 		boolean withRandomWalk = true;
 		int iter;
@@ -89,7 +97,7 @@ public class ReachabilitySolver {
 				if ((iterations == 0 && iter==0) || timeout != -1) {
 					steps = 10000; // be more moderate on first run : 100k
 				}
-				if (withRandomWalk && randomCheckReachability(re, tocheck, props, doneProps,steps) >0)
+				if (withRandomWalk && randomCheckReachability(re, tocheck, props, doneProps, steps, effort) >0)
 					iter++;
 
 				if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished())
@@ -113,7 +121,7 @@ public class ReachabilitySolver {
 					iter += SMTBasedReachabilitySolver.solveProblems(problems, spn, smttime, true, repr);
 					cleanupLists(props, doneProps, tocheck, tocheckIndexes);
 
-					int replayed = tryReplayParikh(problems, doneProps, repr, re, timeout);
+					int replayed = tryReplayParikh(problems, doneProps, repr, re, timeout, effort);
 					if (replayed >0) {
 						iter++;
 						spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
@@ -306,7 +314,7 @@ public class ReachabilitySolver {
 	}
 
 	private static int tryReplayParikh(ProblemSet problems, DoneProperties doneProps, List<Integer> repr,
-			RandomExplorer re, int timeout) {
+			RandomExplorer re, int timeout, Effort effort) {
 		int replayed = 0;
 		long time = System.currentTimeMillis();
 		Map<SparseIntArray,List<Problem>> indexMap = new LinkedHashMap<>();
@@ -356,7 +364,7 @@ public class ReachabilitySolver {
 					doneProps.put(p.getName(), p.isEF() == PetriSpotWalker.isWitness(value), walkTechniques(techniques));
 				}
 			};
-			PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(re.getNet(), tocheck, hints, 100L * maxSz, 1, maxTime, false, stream);
+			PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(re.getNet(), tocheck, hints, 100L * maxSz, 1, maxTime, false, effort, stream);
 			if (psv != null) {
 				for (int v = 0; v < remain.size(); v++) {
 					if (psv.found[v] != 0) {
@@ -543,15 +551,16 @@ public class ReachabilitySolver {
 	}
 
 	static int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, List<Property> props,
-			DoneProperties doneProps, int steps) {
+			DoneProperties doneProps, int steps, Effort effort) {
 		long time = System.currentTimeMillis();
 		int seen = 0;
 		int[] verdicts = null;
 		PetriSpotWalker.Verdicts psv = null;
 		if (PetriSpotWalker.USE_PETRISPOT) {
-			// one request replaces the random sweep and the per-property best-first walks
+			// one request replaces the random sweep and the per-property best-first walks;
+			// the effort caps these budgets for a glean
 			int total = 30 + 5 * Math.min(tocheck.size(), 50);
-			psv = PetriSpotWalker.runReachability(re.getNet(), tocheck, steps, 30, total, streamTo(props, doneProps));
+			psv = PetriSpotWalker.runReachability(re.getNet(), tocheck, steps, 30, total, effort, streamTo(props, doneProps));
 		}
 		if (psv != null) {
 			seen = interpretWalkerVerdict(tocheck, props, doneProps, psv.found, psv.techniques);

@@ -18,6 +18,7 @@ import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.petrispot.runner.PetriSpotRunner;
 import fr.lip6.move.petrispot.runner.PetriSpotWalker;
+import fr.lip6.move.petrispot.runner.Effort;
 
 /**
  * Upper bounds by place projection (ABSTRACTION.md): for an open bound with
@@ -108,7 +109,7 @@ public class ProjectionBoundsSolver {
 			ExhaustiveEngines.verifyWithSDD(sub, local, "ReachabilityCardinality", budget);
 		} else {
 			try {
-				ReachabilitySolver.applyReductions(sub, local, budget);
+				ReachabilitySolver.applyReductions(sub, local, budget, Effort.COMMIT);
 			} catch (GlobalPropertySolvedException e) {
 				// nothing global to conclude here
 			}
@@ -119,7 +120,7 @@ public class ProjectionBoundsSolver {
 		// refuted on the projection: look for an abstract witness with a trace
 		int[] witness = null;
 		PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(proj.getNet(),
-				List.of(Expression.nop(Op.GT, abody, Expression.constant(bound))), null, 1000000, 1, Math.max(2, budget / 2), true);
+				List.of(Expression.nop(Op.GT, abody, Expression.constant(bound))), null, 1000000, 1, Math.max(2, budget / 2), true, Effort.COMMIT);
 		if (psv != null && psv.found[0] == PetriSpotWalker.Verdicts.WITNESS) witness = psv.traces[0];
 		return new ProjectionCegar.Answer(ProjectionCegar.Status.REFUTED, witness);
 	}

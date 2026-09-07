@@ -119,42 +119,39 @@ public class PetriSpotWalker {
 
 	/**
 	 * Look for a witness of each predicate: a random sweep over all of them for
-	 * up to sweepSeconds, then focused heuristic walks until totalSeconds.
-	 * Each walk fires at most steps transitions.
+	 * up to sweepSeconds, then focused heuristic walks until totalSeconds, each
+	 * walk firing at most steps transitions. The effort says how those budgets
+	 * are read: caps a glean may fall short of, or the time a commit spends.
 	 *
 	 * @return one verdict per predicate, or null if PetriSpot could not run
 	 */
 	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates, long steps,
-			int sweepSeconds, int totalSeconds) {
-		return runReachability(net, predicates, null, steps, sweepSeconds, totalSeconds);
+			int sweepSeconds, int totalSeconds, Effort effort) {
+		return runReachability(net, predicates, null, steps, sweepSeconds, totalSeconds, false, effort, null);
 	}
 
 	/** Same, publishing each verdict to the listener as it arrives. */
 	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates, long steps,
-			int sweepSeconds, int totalSeconds, Listener listener) {
-		return runReachability(net, predicates, null, steps, sweepSeconds, totalSeconds, false, listener);
+			int sweepSeconds, int totalSeconds, Effort effort, Listener listener) {
+		return runReachability(net, predicates, null, steps, sweepSeconds, totalSeconds, false, effort, listener);
 	}
 
 	/**
 	 * Same, with an optional Parikh vector per predicate (null entries allowed,
 	 * or a null list): the hinted predicates are walked with the parikh
-	 * strategy in their focused rounds.
+	 * strategy in their focused rounds. withTrace asks for the witness traces
+	 * (Verdicts.traces), off the fast path otherwise.
 	 */
 	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates,
-			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds) {
-		return runReachability(net, predicates, parikhs, steps, sweepSeconds, totalSeconds, false);
-	}
-
-	/** Same; withTrace asks for the witness traces (Verdicts.traces), off the fast path otherwise. */
-	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates,
-			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds, boolean withTrace) {
-		return runReachability(net, predicates, parikhs, steps, sweepSeconds, totalSeconds, withTrace, null);
+			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds, boolean withTrace,
+			Effort effort) {
+		return runReachability(net, predicates, parikhs, steps, sweepSeconds, totalSeconds, withTrace, effort, null);
 	}
 
 	/** Same, publishing each verdict to the listener as it arrives. */
 	public static Verdicts runReachability(ISparsePetriNet net, List<Expression> predicates,
 			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds, boolean withTrace,
-			Listener listener) {
+			Effort effort, Listener listener) {
 		if (predicates.isEmpty()) {
 			return new Verdicts(0);
 		}
@@ -167,21 +164,31 @@ public class PetriSpotWalker {
 			System.out.println("PetriSpot walker skipped: " + e.getMessage());
 			return null;
 		}
+		int total = effort.totalSeconds(totalSeconds);
+		List<String> args = budgetArgs(steps, effort.sweepSeconds(sweepSeconds), total, effort);
+		if (withTrace) args.add("--trace");
+		return run(net, forms, hintForms(parikhs), args, total, THREADS, null, listener);
+	}
+
+	/**
+	 * The budget flags of a request. Without --escalate a round that ends on
+	 * its step budget having found nothing ends the run, handing back the
+	 * seconds it was given; with it the round buys ten times the steps instead.
+	 */
+	private static List<String> budgetArgs(long steps, int sweepSeconds, int totalSeconds, Effort effort) {
 		List<String> args = new ArrayList<>();
 		args.add("--walkSteps=" + steps);
 		args.add("--sweepTime=" + sweepSeconds);
 		args.add("--totalTime=" + totalSeconds);
-		// A round that ends on its step budget having found nothing stops the
-		// driver otherwise, handing back the seconds it was given.
-		args.add("--escalate");
-		if (withTrace) args.add("--trace");
-		return run(net, forms, hintForms(parikhs), args, totalSeconds, THREADS, null, listener);
+		if (effort.escalates()) args.add("--escalate");
+		return args;
 	}
 
 	/**
-	 * A walk meant to run beside another solver: it takes the number of threads
-	 * it may use and a handle the caller stops it with, and it escalates its
-	 * step budget rather than conceding, since nothing else will use the time.
+	 * A walk meant to run beside another solver, the seed of the companion
+	 * contract: it takes the number of threads it may use and a handle the
+	 * caller stops it with, and it always escalates its step budget rather
+	 * than conceding, since nothing else will use the time.
 	 *
 	 * @return one verdict per predicate, or null if PetriSpot could not run
 	 */
@@ -205,11 +212,7 @@ public class PetriSpotWalker {
 			System.out.println("PetriSpot walker skipped: " + e.getMessage());
 			return null;
 		}
-		List<String> args = new ArrayList<>();
-		args.add("--walkSteps=" + steps);
-		args.add("--sweepTime=" + Math.min(10, totalSeconds));
-		args.add("--totalTime=" + totalSeconds);
-		args.add("--escalate");
+		List<String> args = budgetArgs(steps, Math.min(10, totalSeconds), totalSeconds, Effort.COMMIT);
 		return run(net, forms, null, args, totalSeconds, threads, cancel, listener);
 	}
 
@@ -231,26 +234,18 @@ public class PetriSpotWalker {
 	/**
 	 * Maximise each expression (a weighted sum of places): a random sweep over
 	 * all of them for up to sweepSeconds, then focused best-first climbs until
-	 * totalSeconds, each walk firing at most steps transitions. knownBounds[i]
-	 * is a structural upper bound of expression i, or -1 when unknown; reaching
-	 * it ends that expression early.
+	 * totalSeconds, each walk firing at most steps transitions, the effort
+	 * saying how those budgets are read. knownBounds[i] is a structural upper
+	 * bound of expression i, or -1 when unknown; reaching it ends that
+	 * expression early. parikhs is an optional Parikh vector per expression
+	 * (null entries allowed, or a null list); each value is published to the
+	 * listener as it arrives (a null listener is allowed).
 	 *
 	 * @return the largest values seen (Verdicts.max), or null if PetriSpot could not run
 	 */
 	public static Verdicts runBounds(ISparsePetriNet net, List<Expression> expressions, List<Integer> knownBounds,
-			long steps, int sweepSeconds, int totalSeconds) {
-		return runBounds(net, expressions, knownBounds, null, steps, sweepSeconds, totalSeconds);
-	}
-
-	/** Same, with an optional Parikh vector per expression (see runReachability). */
-	public static Verdicts runBounds(ISparsePetriNet net, List<Expression> expressions, List<Integer> knownBounds,
-			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds) {
-		return runBounds(net, expressions, knownBounds, parikhs, steps, sweepSeconds, totalSeconds, null);
-	}
-
-	/** Same, publishing each value to the listener as it arrives. */
-	public static Verdicts runBounds(ISparsePetriNet net, List<Expression> expressions, List<Integer> knownBounds,
-			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds, Listener listener) {
+			List<SparseIntArray> parikhs, long steps, int sweepSeconds, int totalSeconds, Effort effort,
+			Listener listener) {
 		if (expressions.isEmpty()) {
 			return new Verdicts(0);
 		}
@@ -264,13 +259,9 @@ public class PetriSpotWalker {
 			System.out.println("PetriSpot walker skipped: " + e.getMessage());
 			return null;
 		}
-		List<String> args = new ArrayList<>();
-		args.add("--walkSteps=" + steps);
-		args.add("--sweepTime=" + sweepSeconds);
-		args.add("--totalTime=" + totalSeconds);
-		// a bound round that ends on its step budget buys steps, not a shorter run
-		args.add("--escalate");
-		Verdicts v = run(net, forms, hintForms(parikhs), args, totalSeconds, THREADS, null, listener);
+		int total = effort.totalSeconds(totalSeconds);
+		List<String> args = budgetArgs(steps, effort.sweepSeconds(sweepSeconds), total, effort);
+		Verdicts v = run(net, forms, hintForms(parikhs), args, total, THREADS, null, listener);
 		if (v != null) {
 			for (int i = 0; i < v.max.length; i++) {
 				if (v.max[i] == Long.MIN_VALUE) {
@@ -284,27 +275,21 @@ public class PetriSpotWalker {
 
 	/**
 	 * Look for a deadlock with random walks of at most steps transitions each,
-	 * for up to timeoutSeconds.
+	 * for up to timeoutSeconds, guided by a Parikh vector when one is given
+	 * (null otherwise); the effort says whether a round that ended on its step
+	 * budget buys more steps or ends the call.
 	 *
 	 * @return TRUE if a deadlock was reached, FALSE if none was, null if PetriSpot could not run
 	 */
-	public static Boolean runDeadlock(ISparsePetriNet net, long steps, int timeoutSeconds) {
-		return runDeadlock(net, null, steps, timeoutSeconds);
-	}
-
-	/** Same, guided by a Parikh vector when one is given. */
-	public static Boolean runDeadlock(ISparsePetriNet net, SparseIntArray parikh, long steps, int timeoutSeconds) {
-		List<String> args = new ArrayList<>();
-		args.add("--walkSteps=" + steps);
+	public static Boolean runDeadlock(ISparsePetriNet net, SparseIntArray parikh, long steps, int timeoutSeconds,
+			Effort effort) {
+		int total = effort.totalSeconds(timeoutSeconds);
+		// -t is the per-property budget the driver falls back on without a total
+		List<String> args = budgetArgs(steps, 0, total, effort);
 		args.add("-t");
-		args.add(Integer.toString(timeoutSeconds));
-		// Without a total budget the driver walks one round and concludes; with
-		// --escalate a round that ended on its step budget buys more steps
-		// rather than giving the remaining seconds back.
-		args.add("--totalTime=" + timeoutSeconds);
-		args.add("--escalate");
+		args.add(Integer.toString(total));
 		List<String> hints = parikh == null ? null : hintForms(List.of(parikh));
-		Verdicts v = run(net, List.of(SexprPropertyPrinter.deadlock("prop0")), hints, args, timeoutSeconds);
+		Verdicts v = run(net, List.of(SexprPropertyPrinter.deadlock("prop0")), hints, args, total);
 		if (v == null) {
 			return null;
 		}

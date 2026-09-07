@@ -26,6 +26,7 @@ import fr.lip6.move.gal.structural.hlpn.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.structural.StructuralToPNML;
 import fr.lip6.move.petrispot.runner.PetriSpotWalker;
+import fr.lip6.move.petrispot.runner.Effort;
 
 public abstract class DeadlockSolver {
 
@@ -272,7 +273,7 @@ public abstract class DeadlockSolver {
 		if (!PetriSpotWalker.USE_PETRISPOT) {
 			return false;
 		}
-		Boolean found = PetriSpotWalker.runDeadlock(sr, parikh, steps, timeout);
+		Boolean found = PetriSpotWalker.runDeadlock(sr, parikh, steps, timeout, Effort.COMMIT);
 		if (found == null) {
 			return false;
 		}

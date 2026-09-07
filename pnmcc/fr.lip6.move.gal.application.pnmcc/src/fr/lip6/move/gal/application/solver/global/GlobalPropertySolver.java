@@ -34,6 +34,7 @@ import fr.lip6.move.gal.structural.hlpn.HLPlace;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.petrispot.runner.PetriSpotRunner;
+import fr.lip6.move.petrispot.runner.Effort;
 import fr.lip6.move.petrispot.runner.PetriSpotRunner.InvariantMode;
 
 public class GlobalPropertySolver {
@@ -453,7 +454,7 @@ public class GlobalPropertySolver {
 		if (!reader.getSPN().getProperties().isEmpty()) {
 			try {
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-				ReachabilitySolver.applyReductions(reader, doneProps, -1);
+				ReachabilitySolver.applyReductions(reader, doneProps, -1, Effort.COMMIT);
 			} catch (GlobalPropertySolvedException e) {
 				e.printStackTrace();
 			}

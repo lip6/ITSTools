@@ -34,6 +34,7 @@ import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.Simplifier;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
+import fr.lip6.move.petrispot.runner.Effort;
 
 public class KnowledgeFacts {
 	public static final int DEBUG = 0;
@@ -176,7 +177,7 @@ public class KnowledgeFacts {
 		
 		DoneProperties todoProps = new ConcurrentHashDoneProperties();
 		try {
-			ReachabilitySolver.applyReductions(reader, todoProps , 100);
+			ReachabilitySolver.applyReductions(reader, todoProps, 100, Effort.GLEAN);
 		} catch (GlobalPropertySolvedException e) {
 			e.printStackTrace();
 		}

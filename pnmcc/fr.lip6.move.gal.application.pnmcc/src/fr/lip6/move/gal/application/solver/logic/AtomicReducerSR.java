@@ -36,6 +36,7 @@ import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.Simplifier;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.petrispot.runner.PetriSpotWalker;
+import fr.lip6.move.petrispot.runner.Effort;
 
 public class AtomicReducerSR {
 	private static final int DEBUG = 0;
@@ -103,7 +104,7 @@ public class AtomicReducerSR {
 		
 		DoneProperties todoProps = new ConcurrentHashDoneProperties();
 		try {
-			ReachabilitySolver.applyReductions(reader, todoProps , 100);
+			ReachabilitySolver.applyReductions(reader, todoProps, 100, Effort.GLEAN);
 		} catch (GlobalPropertySolvedException e) {
 			e.printStackTrace();
 		}
@@ -249,7 +250,7 @@ public class AtomicReducerSR {
 		int timeout = 30; // 30 secs
 		int[] verdicts = null;
 		if (PetriSpotWalker.USE_PETRISPOT) {
-			PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(spn, tocheck, steps, timeout, timeout);
+			PetriSpotWalker.Verdicts psv = PetriSpotWalker.runReachability(spn, tocheck, steps, timeout, timeout, Effort.GLEAN);
 			if (psv != null) verdicts = psv.found;
 		}
 		if (verdicts == null) {
@@ -370,7 +371,7 @@ public class AtomicReducerSR {
 				
 				DoneProperties todoProps = new ConcurrentHashDoneProperties();
 				try {
-					ReachabilitySolver.applyReductions(reader, todoProps , 100);
+					ReachabilitySolver.applyReductions(reader, todoProps, 100, Effort.GLEAN);
 				} catch (GlobalPropertySolvedException e) {
 					e.printStackTrace();
 				}
