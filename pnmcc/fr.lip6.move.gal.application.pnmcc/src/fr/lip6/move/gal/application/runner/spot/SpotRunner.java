@@ -557,82 +557,66 @@ public class SpotRunner {
 		}
 	}
 	
+	/**
+	 * For each state of the automaton, the condition on the letter x such that
+	 * the word x x x ... is accepted from that state: one spotutil call, which
+	 * answers with an HOA of self-loops (a state without edge accepts no
+	 * stuttering word). When the tool fails or declines (more than 14 atomic
+	 * propositions), every state gets false, which the consumers read as
+	 * "nothing known".
+	 */
 	public void computeInfStutter(TGBA tgba)  {
+		long time = System.currentTimeMillis();
 		List<File> todel = new ArrayList<>();
+		List<Expression> infStutter = new ArrayList<>();
 		try {
-
-			int oldinit = tgba.getInitial();
-			long time = System.currentTimeMillis();
-			List<Expression> infStutter = new ArrayList<>();
-			for (int state = 0; state < tgba.nbStates() ; state++) {
-				// set initial state
-				tgba.setInitial(state);
-
-				try {
-					// export resulting automaton, load result to grab (reduced) alphabet
-					File autPath = Files.createTempFile("aut"+state, ".hoa").toFile();
-					todel.add(autPath);
-					TGBA tgbaSimp = simplify(tgba,autPath);
-
-					if (!tgbaSimp.getAPs().isEmpty()) {
-						// now build infinite stuttering assertion over the alphabet
-						StringBuilder sb = new StringBuilder();
-						boolean first = true;
-						for (AtomicProp ap : tgbaSimp.getAPs()) {
-							if (first) first=false;
-							else sb.append("&");
-							sb.append("(G ").append(ap.getName()).append(" | G!").append(ap.getName()).append(")");
-						}
-						String ltl = sb.toString();
-						File stutterAut = Files.createTempFile("stutter", ".hoa").toFile();
-						todel.add(stutterAut);
-						if (! buildAutomaton(ltl,stutterAut)) {
-							break;
-						}
-
-						// finally make a product of these two
-						TGBA prod = makeProduct(autPath,stutterAut,tgbaSimp.getApm());
-
-						if (prod == null) {
-							// suppose no edge
-							infStutter.add(Expression.constant(false));
-							continue;
-						}
-
-						// explore the product
-						List<Expression> st = new ArrayList<>();
-						for (TGBAEdge arc : prod.getEdges().get(prod.getInitial())) {
-							st.add(arc.getCondition());
-						}
-						Expression dnf = Expression.nop(Op.OR,st);
-						Expression red = new ExpressionToLogicNG().simplify(dnf);
-						Expression fst = Simplifier.simplifyBoolean(red);						
-
-						infStutter.add(fst);
-
-					} else {
-						if (tgbaSimp.getEdges().get(0).isEmpty()) {
-							// no edge
-							infStutter.add(Expression.constant(false));
-						} else {
-							// just true as AP
-							infStutter.add(Expression.constant(true));
-						}
-					}
-				} catch (TimeoutException|InterruptedException|IOException te) {
-					System.out.println("Spot timed out "+te.getMessage());
-					infStutter.add(Expression.constant(false));
-				}
+			CommandLine cl = new CommandLine();
+			cl.addArg(pathToSpotUtil);
+			cl.addArg("inf-stutter");
+			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
+			todel.add(curAut);
+			PrintWriter pw = new PrintWriter(curAut);
+			tgba.exportAsHOA(pw, ExportMode.SPOTAP);
+			pw.close();
+			cl.addArg(curAut.getCanonicalPath());
+			if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
+			File outPath = Files.createTempFile("infstutter", ".hoa").toFile();
+			todel.add(outPath);
+			int status = Runner.runTool(timeout, cl, outPath, true);
+			if (status != 0) {
+				throw new IOException("spotutil inf-stutter failed with status " + status);
 			}
-			System.out.println("Stuttering acceptance computed with spot in "+(System.currentTimeMillis() - time)+" ms :" + infStutter);
-			tgba.setInfStutterConditions(infStutter);
-			tgba.setInitial(oldinit);
+			TGBA loops = TGBAparserHOAF.parseFrom(outPath.getCanonicalPath(), tgba.getApm());
+			if (loops.nbStates() != tgba.nbStates()) {
+				throw new IOException("spotutil inf-stutter answered with " + loops.nbStates() + " states for " + tgba.nbStates());
+			}
+			for (int q = 0; q < loops.nbStates(); q++) {
+				List<Expression> st = new ArrayList<>();
+				for (TGBAEdge arc : loops.getEdges().get(q)) {
+					st.add(arc.getCondition());
+				}
+				if (st.isEmpty()) {
+					infStutter.add(Expression.constant(false));
+					continue;
+				}
+				Expression dnf = Expression.nop(Op.OR, st);
+				Expression red = new ExpressionToLogicNG().simplify(dnf);
+				infStutter.add(Simplifier.simplifyBoolean(red));
+			}
+		} catch (IOException | TimeoutException | InterruptedException e) {
+			System.out.println("Stuttering acceptance not computed : " + e.getMessage());
+			infStutter.clear();
+			for (int q = 0; q < tgba.nbStates(); q++) {
+				infStutter.add(Expression.constant(false));
+			}
 		} finally {
 			if (DEBUG == 0)
 				for (File f : todel) {
 					f.delete();
 				}
 		}
+		System.out.println("Stuttering acceptance computed with spot in "+(System.currentTimeMillis() - time)+" ms :" + infStutter);
+		tgba.setInfStutterConditions(infStutter);
 	}
 
 
@@ -697,47 +681,6 @@ public class SpotRunner {
 			return false;
 		}
 
-	}
-
-	public TGBA simplify(TGBA tgba, File autPath) throws IOException, TimeoutException, InterruptedException {
-		List<File> todel = new ArrayList<>();
-		try {
-
-			long time = System.currentTimeMillis();
-			CommandLine cl = new CommandLine();
-			cl.addArg(pathToautfilt);
-			cl.addArg("--hoaf=tv"); // prefix notation for output
-			cl.addArg("--small");
-			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
-			todel.add(curAut);
-			PrintWriter pw = new PrintWriter(curAut);
-			tgba.exportAsHOA(pw, ExportMode.SPOTAP);
-			pw.close();
-			cl.addArg("-F");
-			cl.addArg(curAut.getCanonicalPath());
-
-			if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
-			int status = Runner.runTool(timeout, cl, autPath, true);
-			if (status == 0) {
-				if (DEBUG >= 1) System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + autPath.getCanonicalPath());
-
-				TGBA tgbaout = TGBAparserHOAF.parseFrom(autPath.getCanonicalPath(), tgba.getApm());
-
-				if (DEBUG >= 2) System.out.println("Resulting TGBA : "+ tgbaout.toString());
-				return tgbaout;
-			} else {
-				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
-				try (Stream<String> stream = Files.lines(Paths.get(autPath.getCanonicalPath()))) {
-					stream.forEach(System.out::println);
-				}
-			}
-			return tgba;
-		} finally {
-			if (DEBUG == 0)
-				for (File f : todel) {
-					f.delete();
-				}
-		}
 	}
 
 	public boolean buildComplement (TGBA tgba, File compPath)  {
