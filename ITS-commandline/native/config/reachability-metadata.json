@@ -1,0 +1,1163 @@
+{
+  "reflection": [
+    {
+      "type": "__redirected.__XMLInputFactory"
+    },
+    {
+      "type": "__redirected.__XMLOutputFactory"
+    },
+    {
+      "type": "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.xml.internal.stream.XMLInputFactoryImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.xml.internal.stream.XMLOutputFactoryImpl"
+    },
+    {
+      "type": "fr.lip6.move.gal.Parameter[]"
+    },
+    {
+      "type": "fr.lip6.move.gal.Property[]"
+    },
+    {
+      "type": "fr.lip6.move.gal.Statement[]"
+    },
+    {
+      "type": "fr.lip6.move.gal.Transition[]"
+    },
+    {
+      "type": "fr.lip6.move.gal.TypeDeclaration[]"
+    },
+    {
+      "type": "fr.lip6.move.gal.Variable[]"
+    },
+    {
+      "type": "fr.lip6.move.gal.impl.GalPackageImpl"
+    },
+    {
+      "type": "fr.lip6.move.gal.itscl.application.Application",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "main",
+          "parameterTypes": [
+            "java.lang.String[]"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "fr.lip6.move.pnml.ptnet.Arc[]"
+    },
+    {
+      "type": "fr.lip6.move.pnml.ptnet.Page[]"
+    },
+    {
+      "type": "fr.lip6.move.pnml.ptnet.PnObject[]"
+    },
+    {
+      "type": "fr.lip6.move.pnml.ptnet.ToolInfo[]"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.booleans.impl.BooleansPackageImpl"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.cyclicEnumerations.impl.CyclicEnumerationsPackageImpl"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.dots.impl.DotsPackageImpl"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.finiteEnumerations.FEConstant[]"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.finiteEnumerations.impl.FiniteEnumerationsPackageImpl"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.finiteIntRanges.impl.FiniteIntRangesPackageImpl"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.hlcorestructure.Arc[]"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.hlcorestructure.Declaration[]"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.hlcorestructure.Page[]"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.hlcorestructure.PetriNet[]"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.hlcorestructure.PnObject[]"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.hlcorestructure.hlapi.PetriNetDocHLAPI",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.hlcorestructure.impl.ArcImpl",
+      "methods": [
+        {
+          "name": "idRefHang",
+          "parameterTypes": [
+            "java.util.ArrayList"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.hlcorestructure.impl.HlcorestructurePackageImpl"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.integers.impl.IntegersPackageImpl"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.multisets.impl.MultisetsPackageImpl"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.partitions.impl.PartitionsPackageImpl"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.terms.Term[]"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.terms.TermsDeclaration[]"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.terms.impl.TermsPackageImpl"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.terms.impl.UserOperatorImpl",
+      "methods": [
+        {
+          "name": "idRefHang",
+          "parameterTypes": [
+            "java.util.ArrayList"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.terms.impl.UserSortImpl",
+      "methods": [
+        {
+          "name": "idRefHang",
+          "parameterTypes": [
+            "java.util.ArrayList"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.terms.impl.VariableImpl",
+      "methods": [
+        {
+          "name": "idRefHang",
+          "parameterTypes": [
+            "java.util.ArrayList"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.beans.PropertyVetoException"
+    },
+    {
+      "type": "java.lang.Boolean",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "getBoolean",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Object"
+    },
+    {
+      "type": "java.lang.ObjectBeanInfo"
+    },
+    {
+      "type": "java.lang.ObjectCustomizer"
+    },
+    {
+      "type": "java.lang.String"
+    },
+    {
+      "type": "java.lang.String[]"
+    },
+    {
+      "type": "java.lang.System",
+      "methods": [
+        {
+          "name": "getSecurityManager",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.lang.Thread",
+      "methods": [
+        {
+          "name": "getContextClassLoader",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.lang.ref.Reference"
+    },
+    {
+      "type": "java.security.AccessController",
+      "methods": [
+        {
+          "name": "doPrivileged",
+          "parameterTypes": [
+            "java.security.PrivilegedAction"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.security.MessageDigestSpi"
+    },
+    {
+      "type": "java.security.interfaces.RSAPrivateKey"
+    },
+    {
+      "type": "java.security.interfaces.RSAPublicKey"
+    },
+    {
+      "type": "org.apache.axiom.locator.DefaultOMMetaFactoryLocator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.axiom.om.dom.DOMMetaFactory"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.CDATASectionImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.CommentImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.DocumentFragmentImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.DocumentImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.DocumentTypeImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.EntityReferenceImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.NSAwareAttribute"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.NSAwareElement"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.NSUnawareAttribute"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.NSUnawareElement"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.NamespaceDeclaration"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.OMSourcedElementImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.ProcessingInstructionImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.TextImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.dom.factory.OMDOMMetaFactoryLoader",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.axiom.om.impl.llom.CDATASectionImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.llom.CharacterDataImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.axiom.om.impl.llom.NamespaceDeclaration",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.axiom.om.impl.llom.OMAttributeImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.axiom.om.impl.llom.OMCommentImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.llom.OMDocTypeImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.llom.OMDocumentImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.axiom.om.impl.llom.OMElementImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.axiom.om.impl.llom.OMEntityReferenceImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.llom.OMProcessingInstructionImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.llom.OMSourcedElementImpl"
+    },
+    {
+      "type": "org.apache.axiom.om.impl.llom.factory.OMLinkedListMetaFactoryLoader",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.SOAPMessageImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap11.SOAP11BodyImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap11.SOAP11EnvelopeImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap11.SOAP11FaultCodeImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap11.SOAP11FaultDetailImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap11.SOAP11FaultImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap11.SOAP11FaultReasonImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap11.SOAP11FaultRoleImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap11.SOAP11HeaderBlockImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap11.SOAP11HeaderImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12BodyImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12EnvelopeImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12FaultCodeImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12FaultDetailImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12FaultImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12FaultNodeImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12FaultReasonImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12FaultRoleImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12FaultSubCodeImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12FaultTextImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12FaultValueImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12HeaderBlockImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.dom.soap12.SOAP12HeaderImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.SOAPMessageImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap11.SOAP11BodyImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap11.SOAP11EnvelopeImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap11.SOAP11FaultCodeImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap11.SOAP11FaultDetailImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap11.SOAP11FaultImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap11.SOAP11FaultReasonImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap11.SOAP11FaultRoleImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap11.SOAP11HeaderBlockImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap11.SOAP11HeaderImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12BodyImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12EnvelopeImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12FaultCodeImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12FaultDetailImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12FaultImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12FaultNodeImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12FaultReasonImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12FaultRoleImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12FaultSubCodeImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12FaultTextImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12FaultValueImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12HeaderBlockImpl"
+    },
+    {
+      "type": "org.apache.axiom.soap.impl.llom.soap12.SOAP12HeaderImpl"
+    },
+    {
+      "type": "org.apache.commons.logging.LogFactory"
+    },
+    {
+      "type": "org.apache.commons.logging.impl.Log4JLogger",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "org.apache.commons.logging.impl.LogFactoryImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.commons.logging.impl.WeakHashtable",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.log4j.ConsoleAppender",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.apache.log4j.Layout"
+    },
+    {
+      "type": "org.apache.log4j.LayoutBeanInfo"
+    },
+    {
+      "type": "org.apache.log4j.LayoutCustomizer"
+    },
+    {
+      "type": "org.apache.log4j.Level",
+      "fields": [
+        {
+          "name": "TRACE"
+        }
+      ]
+    },
+    {
+      "type": "org.apache.log4j.PatternLayout",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        },
+        {
+          "name": "setConversionPattern",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "org.apache.log4j.PatternLayoutBeanInfo"
+    },
+    {
+      "type": "org.apache.log4j.PatternLayoutCustomizer"
+    },
+    {
+      "type": "org.apache.log4j.Priority"
+    },
+    {
+      "type": "org.apache.log4j.spi.OptionHandler"
+    },
+    {
+      "type": "org.eclipse.core.internal.runtime.Messages",
+      "fields": [
+        {
+          "name": "auth_alreadySpecified"
+        },
+        {
+          "name": "auth_notAvailable"
+        },
+        {
+          "name": "line_separator_platform_unix"
+        },
+        {
+          "name": "line_separator_platform_windows"
+        },
+        {
+          "name": "meta_appNotInit"
+        },
+        {
+          "name": "meta_appStopped"
+        },
+        {
+          "name": "meta_exceptionParsingLog"
+        },
+        {
+          "name": "parse_badPrereqOnFrag"
+        },
+        {
+          "name": "parse_duplicateFragment"
+        },
+        {
+          "name": "parse_duplicateLib"
+        },
+        {
+          "name": "parse_duplicatePlugin"
+        },
+        {
+          "name": "parse_error"
+        },
+        {
+          "name": "parse_errorNameLineColumn"
+        },
+        {
+          "name": "parse_errorProcessing"
+        },
+        {
+          "name": "parse_extPointDisabled"
+        },
+        {
+          "name": "parse_extPointUnknown"
+        },
+        {
+          "name": "parse_fragmentMissingAttr"
+        },
+        {
+          "name": "parse_fragmentMissingIdName"
+        },
+        {
+          "name": "parse_internalStack"
+        },
+        {
+          "name": "parse_missingFPName"
+        },
+        {
+          "name": "parse_missingFPVersion"
+        },
+        {
+          "name": "parse_missingFragmentPd"
+        },
+        {
+          "name": "parse_missingPluginId"
+        },
+        {
+          "name": "parse_missingPluginName"
+        },
+        {
+          "name": "parse_missingPluginVersion"
+        },
+        {
+          "name": "parse_nullFragmentIdentifier"
+        },
+        {
+          "name": "parse_nullPluginIdentifier"
+        },
+        {
+          "name": "parse_pluginMissingAttr"
+        },
+        {
+          "name": "parse_pluginMissingIdName"
+        },
+        {
+          "name": "parse_prereqDisabled"
+        },
+        {
+          "name": "parse_prereqLoop"
+        },
+        {
+          "name": "parse_prereqOptLoop"
+        },
+        {
+          "name": "parse_unknownAttribute"
+        },
+        {
+          "name": "parse_unknownElement"
+        },
+        {
+          "name": "parse_unknownEntry"
+        },
+        {
+          "name": "parse_unknownLibraryType"
+        },
+        {
+          "name": "parse_unknownTopElement"
+        },
+        {
+          "name": "parse_unsatisfiedOptPrereq"
+        },
+        {
+          "name": "parse_unsatisfiedPrereq"
+        },
+        {
+          "name": "parse_validExport"
+        },
+        {
+          "name": "parse_validMatch"
+        },
+        {
+          "name": "plugin_deactivatedLoad"
+        },
+        {
+          "name": "plugin_instantiateClassError"
+        },
+        {
+          "name": "plugin_loadClassError"
+        },
+        {
+          "name": "plugin_notPluginClass"
+        },
+        {
+          "name": "plugin_pluginDisabled"
+        },
+        {
+          "name": "plugin_shutdownProblems"
+        },
+        {
+          "name": "plugin_startupProblems"
+        },
+        {
+          "name": "plugin_unableToGetActivator"
+        },
+        {
+          "name": "plugin_unableToResolve"
+        },
+        {
+          "name": "preferences_saveProblems"
+        }
+      ]
+    },
+    {
+      "type": "org.eclipse.emf.ecore.EAnnotation[]"
+    },
+    {
+      "type": "org.eclipse.emf.ecore.EClassifier[]"
+    },
+    {
+      "type": "org.eclipse.emf.ecore.EEnumLiteral[]"
+    },
+    {
+      "type": "org.eclipse.emf.ecore.EGenericType[]"
+    },
+    {
+      "type": "org.eclipse.emf.ecore.EObject[]"
+    },
+    {
+      "type": "org.eclipse.emf.ecore.EOperation[]"
+    },
+    {
+      "type": "org.eclipse.emf.ecore.EParameter[]"
+    },
+    {
+      "type": "org.eclipse.emf.ecore.EStructuralFeature[]"
+    },
+    {
+      "type": "org.eclipse.emf.ecore.ETypeParameter[]"
+    },
+    {
+      "type": "org.eclipse.emf.ecore.impl.EStringToStringMapEntryImpl[]"
+    },
+    {
+      "type": "org.eclipse.emf.ecore.impl.EcorePackageImpl"
+    },
+    {
+      "type": "org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.smtlib.command.C_check_sat_assuming",
+      "methods": [
+        {
+          "name": "write",
+          "parameterTypes": [
+            "org.smtlib.sexpr.Printer"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "org.smtlib.command.C_declare_fun",
+      "methods": [
+        {
+          "name": "write",
+          "parameterTypes": [
+            "org.smtlib.sexpr.Printer"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "org.smtlib.command.C_define_fun",
+      "methods": [
+        {
+          "name": "write",
+          "parameterTypes": [
+            "org.smtlib.sexpr.Printer"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.launcher.LauncherHelper",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "isStaticMain"
+        },
+        {
+          "name": "noArgMain"
+        }
+      ],
+      "methods": [
+        {
+          "name": "getApplicationClass",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.NativePRNG",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.security.SecureRandomParameters"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA2$SHA256",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.SHA5$SHA384",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.provider.X509Factory",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSAKeyFactory$Legacy",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSASignature$SHA256withRSA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.rsa.RSASignature$SHA384withRSA",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.AuthorityInfoAccessExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.AuthorityKeyIdentifierExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.BasicConstraintsExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.CRLDistributionPointsExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.CertificatePoliciesExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.ExtendedKeyUsageExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.KeyUsageExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.SubjectAlternativeNameExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.security.x509.SubjectKeyIdentifierExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Boolean",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.text.resources.cldr.FormatData"
+    },
+    {
+      "type": "sun.text.resources.cldr.FormatData_en"
+    },
+    {
+      "type": "sun.text.resources.cldr.FormatData_en_US"
+    },
+    {
+      "type": "sun.util.resources.cldr.CalendarData"
+    }
+  ],
+  "resources": [
+    {
+      "glob": "META-INF/axiom.xml"
+    },
+    {
+      "glob": "META-INF/services/java.time.zone.ZoneRulesProvider"
+    },
+    {
+      "glob": "META-INF/services/javax.xml.parsers.DocumentBuilderFactory"
+    },
+    {
+      "glob": "META-INF/services/javax.xml.parsers.SAXParserFactory"
+    },
+    {
+      "glob": "META-INF/services/javax.xml.stream.XMLInputFactory"
+    },
+    {
+      "glob": "META-INF/services/org.apache.commons.logging.LogFactory"
+    },
+    {
+      "glob": "META-INF/services/org.osgi.framework.connect.FrameworkUtilHelper"
+    },
+    {
+      "glob": "XMLInputFactory.properties"
+    },
+    {
+      "glob": "com/sun/xml/internal/stream/XMLInputFactoryImpl.class"
+    },
+    {
+      "glob": "com/sun/xml/internal/stream/XMLOutputFactoryImpl.class"
+    },
+    {
+      "glob": "commons-logging.properties"
+    },
+    {
+      "glob": "log4j.properties"
+    },
+    {
+      "glob": "log4j.xml"
+    },
+    {
+      "glob": "org/apache/axiom/om/impl/dom/nodetypes.index"
+    },
+    {
+      "glob": "org/apache/axiom/om/impl/llom/nodetypes.index"
+    },
+    {
+      "glob": "org/apache/axiom/soap/impl/dom/nodetypes.index"
+    },
+    {
+      "glob": "org/apache/axiom/soap/impl/dom/soap11/nodetypes.index"
+    },
+    {
+      "glob": "org/apache/axiom/soap/impl/dom/soap12/nodetypes.index"
+    },
+    {
+      "glob": "org/apache/axiom/soap/impl/llom/nodetypes.index"
+    },
+    {
+      "glob": "org/apache/axiom/soap/impl/llom/soap11/nodetypes.index"
+    },
+    {
+      "glob": "org/apache/axiom/soap/impl/llom/soap12/nodetypes.index"
+    },
+    {
+      "glob": "org/eclipse/core/internal/runtime/messages.properties"
+    },
+    {
+      "glob": "org/eclipse/core/internal/runtime/messages_en.properties"
+    },
+    {
+      "glob": "org/eclipse/core/internal/runtime/messages_en_US.properties"
+    },
+    {
+      "module": "java.base",
+      "glob": "jdk/internal/icu/impl/data/icudt76b/nfkc.nrm"
+    },
+    {
+      "module": "java.logging",
+      "glob": "sun/util/logging/resources/logging_en.properties"
+    },
+    {
+      "module": "java.logging",
+      "glob": "sun/util/logging/resources/logging_en_US.properties"
+    },
+    {
+      "module": "java.xml",
+      "glob": "com/sun/xml/internal/stream/XMLInputFactoryImpl.class"
+    },
+    {
+      "module": "java.xml",
+      "glob": "com/sun/xml/internal/stream/XMLOutputFactoryImpl.class"
+    },
+    {
+      "bundle": "sun.util.logging.resources.logging"
+    }
+  ]
+}
