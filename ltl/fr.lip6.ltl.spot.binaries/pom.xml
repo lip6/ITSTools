@@ -31,6 +31,7 @@
                                 <get src="https://github.com/yanntm/Spot-BinaryBuilds/raw/gh-pages/ltlfilt" dest="bin/ltlfilt-linux64"/>
 								<get src="https://github.com/yanntm/Spot-BinaryBuilds/raw/gh-pages/autfilt" dest="bin/autfilt-linux64"/>
 								<get src="https://github.com/yanntm/Spot-BinaryBuilds/raw/gh-pages/ltl2tgba" dest="bin/ltl2tgba-linux64"/>
+								<get src="https://github.com/yanntm/Spot-BinaryBuilds/raw/gh-pages/spotutil" dest="bin/spotutil-linux64"/>
   								<chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
                            </target>
                         </configuration>

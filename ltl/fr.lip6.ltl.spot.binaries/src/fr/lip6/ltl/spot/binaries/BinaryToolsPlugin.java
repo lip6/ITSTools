@@ -40,7 +40,8 @@ public class BinaryToolsPlugin extends Plugin {
 	private static BinaryToolsPlugin plugin;
 
 	// variants of the tool : multicore, sequential, symbolic...
-	public enum Tool {autfilt, ltlfilt, ltl2tgba, autstates, senseclsl};
+	// spotutil replaces the python scripts autstates.py and senseclsl.py (subcommands stutter-states, sensitivity)
+	public enum Tool {autfilt, ltlfilt, ltl2tgba, spotutil};
 	private static URI toolUri [] = new URI [Tool.values().length];
 	
 	/**
@@ -76,21 +77,8 @@ public class BinaryToolsPlugin extends Plugin {
 	public static URI getProgramURI(Tool tool) throws IOException {
 		if (toolUri[tool.ordinal()] == null) {
 			String relativePath = null;
-			switch (tool) {
-			case autfilt:
-			case ltlfilt:
-			case ltl2tgba: {
-				// compiled binaries
-				relativePath = "bin/" + tool.toString() + "-" + getArchOS();
-				break;
-			}
-			case autstates:
-			case senseclsl: {
-				// python scripts
-				relativePath = "bin/" + tool.toString() + ".py";
-				break;
-			}
-			}
+			// compiled binaries, all of them
+			relativePath = "bin/" + tool.toString() + "-" + getArchOS();
 				
 			
 			URI uri = findRelativeURI(tool.toString(), relativePath);

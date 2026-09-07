@@ -87,8 +87,7 @@ public class SpotRunner {
 	private String pathToltl2tgba;
 	private String pathToautfilt;
 	private long timeout;
-	private String pathToautstates;
-	private String pathToSenseCLSL;
+	private String pathToSpotUtil; // stutter-states and sensitivity, once autstates.py and senseclsl.py
 
 	public SpotRunner(long timeout) {
 		super();
@@ -96,8 +95,7 @@ public class SpotRunner {
 			this.pathToltlfilt = fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.getProgramURI(Tool.ltlfilt).getPath();
 			this.pathToltl2tgba = fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.getProgramURI(Tool.ltl2tgba).getPath();
 			this.pathToautfilt = fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.getProgramURI(Tool.autfilt).getPath();
-			this.pathToautstates = fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.getProgramURI(Tool.autstates).getPath();
-			this.pathToSenseCLSL = fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.getProgramURI(Tool.senseclsl).getPath();
+			this.pathToSpotUtil = fr.lip6.ltl.spot.binaries.BinaryToolsPlugin.getProgramURI(Tool.spotutil).getPath();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -500,7 +498,8 @@ public class SpotRunner {
 		try {
 			long time = System.currentTimeMillis();
 			CommandLine cl = new CommandLine();
-			cl.addArg(pathToautstates);
+			cl.addArg(pathToSpotUtil);
+			cl.addArg("stutter-states");
 			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
 			todel.add(curAut);
 			PrintWriter pw = new PrintWriter(curAut);
@@ -899,7 +898,8 @@ public class SpotRunner {
 
 			long time = System.currentTimeMillis();
 			CommandLine cl = new CommandLine();
-			cl.addArg(pathToSenseCLSL);
+			cl.addArg(pathToSpotUtil);
+			cl.addArg("sensitivity");
 			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
 			todel.add(curAut);
 			PrintWriter pw = new PrintWriter(curAut);
