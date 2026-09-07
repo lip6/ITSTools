@@ -3,6 +3,7 @@ package fr.lip6.move.gal.application.solver;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.lip6.move.gal.application.solver.global.GlobalPropertySolverException;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
@@ -108,8 +109,12 @@ public class ParallelWalk {
 		PetriSpotWalker.Listener listener = new PetriSpotWalker.Listener() {
 			@Override
 			public void formula(int index, String value, String techniques) {
-				doneProps.put(props.get(index).getName(), "TRUE".equals(value),
-						ReachabilitySolver.walkTechniques(techniques));
+				try {
+					doneProps.put(props.get(index).getName(), "TRUE".equals(value),
+							ReachabilitySolver.walkTechniques(techniques));
+				} catch (GlobalPropertySolverException e) {
+					// the verdict decided the whole examination (Liveness...): the printer has said so, nothing to add
+				}
 			}
 		};
 		Thread thread = new Thread(() -> {
@@ -128,6 +133,8 @@ public class ParallelWalk {
 						System.out.println("CTL check beside the decision diagrams solved " + seen + " properties.");
 					}
 				}
+			} catch (GlobalPropertySolverException e) {
+				System.out.println("CTL check beside the decision diagrams decided the examination : " + e.getMessage());
 			} catch (RuntimeException e) {
 				System.out.println("CTL check beside the decision diagrams failed : " + e.getMessage());
 			}
