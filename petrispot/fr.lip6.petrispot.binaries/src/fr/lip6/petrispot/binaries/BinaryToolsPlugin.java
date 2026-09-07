@@ -70,6 +70,11 @@ public class BinaryToolsPlugin extends Plugin {
 
 	private static final Logger log = Logger.getLogger("fr.lip6.move.gal"); //$NON-NLS-1$
 
+	/** This bundle's symbolic name, the prefix of its folder in the product's plugins/. */
+	private static final String BUNDLE = "fr.lip6.petrispot.binaries";
+	/** System property naming the product's plugins/ folder when no framework runs and the class folder is not the bundle (a native image). */
+	private static final String BINARIES_ROOT = "fr.lip6.binaries.root";
+
 	/**
 	 * A resource of this bundle: through the framework when there is one; on a
 	 * flat classpath (no framework, getDefault() is null) the bundle is the
@@ -82,6 +87,16 @@ public class BinaryToolsPlugin extends Plugin {
 			return getDefault().getBundle().getResource(relativePath);
 		}
 		try {
+			// an explicit plugins folder (a native image has no class folder to start from)
+			String plugins = System.getProperty(BINARIES_ROOT);
+			if (plugins != null) {
+				File[] dirs = new File(plugins).listFiles((d, n) -> n.startsWith(BUNDLE + "_") || n.equals(BUNDLE));
+				if (dirs == null || dirs.length == 0) {
+					return null;
+				}
+				File f = new File(dirs[0], relativePath);
+				return f.exists() ? f.toURI().toURL() : null;
+			}
 			File root = new File(BinaryToolsPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 			if (root.isFile()) {
 				root = new File(root.getParentFile(), root.getName().replaceFirst("\\.jar$", ""));
