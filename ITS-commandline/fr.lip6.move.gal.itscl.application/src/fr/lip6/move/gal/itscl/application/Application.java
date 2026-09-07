@@ -40,12 +40,21 @@ public class Application implements IApplication {
 		return run((String[]) context.getArguments().get(APPARGS));
 	}
 
-	/** The flat classpath entry, no framework: the same arguments as the its-tools launcher. */
+	/** The flat classpath and native image entry, no framework: the same arguments as the its-tools launcher. */
 	public static void main(String[] args) throws Exception {
 		if (Arrays.asList(args).contains("-pnfolder")) {
 			fr.lip6.move.gal.application.Application.main(args);
 		}
-		new Application().run(args);
+		// a thread with the ini's stack size: a native executable's main runs on the OS stack
+		Thread runner = new Thread(null, () -> {
+			try {
+				new Application().run(args);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}, "its-tools", fr.lip6.move.gal.application.Application.MAIN_STACK);
+		runner.start();
+		runner.join();
 		System.exit(0);
 	}
 

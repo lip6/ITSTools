@@ -197,10 +197,24 @@ public class Application implements IApplication, Ender {
 		return run((String[]) context.getArguments().get(APPARGS));
 	}
 
-	/** The flat classpath entry, no framework: the arguments its-tools takes after the application name. */
+	/** The stack of the thread the run gets, the -Xss of the launcher's ini (deep recursions in the reductions). */
+	public static final long MAIN_STACK = 128L << 20;
+
+	/**
+	 * The flat classpath and native image entry, no framework: the arguments
+	 * its-tools takes after the application name. The run gets a thread of its
+	 * own with MAIN_STACK: a native executable's main runs on the OS stack.
+	 * The run's return value carries no status (null ends several normal paths);
+	 * the exit ends the helper threads.
+	 */
 	public static void main(String[] args) {
-		// the run's return value carries no status (null ends several normal paths); the exit ends the helper threads
-		new Application().run(args);
+		Thread runner = new Thread(null, () -> new Application().run(args), "its-tools", MAIN_STACK);
+		runner.start();
+		try {
+			runner.join();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 		System.exit(0);
 	}
 

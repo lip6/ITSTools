@@ -27,6 +27,18 @@ jobs:
       run: cd fr.lip6.move.gal.parent && mvn -B -e install -Djdk.xml.maxGeneralEntitySizeLimit=0 -Djdk.xml.totalEntitySizeLimit=0 && cd -
     - name: copy update site to website
       run: cp -r fr.lip6.move.gal.updatesite/target/repository/* website/ ; ls website/
+    - name: Set up GraalVM for the native image
+      uses: graalvm/setup-graalvm@v1
+      with:
+        java-version: '25'
+        distribution: 'graalvm'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build the native image of the command line
+      run: |
+        mkdir -p native-prod
+        tar xzf ITS-commandline/fr.lip6.move.gal.itscl.product/target/products/fr.lip6.move.gal.itscl.product-linux.gtk.x86_64.tar.gz -C native-prod
+        GRAALVM=$JAVA_HOME NATIVE_XMX=10g ITS-commandline/native/build-native.sh $PWD/native-prod $PWD/website/its-tools-native
+        rm -rf native-prod
     - name: Copy scripts
       run: cp ITS-commandline/fr.lip6.move.gal.itscl.product/target/products/*.zip website/ ; ls website/
     - name: Prepare website directory

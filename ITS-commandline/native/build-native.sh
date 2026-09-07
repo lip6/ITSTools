@@ -1,6 +1,6 @@
 #! /bin/bash
 # ITS-Tools as a native executable (GraalVM native-image) from a Linux product folder.
-#   GRAALVM=/path/to/graalvm-jdk-25 ./build-native.sh /path/to/product [its-tools-native]
+#   GRAALVM=/path/to/graalvm-jdk-25 [NATIVE_XMX=10g] ./build-native.sh /path/to/product [its-tools-native]
 # The product is the Tycho output (its-tools, its-tools-flat.sh, plugins/); the class path is
 # the one its-tools-flat.sh builds. config/ holds the reachability metadata the tracing agent
 # recorded (trace-agent.sh); a run that hits an unregistered class or resource is traced and
@@ -21,7 +21,7 @@ for j in "$PROD"/plugins-lib/*.jar ; do [ -f "$j" ] && CP="$CP:$j" ; done
 cd "$HERE"
 "$GRAALVM/bin/native-image" -cp "${CP#:}" \
   -H:ConfigurationFileDirectories="$HERE/config" \
-  --no-fallback -J-Xmx24g \
+  --no-fallback -J-Xmx${NATIVE_XMX:-24g} \
   --gc=G1 -R:MaxHeapSize=16g -R:MinHeapSize=40m -R:StackSize=128m \
   -o "$OUT" fr.lip6.move.gal.itscl.application.Application
 ls -la "$OUT"
