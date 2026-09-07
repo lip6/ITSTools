@@ -19,11 +19,12 @@ import fr.lip6.move.gal.structural.expr.VarRef;
  * places are p&lt;i&gt;, transitions t&lt;i&gt;.
  *
  * <p>Supported: boolean constants, and/or/not, comparisons, integer
- * constants, places, sums, differences, products with a constant, and
- * ENABLED over transitions (printed as {@code (fireable t...)}). Anything
- * else (division, modulo, atomic proposition references, parameters) throws
- * {@link UnsupportedOperationException}: the caller then keeps the Java
- * walker.
+ * constants, places, sums, differences, products with a constant, ENABLED
+ * over transitions (printed as {@code (fireable t...)}), and in a
+ * {@link #ctl} form the deadlock atom and the CTL operators EX AX EF AF EG AG
+ * EU AU. Anything else (division, modulo, atomic proposition references,
+ * parameters) throws {@link UnsupportedOperationException}: the caller then
+ * keeps the Java walker.
  */
 public class SexprPropertyPrinter implements ExprVisitor<Void> {
 
@@ -73,6 +74,18 @@ public class SexprPropertyPrinter implements ExprVisitor<Void> {
 		return "(deadlock " + name + ")";
 	}
 
+	/**
+	 * {@code (ctl NAME formula)}: a CTL formula checked at the initial marking
+	 * by PetriSpot's explicit checker; the FORMULA value is its truth.
+	 */
+	public static String ctl(String name, Expression formula) {
+		SexprPropertyPrinter p = new SexprPropertyPrinter();
+		p.sb.append("(ctl ").append(name).append(' ');
+		formula.accept(p);
+		p.sb.append(')');
+		return p.sb.toString();
+	}
+
 	private void list(String head, Expression... kids) {
 		sb.append('(').append(head);
 		for (Expression k : kids) {
@@ -97,6 +110,15 @@ public class SexprPropertyPrinter implements ExprVisitor<Void> {
 		case LEQ: list("<=", binOp.left, binOp.right); break;
 		case GEQ: list(">=", binOp.left, binOp.right); break;
 		case GT: list(">", binOp.left, binOp.right); break;
+		case DEAD: sb.append("deadlock"); break;
+		case EX: list("EX", binOp.left); break;
+		case AX: list("AX", binOp.left); break;
+		case EF: list("EF", binOp.left); break;
+		case AF: list("AF", binOp.left); break;
+		case EG: list("EG", binOp.left); break;
+		case AG: list("AG", binOp.left); break;
+		case EU: list("EU", binOp.left, binOp.right); break;
+		case AU: list("AU", binOp.left, binOp.right); break;
 		default:
 			throw new UnsupportedOperationException("Operator not supported by the PetriSpot walker: " + binOp.getOp());
 		}

@@ -5,6 +5,7 @@ import java.util.List;
 
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.Property;
+import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -22,6 +23,11 @@ import fr.lip6.move.petrispot.runner.PetriSpotWalker;
  *
  * The walk is stopped as soon as the attempt it accompanies is over; the
  * verdicts it printed before that are kept.
+ *
+ * <p>CTL properties (the attempts of the CTL examinations) go to PetriSpot's
+ * explicit CTL checker instead of the reachability walk: it answers a formula
+ * when a witness or a counter-example of bounded size exists, and the
+ * verdict is the formula's truth.
  */
 public class ParallelWalk {
 
@@ -57,6 +63,9 @@ public class ParallelWalk {
 		if (props.isEmpty()) {
 			return null;
 		}
+		if (props.stream().allMatch(p -> p.getType() == PropertyType.CTL)) {
+			return startCtl(spn, props, doneProps, seconds);
+		}
 		List<Integer> indexes = new ArrayList<>();
 		List<Expression> tocheck = new ArrayList<>();
 		ReachabilitySolver.computeToCheck(props, indexes, tocheck);
@@ -82,6 +91,47 @@ public class ParallelWalk {
 				System.out.println("Walk beside the decision diagrams failed : " + e.getMessage());
 			}
 		}, "petrispot-beside-dd");
+		thread.setDaemon(true);
+		thread.start();
+		return new ParallelWalk(thread, cancel);
+	}
+
+	/** The explicit CTL checker beside a CTL attempt; verdicts published as they arrive. */
+	private static ParallelWalk startCtl(SparsePetriNet spn, List<Property> props, DoneProperties doneProps,
+			int seconds) {
+		List<Expression> formulas = new ArrayList<>();
+		for (Property p : props) {
+			formulas.add(p.getBody());
+		}
+		StructuralReduction sr = new StructuralReduction(spn);
+		PetriSpotWalker.Cancel cancel = new PetriSpotWalker.Cancel();
+		PetriSpotWalker.Listener listener = new PetriSpotWalker.Listener() {
+			@Override
+			public void formula(int index, String value, String techniques) {
+				doneProps.put(props.get(index).getName(), "TRUE".equals(value),
+						ReachabilitySolver.walkTechniques(techniques));
+			}
+		};
+		Thread thread = new Thread(() -> {
+			try {
+				PetriSpotWalker.Verdicts v = PetriSpotWalker.runCtl(sr, formulas, seconds, THREADS, cancel, listener);
+				if (v != null) {
+					int seen = 0;
+					for (int i = 0; i < v.found.length; i++) {
+						if (v.found[i] != 0) {
+							doneProps.put(props.get(i).getName(), v.found[i] == PetriSpotWalker.Verdicts.WITNESS,
+									ReachabilitySolver.walkTechniques(v.techniques[i]));
+							seen++;
+						}
+					}
+					if (seen > 0) {
+						System.out.println("CTL check beside the decision diagrams solved " + seen + " properties.");
+					}
+				}
+			} catch (RuntimeException e) {
+				System.out.println("CTL check beside the decision diagrams failed : " + e.getMessage());
+			}
+		}, "petrispot-ctl-beside-dd");
 		thread.setDaemon(true);
 		thread.start();
 		return new ParallelWalk(thread, cancel);

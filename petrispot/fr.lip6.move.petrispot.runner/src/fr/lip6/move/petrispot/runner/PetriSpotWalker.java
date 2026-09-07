@@ -216,6 +216,35 @@ public class PetriSpotWalker {
 		return run(net, forms, null, args, totalSeconds, threads, cancel, listener);
 	}
 
+	/**
+	 * Check CTL formulas with PetriSpot's explicit checker for up to
+	 * totalSeconds, threads formulas at a time, beside another engine: the
+	 * cancel handle stops it when that engine is done. The checker answers a
+	 * formula only when it finds a witness or a counter-example of bounded
+	 * size, so a formula may stay unanswered; found is WITNESS for TRUE and
+	 * ABSENT for FALSE, both final.
+	 *
+	 * @return one verdict per formula, or null if PetriSpot could not run
+	 */
+	public static Verdicts runCtl(ISparsePetriNet net, List<Expression> formulas, int totalSeconds, int threads,
+			Cancel cancel, Listener listener) {
+		if (formulas.isEmpty()) {
+			return new Verdicts(0);
+		}
+		List<String> forms = new ArrayList<>(formulas.size());
+		try {
+			for (int i = 0; i < formulas.size(); i++) {
+				forms.add(SexprPropertyPrinter.ctl("prop" + i, formulas.get(i)));
+			}
+		} catch (UnsupportedOperationException e) {
+			System.out.println("PetriSpot CTL checker skipped: " + e.getMessage());
+			return null;
+		}
+		List<String> args = new ArrayList<>();
+		args.add("--totalTime=" + totalSeconds);
+		return run(net, forms, null, args, totalSeconds, threads, cancel, listener);
+	}
+
 	/** The (parikh prop<i> ...) forms of a list of vectors, or null when there is none. */
 	private static List<String> hintForms(List<SparseIntArray> parikhs) {
 		if (parikhs == null) {
