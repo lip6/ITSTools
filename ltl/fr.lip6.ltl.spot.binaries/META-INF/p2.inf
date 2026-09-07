@@ -10,10 +10,9 @@
 instructions.install=\
   org.eclipse.equinox.p2.touchpoint.eclipse.installBundle(bundle:${artifact});\
   org.eclipse.equinox.p2.touchpoint.eclipse.chmod(targetDir:@artifact,targetFile:bin/autfilt-linux64,permissions:755);\
-  org.eclipse.equinox.p2.touchpoint.eclipse.chmod(targetDir:@artifact,targetFile:bin/autstates.py,permissions:755);\
   org.eclipse.equinox.p2.touchpoint.eclipse.chmod(targetDir:@artifact,targetFile:bin/ltl2tgba-linux64,permissions:755);\
   org.eclipse.equinox.p2.touchpoint.eclipse.chmod(targetDir:@artifact,targetFile:bin/ltlfilt-linux64,permissions:755);\
-  org.eclipse.equinox.p2.touchpoint.eclipse.chmod(targetDir:@artifact,targetFile:bin/senseclsl.py,permissions:755);
+  org.eclipse.equinox.p2.touchpoint.eclipse.chmod(targetDir:@artifact,targetFile:bin/spotutil-linux64,permissions:755);
 
 instructions.uninstall=\
   org.eclipse.equinox.p2.touchpoint.eclipse.uninstallBundle(bundle:${artifact});
