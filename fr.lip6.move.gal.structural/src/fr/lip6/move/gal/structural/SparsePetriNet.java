@@ -20,7 +20,7 @@ import fr.lip6.move.gal.structural.expr.Simplifier;
 import fr.lip6.move.gal.structural.expr.VarRef;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
-public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
+public class SparsePetriNet extends PetriNet implements ISparsePetriNet, NetBlocks.Holder {
 	private List<Integer> marks = new ArrayList<>();
 	private IntMatrixCol flowPT = new IntMatrixCol(0, 0);
 	private IntMatrixCol flowTP = new IntMatrixCol(0, 0);
@@ -418,17 +418,24 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		rewriteConstantSums();
 	}
 
+	@Override
+	public boolean hasAnyBlock() {
+		return blocks != null;
+	}
+
 	/** Is that block there? O(1), and the usual answer is no. */
 	public boolean hasBlock(NetBlock block) {
 		return blocks != null && blocks.containsKey(block);
 	}
 
 	/** That block, or null; see {@link NetBlock}. */
+	@Override
 	public IntMatrixCol getBlock(NetBlock block) {
 		return blocks == null ? null : blocks.get(block);
 	}
 
 	/** Attach (or replace) a block. */
+	@Override
 	public void putBlock(NetBlock block, IntMatrixCol matrix) {
 		if (blocks == null) {
 			blocks = new EnumMap<>(NetBlock.class);
@@ -447,6 +454,15 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	 */
 	public void clearBlocks() {
 		blocks = null;
+	}
+
+	/** Forget the blocks, saying why: for a rule that cannot maintain them. */
+	@Override
+	public void clearBlocks(String why) {
+		if (blocks != null) {
+			blocks = null;
+			System.out.println("Counting record dropped: " + why);
+		}
 	}
 
 	public void readFrom(StructuralReduction sr) {
@@ -499,7 +515,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 
 	public void removeRedundantTransitions(boolean andEmptyEffects) {
 		int reduced = 0;
-		if (andEmptyEffects) {
+		if (andEmptyEffects && NetBlocks.mayDropNoEffect(this)) {
 			// transitions with no effect => no use
 			List<Integer> todrop = new ArrayList<>();
 			for (int i = tnames.size() - 1; i >= 0; i--) {
@@ -525,6 +541,9 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	private int ensureUnique(IntMatrixCol mPT, IntMatrixCol mTP, List<String> names) {
 		Map<SparseIntArray, Map<SparseIntArray, Integer>> seen = new HashMap<>();
 		List<Integer> todel = new ArrayList<>();
+		// the survivor of each duplicate, so a counting record can follow the
+		// fusion: the survivor stands for the dropped transition as well
+		Map<Integer, Integer> survivorOf = blocks != null ? new HashMap<>() : null;
 
 		// plain iteration order to collect decreasing tokill indexes
 		for (int trid = mPT.getColumnCount() - 1; trid >= 0; trid--) {
@@ -533,8 +552,12 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 			Integer b = seen.computeIfAbsent(tcolPT, k -> new HashMap<>()).put(tcolTP, trid);
 			if (b != null) {
 				todel.add(trid);
+				if (survivorOf != null) {
+					survivorOf.put(trid, b);
+				}
 			}
 		}
+		NetBlocks.transitionsFused(this, names.size(), todel, survivorOf);
 		List<String> rem = new ArrayList<>();
 		for (int td : todel) {
 			rem.add(names.remove(td));

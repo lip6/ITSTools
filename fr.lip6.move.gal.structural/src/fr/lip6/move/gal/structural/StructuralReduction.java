@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.BitSet;
 import java.util.Collections;
@@ -27,7 +28,7 @@ import fr.lip6.move.gal.util.IntMatrixCol;
  *
  */
 
-public class StructuralReduction implements Cloneable, ISparsePetriNet {
+public class StructuralReduction implements Cloneable, ISparsePetriNet, NetBlocks.Holder {
 
 	private List<Expression> image;
 	private List<Integer> marks;
@@ -105,11 +106,30 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return blocks == null ? Collections.emptyMap() : blocks;
 	}
 
+	@Override
+	public boolean hasAnyBlock() {
+		return blocks != null;
+	}
+
+	@Override
+	public IntMatrixCol getBlock(NetBlock block) {
+		return blocks == null ? null : blocks.get(block);
+	}
+
+	@Override
+	public void putBlock(NetBlock block, IntMatrixCol matrix) {
+		if (blocks == null) {
+			blocks = new EnumMap<>(NetBlock.class);
+		}
+		blocks.put(block, matrix);
+	}
+
 	/**
 	 * Forget the counting record: what a rule does when it cannot maintain it.
 	 * A consumer then leaves the value unanswered instead of reading a stale
 	 * number.
 	 */
+	@Override
 	public void clearBlocks(String why) {
 		if (blocks != null) {
 			blocks = null;
@@ -837,8 +857,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		if (rt == ReductionType.REACHABILITY || rt == ReductionType.STATESPACE) {
 
 			List<Integer> todrop = new ArrayList<>();
+			boolean dropNoEffect = NetBlocks.mayDropNoEffect(this);
 			for (int i = tnames.size() - 1; i >= 0; i--) {
-				if ((rt == ReductionType.REACHABILITY || rt == ReductionType.STATESPACE)
+				if (dropNoEffect && (rt == ReductionType.REACHABILITY || rt == ReductionType.STATESPACE)
 						&& flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
 					// transitions with no effect => no use to safety
 					todrop.add(i);
@@ -963,6 +984,12 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			boolean trace) {
 		Map<SparseIntArray, Map<SparseIntArray, Integer>> seen = new HashMap<>();
 		List<Integer> todel = new ArrayList<>();
+		// Fusing duplicate transitions is the one drop a counting record can
+		// follow exactly: the survivor stands for the dropped one as well, so
+		// its multiplicity takes the dropped weight. Any other fusion here
+		// (places, or a matrix that is not the live net) drops the record.
+		boolean trackTransitions = blocks != null && init == null && names == tnames;
+		Map<Integer, Integer> survivorOf = trackTransitions ? new HashMap<>() : null;
 
 		if (init != null) {
 			for (int i = untouchable.nextSetBit(0); i >= 0; i = untouchable.nextSetBit(i + 1)) {
@@ -980,6 +1007,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				Integer b = seen.computeIfAbsent(tcolPT, k -> new HashMap<>()).put(tcolTP, trid);
 				if (b != null) {
 					todel.add(trid);
+					if (trackTransitions) {
+						survivorOf.put(trid, b);
+					}
 				}
 			}
 		} else {
@@ -1010,6 +1040,12 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			FlowPrinter.drawNet(this, "Unique test discarding " + todel.size() + " objects ",
 					init != null ? new HashSet<>(todel) : Collections.emptySet(),
 					init == null ? new HashSet<>(todel) : Collections.emptySet());
+		}
+		if (trackTransitions) {
+			NetBlocks.transitionsFused(this, tnames.size(), todel, survivorOf);
+		} else if (!todel.isEmpty()) {
+			NetBlocks.transitionsDropped(this, todel.size(),
+					init != null ? "duplicate places" : "duplicate objects");
 		}
 		List<String> rem = new ArrayList<>();
 		for (int td : todel) {
@@ -1405,13 +1441,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			FlowPrinter.drawNet(this, "Discarding " + todrop.size() + " transitions with rule " + rule,
 					Collections.emptySet(), new HashSet<>(todrop));
 		}
-		// A dropped transition's arcs belong to the graph the record counts, and
-		// nothing here can attribute them to a survivor (HSC_PLAN.md section 11,
-		// "ghost contributors" is the fix): the record goes rather than lie.
-		if (!todrop.isEmpty()) {
-			clearBlocks(rule + " removed " + todrop.size()
-					+ " transitions whose arcs it cannot account for");
-		}
+		NetBlocks.transitionsDropped(this, todrop.size(), rule);
 		for (int tid : todrop) {
 			flowPT.deleteColumn(tid);
 			flowTP.deleteColumn(tid);

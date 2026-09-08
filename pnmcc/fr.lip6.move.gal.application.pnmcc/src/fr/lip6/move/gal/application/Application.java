@@ -39,6 +39,7 @@ import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.application.runner.CegarRunner;
 import fr.lip6.move.gal.application.runner.HscSolverRunner;
 import fr.lip6.move.hsc.runner.HscRunner;
+import fr.lip6.move.gal.structural.NetBlock;
 import fr.lip6.move.gal.application.runner.Ender;
 import fr.lip6.move.gal.application.runner.IRunner;
 import fr.lip6.move.gal.application.runner.MccDonePropertyPrinter;
@@ -583,6 +584,21 @@ public class Application implements IApplication, Ender {
 				reader.createSPN(false, false);
 
 				if (doHSC || hscBench) {
+					// This net is the input as read (a P/T model) or its
+					// unfolding: nothing has removed anything yet, so it vouches
+					// for its own arcs. TMULT says so; the rules that follow
+					// maintain it or drop it.
+					if (!reader.getSPN().hasBlock(NetBlock.TMULT)) {
+						reader.getSPN().putBlock(NetBlock.TMULT,
+								new IntMatrixCol(reader.getSPN().getTransitionCount(), 1));
+					}
+					if (hscBenchReduce) {
+						// the fast shape: reduce first, and see whether the record
+						// survives the rules (duplicate fusion does, dropping a
+						// transition does not)
+						reader.getSPN().removeConstantPlaces();
+						reader.getSPN().removeRedundantTransitions(true);
+					}
 					// The examination that counts objects rather than deciding a
 					// property: one call to libHSC answers all four values on the
 					// net as it is here, before the rules that remove transitions,

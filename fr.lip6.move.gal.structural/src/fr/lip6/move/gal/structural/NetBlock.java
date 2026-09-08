@@ -9,7 +9,8 @@ package fr.lip6.move.gal.structural;
  * `INTEROP.md` section 3, `HSC_PLAN.md` sections 10 to 13): an 8-byte name
  * and a KERS payload, hence {@link #blockName()} is at most 8 characters. An
  * enum rather than a string keeps presence tests O(1) and typos impossible,
- * and fixes the order blocks are written in.
+ * and fixes the order blocks are written in. Maintaining them across a
+ * transformation is {@link NetBlocks}.
  *
  * The contract for a modifier of the net: maintain the blocks it can and drop
  * the ones it cannot. A stale block makes a consumer return a wrong number,
@@ -48,4 +49,5 @@ public enum NetBlock {
 	public String blockName() {
 		return name();
 	}
+
 }
