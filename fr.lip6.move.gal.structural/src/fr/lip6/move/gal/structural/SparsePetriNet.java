@@ -252,7 +252,8 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet, NetBloc
 
 			SparseIntArray from = tflowPT.getColumn(pid);
 			SparseIntArray to = tflowTP.getColumn(pid);
-			if (syphon.contains(pid) || from.equals(to) || (to.size() == 0 && marks.get(pid) == 0)) {
+			if ((syphon.contains(pid) || from.equals(to) || (to.size() == 0 && marks.get(pid) == 0))
+					&& NetBlocks.mayDropConstantPlace(this, marks.get(pid))) {
 				// constant marking place
 				int m = marks.get(pid);
 				for (int tpos = 0; tpos < from.size(); tpos++) {

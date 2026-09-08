@@ -88,6 +88,25 @@ public class NetBlocks {
 		return false;
 	}
 
+	/**
+	 * May a rule remove this constant place?
+	 *
+	 * A place holding no token is free to go: it contributes nothing to any
+	 * count. One that holds tokens contributes them to every marking's total
+	 * and is a candidate for the largest marking of a place, and nothing in
+	 * the net that remains says so, so a net that tracks counts keeps it.
+	 * Recording what it held instead ({@link NetBlock#PDROP}) is what would
+	 * let it go.
+	 */
+	public static boolean mayDropConstantPlace(Holder net, int marking) {
+		if (marking == 0 || !net.hasAnyBlock()) {
+			return true;
+		}
+		System.out.println("Keeping a constant place holding " + marking
+				+ " tokens: a counting record needs them.");
+		return false;
+	}
+
 	/** TMULT after a fusion, or null when the fusion cannot be followed. */
 	private static IntMatrixCol fuse(IntMatrixCol tmult, int count, List<Integer> dropped,
 			Map<Integer, Integer> survivorOf) {
