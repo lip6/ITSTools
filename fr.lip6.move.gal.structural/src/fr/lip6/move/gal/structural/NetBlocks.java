@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.structural;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -89,22 +90,87 @@ public class NetBlocks {
 	}
 
 	/**
-	 * May a rule remove this constant place?
+	 * May a rule replace transitions by a composition of simpler ones?
 	 *
-	 * A place holding no token is free to go: it contributes nothing to any
-	 * count. One that holds tokens contributes them to every marking's total
-	 * and is a candidate for the largest marking of a place, and nothing in
-	 * the net that remains says so, so a net that tracks counts keeps it.
-	 * Recording what it held instead ({@link NetBlock#PDROP}) is what would
-	 * let it go.
+	 * Not while a record is tracked. The transition it removes contributed its
+	 * own arcs, from the states where *it* was enabled, and no surviving
+	 * transition stands for them, so the rule and an arc count cannot both be
+	 * had. Skipping the rule is the cheaper loss: it prefers longer firing
+	 * paths and buys little.
 	 */
-	public static boolean mayDropConstantPlace(Holder net, int marking) {
-		if (marking == 0 || !net.hasAnyBlock()) {
+	public static boolean mayComposeRedundant(Holder net) {
+		if (!net.hasAnyBlock()) {
 			return true;
 		}
-		System.out.println("Keeping a constant place holding " + marking
-				+ " tokens: a counting record needs them.");
+		System.out.println("Skipping the redundant composition rule: a counting record needs the arcs it removes.");
 		return false;
+	}
+
+	/**
+	 * Constant places were removed: what they held is recorded, since it is in
+	 * every marking's total and each value is a candidate for the largest
+	 * marking of a place. Appended, so chained removals accumulate.
+	 *
+	 * @param markings the marking of each removed place, zeroes included or not
+	 *                 (a place holding none contributes nothing)
+	 */
+	public static void constantPlacesDropped(Holder net, List<Integer> markings) {
+		if (!net.hasAnyBlock() || markings.isEmpty()) {
+			return;
+		}
+		IntMatrixCol previous = net.getBlock(NetBlock.PDROP);
+		SparseIntArray old = previous != null && previous.getColumnCount() > 0 ? previous.getColumn(0)
+				: new SparseIntArray();
+		SparseIntArray next = new SparseIntArray();
+		int row = 0;
+		for (int i = 0, ie = old.size(); i < ie; i++) {
+			next.append(row++, old.valueAt(i));
+		}
+		for (int m : markings) {
+			if (m != 0) {
+				next.append(row++, m);
+			}
+		}
+		if (row > 0) {
+			IntMatrixCol block = new IntMatrixCol(row, 0);
+			block.appendColumn(next);
+			net.putBlock(NetBlock.PDROP, block);
+		}
+	}
+
+	/**
+	 * Transitions that can never fire were removed: they contributed no arc, so
+	 * a record survives them; only the transition indexing moves.
+	 */
+	public static void deadTransitionsDropped(Holder net, int count, Collection<Integer> dropped) {
+		if (!net.hasAnyBlock() || dropped.isEmpty()) {
+			return;
+		}
+		IntMatrixCol tmult = net.getBlock(NetBlock.TMULT);
+		if (tmult == null) {
+			return;
+		}
+		Set<Integer> dead = new HashSet<>(dropped);
+		SparseIntArray col = tmult.getColumnCount() > 0 ? tmult.getColumn(0) : new SparseIntArray();
+		long[] weight = new long[count];
+		Arrays.fill(weight, 1L);
+		for (int i = 0, ie = col.size(); i < ie; i++) {
+			weight[col.keyAt(i)] = 1L + col.valueAt(i);
+		}
+		IntMatrixCol next = new IntMatrixCol(count - dead.size(), 0);
+		SparseIntArray kept = new SparseIntArray();
+		int index = 0;
+		for (int t = 0; t < count; t++) {
+			if (dead.contains(t)) {
+				continue;
+			}
+			if (weight[t] != 1L) {
+				kept.append(index, (int) (weight[t] - 1L));
+			}
+			index++;
+		}
+		next.appendColumn(kept);
+		net.putBlock(NetBlock.TMULT, next);
 	}
 
 	/** TMULT after a fusion, or null when the fusion cannot be followed. */

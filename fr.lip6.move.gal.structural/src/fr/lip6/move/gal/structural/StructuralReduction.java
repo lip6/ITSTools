@@ -423,6 +423,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet, NetBlock
 	 * @return the number of transitions discarded by the rule
 	 */
 	private int ruleRedundantCompositions(ReductionType rt) {
+		if (!NetBlocks.mayComposeRedundant(this)) {
+			return 0;
+		}
 		if (tnames.size() > 20000 || rt == ReductionType.LIVENESS) {
 			// quadratic |T| => 10^8 hurts too much
 			return 0;

@@ -252,8 +252,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet, NetBloc
 
 			SparseIntArray from = tflowPT.getColumn(pid);
 			SparseIntArray to = tflowTP.getColumn(pid);
-			if ((syphon.contains(pid) || from.equals(to) || (to.size() == 0 && marks.get(pid) == 0))
-					&& NetBlocks.mayDropConstantPlace(this, marks.get(pid))) {
+			if (syphon.contains(pid) || from.equals(to) || (to.size() == 0 && marks.get(pid) == 0)) {
 				// constant marking place
 				int m = marks.get(pid);
 				for (int tpos = 0; tpos < from.size(); tpos++) {
@@ -281,20 +280,27 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet, NetBloc
 			for (int i = 0; i < atomicProps.size(); i++) {
 				atomicProps.set(i, simplifyConstants(atomicProps.get(i), perm));
 			}
+			List<Integer> droppedMarkings = new ArrayList<>();
 			for (int pid = perm.length - 1; pid >= 0; pid--) {
 				if (perm[pid] == -1) {
 					// delete line for p
 					tflowPT.deleteColumn(pid);
 					tflowTP.deleteColumn(pid);
 					pnames.remove(pid);
-					totaltok += marks.remove(pid);
+					int held = marks.remove(pid);
+					totaltok += held;
+					droppedMarkings.add(held);
 				}
 			}
+			NetBlocks.constantPlacesDropped(this, droppedMarkings);
 			// reconstruct updated flow matrices
 			tflowPT.transposeTo(flowPT);
 			tflowTP.transposeTo(flowTP);
 		}
 		if (!todelTrans.isEmpty()) {
+			// these can never fire (they ask more of a constant place than it
+			// holds), so they contributed no arc: only the indexing moves
+			NetBlocks.deadTransitionsDropped(this, tnames.size(), todelTrans);
 			// delete transitions
 			for (int tid : todelTrans) {
 				flowPT.deleteColumn(tid);
