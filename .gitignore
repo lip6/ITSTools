@@ -2,3 +2,4 @@
 **/src-gen/
 **/xtend-gen/
 **/.tycho-consumer-pom.xml
+.vscode/
