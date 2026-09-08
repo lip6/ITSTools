@@ -153,6 +153,9 @@
       "type": "fr.lip6.move.pnml.symmetricnet.partitions.impl.PartitionsPackageImpl"
     },
     {
+      "type": "fr.lip6.move.pnml.symmetricnet.terms.Sort[]"
+    },
+    {
       "type": "fr.lip6.move.pnml.symmetricnet.terms.Term[]"
     },
     {
