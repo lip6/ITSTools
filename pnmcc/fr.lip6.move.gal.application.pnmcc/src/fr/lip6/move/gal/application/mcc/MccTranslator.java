@@ -95,6 +95,13 @@ public class MccTranslator {
 			try {
 				if (useLouvain && order == null) {
 
+					if (!canDecompose()) {
+						// the hierarchy would be fused back to a single GAL: the graph, the
+						// clustering and the decomposition are all work thrown away
+						getLog().fine("Not decomposing : a property sums or compares places, which libits reads within one component.");
+						return false;
+					}
+
 					INextBuilder inb = INextBuilder.build(spec);
 					List<BitSet> constraints = new ArrayList<>();
 					for (Property p : spec.getProperties()) {
