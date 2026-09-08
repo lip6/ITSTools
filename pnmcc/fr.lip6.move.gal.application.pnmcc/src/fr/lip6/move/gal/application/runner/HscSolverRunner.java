@@ -50,6 +50,11 @@ public class HscSolverRunner extends AbstractRunner {
 		Property deadlock = null;
 		for (Property p : net.getProperties()) {
 			if (doneProps.containsKey(p.getName())) continue;
+			if (p.getBody().getOp() == Op.BOOLCONST) {
+				// settled by the simplifications on the initial marking (testInInitial)
+				doneProps.put(p.getName(), p.getBody().getValue() == 1, "TOPOLOGICAL INITIAL_STATE");
+				continue;
+			}
 			switch (p.getType()) {
 			case INVARIANT: {
 				Expression body = p.getBody();

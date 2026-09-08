@@ -127,6 +127,10 @@ public class Application implements IApplication, Ender {
 	private static final String SMT = "-smt";
 	private static final String ITS = "-its";
 	private static final String HSC = "-hsc";
+	/** The libHSC engine alone, right after the model and its properties are read (LouvainBench's role for hsc-pn). */
+	private static final String HSC_BENCH = "-hscBench";
+	/** With -hscBench : reduce the net before handing it to hsc-pn. */
+	private static final String HSC_BENCH_REDUCE = "-hscBenchReduce";
 	private static final String MANYORDER = "-manyOrder";
 	private static final String CEGAR = "-cegar";
 	private static final String LTSMIN = "-ltsmin";
@@ -274,6 +278,8 @@ public class Application implements IApplication, Ender {
 
 		boolean doITS = false;
 		boolean doHSC = false;
+		boolean hscBench = false;
+		boolean hscBenchReduce = false;
 		boolean doSMT = false;
 		boolean doCegar = false;
 		boolean onlyGal = false;
@@ -353,6 +359,11 @@ public class Application implements IApplication, Ender {
 				doITS = true;
 			} else if (HSC.equals(args[i])) {
 				doHSC = true;
+			} else if (HSC_BENCH.equals(args[i])) {
+				hscBench = true;
+			} else if (HSC_BENCH_REDUCE.equals(args[i])) {
+				hscBench = true;
+				hscBenchReduce = true;
 			} else if (disablePOR.equals(args[i])) {
 				doPOR = false;
 			} else if (ONLYGAL.equals(args[i])) {
@@ -664,6 +675,20 @@ public class Application implements IApplication, Ender {
 		if (louvainBench) {
 			LouvainBench.run(reader, doneProps, examination, louvainBenchReduce, doITS, timeout, wasKilled, runners,
 					this);
+			return IApplication.EXIT_OK;
+		}
+
+		if (hscBench) {
+			// the symbolic engine of libHSC alone: no walk, no SMT, the reductions only when asked
+			reader.createSPN(hscBenchReduce, hscBenchReduce);
+			System.out.println("HSC bench : " + reader.getSPN().getPlaceCount() + " places, "
+					+ reader.getSPN().getTransitionCount() + " transitions, " + reader.getSPN().getProperties().size()
+					+ " properties" + (hscBenchReduce ? " after reduction" : ""));
+			HscSolverRunner hsc = new HscSolverRunner(reader.getSPN(), timeout);
+			hsc.configure(null, doneProps);
+			runners.add(hsc);
+			hsc.solve(this);
+			hsc.join();
 			return IApplication.EXIT_OK;
 		}
 		

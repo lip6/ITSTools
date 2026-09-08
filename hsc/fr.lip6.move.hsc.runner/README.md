@@ -8,6 +8,6 @@ read back as they are printed. Unlike the walker, every verdict is a proof:
 `TRUE` and `FALSE` are both final, a bound value is exact.
 
 The binary comes from `fr.lip6.hsc.binaries` (downloaded from the libHSC CI
-at build time), or from `-Dhsc.bin=<path>` outside OSGi. `HscRunner.DEBUG`
-(1 keeps the exchanged files, 2 echoes the binary's output) is the switch
-when a call has to be seen.
+at build time), or from `-Dhsc.bin=<path>` outside OSGi. `-Dhsc.debug=1`
+keeps the exchanged files and prints the command, `2` also echoes the
+binary's output (`HscRunner.DEBUG`).

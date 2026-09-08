@@ -28,8 +28,8 @@ import fr.lip6.move.gal.structural.expr.Expression;
  */
 public class HscRunner {
 
-	/** 0 none, 1 keep the exchanged files and print the command, 2 also echo the binary's output. */
-	public static int DEBUG = 0;
+	/** 0 none, 1 keep the exchanged files and print the command, 2 also echo the binary's output; set with -Dhsc.debug=N. */
+	public static int DEBUG = Integer.getInteger("hsc.debug", 0);
 	/** Seconds granted beyond the budget before the process is killed. */
 	private static final int GRACE_SECONDS = 5;
 
