@@ -964,8 +964,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					if (init.get(trid) >= init.get(pb.intValue())) {
 						todel.add(trid);
 					} else if (!untouchable.get(pb)) {
+						// pb goes, trid stays : the map holds the index of the survivor
 						todel.add(pb);
-						map.put(tcolTP, init.get(pb.intValue()));
+						map.put(tcolTP, trid);
 					}
 				} else {
 					map.put(tcolTP, trid);
