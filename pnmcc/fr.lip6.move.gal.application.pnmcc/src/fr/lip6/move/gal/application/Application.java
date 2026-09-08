@@ -38,6 +38,7 @@ import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.application.runner.CegarRunner;
 import fr.lip6.move.gal.application.runner.HscSolverRunner;
+import fr.lip6.move.hsc.runner.HscRunner;
 import fr.lip6.move.gal.application.runner.Ender;
 import fr.lip6.move.gal.application.runner.IRunner;
 import fr.lip6.move.gal.application.runner.MccDonePropertyPrinter;
@@ -580,7 +581,23 @@ public class Application implements IApplication, Ender {
 		if (redForExport == null)
 			if ("StateSpace".equals(examination)) {
 				reader.createSPN(false, false);
-				
+
+				if (doHSC || hscBench) {
+					// The examination that counts objects rather than deciding a
+					// property: one call to libHSC answers all four values on the
+					// net as it is here, before the rules that remove transitions,
+					// so its arcs are still those of the net it came from (the
+					// TMULT block the unfolder attached says so). Anything short
+					// of the four values falls through to the diagrams.
+					System.out.println("HSC StateSpace : " + reader.getSPN().getPlaceCount()
+							+ " places, " + reader.getSPN().getTransitionCount() + " transitions");
+					int answered = HscRunner.runStateSpace(reader.getSPN(), (int) timeout,
+							HscRunner.Shape.LOUVAIN, true);
+					if (answered >= 4) {
+						return IApplication.EXIT_OK;
+					}
+				}
+
 				if (rebuildPNML) {
 					tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
 					return 0;

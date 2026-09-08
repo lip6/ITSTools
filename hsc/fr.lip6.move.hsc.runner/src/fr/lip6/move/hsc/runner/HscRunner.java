@@ -104,6 +104,96 @@ public class HscRunner {
 	}
 
 	/**
+	 * The MCC StateSpace examination on this net: hsc-pn computes the reachable
+	 * set once and answers STATES, MAX_TOKEN_IN_PLACE, MAX_TOKEN_PER_MARKING
+	 * and TRANSITIONS, printing the contest lines itself. They are echoed here
+	 * as they arrive.
+	 *
+	 * The arc count is only reported when the net carries the evidence that its
+	 * arcs are those of the net it came from (the {@code TMULT} block, which
+	 * the unfolder attaches and a reduction drops when it cannot account for
+	 * what it removed): hand this the net *before* the arc-destroying rules.
+	 *
+	 * @return how many STATE_SPACE lines were answered, -1 when the binary
+	 *         could not run
+	 */
+	public static int runStateSpace(ISparsePetriNet net, int totalSeconds, Shape shape, boolean force) {
+		long t0 = System.currentTimeMillis();
+		List<File> todel = new ArrayList<>();
+		int lines = 0;
+		try {
+			File netFile = Files.createTempFile("hsc-net-", ".pnet").toFile();
+			todel.add(netFile);
+			PNETFormatIO.write(net, netFile.toPath());
+			CommandLine cl = new CommandLine();
+			cl.addArg(binaryPath());
+			cl.addArg("--net");
+			cl.addArg(netFile.getCanonicalPath());
+			cl.addArg("--states");
+			cl.addArg("--shape");
+			cl.addArg((shape == null ? Shape.LOUVAIN : shape).flag);
+			if (force) cl.addArg("--force");
+			if (totalSeconds > 0) {
+				cl.addArg("--totalTime");
+				cl.addArg(Integer.toString(totalSeconds));
+			}
+			cl.addArg("-q");
+			if (DEBUG >= 1) System.out.println("Running hsc-pn: " + cl);
+			ProcessBuilder pb = new ProcessBuilder(cl.getArgs());
+			pb.redirectError(Redirect.INHERIT);
+			Process process = pb.start();
+			int[] seen = new int[1];
+			Thread reader = new Thread(() -> seen[0] = echoStateSpace(process), "hsc-pn-stdout");
+			reader.start();
+			int exitCode = -1;
+			try {
+				exitCode = Runner.waitForOrTimeout(totalSeconds + GRACE_SECONDS, TimeUnit.SECONDS, cl, process);
+			} catch (TimeoutException e) {
+				System.out.println("hsc-pn killed after " + (totalSeconds + GRACE_SECONDS) + " s.");
+			}
+			reader.join();
+			lines = seen[0];
+			System.out.println("hsc-pn: " + lines + " StateSpace values in "
+					+ (System.currentTimeMillis() - t0) + " ms (exit " + exitCode + ").");
+			if (exitCode != 0 && lines == 0) {
+				return -1;
+			}
+			return lines;
+		} catch (IOException e) {
+			System.out.println("hsc-pn I/O error: " + e.getMessage());
+			return -1;
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			System.out.println("hsc-pn interrupted.");
+			return -1;
+		} finally {
+			if (DEBUG == 0)
+				for (File f : todel)
+					f.delete();
+		}
+	}
+
+	/** Echo the STATE_SPACE lines to standard output; returns how many. */
+	private static int echoStateSpace(Process process) {
+		int seen = 0;
+		try (BufferedReader in = new BufferedReader(
+				new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+			String line;
+			while ((line = in.readLine()) != null) {
+				if (line.startsWith("STATE_SPACE ")) {
+					System.out.println(line);
+					seen++;
+				} else if (DEBUG >= 2) {
+					System.out.println("[hsc-pn] " + line);
+				}
+			}
+		} catch (IOException e) {
+			// stream closed by a kill: keep what was read
+		}
+		return seen;
+	}
+
+	/**
 	 * Write the net and the forms, run the binary under the budget, read the
 	 * stream. Returns null when the binary could not run at all (missing,
 	 * I/O error, no verdict and a non-zero exit), so a caller can fall back.
