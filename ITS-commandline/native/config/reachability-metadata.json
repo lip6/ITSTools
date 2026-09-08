@@ -121,6 +121,9 @@
       "type": "fr.lip6.move.pnml.symmetricnet.hlcorestructure.PnObject[]"
     },
     {
+      "type": "fr.lip6.move.pnml.symmetricnet.hlcorestructure.Position[]"
+    },
+    {
       "type": "fr.lip6.move.pnml.symmetricnet.hlcorestructure.hlapi.PetriNetDocHLAPI",
       "methods": [
         {
@@ -148,6 +151,9 @@
     },
     {
       "type": "fr.lip6.move.pnml.symmetricnet.multisets.impl.MultisetsPackageImpl"
+    },
+    {
+      "type": "fr.lip6.move.pnml.symmetricnet.partitions.PartitionElement[]"
     },
     {
       "type": "fr.lip6.move.pnml.symmetricnet.partitions.impl.PartitionsPackageImpl"
@@ -362,7 +368,13 @@
       ]
     },
     {
-      "type": "org.apache.axiom.om.impl.llom.OMCommentImpl"
+      "type": "org.apache.axiom.om.impl.llom.OMCommentImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "org.apache.axiom.om.impl.llom.OMDocTypeImpl"
