@@ -85,9 +85,6 @@ public class PetriSpotRunner {
 			cl.addArg(modeFlag(mode));
 			cl.addArg("--basisKERS=" + outputKers.getCanonicalPath());
 
-			// the Q+ basis is read in phase 2 only, where semiflows are refined: inert for flows
-			cl.addArg("--useQPlusBasis");
-
 			System.out.println("Running PetriSpot : " + cl);
 			long t0 = System.currentTimeMillis();
 
