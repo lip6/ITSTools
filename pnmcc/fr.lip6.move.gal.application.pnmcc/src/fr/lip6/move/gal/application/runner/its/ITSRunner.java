@@ -59,6 +59,8 @@ public class ITSRunner extends AbstractRunner {
 	protected String workFolder;
 
 	private Thread itsReader;
+	/** The files handed to the engine, deleted when the invocation is over. */
+	private final List<File> tempFiles = new ArrayList<>();
 	private long timeout;
 	private String orderff;
 	private String outputPath;
@@ -115,7 +117,7 @@ public class ITSRunner extends AbstractRunner {
 				if (reader.getTgba() != null) {
 					TGBA tgba = reader.getTgba();
 					File curAut = Files.createTempFile("aut", ".hoa").toFile();
-					if (DEBUG == 0) curAut.deleteOnExit();
+					tempFiles.add(curAut);
 					PrintWriter pw = new PrintWriter(curAut);
 					tgba.exportAsHOA(pw, ExportMode.SPOTAP);
 					pw.close();
@@ -126,7 +128,7 @@ public class ITSRunner extends AbstractRunner {
 					// We will put properties in a file
 					// Reachability
 					File file = Files.createTempFile(examination, ".prop").toFile();
-					if (DEBUG == 0) file.deleteOnExit();
+					tempFiles.add(file);
 					String propPath = file.getCanonicalPath();	
 					SerializationUtil.serializePropertiesForITSTools(getOutputPath(), spec.getProperties(), propPath);
 					
@@ -187,10 +189,30 @@ public class ITSRunner extends AbstractRunner {
 
 	@Override
 	public void join() throws InterruptedException {
-		super.join();
-		if (itsReader != null) {
-			itsReader.join();
+		try {
+			super.join();
+			if (itsReader != null) {
+				itsReader.join();
+			}
+		} finally {
+			// the engine has read them and is gone; waiting for the JVM to exit would keep
+			// every file of every invocation of a run, and leave them all when it is killed
+			dropTempFiles();
 		}
+	}
+
+	/** The discipline SpotRunner keeps : what an invocation wrote, it deletes when it is done. */
+	private void dropTempFiles() {
+		if (DEBUG == 0) {
+			for (File f : tempFiles) {
+				f.delete();
+			}
+		} else {
+			for (File f : tempFiles) {
+				System.out.println("Keeping " + f.getAbsolutePath());
+			}
+		}
+		tempFiles.clear();
 	}
 
 	class ITSInterpreter implements Runnable {
@@ -425,18 +447,18 @@ public class ITSRunner extends AbstractRunner {
 		spec.getProperties().removeIf(p-> doneProps.containsKey(p.getName()));
 		if (examination.contains("CTL")) {
 			File file = Files.createTempFile(examination, ".ctl").toFile();
-			if (DEBUG == 0) file.deleteOnExit();
+			tempFiles.add(file);
 			proppath = file.getCanonicalPath();	
 			SerializationUtil.serializePropertiesForITSCTLTools(getOutputPath(), spec.getProperties(), proppath);
 		} else if (examination.contains("LTL")) {
 			File file = Files.createTempFile(examination, ".ltl").toFile();
-			if (DEBUG == 0) file.deleteOnExit();
+			tempFiles.add(file);
 			proppath = file.getCanonicalPath();	
 			SerializationUtil.serializePropertiesForITSLTLTools(getOutputPath(), spec.getProperties(), proppath);
 		} else {
 			// Reachability
 			File file = Files.createTempFile(examination, ".prop").toFile();
-			if (DEBUG == 0) file.deleteOnExit();
+			tempFiles.add(file);
 			proppath = file.getCanonicalPath();	
 			SerializationUtil.serializePropertiesForITSTools(getOutputPath(), spec.getProperties(), proppath);
 		}
@@ -488,7 +510,7 @@ public class ITSRunner extends AbstractRunner {
 
 	public String outputGalFile() throws IOException {
 		File file = Files.createTempFile(examination, ".gal").toFile();
-		if (DEBUG == 0) file.deleteOnExit();		
+		tempFiles.add(file);		
 		String outpath = file.getCanonicalPath();
 		SerializationUtil.systemToFile(spec, outpath, false);
 		outputPath = outpath;
