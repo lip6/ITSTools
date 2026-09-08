@@ -37,6 +37,9 @@
       "type": "com.sun.xml.internal.stream.XMLOutputFactoryImpl"
     },
     {
+      "type": "fr.lip6.move.gal.InstanceDecl[]"
+    },
+    {
       "type": "fr.lip6.move.gal.Parameter[]"
     },
     {
@@ -44,6 +47,9 @@
     },
     {
       "type": "fr.lip6.move.gal.Statement[]"
+    },
+    {
+      "type": "fr.lip6.move.gal.Synchronization[]"
     },
     {
       "type": "fr.lip6.move.gal.Transition[]"
