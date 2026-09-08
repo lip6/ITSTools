@@ -42,17 +42,27 @@ public class GraphBuilder {
 
 	/**
 	 * A comparison over more variables than this is a global statement, a sum over a whole
-	 * component or the net : keeping its variables in one place would forbid any cut, so it is
-	 * dropped from the graph and the partition may split it.
+	 * component or the net : it is not contracted, since holding its variables in one node
+	 * would forbid any cut.
 	 */
 	private static final int MAX_CONSTRAINT = 20;
 
 	/**
-	 * Comparisons that share variables are held together as one, and a group so grown may not
-	 * hold more than this share of the net : contracting it would leave nothing to cut, so it
-	 * is dissolved and its comparisons are left to the partition, like an oversized one.
+	 * Comparisons that share variables are held together as one, and a group so grown past this
+	 * share of the net is not contracted either : there would be nothing left to cut.
 	 */
 	private static final double MAX_GROUP_RATIO = 0.5;
+
+	/**
+	 * What to do with a comparison no partition can honour. libits evaluates a comparison, and
+	 * a sum of places, within one component of the hierarchy: it cannot read places sitting on
+	 * either side of a border. Honouring such a property means rewriting the net so the value
+	 * it compares lives in a place of its own, which the transition relation then maintains --
+	 * so short of that rewriting, a decomposition that splits the comparison is of no use to
+	 * the symbolic engine, and none is better than a bad one. False builds the graph anyway,
+	 * which is how the cost of an unhonoured decomposition is measured.
+	 */
+	public static boolean VETO_UNHONOURED = true;
 
 	/**
 	 * The edges of the graph, one "src dest weight" line each, written as they are produced:
@@ -147,7 +157,7 @@ public class GraphBuilder {
 
 	/**
 	 * The node each variable belongs to : variables a property compares share one, the others
-	 * stand alone.
+	 * stand alone. Null when a comparison cannot be honoured and VETO_UNHONOURED says so.
 	 */
 	private static int[] contract(int nbVars, List<BitSet> constraints) {
 		List<BitSet> groups = new ArrayList<>();
@@ -182,8 +192,12 @@ public class GraphBuilder {
 		if (dropped > 0 || dissolved > 0) {
 			System.out.println("Decomposition : of " + constraints.size() + " comparisons, " + dropped
 					+ " relate more than " + MAX_CONSTRAINT + " variables and " + dissolved
-					+ " groups of them more than half the net : left to the partition. "
-					+ groups.size() + " groups are held together.");
+					+ " groups of them more than half the net; " + groups.size() + " are held together."
+					+ (VETO_UNHONOURED ? " Not decomposing : no partition can honour them."
+							: " Decomposing anyway : the partition may split them."));
+			if (VETO_UNHONOURED) {
+				return null;
+			}
 		}
 		int[] nodeOf = new int[nbVars];
 		Arrays.fill(nodeOf, -1);
@@ -248,10 +262,14 @@ public class GraphBuilder {
 		return computeLouvain(ff, nodeNames(sr.getPnames(), nodeOf, nodeOf.length), rec);
 	}
 
+	/** Null when the properties hold the net together and no partition can honour them. */
 	public static IOrder computeLouvain(INextBuilder inb, boolean rec, List<BitSet> constraints) throws IOException, TimeoutException, InterruptedException {
 		DependencyMatrix dm = new DependencyMatrix(inb.size(), inb.getNextForLabel(""));
 		List<String> varNames = inb.getVariableNames();
 		int[] nodeOf = contract(dm.nbRows(), constraints);
+		if (nodeOf == null) {
+			return null;
+		}
 		int nbNodes = 0;
 		for (int n : nodeOf) {
 			nbNodes = Math.max(nbNodes, n + 1);

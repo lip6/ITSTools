@@ -112,6 +112,11 @@ public class MccTranslator {
 					}
 					try {
 						IOrder graph = GraphBuilder.computeLouvain(inb, true, constraints);
+						if (graph == null) {
+							// the properties hold the net together : a flat GAL is what libits can use
+							spec = saved;
+							return false;
+						}
 						setOrder(graph);
 					} catch (OutOfMemoryError e) {
 						System.out.println("Louvain graph construction failed due to OOM.");

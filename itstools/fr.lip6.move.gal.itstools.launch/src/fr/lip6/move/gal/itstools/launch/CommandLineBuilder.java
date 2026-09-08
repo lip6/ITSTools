@@ -116,7 +116,9 @@ public class CommandLineBuilder {
 					}
 					IOrder order = GraphBuilder.computeLouvain(inb,true,constraints);
 					
-					CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getMain(), order);
+					if (order != null) {
+						CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getMain(), order);
+					}
 				} catch (Exception e) {
 					log.warning("Could not build decomposition of model due to "+e);
 					e.printStackTrace();
