@@ -92,6 +92,19 @@ public class OrderFactory {
 	}
 	
 	public static IOrder parseLouvain (String filename, List<String> pnames, boolean rec) throws IOException {
+		List<List<String>> nodes = new ArrayList<>(pnames.size());
+		for (String name : pnames) {
+			nodes.add(Collections.singletonList(name));
+		}
+		return parseLouvainNodes(filename, nodes, rec);
+	}
+
+	/**
+	 * The communities of a louvain tree, where a node of the graph may stand for several
+	 * variables : variables a property compares are contracted into one node, so that no
+	 * partition can separate them.
+	 */
+	public static IOrder parseLouvainNodes (String filename, List<List<String>> nodeNames, boolean rec) throws IOException {
 		
 		Scanner sc;
 		// erreur si le fichier n'existe pas
@@ -100,7 +113,7 @@ public class OrderFactory {
 		List<List<String>> elements = new ArrayList<>();
 		
 		int i=0;
-		while (sc.hasNextLine() && i < pnames.size()) {
+		while (sc.hasNextLine() && i < nodeNames.size()) {
 			String line = sc.nextLine();
 			String[] words = line.split("\\s");
 			assert(words.length==2);
@@ -110,7 +123,7 @@ public class OrderFactory {
 				elements.add(new ArrayList<>());
 			}
 			List<String> target = elements.get(part);
-			target.add(pnames.get(var));
+			target.addAll(nodeNames.get(var));
 			
 			i++;
 		}		
