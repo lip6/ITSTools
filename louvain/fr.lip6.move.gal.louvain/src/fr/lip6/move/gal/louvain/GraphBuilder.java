@@ -25,123 +25,143 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class GraphBuilder {
 
-	
-	public static Graph buildGraph (IntMatrixCol flowPT, IntMatrixCol flowTP, List<String> pnames, List<String> tnames, List<Integer> initial) {
-		Graph g = new Graph();
+	/** 2 keeps the graph, binary, weights and tree files of a run and traces the tool calls. */
+	private static final int DEBUG = 0;
 
-		for (int tindex =0; tindex < tnames.size() ; tindex++) {
-			SparseIntArray flow = SparseIntArray.sumProd(1, flowPT.getColumn(tindex), 1, flowTP.getColumn(tindex));
-			int nbTouched = flow.size();
-			int nbElts = nbTouched * (nbTouched -1) * 2;
-			if (nbElts != 0) {
-				for (int i = 0 ; i < nbTouched ; i++) {
-					for (int j=i+1 ; j < nbTouched ; j++) {
-						g.add(new Edge(flow.keyAt(i), flow.keyAt(j), 1.0/nbElts));
-					}
-				}
-			}
-		}		
-		return g;
+	/**
+	 * The edges of the graph, one "src dest weight" line each, written as they are produced:
+	 * a hyper edge of arity k induces k*(k-1)/2 of them, so a net of a few thousand places
+	 * reaches tens of millions and holding them costs more than the clustering.
+	 */
+	private static class EdgeSink implements AutoCloseable {
+		private final PrintWriter pw;
+		private int nbEdges = 0;
+
+		EdgeSink(String path) throws FileNotFoundException {
+			pw = new PrintWriter(path);
+		}
+
+		void add(int src, int dest, double weight) {
+			pw.println(src + " " + dest + " " + ((float) weight));
+			nbEdges++;
+		}
+
+		int size() {
+			return nbEdges;
+		}
+
+		@Override
+		public void close() {
+			pw.close();
+		}
 	}
 
 	public static void writeGraph (String path, DependencyMatrix dm, List<BitSet> constraints) throws FileNotFoundException {
 		writeGraph(path, dm, false, constraints);
 	}
-	
+
 	public static void writeGraph (String path, DependencyMatrix dm, boolean allToAll, List<BitSet> constraints) throws FileNotFoundException {
-		Graph g = new Graph();
-				 
-		if (allToAll) {
-			// basic strategy for hyper graph to graph 
-			
-			// for each transition
-			for (int tindex = 0; tindex < dm.nbCols() ; tindex++) {
-				// compute into bs the union of read and write : full support of the transition
-				BitSet bs = (BitSet) dm.getControl(tindex).clone();
-				bs.or(dm.getRead(tindex));
-				bs.or(dm.getWrite(tindex));
-				
-				// compute total size of the support
-				int nbTouched = bs.cardinality();
-				// this is the number of constraints we build : choose 2 from nbTouched
-				int nbElts = nbTouched * (nbTouched -1) / 2;
-				if (nbElts != 0) {
-					// add an arc for any pair of variables in support
-					for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {													
-						for (int j=bs.nextSetBit(i+1) ; j >= 0 ; j = bs.nextSetBit(j+1)) {
-							// weight is one over the number of induced arcs
-							g.add(new Edge(i,j, 1.0/nbElts));							
-						}
-					}
-				}
+		int nbEdges;
+		try (EdgeSink g = new EdgeSink(path)) {
+			if (allToAll) {
+				// basic strategy for hyper graph to graph
 
-			}
-		} else {
-			// flow like strategy for hyper graph to graph 
-			// build an edge from every control variable to every written variable
-			for (int pindex =0; pindex < dm.nbRows() ; pindex++) {
-				g.add(new Edge(pindex, pindex, 0.001));
-			}
-			// for each transition
-			for (int tindex = 0; tindex < dm.nbCols() ; tindex++) {
-				// compute into bs the union of read and write : full support of the transition
-				BitSet bsctrl = dm.getControl(tindex);
-				BitSet bswrite = (BitSet) dm.getWrite(tindex).clone();
-				// drops some constraints
-				bswrite.andNot(bsctrl);
-					
-				// this is the number of constraints we build : nbcontrol * nbwrite
-				int nbElts = bsctrl.cardinality() * bswrite.cardinality();
-				if (nbElts != 0) {
-					// add an arc for any pair of variables in support
-					for (int i = bsctrl.nextSetBit(0); i >= 0; i = bsctrl.nextSetBit(i+1)) {													
-						for (int j=bswrite.nextSetBit(0) ; j >= 0 ; j = bswrite.nextSetBit(j+1)) {
-							if (i !=j)
+				// for each transition
+				for (int tindex = 0; tindex < dm.nbCols() ; tindex++) {
+					// compute into bs the union of read and write : full support of the transition
+					BitSet bs = (BitSet) dm.getControl(tindex).clone();
+					bs.or(dm.getRead(tindex));
+					bs.or(dm.getWrite(tindex));
+
+					// compute total size of the support
+					int nbTouched = bs.cardinality();
+					// this is the number of constraints we build : choose 2 from nbTouched
+					int nbElts = nbTouched * (nbTouched -1) / 2;
+					if (nbElts != 0) {
+						// add an arc for any pair of variables in support
+						for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
+							for (int j=bs.nextSetBit(i+1) ; j >= 0 ; j = bs.nextSetBit(j+1)) {
 								// weight is one over the number of induced arcs
-								g.add(new Edge(i,j, 1.0/nbElts));							
+								g.add(i, j, 1.0/nbElts);
+							}
+						}
+					}
+
+				}
+			} else {
+				// flow like strategy for hyper graph to graph
+				// build an edge from every control variable to every written variable
+				for (int pindex =0; pindex < dm.nbRows() ; pindex++) {
+					g.add(pindex, pindex, 0.001);
+				}
+				// for each transition
+				for (int tindex = 0; tindex < dm.nbCols() ; tindex++) {
+					// compute into bs the union of read and write : full support of the transition
+					BitSet bsctrl = dm.getControl(tindex);
+					BitSet bswrite = (BitSet) dm.getWrite(tindex).clone();
+					// drops some constraints
+					bswrite.andNot(bsctrl);
+
+					// this is the number of constraints we build : nbcontrol * nbwrite
+					int nbElts = bsctrl.cardinality() * bswrite.cardinality();
+					if (nbElts != 0) {
+						// add an arc for any pair of variables in support
+						for (int i = bsctrl.nextSetBit(0); i >= 0; i = bsctrl.nextSetBit(i+1)) {
+							for (int j=bswrite.nextSetBit(0) ; j >= 0 ; j = bswrite.nextSetBit(j+1)) {
+								if (i !=j)
+									// weight is one over the number of induced arcs
+									g.add(i, j, 1.0/nbElts);
+							}
+						}
+					}
+
+				}
+			}
+			nbEdges = g.size();
+			if (nbEdges != 0 || allToAll) {
+				for (BitSet b : constraints) {
+					// add an arc for any pair of variables in support
+					for (int i = b.nextSetBit(0); i >= 0; i = b.nextSetBit(i+1)) {
+						for (int j=b.nextSetBit(0) ; j >= 0 ; j = b.nextSetBit(j+1)) {
+							if (i !=j)
+								// weight is one k
+								g.add(i, j, 10.0 * dm.nbRows());
 						}
 					}
 				}
-
-			}
-			if (! g.iterator().hasNext()) {
-				writeGraph(path, dm, true, constraints);
-				return;
 			}
 		}
-		for (BitSet b : constraints) {
-			// add an arc for any pair of variables in support
-			for (int i = b.nextSetBit(0); i >= 0; i = b.nextSetBit(i+1)) {													
-				for (int j=b.nextSetBit(0) ; j >= 0 ; j = b.nextSetBit(j+1)) {
-					if (i !=j)
-						// weight is one k
-						g.add(new Edge(i,j, 10.0 * dm.nbRows()));							
+		if (nbEdges == 0 && !allToAll) {
+			// the flow strategy relates nothing, fall back on the full support of transitions
+			writeGraph(path, dm, true, constraints);
+		}
+	}
+
+	public static void writeGraph (String path, StructuralReduction sr) throws FileNotFoundException {
+		IntMatrixCol flowPT = sr.getFlowPT();
+		IntMatrixCol flowTP = sr.getFlowTP();
+		try (EdgeSink g = new EdgeSink(path)) {
+			for (int tindex =0; tindex < sr.getTnames().size() ; tindex++) {
+				SparseIntArray flow = SparseIntArray.sumProd(1, flowPT.getColumn(tindex), 1, flowTP.getColumn(tindex));
+				int nbTouched = flow.size();
+				int nbElts = nbTouched * (nbTouched -1) * 2;
+				if (nbElts != 0) {
+					for (int i = 0 ; i < nbTouched ; i++) {
+						for (int j=i+1 ; j < nbTouched ; j++) {
+							g.add(flow.keyAt(i), flow.keyAt(j), 1.0/nbElts);
+						}
+					}
 				}
 			}
 		}
-		outputGraph(path, g);		
 	}
 
-	private static void outputGraph(String path, Graph g) throws FileNotFoundException {
-		PrintWriter pw = new PrintWriter(path);
-		for (Edge e : g) {
-			pw.println(e.getSrc()+" "+e.getDest()+" "+((float)e.getWeight()));
-		}
-		pw.close();
-	}
-	
-	public static void writeGraph (String path, StructuralReduction sr) throws FileNotFoundException {
-		Graph g = buildGraph(sr.getFlowPT(), sr.getFlowTP(), sr.getPnames(), sr.getTnames(), sr.getMarks());
-		
-		outputGraph(path, g);		
-	}
-	
 	public static IOrder computeLouvain(StructuralReduction sr, boolean rec) throws IOException, TimeoutException, InterruptedException {
 		File ff = File.createTempFile("graph", ".txt");
 		writeGraph(ff.getCanonicalPath(), sr);
-		
+
 		List<String> varNames = sr.getPnames();
-		
+
 		IOrder ord = computeLouvain(ff, varNames, rec);
 
 		return ord;
@@ -151,9 +171,9 @@ public class GraphBuilder {
 		File ff = File.createTempFile("graph", ".txt");
 		DependencyMatrix dm = new DependencyMatrix(inb.size(), inb.getNextForLabel(""));
 		writeGraph(ff.getCanonicalPath(), dm, constraints);
-		
+
 		List<String> varNames = inb.getVariableNames();
-		
+
 		IOrder ord = computeLouvain(ff, varNames, rec);
 
 		ord = ord.accept(new IOrderVisitor<IOrder>() {
@@ -176,22 +196,38 @@ public class GraphBuilder {
 				return varOrder;
 			}
 		});
-		
+
 		return ord;
 	}
 
-	
+
 	private static IOrder computeLouvain(File graphff, List<String> varNames, boolean rec)
 			throws IOException, TimeoutException, InterruptedException {
 		String fbin = graphff.getCanonicalPath().replace(".txt", ".bin");
 		String fw = graphff.getCanonicalPath().replace(".txt", ".weights");
-		
-		convertGraphToBin(graphff,  fbin, fw);
+		String ftree = graphff.getCanonicalPath().replace(".txt", ".tree");
 
-		String ftree = runLouvain(graphff,  fbin, fw);
+		try {
+			convertGraphToBin(graphff,  fbin, fw);
 
-		IOrder ord = OrderFactory.parseLouvain(ftree, varNames,rec);
-		return ord;
+			runLouvain(graphff,  fbin, fw);
+
+			IOrder ord = OrderFactory.parseLouvain(ftree, varNames,rec);
+			return ord;
+		} finally {
+			if (DEBUG >= 2) {
+				System.out.println("Louvain files of this run : " + graphff.getCanonicalPath() + " " + fbin + " " + fw + " " + ftree);
+			} else {
+				deleteFiles(graphff.getCanonicalPath(), fbin, fw, ftree);
+			}
+		}
+	}
+
+	/** The files a run leaves behind reach hundreds of megabytes, and a run killed by its budget leaves them all. */
+	private static void deleteFiles(String... paths) {
+		for (String path : paths) {
+			new File(path).delete();
+		}
 	}
 
 	private static String runLouvain(File ff, String fbin, String fw)
@@ -235,9 +271,11 @@ public class GraphBuilder {
 		
 		
 		String ftree = ff.getCanonicalPath().replace(".txt", ".tree");
-		int exit2 = Runner.runTool(10, cl, new File(ftree), false);
+		Runner.runTool(10, cl, new File(ftree), false);
 
-		System.out.println("Built communities with : " + cl);
+		if (DEBUG >= 2) {
+			System.out.println("Built communities with : " + cl);
+		}
 		return ftree;
 	}
 
@@ -255,7 +293,9 @@ public class GraphBuilder {
 		clConvert.addArg("-w");
 		clConvert.addArg(fw);
 		
-		int exit = Runner.runTool(10, clConvert );
-		System.out.println("Converted graph to binary with : " + clConvert);
+		Runner.runTool(10, clConvert );
+		if (DEBUG >= 2) {
+			System.out.println("Converted graph to binary with : " + clConvert);
+		}
 	}
 }
