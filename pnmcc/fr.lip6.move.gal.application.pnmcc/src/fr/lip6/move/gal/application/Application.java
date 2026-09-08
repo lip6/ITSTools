@@ -70,6 +70,7 @@ import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
+import fr.lip6.move.gal.louvain.GraphBuilder;
 import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.mcc.properties.MCCExporter;
@@ -132,6 +133,12 @@ public class Application implements IApplication, Ender {
 	private static final String disableSDD = "-disableSDD";
 	private static final String READ_GAL = "-readGAL";
 	private static final String USE_LOUVAIN = "-louvain";
+	/** Runs the Louvain decomposition on its own, out of the solving loop, to measure the heuristic. */
+	private static final String LOUVAIN_BENCH = "-louvainBench";
+	/** With -louvainBench : reduce the net before decomposing it. */
+	private static final String LOUVAIN_BENCH_REDUCE = "-louvainBenchReduce";
+	/** With -louvainBench : build the graph even when no partition can honour the properties. */
+	private static final String LOUVAIN_BENCH_NOVETO = "-louvainBenchNoVeto";
 	private static final String ORDER_FLAG = "-order";
 	private static final String GSPN_PATH = "-greatspnpath";
 	private static final String BLISS_PATH = "-blisspath";
@@ -257,6 +264,8 @@ public class Application implements IApplication, Ender {
 		boolean doPOR = true;
 		boolean doHierarchy = true;
 		boolean useLouvain = false;
+		boolean louvainBench = false;
+		boolean louvainBenchReduce = false;
 		boolean useManyOrder = false;
 		boolean rebuildPNML = false;
 		boolean exportLTL = false;
@@ -329,6 +338,15 @@ public class Application implements IApplication, Ender {
 				doPOR = false;
 			} else if (ONLYGAL.equals(args[i])) {
 				onlyGal = true;
+			} else if (LOUVAIN_BENCH.equals(args[i])) {
+				louvainBench = true;
+				useLouvain = true;
+			} else if (LOUVAIN_BENCH_REDUCE.equals(args[i])) {
+				louvainBench = true;
+				louvainBenchReduce = true;
+				useLouvain = true;
+			} else if (LOUVAIN_BENCH_NOVETO.equals(args[i])) {
+				GraphBuilder.VETO_UNHONOURED = false;
 			} else if (USE_LOUVAIN.equals(args[i])) {
 				useLouvain = true;
 			} else if (disableSDD.equals(args[i])) {
@@ -621,6 +639,12 @@ public class Application implements IApplication, Ender {
 			reader.getHLPN().testAliasing(doneProps);
 		} else if (reader.getSPN() != null){
 			reader.getSPN().testAliasing(doneProps);
+		}
+
+		if (louvainBench) {
+			LouvainBench.run(reader, doneProps, examination, louvainBenchReduce, doITS, timeout, wasKilled, runners,
+					this);
+			return IApplication.EXIT_OK;
 		}
 		
 //		if (redForExamination != null) {
