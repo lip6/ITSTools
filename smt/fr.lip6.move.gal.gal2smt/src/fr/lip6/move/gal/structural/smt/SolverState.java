@@ -28,6 +28,8 @@ public class SolverState {
 	private SolutionType numericType = SolutionType.Real;
 	private Map<String,Integer> minBounds = new HashMap<>();
 	ISolver solver;
+	private int nbTimeout = 0;
+	private int nbDead = 0;
 	
 	
 	public void setMinBounds(String var, int min) {
@@ -104,8 +106,31 @@ public class SolverState {
 	}
 	
 	public void stop() {
+		if (nbTimeout > 0) {
+			System.out.println("The SMT solver reached the timeout it was given on " + nbTimeout + " value queries.");
+		}
+		nbTimeout = 0;
+		nbDead = 0;
 		solver.exit();
 		declaredVars = new VarSet();
+	}
+
+	/**
+	 * An error reply to a query. Reaching the timeout the solver was given at start() is
+	 * ordinary and comes back once per query, so these are counted and told at stop(); a
+	 * solver process that is gone is said once; any other error stays loud.
+	 */
+	private void reportError(String query, IResponse reply) {
+		String msg = reply.toString();
+		if (msg.contains("Timeout")) {
+			nbTimeout++;
+		} else if (msg.contains("Broken pipe") || msg.contains("Stream closed")) {
+			if (nbDead++ == 0) {
+				System.out.println("The SMT solver process is gone, no more values from it : " + msg);
+			}
+		} else {
+			System.err.println("Error " + query + " : " + reply);
+		}
 	}
 	
 	public SparseIntArray getValues(String prefix) {
@@ -121,7 +146,7 @@ public class SolverState {
 		IResponse reply = solver.get_value(vars);
 		
 		if (reply.isError()) {
-			System.err.println("Error getting values : " + reply);
+			reportError("getting values", reply);
 			return new SparseIntArray();
 		}
 		
