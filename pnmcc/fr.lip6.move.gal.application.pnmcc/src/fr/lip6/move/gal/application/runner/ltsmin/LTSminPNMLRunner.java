@@ -159,6 +159,9 @@ public class LTSminPNMLRunner extends AbstractRunner implements ILTSminRunner {
 		boolean withPOR = false;
 		if (doPOR && isStutterInvariant(pbody)) {
 			ltsmin.addArg("-p");
+			// See LTSminRunner: without --no-V the reduction reports an empty product
+			// where an accepting cycle exists (LTSmin issue 169).
+			ltsmin.addArg("--no-V");
 			withPOR = true;
 		}
 		ltsmin.addArg("--when");

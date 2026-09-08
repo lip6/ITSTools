@@ -206,7 +206,22 @@ public class LTSminRunner extends AbstractRunner implements ILTSminRunner {
 		if (doPOR && isStutterInvariant(pbody)) {
 			ltsmin.addArg("-p");
 			ltsmin.addArg("--pins-guards");
-			//ltsmin.addArg("--no-V");
+			// --no-V is load bearing: keep it. It replaces LTSmin's own visibility
+			// proviso by Peled's, and without it the reduction is unsound -- it reports
+			// an empty product on nets where an accepting cycle exists, so we publish
+			// TRUE for a property that is FALSE. This is LTSmin issue 169, worked around
+			// here in 2019, dropped shortly after, and it bit again on
+			// StigmergyCommit-PT-02b-LTLCardinality-03 in the campaign of 2026-09-07.
+			// Supplying correct NES and NDS matrices does not make it safe: the rows are
+			// right, POR reads the visible groups from them, and the default proviso
+			// still loses the cycle. Nor is the fault ours upstream of LTSmin -- the
+			// property is stutter invariant by Spot, so -p is legitimately applicable.
+			// The price is real but small, about a sixth of the reduction on a product
+			// that is genuinely empty. Note --por=del is unsound here under every
+			// combination of flags, including this one; only the default heuristic is
+			// safe with --no-V. The whole investigation, with a two command
+			// reproduction, is in PetriSpot Petri/test/ltsmin-por-bug/.
+			ltsmin.addArg("--no-V");
 			withPOR = true;
 		}
 		ltsmin.addArg("--when");
