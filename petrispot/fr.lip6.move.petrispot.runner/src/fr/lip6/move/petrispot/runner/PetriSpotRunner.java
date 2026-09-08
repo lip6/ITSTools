@@ -1,5 +1,6 @@
 package fr.lip6.move.petrispot.runner;
 
+import fr.lip6.move.gal.interop.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

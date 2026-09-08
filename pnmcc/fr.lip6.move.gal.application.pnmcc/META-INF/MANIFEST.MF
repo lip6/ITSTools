@@ -23,7 +23,8 @@ Require-Bundle: org.eclipse.core.runtime,
  fr.lip6.move.gal.struct2gal,
  fr.lip6.ltl.spot.binaries,
  fr.lip6.smt.z3.binaries,
- fr.lip6.move.petrispot.runner
+ fr.lip6.move.petrispot.runner,
+ fr.lip6.move.hsc.runner
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: LIP6

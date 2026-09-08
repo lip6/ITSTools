@@ -37,6 +37,7 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.application.mcc.MccTranslator;
 import fr.lip6.move.gal.application.runner.CegarRunner;
+import fr.lip6.move.gal.application.runner.HscSolverRunner;
 import fr.lip6.move.gal.application.runner.Ender;
 import fr.lip6.move.gal.application.runner.IRunner;
 import fr.lip6.move.gal.application.runner.MccDonePropertyPrinter;
@@ -125,6 +126,7 @@ public class Application implements IApplication, Ender {
 	private static final String YICES2PATH = "-yices2path";
 	private static final String SMT = "-smt";
 	private static final String ITS = "-its";
+	private static final String HSC = "-hsc";
 	private static final String MANYORDER = "-manyOrder";
 	private static final String CEGAR = "-cegar";
 	private static final String LTSMIN = "-ltsmin";
@@ -169,6 +171,20 @@ public class Application implements IApplication, Ender {
 	private static final String STUDYSMT="--studySMT";
 	
 	private List<IRunner> runners = new ArrayList<>();
+
+	/**
+	 * The libHSC engine beside the decision diagrams: on the reduced Petri net,
+	 * the open reachability, deadlock and bound properties (-hsc).
+	 */
+	private void startHsc(MccTranslator reader, DoneProperties doneProps, int timeout, boolean doHSC) throws IOException {
+		if (!doHSC || reader.getSPN() == null) {
+			return;
+		}
+		HscSolverRunner hsc = new HscSolverRunner(reader.getSPN(), timeout);
+		hsc.configure(null, doneProps);
+		runners.add(hsc);
+		hsc.solve(this);
+	}
 
 	private static Logger logger = Logger.getLogger("fr.lip6.move.gal");
 
@@ -257,6 +273,7 @@ public class Application implements IApplication, Ender {
 		String outStats = null;
 
 		boolean doITS = false;
+		boolean doHSC = false;
 		boolean doSMT = false;
 		boolean doCegar = false;
 		boolean onlyGal = false;
@@ -334,6 +351,8 @@ public class Application implements IApplication, Ender {
 				doCegar = true;
 			} else if (ITS.equals(args[i])) {
 				doITS = true;
+			} else if (HSC.equals(args[i])) {
+				doHSC = true;
 			} else if (disablePOR.equals(args[i])) {
 				doPOR = false;
 			} else if (ONLYGAL.equals(args[i])) {
@@ -583,7 +602,8 @@ public class Application implements IApplication, Ender {
 						+ reader.getSPN().getTransitionCount() + " transitions.");
 				reader.rebuildSpecification(doneProps);
 				// ITS is the only method we will run.
-				reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+				startHsc(reader, doneProps, timeout, doHSC);
+			reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
 						reader, doneProps, useLouvain, timeout, wasKilled, startTime, runners, this);
 
 				return 0;
@@ -910,7 +930,8 @@ public class Application implements IApplication, Ender {
 				allSolved(pwd, examination);				
 			} else {
 				tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
-				reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+				startHsc(reader, doneProps, timeout, doHSC);
+			reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
 					reader, doneProps, useLouvain, timeout, wasKilled, startTime, runners, this);
 			}
 			return 0;
@@ -978,7 +999,8 @@ public class Application implements IApplication, Ender {
 			}
 
 			if (doITS || onlyGal) {
-				reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+				startHsc(reader, doneProps, timeout, doHSC);
+			reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
 						reader, doneProps, useLouvain, timeout, wasKilled, startTime, runners, this);
 			}
 
@@ -1196,6 +1218,7 @@ public class Application implements IApplication, Ender {
 				}
 			}
 
+			startHsc(reader, doneProps, timeout, doHSC);
 			reader = MultiOrderRunner.runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
 					reader, doneProps, useLouvain, timeout, wasKilled, startTime, runners, this);
 

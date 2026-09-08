@@ -1,4 +1,4 @@
-package fr.lip6.move.petrispot.runner;
+package fr.lip6.move.gal.interop;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

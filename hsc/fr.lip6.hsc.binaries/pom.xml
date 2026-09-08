@@ -1,0 +1,47 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+	  <groupId>fr.lip6.move.gal</groupId>
+	  <artifactId>fr.lip6.move.gal.parent</artifactId>
+	  <version>1.0.0-SNAPSHOT</version>
+	  <relativePath>../../fr.lip6.move.gal.parent/pom.xml</relativePath>
+  </parent>
+
+    <artifactId>fr.lip6.hsc.binaries</artifactId>
+    <packaging>eclipse-plugin</packaging>
+    <name>libHSC binaries</name>
+    <description>libHSC binary packaging (hsc-pn, the symbolic Petri net property answerer).</description>
+
+    <build>
+        <plugins>
+            <!-- Fetch the binaries from GitHub releases -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <configuration>
+                            <target>
+                                <echo message="Get libHSC binaries"/>
+                                <mkdir dir="bin"/>
+                                <get src="https://github.com/yanntm/libHSC/raw/refs/heads/HSC-Linux/hsc-pn" dest="bin/hsc-pn"/>
+                                <!-- no OSX build published yet (libHSC doc/ci.md)
+                                <get src="https://github.com/yanntm/libHSC/raw/refs/heads/HSC-OSX/hsc-pn" dest="bin/hsc-pn-mac"/>
+                                -->
+                                <chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,4 +1,4 @@
-package fr.lip6.move.petrispot.runner;
+package fr.lip6.move.gal.interop;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.expr.ArrayVarRef;

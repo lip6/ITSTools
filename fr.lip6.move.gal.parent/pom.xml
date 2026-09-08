@@ -103,6 +103,9 @@
 		<!-- PetriSpot : Petri net invariants solver -->
 		<module>../petrispot/fr.lip6.petrispot.binaries</module>
 		<module>../petrispot/fr.lip6.move.petrispot.runner</module>
+		<module>../interop/fr.lip6.move.gal.interop</module>
+		<module>../hsc/fr.lip6.hsc.binaries</module>
+		<module>../hsc/fr.lip6.move.hsc.runner</module>
 		
 		<!-- LTSmin interactions : launching and configuration -->
  		<module>../ltsmin/fr.lip6.move.gal.ltsmin.preference</module>

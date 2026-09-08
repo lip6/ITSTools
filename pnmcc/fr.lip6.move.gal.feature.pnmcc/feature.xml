@@ -366,4 +366,16 @@ This Agreement is governed by the laws of the State of New York and the intellec
          id="fr.lip6.petrispot.binaries"
          version="0.0.0"/>
 
+   <plugin
+         id="fr.lip6.move.gal.interop"
+         version="0.0.0"/>
+
+   <plugin
+         id="fr.lip6.hsc.binaries"
+         version="0.0.0"/>
+
+   <plugin
+         id="fr.lip6.move.hsc.runner"
+         version="0.0.0"/>
+
 </feature>

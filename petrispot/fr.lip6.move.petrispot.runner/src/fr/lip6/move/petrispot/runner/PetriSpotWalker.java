@@ -1,5 +1,6 @@
 package fr.lip6.move.petrispot.runner;
 
+import fr.lip6.move.gal.interop.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
