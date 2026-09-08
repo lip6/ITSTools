@@ -13,9 +13,11 @@ import java.util.stream.Collectors;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.FlowPrinter;
+import fr.lip6.move.gal.structural.NetBlock;
 import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
+import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -279,7 +281,18 @@ public class SparseHLPetriNet extends PetriNet {
 		Logger.getLogger("fr.lip6.move.gal").info("Unfolded "+spn.getProperties().size() +" HLPN properties in " + (System.currentTimeMillis()- time) + " ms.");
 		if (DEBUG >=1)
 			FlowPrinter.drawNet(spn, "After Unfold", Collections.emptySet(), Collections.emptySet());
-		
+
+		if (rt == ReductionType.STATESPACE) {
+			// StateSpace is the examination that counts objects rather than
+			// deciding a property, so the unfolded net carries a counting
+			// record: TMULT says how many transitions of this unfolding each
+			// transition stands for (empty here, hence all ones; the collapsing
+			// steps fill it in). Its *presence* is the switch: a later step
+			// maintains it if it can and drops it if it cannot, and a consumer
+			// weights its arc counts by it. HSC_PLAN.md sections 10 to 13.
+			spn.putBlock(NetBlock.TMULT, new IntMatrixCol(spn.getTransitionCount(), 1));
+		}
+
 		return spn;
 	}
 

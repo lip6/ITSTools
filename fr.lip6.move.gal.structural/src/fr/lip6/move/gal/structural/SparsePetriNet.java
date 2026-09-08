@@ -1,6 +1,8 @@
 package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Map.Entry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +30,20 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	private boolean isSafe = false;
 	private static final int DEBUG = 0;
 	private boolean isSkeleton = false;
+	/**
+	 * Optional data blocks a transformation attaches to the net it produces:
+	 * how many objects of its own input each object here stands for, and what it
+	 * dropped but still counts. Null until something is attached, so a net that
+	 * carries none costs one reference. Names and payloads are the PNET named
+	 * blocks (PetriSpot KERS.md, INTEROP.md section 3, HSC_PLAN.md sections 10
+	 * to 13); {@link NetBlock} says what each one holds.
+	 *
+	 * The contract for a modifier: maintain them, or clear them. A record that
+	 * cannot be maintained must go, because a consumer that reads a stale one
+	 * returns a wrong number, where a missing one only leaves a value
+	 * unanswered.
+	 */
+	private EnumMap<NetBlock, IntMatrixCol> blocks = null;
 
 	public SparsePetriNet() {
 	}
@@ -43,6 +59,12 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		pnames = new ArrayList<>(spn.pnames);
 		maxArcValue = spn.maxArcValue;
 		isSafe = spn.isSafe;
+		if (spn.blocks != null) {
+			blocks = new EnumMap<>(NetBlock.class);
+			for (Entry<NetBlock, IntMatrixCol> e : spn.blocks.entrySet()) {
+				blocks.put(e.getKey(), new IntMatrixCol(e.getValue()));
+			}
+		}
 		isSkeleton = spn.isSkeleton;
 	}
 
@@ -396,11 +418,48 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		rewriteConstantSums();
 	}
 
+	/** Is that block there? O(1), and the usual answer is no. */
+	public boolean hasBlock(NetBlock block) {
+		return blocks != null && blocks.containsKey(block);
+	}
+
+	/** That block, or null; see {@link NetBlock}. */
+	public IntMatrixCol getBlock(NetBlock block) {
+		return blocks == null ? null : blocks.get(block);
+	}
+
+	/** Attach (or replace) a block. */
+	public void putBlock(NetBlock block, IntMatrixCol matrix) {
+		if (blocks == null) {
+			blocks = new EnumMap<>(NetBlock.class);
+		}
+		blocks.put(block, matrix);
+	}
+
+	/** The blocks, in {@link NetBlock} order; empty when there are none. */
+	public Map<NetBlock, IntMatrixCol> getBlocks() {
+		return blocks == null ? Collections.emptyMap() : blocks;
+	}
+
+	/**
+	 * Forget the blocks: what a modifier does when it cannot maintain them.
+	 * Cheap and idempotent.
+	 */
+	public void clearBlocks() {
+		blocks = null;
+	}
+
 	public void readFrom(StructuralReduction sr) {
 		readFrom(sr, null);
 	}
 
 	public List<Expression> readFrom(StructuralReduction sr, List<Expression> original) {
+		// the counting record comes back as the reduction left it: maintained,
+		// or dropped by a rule that could not (HSC_PLAN.md section 11)
+		clearBlocks();
+		for (Entry<NetBlock, IntMatrixCol> e : sr.getBlocks().entrySet()) {
+			putBlock(e.getKey(), e.getValue());
+		}
 		flowPT = sr.getFlowPT();
 		flowTP = sr.getFlowTP();
 		marks = new ArrayList<>(sr.getMarks());

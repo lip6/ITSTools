@@ -2,6 +2,12 @@ package fr.lip6.move.gal.interop;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
+import fr.lip6.move.gal.structural.NetBlock;
+import fr.lip6.move.gal.structural.SparsePetriNet;
+import java.util.Map.Entry;
+import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,5 +53,35 @@ public class PNETFormatIO {
 		IntMatrixCol marking = new IntMatrixCol(places, 0);
 		marking.appendColumn(new SparseIntArray(net.getMarks()));
 		KERSFormatIO.write(marking, out);
+		if (net instanceof SparsePetriNet spn) {
+			writeBlocks(spn.getBlocks(), out);
+		}
+	}
+
+	/**
+	 * The optional named blocks that follow the three mandatory ones: an 8-byte
+	 * zero-padded ASCII name, the payload's byte length, then an ordinary KERS
+	 * payload (PetriSpot INTEROP.md section 3). A reader that does not know a
+	 * name skips it by its length, so nothing here needs a version or a flag;
+	 * a net with nothing to declare writes nothing.
+	 */
+	public static void writeBlocks(Map<NetBlock, IntMatrixCol> blocks, DataOutputStream out) throws IOException {
+		for (Entry<NetBlock, IntMatrixCol> block : blocks.entrySet()) {
+			byte[] name = block.getKey().blockName().getBytes(StandardCharsets.US_ASCII);
+			if (name.length == 0 || name.length > 8) {
+				throw new IOException("A PNET block name is 1 to 8 characters: " + block.getKey().blockName());
+			}
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			try (DataOutputStream payload = new DataOutputStream(buffer)) {
+				KERSFormatIO.write(block.getValue(), payload);
+			}
+			byte[] bytes = buffer.toByteArray();
+			out.write(name);
+			for (int i = name.length; i < 8; i++) {
+				out.writeByte(0);
+			}
+			KERSFormatIO.writeIntLE(out, bytes.length);
+			out.write(bytes);
+		}
 	}
 }

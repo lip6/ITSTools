@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,6 +84,37 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			}
 		}
 		isSafe = spn.isSafe();
+		if (spn instanceof SparsePetriNet source && !source.getBlocks().isEmpty()) {
+			blocks = new EnumMap<>(NetBlock.class);
+			for (Entry<NetBlock, IntMatrixCol> e : source.getBlocks().entrySet()) {
+				blocks.put(e.getKey(), new IntMatrixCol(e.getValue()));
+			}
+		}
+	}
+
+	/**
+	 * The blocks the source net carried (see
+	 * {@link SparsePetriNet#getBlock(NetBlock)}): a counting record a
+	 * transformation attached, transported back by
+	 * {@link SparsePetriNet#readFrom(StructuralReduction)}. Null when the net
+	 * carried none, which is the ordinary case and costs one reference.
+	 */
+	private EnumMap<NetBlock, IntMatrixCol> blocks = null;
+
+	public Map<NetBlock, IntMatrixCol> getBlocks() {
+		return blocks == null ? Collections.emptyMap() : blocks;
+	}
+
+	/**
+	 * Forget the counting record: what a rule does when it cannot maintain it.
+	 * A consumer then leaves the value unanswered instead of reading a stale
+	 * number.
+	 */
+	public void clearBlocks(String why) {
+		if (blocks != null) {
+			blocks = null;
+			System.out.println("Counting record dropped: " + why);
+		}
 	}
 
 	public List<Expression> getImage() {
@@ -1372,6 +1404,13 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		if (DEBUG == 2 && !todrop.isEmpty() && trace) {
 			FlowPrinter.drawNet(this, "Discarding " + todrop.size() + " transitions with rule " + rule,
 					Collections.emptySet(), new HashSet<>(todrop));
+		}
+		// A dropped transition's arcs belong to the graph the record counts, and
+		// nothing here can attribute them to a survivor (HSC_PLAN.md section 11,
+		// "ghost contributors" is the fix): the record goes rather than lie.
+		if (!todrop.isEmpty()) {
+			clearBlocks(rule + " removed " + todrop.size()
+					+ " transitions whose arcs it cannot account for");
 		}
 		for (int tid : todrop) {
 			flowPT.deleteColumn(tid);
