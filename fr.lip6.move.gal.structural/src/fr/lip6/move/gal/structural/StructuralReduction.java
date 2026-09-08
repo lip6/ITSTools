@@ -130,6 +130,13 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet, NetBlock
 	 * number.
 	 */
 	@Override
+	public void removeBlock(NetBlock block, String why) {
+		if (blocks != null && blocks.remove(block) != null) {
+			System.out.println("Counting record: " + block.blockName() + " dropped, " + why);
+		}
+	}
+
+	@Override
 	public void clearBlocks(String why) {
 		if (blocks != null) {
 			blocks = null;
@@ -197,6 +204,15 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet, NetBlock
 			total += ruleReducePlaces(rt, false, false);
 			total += ruleReduceTrans(rt);
 			total += ruleRedundantCompositions(rt);
+			if (hasAnyBlock()) {
+				// a free component fuses into one place holding its total, and
+				// what that place stands for is recorded: worth doing precisely
+				// because someone is counting, and skipped otherwise since the
+				// state count of the fused net is not the state count asked for
+				if (findFreeSCC(rt)) {
+					total++;
+				}
+			}
 			total += ruleReducePlaces(rt, false, false);
 			total += ruleReduceTrans(rt);
 			return total;
@@ -2846,6 +2862,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet, NetBlock
 		if (rt == ReductionType.LTL) {
 			return false;
 		}
+		// with a counting record, what each surviving place stands for is
+		// recorded (NetBlocks.freeComponentsFused); without one, nothing is
+		// tracked and nothing is allocated
+		Map<Integer, Integer> mergedInto = hasAnyBlock() ? new HashMap<>() : null;
 		long time = System.currentTimeMillis();
 		// extract simple transitions to a PxP matrix
 		int nbP = pnames.size();
@@ -2903,10 +2923,15 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet, NetBlock
 				}
 				marks.set(kept, marks.get(kept) + marks.get(other));
 				tokill.add(other);
+				if (mergedInto != null) {
+					mergedInto.put(other, kept);
+				}
 			}
 		}
 
 		// at this stage, the other places in each SCC are now redundant, kill them
+		// what the surviving places now stand for, before the indices move
+		NetBlocks.freeComponentsFused(this, pnames.size(), mergedInto == null ? Collections.emptyMap() : mergedInto);
 		tokill.sort((a, b) -> -a.compareTo(b));
 		tflowPT = flowPT.transpose();
 		tflowTP = flowTP.transpose();

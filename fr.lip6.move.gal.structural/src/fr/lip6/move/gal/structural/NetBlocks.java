@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import android.util.SparseIntArray;
@@ -31,6 +32,9 @@ public class NetBlocks {
 		void putBlock(NetBlock block, IntMatrixCol matrix);
 
 		void clearBlocks(String why);
+
+		/** Forget one block, keeping the others. */
+		void removeBlock(NetBlock block, String why);
 	}
 
 	private NetBlocks() {
@@ -47,12 +51,13 @@ public class NetBlocks {
 	 */
 	public static void transitionsFused(Holder net, int count, List<Integer> dropped,
 			Map<Integer, Integer> survivorOf) {
-		if (!net.hasAnyBlock() || dropped.isEmpty()) {
+		if (dropped.isEmpty() || !tracksArcs(net)) {
 			return;
 		}
 		IntMatrixCol next = fuse(net.getBlock(NetBlock.TMULT), count, dropped, survivorOf);
 		if (next == null) {
-			net.clearBlocks("a fusion of " + dropped.size() + " duplicate transitions it could not follow");
+			net.removeBlock(NetBlock.TMULT,
+					"a fusion of " + dropped.size() + " duplicate transitions it could not follow");
 		} else {
 			net.putBlock(NetBlock.TMULT, next);
 		}
@@ -60,16 +65,22 @@ public class NetBlocks {
 
 	/**
 	 * Transitions were removed and no surviving transition stands for them, so
-	 * the arcs they contributed to the graph a record counts are gone with
-	 * them: the record cannot be maintained. Keeping their guards and weights
-	 * instead (the ghost contributors of HSC_PLAN.md section 11) is what would
-	 * let it survive.
+	 * the arcs they contributed are gone with them and only the arc block goes:
+	 * a state or token record is untouched by a transition disappearing.
+	 * Keeping their guards and weights instead (the ghost contributors of
+	 * HSC_PLAN.md section 11) is what would let the arc block survive too.
 	 */
 	public static void transitionsDropped(Holder net, int howMany, String why) {
-		if (!net.hasAnyBlock() || howMany == 0) {
+		if (howMany == 0 || !tracksArcs(net)) {
 			return;
 		}
-		net.clearBlocks(howMany + " transitions removed (" + why + ") whose arcs it cannot account for");
+		net.removeBlock(NetBlock.TMULT,
+				howMany + " transitions removed (" + why + ") whose arcs it cannot account for");
+	}
+
+	/** Is an arc count being tracked? Only then do arc-destroying rules matter. */
+	private static boolean tracksArcs(Holder net) {
+		return net.hasAnyBlock() && net.getBlock(NetBlock.TMULT) != null;
 	}
 
 	/**
@@ -82,7 +93,7 @@ public class NetBlocks {
 	 * there to be counted.
 	 */
 	public static boolean mayDropNoEffect(Holder net) {
-		if (!net.hasAnyBlock()) {
+		if (!tracksArcs(net)) {
 			return true;
 		}
 		System.out.println("Keeping the transitions with no effect: a counting record needs their arcs.");
@@ -99,7 +110,7 @@ public class NetBlocks {
 	 * paths and buys little.
 	 */
 	public static boolean mayComposeRedundant(Holder net) {
-		if (!net.hasAnyBlock()) {
+		if (!tracksArcs(net)) {
 			return true;
 		}
 		System.out.println("Skipping the redundant composition rule: a counting record needs the arcs it removes.");
@@ -171,6 +182,68 @@ public class NetBlocks {
 		}
 		next.appendColumn(kept);
 		net.putBlock(NetBlock.TMULT, next);
+	}
+
+	/**
+	 * Free components were fused: each surviving place now stands for the sum
+	 * of what its component's places stood for, and the places merged into it
+	 * are gone. The arc count cannot follow — the component's internal moves
+	 * are not the moves of the fused net — so {@link NetBlock#TMULT} goes
+	 * while {@link NetBlock#PCOEF} takes the new coefficients.
+	 *
+	 * @param placeCount the place count before the removals
+	 * @param mergedInto for each removed place, the place that absorbed it
+	 */
+	public static void freeComponentsFused(Holder net, int placeCount, Map<Integer, Integer> mergedInto) {
+		if (!net.hasAnyBlock() || mergedInto.isEmpty()) {
+			return;
+		}
+		// the component's internal moves become self-loops here, so the arcs of
+		// this net are no longer the arcs of the one asked about; the token and
+		// state records stay valid, and the self-loops become free to remove
+		net.removeBlock(NetBlock.TMULT,
+				"free components were fused, and the moves inside them are not the moves of this net");
+		long[] coeff = new long[placeCount];
+		Arrays.fill(coeff, 1L);
+		IntMatrixCol pcoef = net.getBlock(NetBlock.PCOEF);
+		if (pcoef != null && pcoef.getColumnCount() > 0) {
+			SparseIntArray col = pcoef.getColumn(0);
+			for (int i = 0, ie = col.size(); i < ie; i++) {
+				coeff[col.keyAt(i)] = 1L + col.valueAt(i);
+			}
+		}
+		Set<Integer> gone = new HashSet<>(mergedInto.keySet());
+		for (Entry<Integer, Integer> e : mergedInto.entrySet()) {
+			// the absorbing place may itself be absorbed further up the chain
+			int root = e.getValue();
+			while (gone.contains(root)) {
+				Integer next = mergedInto.get(root);
+				if (next == null || next.intValue() == root) {
+					net.clearBlocks("a fused free component has no surviving place");
+					return;
+				}
+				root = next.intValue();
+			}
+			coeff[root] += coeff[e.getKey()];
+			if (coeff[root] > Integer.MAX_VALUE) {
+				net.clearBlocks("a place coefficient outgrew an int");
+				return;
+			}
+		}
+		IntMatrixCol next = new IntMatrixCol(placeCount - gone.size(), 0);
+		SparseIntArray kept = new SparseIntArray();
+		int index = 0;
+		for (int p = 0; p < placeCount; p++) {
+			if (gone.contains(p)) {
+				continue;
+			}
+			if (coeff[p] != 1L) {
+				kept.append(index, (int) (coeff[p] - 1L));
+			}
+			index++;
+		}
+		next.appendColumn(kept);
+		net.putBlock(NetBlock.PCOEF, next);
 	}
 
 	/** TMULT after a fusion, or null when the fusion cannot be followed. */

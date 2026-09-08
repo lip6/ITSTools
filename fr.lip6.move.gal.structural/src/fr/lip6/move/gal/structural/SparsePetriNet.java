@@ -465,6 +465,13 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet, NetBloc
 
 	/** Forget the blocks, saying why: for a rule that cannot maintain them. */
 	@Override
+	public void removeBlock(NetBlock block, String why) {
+		if (blocks != null && blocks.remove(block) != null) {
+			System.out.println("Counting record: " + block.blockName() + " dropped, " + why);
+		}
+	}
+
+	@Override
 	public void clearBlocks(String why) {
 		if (blocks != null) {
 			blocks = null;
