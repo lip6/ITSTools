@@ -385,7 +385,14 @@ public class ITSRunner extends AbstractRunner {
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
-				e.printStackTrace();
+				// the reader ends when the process it reads is killed, at its budget or once the
+				// last property is answered: the killer says so, one line is enough here
+				String msg = String.valueOf(e.getMessage());
+				if (msg.contains("Stream closed") || msg.contains("Broken pipe")) {
+					System.out.println("ITS tools output stream closed.");
+				} else {
+					e.printStackTrace();
+				}
 			} catch (GlobalPropertySolverException e) {
 				ender.killAll();
 				return;
