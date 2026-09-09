@@ -183,6 +183,48 @@ public class Application implements IApplication, Ender {
 	 * The libHSC engine beside the decision diagrams: on the reduced Petri net,
 	 * the open reachability, deadlock and bound properties (-hsc).
 	 */
+	/**
+	 * The places that stay empty in every reachable marking: no token initially
+	 * and no producer among the transitions that can fire, a fixpoint over the
+	 * net alone. Their consumers never fire.
+	 */
+	private static List<Integer> neverMarkedPlaces(SparsePetriNet spn) {
+		int np = spn.getPlaceCount();
+		int nt = spn.getTransitionCount();
+		boolean[] markable = new boolean[np];
+		for (int p = 0; p < np; p++) {
+			markable[p] = spn.getMarks().get(p) > 0;
+		}
+		boolean changed = true;
+		while (changed) {
+			changed = false;
+			for (int t = 0; t < nt; t++) {
+				SparseIntArray in = spn.getFlowPT().getColumn(t);
+				boolean live = true;
+				for (int k = 0; k < in.size() && live; k++) {
+					live = markable[in.keyAt(k)];
+				}
+				if (!live) {
+					continue;
+				}
+				SparseIntArray out = spn.getFlowTP().getColumn(t);
+				for (int k = 0; k < out.size(); k++) {
+					if (!markable[out.keyAt(k)]) {
+						markable[out.keyAt(k)] = true;
+						changed = true;
+					}
+				}
+			}
+		}
+		List<Integer> never = new ArrayList<>();
+		for (int p = 0; p < np; p++) {
+			if (!markable[p]) {
+				never.add(p);
+			}
+		}
+		return never;
+	}
+
 	private void startHsc(MccTranslator reader, DoneProperties doneProps, int timeout, boolean doHSC) throws IOException {
 		if (!doHSC || reader.getSPN() == null) {
 			return;
@@ -617,6 +659,23 @@ public class Application implements IApplication, Ender {
 				}
 
 				if (rebuildPNML) {
+					// The net handed to another tool for StateSpace keeps all four
+					// values only under the reductions that preserve them: the
+					// never-marked places (no token, no producer among the
+					// transitions that can fire) and their consumers, which never
+					// fire. Constant places and redundant transitions change
+					// MAX_TOKEN and TRANSITIONS for a reader of a plain PNML, so
+					// they stay.
+					SparsePetriNet spn = reader.getSPN();
+					List<Integer> neverMarked = neverMarkedPlaces(spn);
+					if (!neverMarked.isEmpty()) {
+						StructuralReduction sr = new StructuralReduction(spn);
+						sr.dropPlaces(neverMarked, true, "StateSpace: never marked places and their consumers");
+						spn.readFrom(sr);
+						System.out.println("StateSpace rebuild: dropped " + neverMarked.size()
+								+ " never marked places and their consumers; " + spn.getPlaceCount()
+								+ " places, " + spn.getTransitionCount() + " transitions remain.");
+					}
 					tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
 					return 0;
 				}
