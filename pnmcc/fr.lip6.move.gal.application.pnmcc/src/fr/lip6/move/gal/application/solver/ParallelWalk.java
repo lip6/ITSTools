@@ -11,6 +11,7 @@ import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.petrispot.runner.PetriSpotWalker;
+import fr.lip6.move.hsc.runner.HscRunner;
 
 /**
  * A PetriSpot walk running beside a decision diagram attempt.
@@ -34,6 +35,12 @@ public class ParallelWalk {
 
 	/** Whether a walk accompanies every decision diagram attempt. */
 	public static final boolean ENABLED = true;
+
+	/**
+	 * Whether libHSC's symbolic CTL checker (hsc-pn) also runs beside a CTL
+	 * attempt, on the same reduced net: set by the -hsc flag.
+	 */
+	public static boolean HSC_CTL = false;
 
 	/** Cores left to the walk. The diagram engine uses one of the four. */
 	private static final int THREADS = 3;
@@ -141,7 +148,39 @@ public class ParallelWalk {
 		}, "petrispot-ctl-beside-dd");
 		thread.setDaemon(true);
 		thread.start();
+		if (HSC_CTL) {
+			startHscCtl(sr, props, formulas, doneProps, seconds);
+		}
 		return new ParallelWalk(thread, cancel);
+	}
+
+	/**
+	 * libHSC's symbolic CTL checker beside a CTL attempt (-hsc): the same
+	 * reduced net and formulas go to hsc-pn, whose verdicts are proofs and
+	 * land in doneProps as they stream. Bounded by seconds like the walk; not
+	 * cancelled with it, the process ends with its budget.
+	 */
+	private static void startHscCtl(StructuralReduction sr, List<Property> props, List<Expression> formulas,
+			DoneProperties doneProps, int seconds) {
+		HscRunner.Listener listener = (index, value, techniques) -> {
+			try {
+				doneProps.put(props.get(index).getName(), "TRUE".equals(value), "DECISION_DIAGRAMS SATURATION HSC");
+			} catch (GlobalPropertySolverException e) {
+				// the verdict decided the whole examination: the printer has said so
+			}
+		};
+		Thread thread = new Thread(() -> {
+			try {
+				HscRunner.Verdicts v = HscRunner.runCtl(sr, formulas, seconds, HscRunner.Shape.LOUVAIN, true, listener);
+				if (v != null && v.solved() > 0) {
+					System.out.println("libHSC CTL check beside the decision diagrams solved " + v.solved() + " properties.");
+				}
+			} catch (RuntimeException e) {
+				System.out.println("libHSC CTL check beside the decision diagrams failed : " + e.getMessage());
+			}
+		}, "hsc-ctl-beside-dd");
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	/** Stop the walk and wait for its verdicts to be published. */

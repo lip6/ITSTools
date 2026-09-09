@@ -50,6 +50,7 @@ import fr.lip6.move.gal.application.runner.spot.SpotLTLRunner;
 import fr.lip6.move.gal.application.runner.spot.SpotRunner;
 import fr.lip6.move.gal.application.solver.ExclusiveImplicantsComputer;
 import fr.lip6.move.gal.application.solver.GALSolver;
+import fr.lip6.move.gal.application.solver.ParallelWalk;
 import fr.lip6.move.gal.application.solver.ReachabilitySolver;
 import fr.lip6.move.gal.application.solver.UpperBoundsSolver;
 import fr.lip6.move.gal.application.solver.ExclusiveImplicantsComputer.Constraint;
@@ -361,6 +362,7 @@ public class Application implements IApplication, Ender {
 				doITS = true;
 			} else if (HSC.equals(args[i])) {
 				doHSC = true;
+				ParallelWalk.HSC_CTL = true;
 			} else if (HSC_BENCH.equals(args[i])) {
 				hscBench = true;
 			} else if (HSC_BENCH_REDUCE.equals(args[i])) {

@@ -258,6 +258,34 @@ public class HscRunner {
 		}
 	}
 
+	/**
+	 * The CTL formulas at the initial marking, by libHSC's symbolic checker
+	 * (forward form over the saturated reachable set, the inverse relation for
+	 * what the forward form leaves). One (ctl prop&lt;i&gt; formula) form per
+	 * property; hsc-pn runs them in rounds of growing per-property budget under
+	 * totalSeconds, so the cheap ones come first. Verdicts stream to the
+	 * listener as FORMULA lines arrive; a formula the checker leaves open has
+	 * no verdict.
+	 *
+	 * @return one verdict per formula, or null when the binary could not run
+	 */
+	public static Verdicts runCtl(ISparsePetriNet net, List<Expression> formulas, int totalSeconds, Shape shape,
+			boolean force, Listener listener) {
+		if (formulas.isEmpty()) {
+			return new Verdicts(0);
+		}
+		List<String> forms = new ArrayList<>(formulas.size());
+		try {
+			for (int i = 0; i < formulas.size(); i++) {
+				forms.add(SexprPropertyPrinter.ctl("prop" + i, formulas.get(i)));
+			}
+		} catch (UnsupportedOperationException e) {
+			System.out.println("hsc-pn CTL skipped: " + e.getMessage());
+			return null;
+		}
+		return run(net, forms, totalSeconds, shape, force, listener);
+	}
+
 	/** The bundled binary, or the one named by the system property hsc.bin (tests outside OSGi). */
 	private static String binaryPath() throws IOException {
 		String override = System.getProperty("hsc.bin");
