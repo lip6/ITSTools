@@ -1,6 +1,8 @@
 #! /bin/bash
 # ITS-Tools as a native executable (GraalVM native-image) from a Linux product folder.
-#   GRAALVM=/path/to/graalvm-jdk-25 [NATIVE_XMX=10g] ./build-native.sh /path/to/product [its-tools-native]
+#   GRAALVM=/path/to/graalvm-jdk-25 [NATIVE_XMX=10g] [NATIVE_MARCH=x86-64-v2] ./build-native.sh /path/to/product [its-tools-native]
+# NATIVE_MARCH names the CPU target (-march; `native-image -march=list`); unset, native-image's
+# default applies (x86-64-v3, AVX2), which the Westmere nodes of the cluster (x86-64-v2) refuse.
 # The product is the Tycho output (its-tools, its-tools-flat.sh, plugins/); the class path is
 # the one its-tools-flat.sh builds. config/ holds the reachability metadata the tracing agent
 # recorded (trace-agent.sh); a run that hits an unregistered class or resource is traced and
@@ -19,7 +21,7 @@ for j in "$PROD"/plugins/*.jar ; do CP="$CP:$j" ; done
 for d in "$PROD"/plugins/*/ ; do [ -f "$d/META-INF/MANIFEST.MF" ] && CP="$CP:${d%/}" ; done
 for j in "$PROD"/plugins-lib/*.jar ; do [ -f "$j" ] && CP="$CP:$j" ; done
 cd "$HERE"
-"$GRAALVM/bin/native-image" -cp "${CP#:}" \
+"$GRAALVM/bin/native-image" -cp "${CP#:}" ${NATIVE_MARCH:+-march=$NATIVE_MARCH} \
   -H:ConfigurationFileDirectories="$HERE/config" \
   --no-fallback -J-Xmx${NATIVE_XMX:-24g} \
   --gc=G1 -R:MaxHeapSize=16g -R:MinHeapSize=40m -R:StackSize=128m \
